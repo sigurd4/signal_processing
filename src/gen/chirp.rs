@@ -87,6 +87,6 @@ mod test
         let c_quad = t.chirp(f.clone(), dt.clone(), ChirpCurve::Quadratic, 0.0);
         let c_log = t.chirp(f, dt, ChirpCurve::Logarithmic, 0.0);
 
-        plot::plot_curves("x(t)", "plots/x_chirp.png", [&t.zip(c_lin), &t.zip(c_quad), &t.zip(c_log)]).unwrap()
+        plot::plot_curves("x(t)", "plots/x_t_chirp.png", [&t.zip(c_lin), &t.zip(c_quad), &t.zip(c_log)]).unwrap()
     }
 }

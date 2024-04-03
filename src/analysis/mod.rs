@@ -9,6 +9,7 @@ moddef::moddef!(
         freqs,
         freqz,
         fwhm,
+        grpdelay,
         impz,
         real_freqz,
         real_specgram,

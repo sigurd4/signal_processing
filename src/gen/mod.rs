@@ -26,7 +26,9 @@ moddef::moddef!(
         firgr,
         firls,
         firpm,
-        firpmord
+        firpmord,
+        gauspuls,
+        gmonopuls
     }
 );
 

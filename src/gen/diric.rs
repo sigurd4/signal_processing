@@ -1,4 +1,4 @@
-use core::ops::{Range};
+use core::ops::Range;
 
 use array_math::ArrayOps;
 use num::{traits::FloatConst, Float};
@@ -89,9 +89,9 @@ mod test
     fn test()
     {
         const N: usize = 1024;
-        let (y, x): ([_; N], _) = (-8.0..8.0).diric((), 6);
+        let (y, t): ([_; N], _) = (-8.0..8.0).diric((), 6);
 
-        plot::plot_curves("y(x)", "plots/y_diric.png", [&x.zip(y)])
+        plot::plot_curves("y(t)", "plots/y_t_diric.png", [&t.zip(y)])
             .unwrap()
     }
 }

@@ -1,4 +1,4 @@
-use core::ops::Range;
+use core::ops::{Range, RangeInclusive};
 
 use array_math::ArrayOps;
 use num::{traits::FloatConst, Complex, Float};
@@ -39,14 +39,13 @@ where
     fn cmorwavf(&self, (): (), fb: T, fc: T) -> ([Complex<T>; N], [T; N])
     {
         let x: [_; N] = ArrayOps::fill(|i| {
-            let p = T::from(i).unwrap()/T::from(N - 1).unwrap();
+            let p = T::from(i).unwrap()/T::from(N).unwrap();
             self.start + (self.end - self.start)*p
         });
         
         (x.cmorwavf((), fb, fc).0, x)
     }
 }
-
 impl<'a, T> CMorWavF<'a, T, Vec<T>, usize> for Range<T>
 where
     T: Float + FloatConst,
@@ -55,7 +54,7 @@ where
     fn cmorwavf(&self, n: usize, fb: T, fc: T) -> (Vec<Complex<T>>, Vec<T>)
     {
         let x: Vec<_> = (0..n).map(|i| {
-                let p = T::from(i).unwrap()/T::from(n - 1).unwrap();
+                let p = T::from(i).unwrap()/T::from(n).unwrap();
                 self.start + (self.end - self.start)*p
             }).collect();
 
@@ -63,44 +62,36 @@ where
     }
 }
 
-/*impl<T, const N: usize> CMorWavF<T, ()> for [Complex<T>; N]
+impl<'a, T, const N: usize> CMorWavF<'a, T, [T; N], ()> for RangeInclusive<T>
 where
-    T: Float + FloatConst
+    T: Float + FloatConst,
+    [T; N]: NotRange
 {
-    fn cmorwavf(x: Range<T>, (): (), fb: T, fc: T) -> (Self, Self::Mapped<T>)
+    fn cmorwavf(&self, (): (), fb: T, fc: T) -> ([Complex<T>; N], [T; N])
     {
-        let x: Self::Mapped<T> = ArrayOps::fill(|i| {
+        let x: [_; N] = ArrayOps::fill(|i| {
             let p = T::from(i).unwrap()/T::from(N - 1).unwrap();
-            x.start + (x.end - x.start)*p
+            *self.start() + (*self.end() - *self.start())*p
         });
-
-        let psi = x.map(|x| {
-            Complex::from(T::PI()*fb).inv().sqrt()*Complex::cis(T::TAU()*fc*x)*(-x*x/fb).exp()
-        });
-
-        (psi, x)
+        
+        (x.cmorwavf((), fb, fc).0, x)
     }
 }
-
-impl<T> CMorWavF<T, usize> for Vec<Complex<T>>
+impl<'a, T> CMorWavF<'a, T, Vec<T>, usize> for RangeInclusive<T>
 where
-    T: Float + FloatConst
+    T: Float + FloatConst,
+    Vec<T>: NotRange
 {
-    fn cmorwavf(x: Range<T>, n: usize, fb: T, fc: T) -> (Self, Self::Mapped<T>)
+    fn cmorwavf(&self, n: usize, fb: T, fc: T) -> (Vec<Complex<T>>, Vec<T>)
     {
-        let x: Self::Mapped<T> = (0..n).map(|i| {
+        let x: Vec<_> = (0..n).map(|i| {
                 let p = T::from(i).unwrap()/T::from(n - 1).unwrap();
-                x.start + (x.end - x.start)*p
+                *self.start() + (*self.end() - *self.start())*p
             }).collect();
 
-        let psi = x.iter()
-            .map(|&x| {
-                Complex::from(T::PI()*fb).inv().sqrt()*Complex::cis(T::TAU()*fc*x)*(-x*x/fb).exp()
-            }).collect();
-
-        (psi, x)
+        (x.cmorwavf((), fb, fc).0, x)
     }
-}*/
+}
 
 #[cfg(test)]
 mod test
@@ -113,9 +104,9 @@ mod test
     fn test()
     {
         const N: usize = 1024;
-        let (psi, x): ([_; N], _) = (-8.0..8.0).cmorwavf((), 1.5, 1.0);
+        let (psi, t): ([_; N], _) = (-8.0..=8.0).cmorwavf((), 1.5, 1.0);
 
-        plot::plot_curves("ψ(x)", "plots/psi_cmorwavf.png", [&x.zip(psi.map(|psi| psi.re)), &x.zip(psi.map(|psi| psi.im))])
+        plot::plot_curves("ψ(t)", "plots/psi_t_cmorwavf.png", [&t.zip(psi.map(|psi| psi.re)), &t.zip(psi.map(|psi| psi.im))])
             .unwrap()
     }
 }
