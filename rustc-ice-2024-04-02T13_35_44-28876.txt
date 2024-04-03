@@ -1,0 +1,235 @@
+delayed span bug: Could not find associated const on trait
+   0: std::backtrace::Backtrace::force_capture
+   1: std::backtrace::Backtrace::capture
+   2: <rustc_errors::DiagCtxt>::flush_delayed
+   3: <rustc_errors::DiagCtxt>::emit_diagnostic_without_consuming
+   4: <rustc_errors::DiagCtxt>::emit_diagnostic
+   5: <rustc_hir_analysis::structured_errors::sized_unsized_cast::SizedUnsizedCast as rustc_hir_analysis::structured_errors::StructuredDiagnostic>::diagnostic_extended
+   6: <rustc_hir_analysis::collect::resolve_bound_vars::BoundVarContext as rustc_hir::intravisit::Visitor>::visit_generic_param
+   7: rustc_hir_analysis::collect::type_of::type_of
+   8: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+   9: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  10: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  11: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  12: <rustc_middle::ty::typeck_results::TypeckResults>::set_coercion_cast
+  13: <rustc_middle::ty::consts::Const>::from_anon_const
+  14: <<dyn rustc_hir_analysis::astconv::AstConv>::create_args_for_ast_path::{closure#0}::SubstsForAstPathCtxt as rustc_hir_analysis::astconv::CreateSubstsForGenericArgsCtxt>::inferred_kind
+  15: <rustc_hir_analysis::collect::resolve_bound_vars::is_late_bound_map::ConstrainedCollector as rustc_hir::intravisit::Visitor>::visit_ty
+  16: rustc_hir_analysis::collect::predicates_of::explicit_predicates_of
+  17: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  18: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  19: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  20: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  21: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  22: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  23: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  24: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  25: <rustc_hir_analysis::collect::CollectItemTypesVisitor as rustc_hir::intravisit::Visitor>::visit_item
+  26: rustc_hir_analysis::collect::predicates_defined_on
+  27: rustc_hir_analysis::collect::collect_mod_item_types
+  28: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  29: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  30: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  31: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  32: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  33: rustc_hir_analysis::collect::is_type_alias_impl_trait
+  34: <rustc_hir_analysis::variance::variance_of_opaque::{closure#0}::OpaqueTypeLifetimeCollector as rustc_type_ir::visit::TypeVisitor<rustc_middle::ty::context::TyCtxt>>::visit_ty
+  35: rustc_hir_analysis::check_crate
+  36: rustc_interface::passes::analysis
+  37: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  38: rustc_traits::type_op::type_op_normalize_fn_sig
+  39: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  40: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  41: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  42: rustc_driver_impl::args::arg_expand_all
+  43: rustc_driver_impl::args::arg_expand_all
+  44: rustc_driver_impl::args::arg_expand_all
+  45: rustc_driver_impl::args::arg_expand_all
+  46: rustc_driver_impl::args::arg_expand_all
+  47: rustc_driver_impl::args::arg_expand_all
+  48: rustc_driver_impl::args::arg_expand_all
+  49: std::sys::windows::thread::Thread::new
+  50: BaseThreadInitThunk
+  51: RtlUserThreadStart
+
+delayed span bug: mir_const_qualif: MIR had errors
+   0: std::backtrace::Backtrace::force_capture
+   1: std::backtrace::Backtrace::capture
+   2: <rustc_errors::DiagCtxt>::flush_delayed
+   3: <rustc_errors::DiagCtxt>::emit_diagnostic_without_consuming
+   4: <rustc_errors::DiagCtxt>::emit_diagnostic
+   5: <rustc_mir_transform::separate_const_switch::SeparateConstSwitch as rustc_middle::mir::MirPass>::run_pass
+   6: rustc_mir_transform::mir_const_qualif
+   7: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+   8: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+   9: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  10: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  11: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  12: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  13: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  14: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  15: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  16: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  17: rustc_interface::passes::analysis
+  18: rustc_interface::passes::analysis
+  19: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  20: rustc_traits::type_op::type_op_normalize_fn_sig
+  21: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  22: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  23: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  24: rustc_driver_impl::args::arg_expand_all
+  25: rustc_driver_impl::args::arg_expand_all
+  26: rustc_driver_impl::args::arg_expand_all
+  27: rustc_driver_impl::args::arg_expand_all
+  28: rustc_driver_impl::args::arg_expand_all
+  29: rustc_driver_impl::args::arg_expand_all
+  30: rustc_driver_impl::args::arg_expand_all
+  31: std::sys::windows::thread::Thread::new
+  32: BaseThreadInitThunk
+  33: RtlUserThreadStart
+
+delayed span bug: broken MIR in DefId(0:705 ~ signal_processing[36a8]::analysis::specgram::{impl#3}::{constant#1}) ("return type"): bad type {type error}
+   0: std::backtrace::Backtrace::force_capture
+   1: std::backtrace::Backtrace::capture
+   2: <rustc_errors::DiagCtxt>::flush_delayed
+   3: <rustc_errors::DiagCtxt>::emit_diagnostic_without_consuming
+   4: <rustc_errors::DiagCtxt>::emit_diagnostic
+   5: <rustc_borrowck::type_check::liveness::local_use_map::AppearanceIndex as core::fmt::Debug>::fmt
+   6: <rustc_borrowck::type_check::TypeVerifier as rustc_middle::mir::visit::Visitor>::visit_body
+   7: <rustc_borrowck::type_check::relate_tys::NllTypeRelatingDelegate as rustc_infer::infer::relate::nll::TypeRelatingDelegate>::push_outlives
+   8: <rustc_borrowck::member_constraints::MemberConstraintSet<rustc_middle::ty::sty::RegionVid> as core::default::Default>::default
+   9: <rustc_borrowck::MirBorrowckCtxt>::consume_operand
+  10: rustc_borrowck::mir_borrowck
+  11: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  12: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  13: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  14: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  15: rustc_interface::passes::analysis
+  16: rustc_interface::passes::analysis
+  17: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  18: rustc_traits::type_op::type_op_normalize_fn_sig
+  19: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  20: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  21: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  22: rustc_driver_impl::args::arg_expand_all
+  23: rustc_driver_impl::args::arg_expand_all
+  24: rustc_driver_impl::args::arg_expand_all
+  25: rustc_driver_impl::args::arg_expand_all
+  26: rustc_driver_impl::args::arg_expand_all
+  27: rustc_driver_impl::args::arg_expand_all
+  28: rustc_driver_impl::args::arg_expand_all
+  29: std::sys::windows::thread::Thread::new
+  30: BaseThreadInitThunk
+  31: RtlUserThreadStart
+
+delayed span bug: TyKind::Error constructed but no error reported
+   0: std::backtrace::Backtrace::force_capture
+   1: std::backtrace::Backtrace::capture
+   2: <rustc_errors::DiagCtxt>::flush_delayed
+   3: <rustc_errors::DiagCtxt>::emit_diagnostic_without_consuming
+   4: <rustc_errors::DiagCtxt>::emit_diagnostic
+   5: <rustc_middle::ty::print::pretty::PrintClosureAsImpl as rustc_middle::ty::context::Lift>::lift_to_tcx
+   6: <rustc_middle::ty::Ty>::new_misc_error
+   7: <rustc_borrowck::type_check::TypeVerifier as rustc_middle::mir::visit::Visitor>::visit_body
+   8: <rustc_borrowck::type_check::relate_tys::NllTypeRelatingDelegate as rustc_infer::infer::relate::nll::TypeRelatingDelegate>::push_outlives
+   9: <rustc_borrowck::member_constraints::MemberConstraintSet<rustc_middle::ty::sty::RegionVid> as core::default::Default>::default
+  10: <rustc_borrowck::MirBorrowckCtxt>::consume_operand
+  11: rustc_borrowck::mir_borrowck
+  12: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  13: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  14: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  15: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  16: rustc_interface::passes::analysis
+  17: rustc_interface::passes::analysis
+  18: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  19: rustc_traits::type_op::type_op_normalize_fn_sig
+  20: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  21: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  22: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  23: rustc_driver_impl::args::arg_expand_all
+  24: rustc_driver_impl::args::arg_expand_all
+  25: rustc_driver_impl::args::arg_expand_all
+  26: rustc_driver_impl::args::arg_expand_all
+  27: rustc_driver_impl::args::arg_expand_all
+  28: rustc_driver_impl::args::arg_expand_all
+  29: rustc_driver_impl::args::arg_expand_all
+  30: std::sys::windows::thread::Thread::new
+  31: BaseThreadInitThunk
+  32: RtlUserThreadStart
+
+delayed span bug: broken MIR in DefId(0:705 ~ signal_processing[36a8]::analysis::specgram::{impl#3}::{constant#1}) (LocalDecl { mutability: Mut, local_info: Set(Boring), ty: {type error}, user_ty: None, source_info: SourceInfo { span: src\analysis\specgram.rs:157:58: 157:61 (#0), scope: scope[0] } }): bad type {type error}
+   0: std::backtrace::Backtrace::force_capture
+   1: std::backtrace::Backtrace::capture
+   2: <rustc_errors::DiagCtxt>::flush_delayed
+   3: <rustc_errors::DiagCtxt>::emit_diagnostic_without_consuming
+   4: <rustc_errors::DiagCtxt>::emit_diagnostic
+   5: <rustc_borrowck::type_check::liveness::local_use_map::AppearanceIndex as core::fmt::Debug>::fmt
+   6: <rustc_borrowck::type_check::TypeVerifier as rustc_middle::mir::visit::Visitor>::visit_body
+   7: <rustc_borrowck::type_check::relate_tys::NllTypeRelatingDelegate as rustc_infer::infer::relate::nll::TypeRelatingDelegate>::push_outlives
+   8: <rustc_borrowck::member_constraints::MemberConstraintSet<rustc_middle::ty::sty::RegionVid> as core::default::Default>::default
+   9: <rustc_borrowck::MirBorrowckCtxt>::consume_operand
+  10: rustc_borrowck::mir_borrowck
+  11: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  12: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  13: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  14: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  15: rustc_interface::passes::analysis
+  16: rustc_interface::passes::analysis
+  17: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  18: rustc_traits::type_op::type_op_normalize_fn_sig
+  19: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  20: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  21: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  22: rustc_driver_impl::args::arg_expand_all
+  23: rustc_driver_impl::args::arg_expand_all
+  24: rustc_driver_impl::args::arg_expand_all
+  25: rustc_driver_impl::args::arg_expand_all
+  26: rustc_driver_impl::args::arg_expand_all
+  27: rustc_driver_impl::args::arg_expand_all
+  28: rustc_driver_impl::args::arg_expand_all
+  29: std::sys::windows::thread::Thread::new
+  30: BaseThreadInitThunk
+  31: RtlUserThreadStart
+
+delayed span bug: TyKind::Error constructed but no error reported
+   0: std::backtrace::Backtrace::force_capture
+   1: std::backtrace::Backtrace::capture
+   2: <rustc_errors::DiagCtxt>::flush_delayed
+   3: <rustc_errors::DiagCtxt>::emit_diagnostic_without_consuming
+   4: <rustc_errors::DiagCtxt>::emit_diagnostic
+   5: <rustc_middle::ty::print::pretty::PrintClosureAsImpl as rustc_middle::ty::context::Lift>::lift_to_tcx
+   6: <rustc_middle::ty::Ty>::new_misc_error
+   7: <rustc_borrowck::type_check::TypeVerifier as rustc_middle::mir::visit::Visitor>::visit_body
+   8: <rustc_borrowck::type_check::relate_tys::NllTypeRelatingDelegate as rustc_infer::infer::relate::nll::TypeRelatingDelegate>::push_outlives
+   9: <rustc_borrowck::member_constraints::MemberConstraintSet<rustc_middle::ty::sty::RegionVid> as core::default::Default>::default
+  10: <rustc_borrowck::MirBorrowckCtxt>::consume_operand
+  11: rustc_borrowck::mir_borrowck
+  12: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  13: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  14: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  15: <rustc_query_impl::plumbing::QueryCtxt as rustc_query_system::query::QueryContext>::load_side_effects
+  16: rustc_interface::passes::analysis
+  17: rustc_interface::passes::analysis
+  18: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  19: rustc_traits::type_op::type_op_normalize_fn_sig
+  20: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  21: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  22: rustc_query_impl::profiling_support::alloc_self_profile_query_strings
+  23: rustc_driver_impl::args::arg_expand_all
+  24: rustc_driver_impl::args::arg_expand_all
+  25: rustc_driver_impl::args::arg_expand_all
+  26: rustc_driver_impl::args::arg_expand_all
+  27: rustc_driver_impl::args::arg_expand_all
+  28: rustc_driver_impl::args::arg_expand_all
+  29: rustc_driver_impl::args::arg_expand_all
+  30: std::sys::windows::thread::Thread::new
+  31: BaseThreadInitThunk
+  32: RtlUserThreadStart
+
+
+
+rustc version: 1.77.0-nightly (75c68cfd2 2024-01-07)
+platform: x86_64-pc-windows-msvc
+
+query stack during panic:
+end of query stack

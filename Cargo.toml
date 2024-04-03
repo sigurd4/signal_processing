@@ -1,0 +1,20 @@
+[package]
+name = "signal_processing"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+thiserror = "1.0.58"
+moddef = "0.2.2"
+array_math = {version = "0.2.30", features = ["ndarray"]}
+num = "0.4.1"
+option_trait = "0.1.5"
+rand = "0.8.5"
+ndarray = "0.15.6"
+ndarray-linalg = {version = "0.16.0", features = ["intel-mkl"]}
+
+[dev-dependencies]
+plotters = "0.3.5"
+linspace = "0.1.1"
