@@ -73,7 +73,7 @@ mod test
 
         const N: usize = 1024;
         let w: [_; N] = (0.0..fs).linspace_array();
-        let h_f = h.freqs(&w.map(|w| Complex::new(0.0, w)));
+        let h_f = h.freqs(w.map(|w| Complex::new(0.0, w)));
 
         plot::plot_curves("H(jw)", "plots/h_s_buttap.png", [&w.zip(h_f.map(|h| h.norm())), &w.zip(h_f.map(|h| h.arg()))]).unwrap();
         

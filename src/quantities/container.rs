@@ -1,6 +1,6 @@
 
 
-use ndarray::{prelude::ArrayView, ArrayBase, Dimension, OwnedRepr};
+use ndarray::{prelude::ArrayView, ArrayBase, Dimension, IndexLonger, NdIndex, OwnedRepr};
 
 use crate::MaybeContainer;
 
@@ -12,6 +12,12 @@ pub trait Container<T>: MaybeContainer<T>
     where
         T: 'a,
         F: FnMut<(&'a T,)>;
+        
+    fn map_into_owned<F>(self, map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>;
 }
 
 impl<T> Container<T> for Vec<T>
@@ -24,6 +30,17 @@ impl<T> Container<T> for Vec<T>
         F: FnMut<(&'a T,)>
     {
         self.iter()
+            .map(map)
+            .collect()
+    }
+
+    fn map_into_owned<F>(self, map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.into_iter()
             .map(map)
             .collect()
     }
@@ -41,6 +58,17 @@ impl<T> Container<T> for [T]
             .map(map)
             .collect()
     }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| map(x.clone()))
+            .collect()
+    }
 }
 impl<T, const N: usize> Container<T> for [T; N]
 {
@@ -53,6 +81,15 @@ impl<T, const N: usize> Container<T> for [T; N]
     {
         self.each_ref()
             .map(map)
+    }
+
+    fn map_into_owned<F>(self, map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map(map)
     }
 }
 impl<'c, T> Container<T> for &'c [T]
@@ -68,6 +105,17 @@ impl<'c, T> Container<T> for &'c [T]
             .map(map)
             .collect()
     }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| map(x.clone()))
+            .collect()
+    }
 }
 impl<'b, T, const N: usize> Container<T> for &'b [T; N]
 {
@@ -80,6 +128,16 @@ impl<'b, T, const N: usize> Container<T> for &'b [T; N]
     {
         self.each_ref()
             .map(map)
+    }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.each_ref()
+            .map(|x| map(x.clone()))
     }
 }
 
@@ -94,6 +152,19 @@ impl<T> Container<T> for Vec<Vec<T>>
     {
         self.iter()
             .map(|s| s.iter()
+                .map(&mut map)
+                .collect()
+            ).collect()
+    }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.into_iter()
+            .map(|x| x.into_iter()
                 .map(&mut map)
                 .collect()
             ).collect()
@@ -114,6 +185,18 @@ impl<T, const M: usize> Container<T> for [Vec<T>; M]
                 .collect()
             )
     }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map(|x| x.into_iter()
+                .map(&mut map)
+                .collect()
+            )
+    }
 }
 impl<T> Container<T> for [Vec<T>]
 {
@@ -127,6 +210,19 @@ impl<T> Container<T> for [Vec<T>]
         self.iter()
             .map(|s| s.iter()
                 .map(&mut map)
+                .collect()
+            ).collect()
+    }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| x.iter()
+                .map(|x| map(x.clone()))
                 .collect()
             ).collect()
     }
@@ -146,6 +242,19 @@ impl<'b, T, const M: usize> Container<T> for &'b [Vec<T>; M]
                 .collect()
             )
     }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.each_ref()
+            .map(|x| x.iter()
+                .map(|x| map(x.clone()))
+                .collect()
+            )
+    }
 }
 impl<'b, T> Container<T> for &'b [Vec<T>]
 {
@@ -159,6 +268,19 @@ impl<'b, T> Container<T> for &'b [Vec<T>]
         self.iter()
             .map(|s| s.iter()
                 .map(&mut map)
+                .collect()
+            ).collect()
+    }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| x.iter()
+                .map(|x| map(x.clone()))
                 .collect()
             ).collect()
     }
@@ -178,6 +300,18 @@ impl<T, const N: usize> Container<T> for Vec<[T; N]>
                 .map(&mut map)
             ).collect()
     }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| x.each_ref()
+                .map(|x| map(x.clone()))
+            ).collect()
+    }
 }
 impl<T, const N: usize, const M: usize> Container<T> for [[T; N]; M]
 {
@@ -193,6 +327,15 @@ impl<T, const N: usize, const M: usize> Container<T> for [[T; N]; M]
                 .map(&mut map)
             )
     }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map(|x| x.map(&mut map))
+    }
 }
 impl<T, const N: usize> Container<T> for [[T; N]]
 {
@@ -206,6 +349,18 @@ impl<T, const N: usize> Container<T> for [[T; N]]
         self.iter()
             .map(|s| s.each_ref()
                 .map(&mut map)
+            ).collect()
+    }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| x.each_ref()
+                .map(|x| map(x.clone()))
             ).collect()
     }
 }
@@ -223,6 +378,18 @@ impl<'b, T, const N: usize, const M: usize> Container<T> for &'b [[T; N]; M]
                 .map(&mut map)
             )
     }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.each_ref()
+            .map(|x| x.each_ref()
+                .map(|x| map(x.clone()))
+            )
+    }
 }
 impl<'b, T, const N: usize> Container<T> for &'b [[T; N]]
 {
@@ -236,6 +403,18 @@ impl<'b, T, const N: usize> Container<T> for &'b [[T; N]]
         self.iter()
             .map(|s| s.each_ref()
                 .map(&mut map)
+            ).collect()
+    }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| x.each_ref()
+                .map(|x| map(x.clone()))
             ).collect()
     }
 }
@@ -255,6 +434,19 @@ impl<'b, T> Container<T> for Vec<&'b [T]>
                 .collect()
             ).collect()
     }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.into_iter()
+            .map(|x| x.iter()
+                .map(|x| map(x.clone()))
+                .collect()
+            ).collect()
+    }
 }
 impl<'b, T, const M: usize> Container<T> for [&'b [T]; M]
 {
@@ -268,6 +460,18 @@ impl<'b, T, const M: usize> Container<T> for [&'b [T]; M]
         self.each_ref()
             .map(|s| s.iter()
                 .map(&mut map)
+                .collect()
+            )
+    }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map(|x| x.iter()
+                .map(|x| map(x.clone()))
                 .collect()
             )
     }
@@ -287,6 +491,19 @@ impl<'b, T> Container<T> for [&'b [T]]
                 .collect()
             ).collect()
     }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| x.iter()
+                .map(|x| map(x.clone()))
+                .collect()
+            ).collect()
+    }
 }
 impl<'b, 'c, T, const M: usize> Container<T> for &'b [&'c [T]; M]
 {
@@ -300,6 +517,19 @@ impl<'b, 'c, T, const M: usize> Container<T> for &'b [&'c [T]; M]
         self.each_ref()
             .map(|s| s.iter()
                 .map(&mut map)
+                .collect()
+            )
+    }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.each_ref()
+            .map(|x| x.iter()
+                .map(|x| map(x.clone()))
                 .collect()
             )
     }
@@ -319,6 +549,19 @@ impl<'b, 'c, T> Container<T> for &'b [&'c [T]]
                 .collect()
             ).collect()
     }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| x.iter()
+                .map(|x| map(x.clone()))
+                .collect()
+            ).collect()
+    }
 }
 
 impl<'b, T, const N: usize> Container<T> for Vec<&'b [T; N]>
@@ -333,6 +576,18 @@ impl<'b, T, const N: usize> Container<T> for Vec<&'b [T; N]>
         self.iter()
             .map(|s| s.each_ref()
                 .map(&mut map)
+            ).collect()
+    }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.into_iter()
+            .map(|x| x.each_ref()
+                .map(|x| map(x.clone()))
             ).collect()
     }
 }
@@ -350,6 +605,17 @@ impl<'b, T, const N: usize, const M: usize> Container<T> for [&'b [T; N]; M]
                 .map(&mut map)
             )
     }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map(|x| x.each_ref()
+                .map(|x| map(x.clone()))
+            )
+    }
 }
 impl<'b, T, const N: usize> Container<T> for [&'b [T; N]]
 {
@@ -363,6 +629,18 @@ impl<'b, T, const N: usize> Container<T> for [&'b [T; N]]
         self.iter()
             .map(|s| s.each_ref()
                 .map(&mut map)
+            ).collect()
+    }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| x.each_ref()
+                .map(|x| map(x.clone()))
             ).collect()
     }
 }
@@ -380,6 +658,17 @@ impl<'b, 'c, T, const N: usize, const M: usize> Container<T> for &'b [&'c [T; N]
                 .map(&mut map)
             )
     }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map(|x| x.each_ref()
+                .map(|x| map(x.clone()))
+            )
+    }
 }
 impl<'b, 'c, T, const N: usize> Container<T> for &'b [&'c [T; N]]
 {
@@ -395,34 +684,66 @@ impl<'b, 'c, T, const N: usize> Container<T> for &'b [&'c [T; N]]
                 .map(&mut map)
             ).collect()
     }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| x.each_ref()
+                .map(|x| map(x.clone()))
+            ).collect()
+    }
 }
 
 impl<T, D> Container<T> for ArrayBase<OwnedRepr<T>, D>
 where
-    D: Dimension
+    D: Dimension,
+    <D as Dimension>::Pattern: NdIndex<D>
 {
     type Mapped<M> = ArrayBase<OwnedRepr<M>, D>;
 
-    fn map_to_owned<'a, F>(&'a self, map: F) -> Self::Mapped<F::Output>
+    fn map_to_owned<'a, F>(&'a self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: 'a,
         F: FnMut<(&'a T,)>
     {
-        self.map(map)
+        ArrayBase::from_shape_fn(self.dim(), |i| map(&self[i]))
+    }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        ArrayBase::from_shape_fn(self.dim(), |i| map(self[i].clone()))
     }
 }
 
 impl<'c, T, D> Container<T> for ArrayView<'c, T, D>
 where
-    D: Dimension
+    D: Dimension,
+    <D as Dimension>::Pattern: NdIndex<D>
 {
     type Mapped<M> = ArrayBase<OwnedRepr<M>, D>;
     
-    fn map_to_owned<'a, F>(&'a self, map: F) -> Self::Mapped<F::Output>
+    fn map_to_owned<'a, F>(&'a self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: 'a,
         F: FnMut<(&'a T,)>
     {
-        self.map(map)
+        ArrayBase::from_shape_fn(self.dim(), |i| map(&self[i]))
+    }
+
+    fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        ArrayBase::from_shape_fn(self.dim(), |i| map(self[i].clone()))
     }
 }

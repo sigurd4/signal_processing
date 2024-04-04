@@ -1,11 +1,13 @@
 moddef::moddef!(
     flat(pub) mod {
         bilinear,
+        dct,
         dft,
         dftmtx,
         dht,
         hilbert_transform,
         hilbert,
+        idct,
         iwht,
         sftrans,
         to_sos,

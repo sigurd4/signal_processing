@@ -145,7 +145,7 @@ where
     {
         let mut i = 0;
         let x = self.index_view(0)
-            .map_to_owned(|_| {
+            .map_into_owned(|_| {
                 let k = i;
                 i += 1;
                 T::from(k).unwrap()

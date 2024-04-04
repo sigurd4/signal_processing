@@ -18,6 +18,7 @@
 #![feature(slice_flatten)]
 #![feature(float_gamma)]
 #![feature(fn_traits)]
+#![feature(lazy_cell)]
 
 #![allow(internal_features)]
 #![allow(incomplete_features)]
@@ -73,11 +74,11 @@ mod tests
         
         const N: usize = 1024;
         let w: [_; N] = (0.0..fs).linspace_array();
-        let h_f_bessel = h_bessel.freqs(&w.map(|w| Complex::new(0.0, w)));
-        let h_f_butter = h_butter.freqs(&w.map(|w| Complex::new(0.0, w)));
-        let h_f_cheb1 = h_cheb1.freqs(&w.map(|w| Complex::new(0.0, w)));
-        let h_f_cheb2 = h_cheb2.freqs(&w.map(|w| Complex::new(0.0, w)));
-        let h_f_ellip = h_ellip.freqs(&w.map(|w| Complex::new(0.0, w)));
+        let h_f_bessel = h_bessel.freqs(w.map(|w| Complex::new(0.0, w)));
+        let h_f_butter = h_butter.freqs(w.map(|w| Complex::new(0.0, w)));
+        let h_f_cheb1 = h_cheb1.freqs(w.map(|w| Complex::new(0.0, w)));
+        let h_f_cheb2 = h_cheb2.freqs(w.map(|w| Complex::new(0.0, w)));
+        let h_f_ellip = h_ellip.freqs(w.map(|w| Complex::new(0.0, w)));
 
         plot::plot_curves("H(jw)", "plots/h_s_ap.png",
             [
@@ -111,7 +112,7 @@ mod tests
 
         let z_r = Complex::new(1.0, 1.0);
         let z = (0..M).map(|i| (0..M).map(|j| Complex::new((2.0*i as f64/(M - 1) as f64 - 1.0)*z_r.re, (2.0*j as f64/(M - 1) as f64 - 1.0)*z_r.im)).collect()).collect();
-        let h_z: Vec<Vec<Complex<f64>>> = FreqS::<Complex<f64>, Vec<Vec<Complex<f64>>>>::freqs(&h, &z);
+        let h_z: Vec<Vec<Complex<f64>>> = FreqS::<Complex<f64>, Vec<Vec<Complex<f64>>>>::freqs(&h, z);
 
         let o = <[_; M]>::fill(|j| (2.0*j as f64/(M - 1) as f64 - 1.0)*z_r.re);
         let w = <[_; M]>::fill(|i| (2.0*i as f64/(M - 1) as f64 - 1.0)*z_r.im);

@@ -150,7 +150,7 @@ where
                 .truncate_im()
         }
 
-        let mut den = poly(&ss.a).map_to_owned(|&den| den.into());
+        let mut den = poly(&ss.a).map_into_owned(|den| den.into());
 
         if b.shape().iter().any(Zero::is_zero) && ss.c.shape().iter().any(Zero::is_zero)
         {

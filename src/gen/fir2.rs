@@ -219,7 +219,7 @@ where
         };
 
         let mut b = b.into_iter();
-        let bw = window.map_to_owned(|&w: &W| b.next()
+        let bw = window.map_into_owned(|w: W| b.next()
             .unwrap_or(zero.into())
             *w.into()
         );

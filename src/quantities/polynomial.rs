@@ -80,6 +80,16 @@ where
         Polynomial::new(self.c.map_to_owned(map))
     }
 
+    pub fn map_into_owned<F>(self, map: F) -> Polynomial<F::Output, C::Mapped<F::Output>>
+    where
+        T: Clone,
+        C: Lists<T>,
+        F: FnMut<(T,)>,
+        C::Mapped<F::Output>: MaybeLists<F::Output>
+    {
+        Polynomial::new(self.c.map_into_owned(map))
+    }
+
     pub fn re(&self) -> Polynomial<T::Real, C::Mapped<T::Real>>
     where
         C: Lists<T>,

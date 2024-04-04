@@ -3,9 +3,9 @@
 
 use num::{complex::ComplexFloat, Complex};
 
-use crate::{Container, List, DFT};
+use crate::{Container, Lists, DFT};
 
-pub trait DHT<T>: List<T>
+pub trait DHT<T>: Lists<T>
 where
     T: ComplexFloat
 {
@@ -15,14 +15,14 @@ where
 impl<T, L> DHT<T> for L
 where
     T: ComplexFloat,
-    L: List<T>,
+    L: Lists<T>,
     Self: DFT<T>,
-    Self::Mapped<Complex<T::Real>>: List<Complex<T::Real>, Mapped<T::Real> = Self::Mapped<T::Real>>,
+    Self::Mapped<Complex<T::Real>>: Lists<Complex<T::Real>, Mapped<T::Real> = Self::Mapped<T::Real>>,
 {
     fn dht(&self) -> Self::Mapped<T::Real>
     {
         let y = self.dft();
-        y.map_to_owned(|y| y.re - y.im)
+        y.map_into_owned(|y| y.re - y.im)
     }
 }
 

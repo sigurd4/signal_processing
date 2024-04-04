@@ -131,13 +131,13 @@ where
 
         if let Some(w_o) = w_o
         {
-            let bb = b.b.deref();
+            let bb = b.b.into_inner();
             let p: &[T] = bb.as_view_slice();
             let renorm = p.dtft(T::Real::PI()*w_o)
                 .abs()
                 .recip();
 
-            b.b = Polynomial::new(bb.map_to_owned(|&b: &T| b*renorm))
+            b.b = Polynomial::new(bb.map_into_owned(|b: T| b*renorm))
         }
 
         Ok(b)
