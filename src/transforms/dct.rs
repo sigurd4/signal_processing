@@ -30,32 +30,13 @@ where
         let half = two.recip();
         let quarter = half*half;
 
-        let w = self.map_rows_to_owned(|x| {
-            let x: &[T] = x.as_view_slice();
-            let n = x.len();
-            let nf = <T::Real as NumCast>::from(n).unwrap();
-            
-            let mut i = 0;
-            x.map_into_owned(|_| {
-                let w = if i == 0
-                {
-                    (quarter/nf).sqrt().into()
-                }
-                else
-                {
-                    Complex::cis(-T::Real::FRAC_PI_2()/nf*NumCast::from(i).unwrap())*(half/nf).sqrt()
-                };
-                i += 1;
-                w
-            })
-        });
         let xreal = core::intrinsics::type_id::<T>() == core::intrinsics::type_id::<T::Real>();
         let mut y = self.to_owned();
-        for (x, w) in y.as_mut_slice2()
+        for x in y.as_mut_slice2()
             .into_iter()
-            .zip(w.as_view_slices())
         {
             let n = x.len();
+            let nf = <T::Real as NumCast>::from(n).unwrap();
             let mut y: Vec<_> = if n % 2 == 0 && xreal
             {
                 x[0..n].iter()
@@ -79,11 +60,19 @@ where
                     .collect()
             };
             y.fft();
-            for ((x, y), w) in x.iter_mut()
+            for (i, (x, y)) in x.iter_mut()
                 .zip(y.into_iter())
-                .zip(w.into_iter())
+                .enumerate()
             {
-                *x = (y**w).truncate_im();
+                let w = if i == 0
+                {
+                    (quarter/nf).sqrt().into()
+                }
+                else
+                {
+                    Complex::cis(-T::Real::FRAC_PI_2()/nf*NumCast::from(i).unwrap())*(half/nf).sqrt()
+                };
+                *x = (y*w).truncate_im();
                 if n % 2 == 0 && xreal
                 {
                     *x *= two
