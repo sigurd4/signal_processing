@@ -3,7 +3,7 @@ moddef::moddef!(
         bilinear,
         dct,
         dft,
-        dftmtx,
+        dft2,
         dht,
         hilbert_transform,
         hilbert,
