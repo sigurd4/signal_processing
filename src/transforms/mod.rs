@@ -4,6 +4,7 @@ moddef::moddef!(
         dft,
         dftmtx,
         dht,
+        hilbert_transform,
         hilbert,
         iwht,
         sftrans,
