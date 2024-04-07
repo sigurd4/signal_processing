@@ -138,7 +138,7 @@ where
 impl<'a, T, Y, X> FWHM<'a, T, (), false> for Y
 where
     T: Float + SubAssign + 'a,
-    Y: Matrix<T, IndexView<'a>: List<T, Mapped<T> = X>> + FWHM<'a, T, X, true> + 'a,
+    Y: Matrix<T, RowView<'a>: List<T, Mapped<T> = X>> + FWHM<'a, T, X, true> + 'a,
     X: List<T>
 {
     fn fwhm(&'a self, (): (), at: FullWidthAt<T>) -> Self::RowsMapped<T>

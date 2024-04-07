@@ -6,7 +6,7 @@ use crate::{Container, MaybeContainer, MaybeLists};
 
 pub trait Lists<T>: MaybeLists<T> + Container<T>
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a;
@@ -18,7 +18,7 @@ pub trait Lists<T>: MaybeLists<T> + Container<T>
 
 impl<T> Lists<T> for Vec<T>
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -35,7 +35,7 @@ impl<T> Lists<T> for Vec<T>
 }
 impl<T> Lists<T> for [T]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -52,7 +52,7 @@ impl<T> Lists<T> for [T]
 }
 impl<T, const N: usize> Lists<T> for [T; N]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -69,7 +69,7 @@ impl<T, const N: usize> Lists<T> for [T; N]
 }
 impl<T> Lists<T> for &[T]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -86,7 +86,7 @@ impl<T> Lists<T> for &[T]
 }
 impl<T, const N: usize> Lists<T> for &[T; N]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -104,7 +104,7 @@ impl<T, const N: usize> Lists<T> for &[T; N]
 
 impl<T> Lists<T> for Vec<Vec<T>>
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -125,7 +125,7 @@ impl<T> Lists<T> for Vec<Vec<T>>
 }
 impl<T, const M: usize> Lists<T> for [Vec<T>; M]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -146,7 +146,7 @@ impl<T, const M: usize> Lists<T> for [Vec<T>; M]
 }
 impl<T> Lists<T> for [Vec<T>]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -167,7 +167,7 @@ impl<T> Lists<T> for [Vec<T>]
 }
 impl<T, const M: usize> Lists<T> for &[Vec<T>; M]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -188,7 +188,7 @@ impl<T, const M: usize> Lists<T> for &[Vec<T>; M]
 }
 impl<T> Lists<T> for &[Vec<T>]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -210,7 +210,7 @@ impl<T> Lists<T> for &[Vec<T>]
 
 impl<T, const N: usize> Lists<T> for Vec<[T; N]>
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -230,7 +230,7 @@ impl<T, const N: usize> Lists<T> for Vec<[T; N]>
 }
 impl<T, const N: usize, const M: usize> Lists<T> for [[T; N]; M]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -250,7 +250,7 @@ impl<T, const N: usize, const M: usize> Lists<T> for [[T; N]; M]
 }
 impl<T, const N: usize> Lists<T> for [[T; N]]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -270,7 +270,7 @@ impl<T, const N: usize> Lists<T> for [[T; N]]
 }
 impl<T, const N: usize, const M: usize> Lists<T> for &[[T; N]; M]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -290,7 +290,7 @@ impl<T, const N: usize, const M: usize> Lists<T> for &[[T; N]; M]
 }
 impl<T, const N: usize> Lists<T> for &[[T; N]]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -311,7 +311,7 @@ impl<T, const N: usize> Lists<T> for &[[T; N]]
 
 impl<T> Lists<T> for Vec<&[T]>
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -328,7 +328,7 @@ impl<T> Lists<T> for Vec<&[T]>
 }
 impl<T, const M: usize> Lists<T> for [&[T]; M]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -347,7 +347,7 @@ impl<T, const M: usize> Lists<T> for [&[T]; M]
 }
 impl<T> Lists<T> for [&[T]]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -364,7 +364,7 @@ impl<T> Lists<T> for [&[T]]
 }
 impl<T, const M: usize> Lists<T> for &[&[T]; M]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -383,7 +383,7 @@ impl<T, const M: usize> Lists<T> for &[&[T]; M]
 }
 impl<T> Lists<T> for &[&[T]]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -401,7 +401,7 @@ impl<T> Lists<T> for &[&[T]]
 
 impl<T, const N: usize> Lists<T> for Vec<&[T; N]>
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -420,7 +420,7 @@ impl<T, const N: usize> Lists<T> for Vec<&[T; N]>
 }
 impl<T, const N: usize, const M: usize> Lists<T> for [&[T; N]; M]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -440,7 +440,7 @@ impl<T, const N: usize, const M: usize> Lists<T> for [&[T; N]; M]
 }
 impl<T, const N: usize> Lists<T> for [&[T; N]]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -459,7 +459,7 @@ impl<T, const N: usize> Lists<T> for [&[T; N]]
 }
 impl<T, const N: usize, const M: usize> Lists<T> for &[&[T; N]; M]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -479,7 +479,7 @@ impl<T, const N: usize, const M: usize> Lists<T> for &[&[T; N]; M]
 }
 impl<T, const N: usize> Lists<T> for &[&[T; N]]
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -499,7 +499,7 @@ impl<T, const N: usize> Lists<T> for &[&[T; N]]
 
 impl<T> Lists<T> for Array1<T>
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
         where
             T: 'a,
             Self: 'a
@@ -516,7 +516,7 @@ impl<T> Lists<T> for Array1<T>
 }
 impl<'b, T> Lists<T> for ArrayView1<'b, T>
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
         where
             T: 'a,
             Self: 'a
@@ -534,7 +534,7 @@ impl<'b, T> Lists<T> for ArrayView1<'b, T>
 
 impl<T> Lists<T> for Array2<T>
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
@@ -559,7 +559,7 @@ where
     'b: 'c,
     Self: 'b
 {
-    fn as_views<'a>(&'a self) -> Vec<Self::IndexView<'a>>
+    fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a

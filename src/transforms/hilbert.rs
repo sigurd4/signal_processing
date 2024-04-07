@@ -1,70 +1,63 @@
 use core::ops::{AddAssign, MulAssign};
 
-use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast, One, Zero};
+use num::{complex::ComplexFloat, Complex, One, Zero};
 use array_math::SliceMath;
 
-use crate::Lists;
+use crate::{Lists, OwnedLists, TruncateIm};
 
 pub trait Hilbert<T>: Lists<T>
 where
-    T: Float
+    T: ComplexFloat
 {
-    fn hilbert(&self) -> Self::Mapped<Complex<T>>;
+    fn hilbert(self) -> Self::Owned;
 }
 
 impl<T, L> Hilbert<T> for L
 where
-    T: Float + FloatConst + Into<Complex<T>>,
-    Complex<T>: AddAssign + MulAssign,
-    L: Lists<T>
+    T: ComplexFloat + Into<Complex<T::Real>> + 'static,
+    T::Real: Into<T> + Into<Complex<T::Real>>,
+    Complex<T::Real>: AddAssign + MulAssign,
+    L: Lists<T>,
+    L::Owned: OwnedLists<T>
 {
-    fn hilbert(&self) -> Self::Mapped<Complex<T>>
+    fn hilbert(self) -> Self::Owned
     {
-        let x: Vec<Vec<T>> = self.as_view_slices()
-            .into_iter()
-            .map(|x| x.to_vec())
-            .collect();
-        let zero = T::zero();
-        let one = T::one();
-        let two = one + one;
-        let mut y = x.into_iter()
-            .map(|x| {
-                let mut y: Vec<Complex<_>> = x.into_iter()
-                    .map(|x| x.into())
-                    .collect();
+        let zero = T::Real::zero();
+        let one = T::Real::one();
+        
+        let mut x = self.to_owned();
+        for x in x.as_mut_slice2()
+        {
+            let mut y: Vec<Complex<_>> = x.iter()
+                .map(|&x| x.into())
+                .collect();
+            y.fft();
 
-                let n = y.len();
-                if n > 2
+            let n = y.len();
+            let nhalf = n/2;
+
+            for (i, y) in y.iter_mut()
+                .enumerate()
+            {
+                if i == 0
                 {
-                    y.fft();
-                    let mut y: Vec<_> = if n % 2 == 0
-                    {
-                        core::iter::once(y[0])
-                            .chain(y[1..n/2].iter()
-                                .map(|&y| y*two)
-                            ).chain(core::iter::once(y[n/2]))
-                            .chain(vec![zero.into(); n/2 - 1])
-                            .collect()
-                    }
-                    else
-                    {
-                        core::iter::once(y[0])
-                            .chain(y[1..(n + 1)/2].iter()
-                                .map(|&y| y*two)
-                            ).chain(vec![zero.into(); (n - 1)/2])
-                            .collect()
-                    };
-                    y.ifft();
-                    y.truncate(n);
-                    y
+                    *y = zero.into()
                 }
                 else
                 {
-                    y
+                    *y *= Complex::new(zero, if i > nhalf {one} else {-one})
                 }
-            }).flatten();
+            }
+            y.ifft();
+            
+            for (x, y) in x.iter_mut()
+                .zip(y.into_iter())
+            {
+                *x = y.truncate_im()
+            }
+        }
 
-        self.map_to_owned(|_| y.next().unwrap())
+        x
     }
 }
 
@@ -76,7 +69,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, Hilbert};
+    use crate::{plot, Hilbert, MaybeContainer};
 
     #[test]
     fn test()
@@ -88,9 +81,9 @@ mod test
         let t = (0.0..T).linspace_array();
         let x: [_; N] = ArrayOps::fill(|i| (TAU*F*i as f64/N as f64*T).sin());
 
-        let y = x.hilbert();
+        let y = x.as_view().hilbert();
 
-        plot::plot_curves("y(t)", "plots/y_t_hilbert.png", [&t.zip(y.map(|y| y.re)), &t.zip(y.map(|y| y.im))])
+        plot::plot_curves("x(t), y(t)", "plots/xy_t_hilbert.png", [&t.zip(x), &t.zip(y)])
             .unwrap()
     }
 }

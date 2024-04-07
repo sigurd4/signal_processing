@@ -1,4 +1,4 @@
-use core::ops::{AddAssign, Div, DivAssign, Mul, MulAssign};
+use core::ops::{AddAssign, DivAssign, Mul, MulAssign};
 
 use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex};
@@ -10,10 +10,10 @@ where
     T: ComplexFloat,
     Self::Owned: Matrix<T>
 {
-    fn dst_i_2d(&self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
-    fn dst_ii_2d(&self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
-    fn dst_iii_2d(&self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
-    fn dst_iv_2d(&self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
+    fn dst_i_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
+    fn dst_ii_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
+    fn dst_iii_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
+    fn dst_iv_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
 }
 
 impl<T, M> DST2D<T> for M
@@ -23,9 +23,9 @@ where
     T: ComplexFloat<Real: Into<T>> + Into<Complex<T::Real>> + 'static,
     Complex<T::Real>: AddAssign + MulAssign + DivAssign<T::Real> + Mul<T::Real, Output = Complex<T::Real>> + Mul<T, Output = Complex<T::Real>>
 {
-    fn dst_i_2d(&self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
+    fn dst_i_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
     {
-        let mut h = self.to_owned();
+        let mut h = self.into_owned();
         for h in h.as_mut_slice2()
         {
             h.dst_i();
@@ -37,9 +37,9 @@ where
         }
         ht.matrix_transpose()
     }
-    fn dst_ii_2d(&self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
+    fn dst_ii_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
     {
-        let mut h = self.to_owned();
+        let mut h = self.into_owned();
         for h in h.as_mut_slice2()
         {
             h.dst_ii();
@@ -51,9 +51,9 @@ where
         }
         ht.matrix_transpose()
     }
-    fn dst_iii_2d(&self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
+    fn dst_iii_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
     {
-        let mut h = self.to_owned();
+        let mut h = self.into_owned();
         for h in h.as_mut_slice2()
         {
             h.dst_iii();
@@ -65,9 +65,9 @@ where
         }
         ht.matrix_transpose()
     }
-    fn dst_iv_2d(&self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
+    fn dst_iv_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
     {
-        let mut h = self.to_owned();
+        let mut h = self.into_owned();
         for h in h.as_mut_slice2()
         {
             h.dst_iv();

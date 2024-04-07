@@ -17,6 +17,10 @@ pub trait MaybeContainer<T>
     fn to_owned(&self) -> Self::Owned
     where
         T: Clone;
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone;
 }
 
 impl<T> MaybeContainer<T> for ()
@@ -31,6 +35,13 @@ impl<T> MaybeContainer<T> for ()
     fn to_owned(&self) -> Self::Owned
     {
         
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+
     }
 }
 
@@ -51,6 +62,13 @@ impl<T> MaybeContainer<T> for Vec<T>
     {
         self.clone()
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self
+    }
 }
 impl<T> MaybeContainer<T> for [T]
 {
@@ -65,6 +83,13 @@ impl<T> MaybeContainer<T> for [T]
     }
     fn to_owned(&self) -> Self::Owned
     where
+        T: Clone
+    {
+        self.to_vec()
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
         T: Clone
     {
         self.to_vec()
@@ -87,6 +112,13 @@ impl<T, const N: usize> MaybeContainer<T> for [T; N]
     {
         self.clone()
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self
+    }
 }
 impl<T> MaybeContainer<T> for &[T]
 {
@@ -101,6 +133,13 @@ impl<T> MaybeContainer<T> for &[T]
     }
     fn to_owned(&self) -> Self::Owned
     where
+        T: Clone
+    {
+        self.to_vec()
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
         T: Clone
     {
         self.to_vec()
@@ -123,6 +162,13 @@ impl<T, const N: usize> MaybeContainer<T> for &[T; N]
     {
         (*self).clone()
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.clone()
+    }
 }
 
 impl<T> MaybeContainer<T> for Vec<Vec<T>>
@@ -144,6 +190,13 @@ impl<T> MaybeContainer<T> for Vec<Vec<T>>
     {
         self.to_vec()
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self
+    }
 }
 impl<T, const M: usize> MaybeContainer<T> for [Vec<T>; M]
 {
@@ -163,6 +216,13 @@ impl<T, const M: usize> MaybeContainer<T> for [Vec<T>; M]
     {
         self.each_ref()
             .map(|s| s.clone())
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self
     }
 }
 impl<T> MaybeContainer<T> for [Vec<T>]
@@ -184,6 +244,13 @@ impl<T> MaybeContainer<T> for [Vec<T>]
     {
         self.to_vec()
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.to_vec()
+    }
 }
 impl<T, const M: usize> MaybeContainer<T> for &[Vec<T>; M]
 {
@@ -201,8 +268,14 @@ impl<T, const M: usize> MaybeContainer<T> for &[Vec<T>; M]
     where
         T: Clone
     {
-        self.each_ref()
-            .map(|s| s.clone())
+        (*self).clone()
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.clone()
     }
 }
 impl<T> MaybeContainer<T> for &[Vec<T>]
@@ -220,6 +293,13 @@ impl<T> MaybeContainer<T> for &[Vec<T>]
     }
     fn to_owned(&self) -> Self::Owned
     where
+        T: Clone
+    {
+        self.to_vec()
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
         T: Clone
     {
         self.to_vec()
@@ -244,6 +324,13 @@ impl<T, const N: usize> MaybeContainer<T> for Vec<[T; N]>
     {
         self.to_vec()
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeContainer<T> for [[T; N]; M]
 {
@@ -262,6 +349,13 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for [[T; N]; M]
     {
         self.each_ref()
             .map(|s| s.clone())
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self
     }
 }
 impl<T, const N: usize> MaybeContainer<T> for [[T; N]]
@@ -282,6 +376,13 @@ impl<T, const N: usize> MaybeContainer<T> for [[T; N]]
     {
         self.to_vec()
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.to_vec()
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[[T; N]; M]
 {
@@ -298,8 +399,14 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[[T; N]; M]
     where
         T: Clone
     {
-        self.each_ref()
-            .map(|s| s.clone())
+        (*self).clone()
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.clone()
     }
 }
 impl<T, const N: usize> MaybeContainer<T> for &[[T; N]]
@@ -315,6 +422,13 @@ impl<T, const N: usize> MaybeContainer<T> for &[[T; N]]
     }
     fn to_owned(&self) -> Self::Owned
     where
+        T: Clone
+    {
+        self.to_vec()
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
         T: Clone
     {
         self.to_vec()
@@ -340,6 +454,15 @@ impl<T> MaybeContainer<T> for Vec<&[T]>
             .map(|&s| s.to_vec())
             .collect()
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.into_iter()
+            .map(|s| s.to_vec())
+            .collect()
+    }
 }
 impl<T, const M: usize> MaybeContainer<T> for [&[T]; M]
 {
@@ -354,6 +477,13 @@ impl<T, const M: usize> MaybeContainer<T> for [&[T]; M]
     }
     fn to_owned(&self) -> Self::Owned
     where
+        T: Clone
+    {
+        self.map(|s| s.to_vec())
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
         T: Clone
     {
         self.map(|s| s.to_vec())
@@ -378,6 +508,15 @@ impl<T> MaybeContainer<T> for [&[T]]
             .map(|&s| s.to_vec())
             .collect()
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.iter()
+            .map(|&s| s.to_vec())
+            .collect()
+    }
 }
 impl<T, const M: usize> MaybeContainer<T> for &[&[T]; M]
 {
@@ -396,6 +535,13 @@ impl<T, const M: usize> MaybeContainer<T> for &[&[T]; M]
     {
         self.map(|s| s.to_vec())
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.map(|s| s.to_vec())
+    }
 }
 impl<T> MaybeContainer<T> for &[&[T]]
 {
@@ -410,6 +556,15 @@ impl<T> MaybeContainer<T> for &[&[T]]
     }
     fn to_owned(&self) -> Self::Owned
     where
+        T: Clone
+    {
+        self.iter()
+            .map(|&s| s.to_vec())
+            .collect()
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
         T: Clone
     {
         self.iter()
@@ -437,6 +592,15 @@ impl<T, const N: usize> MaybeContainer<T> for Vec<&[T; N]>
             .map(|&s| s.clone())
             .collect()
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.iter()
+            .map(|&s| s.clone())
+            .collect()
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeContainer<T> for [&[T; N]; M]
 {
@@ -451,6 +615,13 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for [&[T; N]; M]
     }
     fn to_owned(&self) -> Self::Owned
     where
+        T: Clone
+    {
+        self.map(|s| s.clone())
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
         T: Clone
     {
         self.map(|s| s.clone())
@@ -475,6 +646,15 @@ impl<T, const N: usize> MaybeContainer<T> for [&[T; N]]
             .map(|&s| s.clone())
             .collect()
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.iter()
+            .map(|&s| s.clone())
+            .collect()
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[&[T; N]; M]
 {
@@ -493,6 +673,13 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[&[T; N]; M]
     {
         self.map(|s| s.clone())
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.map(|s| s.clone())
+    }
 }
 impl<T, const N: usize> MaybeContainer<T> for &[&[T; N]]
 {
@@ -507,6 +694,15 @@ impl<T, const N: usize> MaybeContainer<T> for &[&[T; N]]
     }
     fn to_owned(&self) -> Self::Owned
     where
+        T: Clone
+    {
+        self.iter()
+            .map(|&s| s.clone())
+            .collect()
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
         T: Clone
     {
         self.iter()
@@ -535,6 +731,13 @@ where
     {
         self.clone()
     }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self
+    }
 }
 
 impl<'b, T, D> MaybeContainer<T> for ArrayView<'b, T, D>
@@ -553,6 +756,13 @@ where
     }
     fn to_owned(&self) -> Self::Owned
     where
+        T: Clone
+    {
+        self.to_owned()
+    }
+    fn into_owned(self) -> Self::Owned
+    where
+        Self: Sized,
         T: Clone
     {
         self.to_owned()

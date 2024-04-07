@@ -3,13 +3,13 @@ use core::ops::{AddAssign, MulAssign};
 use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex};
 
-use crate::{Lists, OwnedList, OwnedLists};
+use crate::{Lists, OwnedLists};
 
 pub trait DFT<T>: Lists<T>
 where
     T: ComplexFloat
 {
-    fn dft(&self) -> Self::Mapped<Complex<T::Real>>;
+    fn dft(self) -> Self::Mapped<Complex<T::Real>>;
 }
 
 impl<T, L> DFT<T> for L
@@ -19,9 +19,9 @@ where
     L::Mapped<Complex<T::Real>>: OwnedLists<Complex<T::Real>>,
     Complex<T::Real>: ComplexFloat<Real = T::Real> + MulAssign + AddAssign
 {
-    fn dft(&self) -> Self::Mapped<Complex<T::Real>>
+    fn dft(self) -> Self::Mapped<Complex<T::Real>>
     {
-        let mut h = self.map_to_owned(|&h| h.into());
+        let mut h = self.map_into_owned(|h| h.into());
         for h in h.as_mut_slice2()
         {
             h.fft()
@@ -35,7 +35,7 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::{ArrayOps};
+    use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
     use crate::{plot, DFT};

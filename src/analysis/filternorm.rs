@@ -18,8 +18,8 @@ where
     T: ComplexFloat<Real: Sum>,
     B: MaybeLists<T>,
     A: MaybeList<T>,
-    B::RowsMapped<Vec<T>>: for<'b> Lists<T, IndexView<'b>: List<T>, RowsMapped<T::Real> = B::RowsMapped<T::Real>>,
-    B::RowsMapped<[Complex<T::Real>; FILTER_INF_NORM_RES]>: for<'b> Lists<Complex<T::Real>, IndexView<'b>: List<Complex<T::Real>>, RowsMapped<T::Real> = B::RowsMapped<T::Real>>, 
+    B::RowsMapped<Vec<T>>: for<'b> Lists<T, RowView<'b>: List<T>, RowsMapped<T::Real> = B::RowsMapped<T::Real>>,
+    B::RowsMapped<[Complex<T::Real>; FILTER_INF_NORM_RES]>: for<'b> Lists<Complex<T::Real>, RowView<'b>: List<Complex<T::Real>>, RowsMapped<T::Real> = B::RowsMapped<T::Real>>, 
     Self: ImpZ<'a, B::RowsMapped<Vec<T>>, Vec<T::Real>, ()> + FreqZ<'a, B::RowsMapped<[Complex<T::Real>; FILTER_INF_NORM_RES]>, [T::Real; FILTER_INF_NORM_RES], ()> + System<Domain = T>
 {
     type Output = B::RowsMapped<T::Real>;

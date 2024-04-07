@@ -21,7 +21,7 @@ where
     T: ComplexFloat + ComplexOp<T, Output = T>,
     B: MaybeLists<T>,
     A: MaybeList<T>,
-    B::RowsMapped<Vec<T>>: for<'b> Lists<T, RowsMapped<Vec<T>> = B::RowsMapped<Vec<T>>, IndexView<'b>: List<T, Mapped<T::Real> = Vec<T::Real>>> + 'a,
+    B::RowsMapped<Vec<T>>: for<'b> Lists<T, RowsMapped<Vec<T>> = B::RowsMapped<Vec<T>>, RowView<'b>: List<T, Mapped<T::Real> = Vec<T::Real>>> + 'a,
     Self: 'a + Filter<'a, T, Vec<T>, Output = B::RowsMapped<Vec<T>>> + System<Domain = T>,
     &'a Self: Into<Tf<T, B::RowsMapped<Vec<T>>, Vec<T>>>,
     Vec<T>: for<'b> Conv<T, T, &'b [T], Output = Vec<T>>,

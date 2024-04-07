@@ -1,6 +1,6 @@
 
 
-use ndarray::{prelude::ArrayView, ArrayBase, Dimension, IndexLonger, NdIndex, OwnedRepr};
+use ndarray::{prelude::ArrayView, ArrayBase, Dimension, NdIndex, OwnedRepr};
 
 use crate::MaybeContainer;
 

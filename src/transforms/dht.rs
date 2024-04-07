@@ -9,7 +9,7 @@ pub trait DHT<T>: Lists<T>
 where
     T: ComplexFloat
 {
-    fn dht(&self) -> Self::Mapped<T::Real>;
+    fn dht(self) -> Self::Mapped<T::Real>;
 }
 
 impl<T, L> DHT<T> for L
@@ -19,7 +19,7 @@ where
     Self: DFT<T>,
     Self::Mapped<Complex<T::Real>>: Lists<Complex<T::Real>, Mapped<T::Real> = Self::Mapped<T::Real>>,
 {
-    fn dht(&self) -> Self::Mapped<T::Real>
+    fn dht(self) -> Self::Mapped<T::Real>
     {
         let y = self.dft();
         y.map_into_owned(|y| y.re - y.im)
@@ -31,7 +31,7 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::{ArrayOps};
+    use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
     use crate::{plot, DHT};

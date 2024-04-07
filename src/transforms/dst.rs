@@ -1,34 +1,30 @@
 use core::ops::{AddAssign, DivAssign, Mul, MulAssign};
 
-use num::{complex::ComplexFloat, traits::FloatConst, Complex, NumCast, One};
-use array_math::{ArrayMath, SliceMath};
+use num::{complex::ComplexFloat, Complex};
+use array_math::SliceMath;
 
-use crate::{Container, List, ListOrSingle, Lists, OwnedLists, DFT, TruncateIm};
+use crate::{Lists, OwnedLists};
 
-pub trait DST<'a, T>: Lists<T>
+pub trait DST<T>: Lists<T>
 where
     T: ComplexFloat
 {
-    fn dst_i(&'a self) -> Self::Owned;
-    fn dst_ii(&'a self) -> Self::Owned;
-    fn dst_iii(&'a self) -> Self::Owned;
-    fn dst_iv(&'a self) -> Self::Owned;
+    fn dst_i(self) -> Self::Owned;
+    fn dst_ii(self) -> Self::Owned;
+    fn dst_iii(self) -> Self::Owned;
+    fn dst_iv(self) -> Self::Owned;
 }
 
-impl<'a, T, L> DST<'a, T> for L
+impl<T, L> DST<T> for L
 where
+    L: Lists<T, Owned: OwnedLists<T>>,
     T: ComplexFloat + Into<Complex<T::Real>> + MulAssign<T::Real> + DivAssign<T::Real> + 'static,
-    L: Lists<T, IndexView<'a>: List<T>> + 'a,
-    L::Owned: OwnedLists<T>,
-    L::RowsMapped<Vec<Complex<T::Real>>>: OwnedLists<Complex<T::Real>>,
-    L::Mapped<Complex<T::Real>>: OwnedLists<Complex<T::Real>>,
     Complex<T::Real>: AddAssign + MulAssign + DivAssign<T::Real> + Mul<T, Output = Complex<T::Real>> + Mul<T::Real, Output = Complex<T::Real>>,
-    T::Real: Into<T> + Into<Complex<T::Real>>,
-    Self: DFT<T>,
+    T::Real: Into<T> + Into<Complex<T::Real>>
 {
-    fn dst_i(&'a self) -> Self::Owned
+    fn dst_i(self) -> Self::Owned
     {
-        let mut y = self.to_owned();
+        let mut y = self.into_owned();
         for x in y.as_mut_slice2()
             .into_iter()
         {
@@ -36,9 +32,9 @@ where
         }
         y
     }
-    fn dst_ii(&'a self) -> Self::Owned
+    fn dst_ii(self) -> Self::Owned
     {
-        let mut y = self.to_owned();
+        let mut y = self.into_owned();
         for x in y.as_mut_slice2()
             .into_iter()
         {
@@ -46,9 +42,9 @@ where
         }
         y
     }
-    fn dst_iii(&'a self) -> Self::Owned
+    fn dst_iii(self) -> Self::Owned
     {
-        let mut y = self.to_owned();
+        let mut y = self.into_owned();
         for x in y.as_mut_slice2()
             .into_iter()
         {
@@ -56,9 +52,9 @@ where
         }
         y
     }
-    fn dst_iv(&'a self) -> Self::Owned
+    fn dst_iv(self) -> Self::Owned
     {
-        let mut y = self.to_owned();
+        let mut y = self.into_owned();
         for x in y.as_mut_slice2()
             .into_iter()
         {
@@ -73,7 +69,7 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::{ArrayOps};
+    use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
     use crate::{plot, DST};

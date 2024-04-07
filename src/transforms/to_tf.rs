@@ -46,7 +46,7 @@ where
     A2: MaybeList<T2>,
     A1::View<'a>: MaybeList<T1>,
     Self: 'a,
-    Polynomial<T1, B1::IndexView<'a>>: Into<Polynomial<T2, B2>>,
+    Polynomial<T1, B1::RowView<'a>>: Into<Polynomial<T2, B2>>,
     Polynomial<T1, A1::View<'a>>: Into<Polynomial<T2, A2>>,
 {
     fn to_tf(&'a self, (): (), output: usize) -> Tf<T2, B2, A2>

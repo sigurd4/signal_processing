@@ -9,7 +9,6 @@ moddef::moddef!(
         dst_2d,
         dst,
         dwht,
-        hilbert_transform,
         hilbert,
         idwht,
         sftrans,

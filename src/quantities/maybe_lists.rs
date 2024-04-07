@@ -8,16 +8,17 @@ use crate::{ListOrSingle, Lists, MaybeContainer, MaybeList};
 pub trait MaybeLists<T>: MaybeContainer<T>
 {
     type RowsMapped<M>: ListOrSingle<M>;
-    type IndexView<'a>: MaybeList<T> + 'a
+    type RowView<'a>: MaybeList<T> + 'a
     where
         T: 'a,
         Self: 'a;
+    type RowOwned: MaybeList<T>;
 
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a;
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a;
@@ -29,25 +30,31 @@ pub trait MaybeLists<T>: MaybeContainer<T>
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>;
+        F: FnMut<(Self::RowView<'a>,)>;
+    fn map_rows_into_owned<F>(self, map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>;
 }
 
 impl<T> MaybeLists<T> for ()
 {
     type RowsMapped<M> = M;
-    type IndexView<'a> = ()
+    type RowView<'a> = ()
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = ();
 
-    fn index_view<'a>(&'a self, _i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, _i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
         where
             T: 'a,
             Self: 'a
@@ -65,7 +72,15 @@ impl<T> MaybeLists<T> for ()
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
+    {
+        map(())
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
     {
         map(())
     }
@@ -74,19 +89,20 @@ impl<T> MaybeLists<T> for ()
 impl<T> MaybeLists<T> for Vec<T>
 {
     type RowsMapped<M> = M;
-    type IndexView<'a> = &'a [T]
+    type RowView<'a> = &'a [T]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Vec<T>;
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         core::slice::from_ref(&self.as_slice())[i]
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -104,27 +120,36 @@ impl<T> MaybeLists<T> for Vec<T>
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         map(self.as_view())
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        map(self)
     }
 }
 impl<T> MaybeLists<T> for [T]
 {
     type RowsMapped<M> = M;
-    type IndexView<'a> = &'a [T]
+    type RowView<'a> = &'a [T]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Vec<T>;
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         core::slice::from_ref(&self)[i]
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -142,27 +167,36 @@ impl<T> MaybeLists<T> for [T]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         map(self.as_view())
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        map(self.to_vec())
     }
 }
 impl<T, const N: usize> MaybeLists<T> for [T; N]
 {
     type RowsMapped<M> = M;
-    type IndexView<'a> = &'a [T; N]
+    type RowView<'a> = &'a [T; N]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = [T; N];
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         core::slice::from_ref(&self)[i]
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -180,27 +214,36 @@ impl<T, const N: usize> MaybeLists<T> for [T; N]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         map(self.as_view())
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        map(self)
     }
 }
 impl<T> MaybeLists<T> for &[T]
 {
     type RowsMapped<M> = M;
-    type IndexView<'a> = &'a [T]
+    type RowView<'a> = &'a [T]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Vec<T>;
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         core::slice::from_ref(self)[i]
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -218,27 +261,36 @@ impl<T> MaybeLists<T> for &[T]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         map(self.as_view())
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        map(self.to_vec())
     }
 }
 impl<T, const N: usize> MaybeLists<T> for &[T; N]
 {
     type RowsMapped<M> = M;
-    type IndexView<'a> = &'a [T; N]
+    type RowView<'a> = &'a [T; N]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = [T; N];
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         core::slice::from_ref(self)[i]
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -256,28 +308,37 @@ impl<T, const N: usize> MaybeLists<T> for &[T; N]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         map(self.as_view())
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        map(self.clone())
     }
 }
 
 impl<T> MaybeLists<T> for Vec<Vec<T>>
 {
     type RowsMapped<MM> = Vec<MM>;
-    type IndexView<'a> = &'a [T]
+    type RowView<'a> = &'a [T]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Vec<T>;
 
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -295,29 +356,40 @@ impl<T> MaybeLists<T> for Vec<Vec<T>>
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.iter()
             .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.into_iter()
+            .map(|r| map(r))
             .collect()
     }
 }
 impl<T, const M: usize> MaybeLists<T> for [Vec<T>; M]
 {
     type RowsMapped<MM> = [MM; M];
-    type IndexView<'a> = &'a [T]
+    type RowView<'a> = &'a [T]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Vec<T>;
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -335,28 +407,37 @@ impl<T, const M: usize> MaybeLists<T> for [Vec<T>; M]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.each_ref()
             .map(|r| map(r.as_view()))
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.map(|r| map(r))
     }
 }
 impl<T> MaybeLists<T> for [Vec<T>]
 {
     type RowsMapped<MM> = Vec<MM>;
-    type IndexView<'a> = &'a [T]
+    type RowView<'a> = &'a [T]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Vec<T>;
 
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -374,29 +455,40 @@ impl<T> MaybeLists<T> for [Vec<T>]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.iter()
             .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|r| map(r.clone()))
             .collect()
     }
 }
 impl<T, const M: usize> MaybeLists<T> for &[Vec<T>; M]
 {
     type RowsMapped<MM> = [MM; M];
-    type IndexView<'a> = &'a [T]
+    type RowView<'a> = &'a [T]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Vec<T>;
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -414,28 +506,38 @@ impl<T, const M: usize> MaybeLists<T> for &[Vec<T>; M]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.each_ref()
             .map(|r| map(r.as_view()))
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.each_ref()
+            .map(|r| map(r.clone()))
     }
 }
 impl<T> MaybeLists<T> for &[Vec<T>]
 {
     type RowsMapped<MM> = Vec<MM>;
-    type IndexView<'a> = &'a [T]
+    type RowView<'a> = &'a [T]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Vec<T>;
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -453,10 +555,20 @@ impl<T> MaybeLists<T> for &[Vec<T>]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.iter()
             .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|r| map(r.clone()))
             .collect()
     }
 }
@@ -464,19 +576,20 @@ impl<T> MaybeLists<T> for &[Vec<T>]
 impl<T, const N: usize> MaybeLists<T> for Vec<[T; N]>
 {
     type RowsMapped<MM> = Vec<MM>;
-    type IndexView<'a> = &'a [T; N]
+    type RowView<'a> = &'a [T; N]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = [T; N];
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -494,29 +607,40 @@ impl<T, const N: usize> MaybeLists<T> for Vec<[T; N]>
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.iter()
             .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.into_iter()
+            .map(|r| map(r))
             .collect()
     }
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for [[T; N]; M]
 {
     type RowsMapped<MM> = [MM; M];
-    type IndexView<'a> = &'a [T; N]
+    type RowView<'a> = &'a [T; N]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = [T; N];
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -534,28 +658,37 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [[T; N]; M]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.each_ref()
             .map(|r| map(r.as_view()))
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.map(|r| map(r))
     }
 }
 impl<T, const N: usize> MaybeLists<T> for [[T; N]]
 {
     type RowsMapped<MM> = Vec<MM>;
-    type IndexView<'a> = &'a [T; N]
+    type RowView<'a> = &'a [T; N]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = [T; N];
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -573,29 +706,40 @@ impl<T, const N: usize> MaybeLists<T> for [[T; N]]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.iter()
             .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|r| map(r.clone()))
             .collect()
     }
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for &[[T; N]; M]
 {
     type RowsMapped<MM> = [MM; M];
-    type IndexView<'a> = &'a [T; N]
+    type RowView<'a> = &'a [T; N]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = [T; N];
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -613,28 +757,38 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[[T; N]; M]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.each_ref()
             .map(|r| map(r.as_view()))
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.each_ref()
+            .map(|r| map(r.clone()))
     }
 }
 impl<T, const N: usize> MaybeLists<T> for &[[T; N]]
 {
     type RowsMapped<MM> = Vec<MM>;
-    type IndexView<'a> = &'a [T; N]
+    type RowView<'a> = &'a [T; N]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = [T; N];
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -652,10 +806,20 @@ impl<T, const N: usize> MaybeLists<T> for &[[T; N]]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.iter()
             .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|r| map(r.clone()))
             .collect()
     }
 }
@@ -663,19 +827,20 @@ impl<T, const N: usize> MaybeLists<T> for &[[T; N]]
 impl<T> MaybeLists<T> for Vec<&[T]>
 {
     type RowsMapped<MM> = Vec<MM>;
-    type IndexView<'a> = &'a [T]
+    type RowView<'a> = &'a [T]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Vec<T>;
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -693,29 +858,40 @@ impl<T> MaybeLists<T> for Vec<&[T]>
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.iter()
             .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.into_iter()
+            .map(|r| map(r.to_vec()))
             .collect()
     }
 }
 impl<T, const M: usize> MaybeLists<T> for [&[T]; M]
 {
     type RowsMapped<MM> = [MM; M];
-    type IndexView<'a> = &'a [T]
+    type RowView<'a> = &'a [T]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Vec<T>;
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -733,28 +909,37 @@ impl<T, const M: usize> MaybeLists<T> for [&[T]; M]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.each_ref()
             .map(|r| map(r.as_view()))
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.map(|r| map(r.to_vec()))
     }
 }
 impl<T> MaybeLists<T> for [&[T]]
 {
     type RowsMapped<MM> = Vec<MM>;
-    type IndexView<'a> = &'a [T]
+    type RowView<'a> = &'a [T]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Vec<T>;
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -772,29 +957,40 @@ impl<T> MaybeLists<T> for [&[T]]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.iter()
-            .map(|r| map(r.as_view()))
+            .map(|&r| map(r.as_view()))
+            .collect()
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|&r| map(r.to_vec()))
             .collect()
     }
 }
 impl<T, const M: usize> MaybeLists<T> for &[&[T]; M]
 {
     type RowsMapped<MM> = [MM; M];
-    type IndexView<'a> = &'a [T]
+    type RowView<'a> = &'a [T]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Vec<T>;
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -812,28 +1008,37 @@ impl<T, const M: usize> MaybeLists<T> for &[&[T]; M]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.each_ref()
             .map(|r| map(r.as_view()))
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.map(|r| map(r.to_vec()))
     }
 }
 impl<T> MaybeLists<T> for &[&[T]]
 {
     type RowsMapped<MM> = Vec<MM>;
-    type IndexView<'a> = &'a [T]
+    type RowView<'a> = &'a [T]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Vec<T>;
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -851,10 +1056,20 @@ impl<T> MaybeLists<T> for &[&[T]]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.iter()
             .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|&r| map(r.to_vec()))
             .collect()
     }
 }
@@ -862,19 +1077,20 @@ impl<T> MaybeLists<T> for &[&[T]]
 impl<T, const N: usize> MaybeLists<T> for Vec<&[T; N]>
 {
     type RowsMapped<MM> = Vec<MM>;
-    type IndexView<'a> = &'a [T; N]
+    type RowView<'a> = &'a [T; N]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = [T; N];
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -892,29 +1108,40 @@ impl<T, const N: usize> MaybeLists<T> for Vec<&[T; N]>
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.iter()
             .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.into_iter()
+            .map(|r| map(r.clone()))
             .collect()
     }
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for [&[T; N]; M]
 {
     type RowsMapped<MM> = [MM; M];
-    type IndexView<'a> = &'a [T; N]
+    type RowView<'a> = &'a [T; N]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = [T; N];
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -932,28 +1159,37 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [&[T; N]; M]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.each_ref()
             .map(|r| map(r.as_view()))
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.map(|r| map(r.clone()))
     }
 }
 impl<T, const N: usize> MaybeLists<T> for [&[T; N]]
 {
     type RowsMapped<MM> = Vec<MM>;
-    type IndexView<'a> = &'a [T; N]
+    type RowView<'a> = &'a [T; N]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = [T; N];
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -971,29 +1207,40 @@ impl<T, const N: usize> MaybeLists<T> for [&[T; N]]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.iter()
             .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|&r| map(r.clone()))
             .collect()
     }
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for &[&[T; N]; M]
 {
     type RowsMapped<MM> = [MM; M];
-    type IndexView<'a> = &'a [T; N]
+    type RowView<'a> = &'a [T; N]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = [T; N];
         
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -1011,28 +1258,37 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[&[T; N]; M]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.each_ref()
             .map(|r| map(r.as_view()))
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.map(|r| map(r.clone()))
     }
 }
 impl<T, const N: usize> MaybeLists<T> for &[&[T; N]]
 {
     type RowsMapped<MM> = Vec<MM>;
-    type IndexView<'a> = &'a [T; N]
+    type RowView<'a> = &'a [T; N]
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = [T; N];
 
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self[i].as_view()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -1050,10 +1306,20 @@ impl<T, const N: usize> MaybeLists<T> for &[&[T; N]]
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.iter()
             .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|&r| map(r.clone()))
             .collect()
     }
 }
@@ -1061,19 +1327,20 @@ impl<T, const N: usize> MaybeLists<T> for &[&[T; N]]
 impl<T> MaybeLists<T> for Array1<T>
 {
     type RowsMapped<M> = M;
-    type IndexView<'a> = ArrayView1<'a, T>
+    type RowView<'a> = ArrayView1<'a, T>
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Array1<T>;
 
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         (&core::array::from_ref(self)[i]).into()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -1091,27 +1358,36 @@ impl<T> MaybeLists<T> for Array1<T>
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         map(self.as_view())
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        map(self)
     }
 }
 impl<'c, T> MaybeLists<T> for ArrayView1<'c, T>
 {
     type RowsMapped<M> = M;
-    type IndexView<'a> = ArrayView1<'a, T>
+    type RowView<'a> = ArrayView1<'a, T>
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Array1<T>;
 
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         core::array::from_ref(self)[i].reborrow()
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -1129,28 +1405,37 @@ impl<'c, T> MaybeLists<T> for ArrayView1<'c, T>
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         map(self.reborrow())
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        map(self.to_owned())
     }
 }
 
 impl<T> MaybeLists<T> for Array2<T>
 {
     type RowsMapped<M> = Vec<M>;
-    type IndexView<'a> = ArrayView1<'a, T>
+    type RowView<'a> = ArrayView1<'a, T>
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Array1<T>;
 
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
         T: 'a,
         Self: 'a
     {
         self.row(i)
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -1168,30 +1453,42 @@ impl<T> MaybeLists<T> for Array2<T>
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.rows()
             .into_iter()
             .map(|r| map(r.as_view()))
             .collect()
     }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.rows()
+            .into_iter()
+            .map(|r| map(r.to_owned()))
+            .collect()
+    }
 }
 impl<'b, T> MaybeLists<T> for ArrayView2<'b, T>
 {
     type RowsMapped<M> = Vec<M>;
-    type IndexView<'a> = ArrayView1<'a, T>
+    type RowView<'a> = ArrayView1<'a, T>
     where
         T: 'a,
         Self: 'a;
+    type RowOwned = Array1<T>;
 
-    fn index_view<'a>(&'a self, i: usize) -> Self::IndexView<'a>
+    fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
         where
             T: 'a,
             Self: 'a
     {
         self.row(i)
     }
-    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::IndexView<'a>>>
+    fn as_views_option<'a>(&'a self) -> Option<Vec<Self::RowView<'a>>>
     where
         T: 'a,
         Self: 'a
@@ -1209,11 +1506,22 @@ impl<'b, T> MaybeLists<T> for ArrayView2<'b, T>
     where
         T: 'a,
         Self: 'a,
-        F: FnMut<(Self::IndexView<'a>,)>
+        F: FnMut<(Self::RowView<'a>,)>
     {
         self.rows()
             .into_iter()
             .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn map_rows_into_owned<F>(self, mut map: F) -> Self::RowsMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(Self::RowOwned,)>
+    {
+        self.rows()
+            .into_iter()
+            .map(|r| map(r.to_owned()))
             .collect()
     }
 }
