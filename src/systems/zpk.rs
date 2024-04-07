@@ -1,9 +1,9 @@
-use core::ops::{Div, Mul};
+use core::ops::{Div, Mul, Neg};
 
-use num::{complex::ComplexFloat, Complex, Float, NumCast, One, Zero};
+use num::{complex::ComplexFloat, traits::Inv, Complex, Float, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{ComplexRealError, MaybeList, ProductSequence};
+use crate::{ComplexRealError, ListOrSingle, MaybeList, ProductSequence, ToZpk};
 
 moddef::moddef!(
     mod {
@@ -15,8 +15,7 @@ moddef::moddef!(
         neg,
         one,
         pow,
-        product,
-        zero
+        product
     }
 );
 
@@ -35,11 +34,16 @@ where
     P: MaybeList<T>,
     K: ComplexFloat<Real = T::Real>
 {
-    /*pub type View<'a> = Zpk<Z::View<'a>, P::View<'a>>
+    pub type View<'a> = Zpk<T, Z::View<'a>, P::View<'a>, K>
     where
         Z: 'a,
-        P: 'a;
-    pub type Owned = Zpk<Z::Owned, P::Owned>;*/
+        P: 'a,
+        Z::View<'a>: MaybeList<T>,
+        P::View<'a>: MaybeList<T>;
+    pub type Owned = Zpk<T, Z::Owned, P::Owned, K>
+    where
+        Z::Owned: MaybeList<T>,
+        P::Owned: MaybeList<T>;
 
     pub fn as_view<'a>(&'a self) -> Zpk<T, Z::View<'a>, P::View<'a>, K>
     where
@@ -75,12 +79,20 @@ where
     {
         Zpk {k: K::zero(), ..Default::default()}
     }
+    pub fn is_one(&self) -> bool
+    {
+        self.z.length() == 0 && self.p.length() == 0 && self.k.is_one()
+    }
+    pub fn is_zero(&self) -> bool
+    {
+        self.k.is_zero()
+    }
 
-    pub fn complex_real<'a, Tol>(&'a self, tolerance: Tol) -> Result<(Vec<[Complex<T::Real>; 2]>, Vec<[Complex<T::Real>; 2]>, Vec<T::Real>, Vec<T::Real>, K), ComplexRealError>
+    pub fn complex_real<Tol>(self, tolerance: Tol) -> Result<(Vec<[Complex<T::Real>; 2]>, Vec<[Complex<T::Real>; 2]>, Vec<T::Real>, Vec<T::Real>, K), ComplexRealError>
     where
         Tol: Maybe<T::Real>,
         T: Into<Complex<T::Real>>,
-        &'a Self: Into<Zpk<T, Vec<T>, Vec<T>, K>>
+        Self: ToZpk<T, Vec<T>, Vec<T>, K, (), ()>
     {
         let tol = if let Some(tol) = tolerance.into_option()
         {
@@ -95,7 +107,7 @@ where
             <T::Real as NumCast>::from(100.0).unwrap()*<T::Real as Float>::epsilon()
         };
 
-        let Zpk {z, p, k}: Zpk<T, Vec<T>, Vec<T>, K> = self.into();
+        let Zpk {z, p, k}: Zpk<T, Vec<T>, Vec<T>, K> = self.to_zpk((), ());
         let mut zc = vec![];
         let mut pc = vec![];
         let mut zr = vec![];
@@ -139,7 +151,31 @@ where
     }
 }
 
-macro_rules! impl_op_extra {
+macro_rules! impl_op1_extra {
+    ($t:ident :: $f:tt) => {
+        impl<'a, T, Z, P, K, O> $t for &'a Zpk<T, Z, P, K>
+        where
+            T: ComplexFloat,
+            Z: MaybeList<T>,
+            P: MaybeList<T>,
+            K: ComplexFloat<Real = T::Real>,
+            Z::View<'a>: MaybeList<T>,
+            P::View<'a>: MaybeList<T>,
+            Zpk<T, Z::View<'a>, P::View<'a>, K>: $t<Output = O>
+        {
+            type Output = O;
+
+            fn $f(self) -> Self::Output
+            {
+                self.as_view().$f()
+            }
+        }
+    };
+}
+impl_op1_extra!(Neg::neg);
+impl_op1_extra!(Inv::inv);
+
+macro_rules! impl_op2_extra {
     ($t:ident :: $f:tt) => {
         impl<'a, T1, T2, Z1, Z2, P1, P2, K1, K2, O> $t<Zpk<T2, Z2, P2, K2>> for &'a Zpk<T1, Z1, P1, K1>
         where
@@ -247,5 +283,5 @@ macro_rules! impl_op_extra {
         }
     };
 }
-impl_op_extra!(Mul::mul);
-impl_op_extra!(Div::div);
+impl_op2_extra!(Mul::mul);
+impl_op2_extra!(Div::div);

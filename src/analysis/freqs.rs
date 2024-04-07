@@ -68,17 +68,20 @@ where
 impl<'a, T, Z, P, K, S, SS> FreqS<'a, S, SS> for Zpk<T, Z, P, K>
 where
     T: ComplexFloat,
-    Z: MaybeList<T>,
-    P: MaybeList<T>,
+    Z: MaybeList<T> + 'a,
+    P: MaybeList<T> + 'a,
     K: ComplexFloat<Real = T::Real>,
     S: ComplexFloat<Real = T::Real>,
     SS: Lists<S> + 'a,
-    Self: ToSos<'a, K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>, (), ()> + 'a + System<Domain = K>,
+    Z::View<'a>: MaybeList<T>,
+    P::View<'a>: MaybeList<T>,
+    Zpk<T, Z::View<'a>, P::View<'a>, K>: ToSos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>, (), ()> + 'a + System<Domain = K>,
     Sos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>>: for<'b> FreqS<'b, S, SS> + System<Domain = K>
 {
     fn freqs(&'a self, s: SS) -> SS::Mapped<Complex<<Self::Domain as ComplexFloat>::Real>>
     {
-        self.to_sos((), ())
+        self.as_view()
+            .to_sos((), ())
             .freqs(s)
     }
 }

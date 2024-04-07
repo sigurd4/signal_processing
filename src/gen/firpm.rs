@@ -215,7 +215,7 @@ impl<T> FirPm for Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>
 where
     T: Float + FloatConst,
     Complex<T>: ComplexFloat<Real = T>,
-    Tf<T, Vec<T>, ()>: FirPm + for<'b> ToZpk<'b, Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T, (), ()> + System<Domain = T>
+    Tf<T, Vec<T>, ()>: FirPm + ToZpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T, (), ()> + System<Domain = T>
 {
     fn firpm<'a, const B2: usize, const R: usize, const W: usize, const RES: bool>(
         order: usize,
@@ -258,7 +258,7 @@ where
 impl<T> FirPm for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: Float + FloatConst,
-    Tf<T, Vec<T>, ()>: FirPm + for<'b> ToSs<'b, T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>
+    Tf<T, Vec<T>, ()>: FirPm + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>
 {
     fn firpm<'a, const B2: usize, const R: usize, const W: usize, const RES: bool>(
         order: usize,

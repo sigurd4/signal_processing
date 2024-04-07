@@ -1,4 +1,4 @@
-use core::{ops::{AddAssign, Mul, MulAssign}};
+use core::ops::{AddAssign, Mul, MulAssign};
 
 use array_math::{ArrayOps, SliceMath};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, NumCast, One, Zero};
@@ -158,18 +158,21 @@ where
 impl<'a, T, Z, P, K, H, W, N> FreqZ<'a, H, W, N> for Zpk<T, Z, P, K>
 where
     T: ComplexFloat,
-    Z: MaybeList<T>,
-    P: MaybeList<T>,
+    Z: MaybeList<T> + 'a,
+    P: MaybeList<T> + 'a,
     K: ComplexFloat<Real = T::Real>,
     H: Lists<Complex<K::Real>>,
     W: List<K::Real>,
     N: Maybe<usize>,
-    Self: ToSos<'a, K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>, (), ()> + System<Domain = K>,
+    Z::View<'a>: MaybeList<T>,
+    P::View<'a>: MaybeList<T>,
+    Zpk<T, Z::View<'a>, P::View<'a>, K>: ToSos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>, (), ()> + System<Domain = K>,
     Sos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>>: for<'b> FreqZ<'b, H, W, N> + System<Domain = K>
 {
     fn freqz(&'a self, n: N) -> (H, W)
     {
-        self.to_sos((), ())
+        self.as_view()
+            .to_sos((), ())
             .freqz(n)
     }
 }

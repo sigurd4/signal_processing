@@ -4,7 +4,7 @@ use std::ops::Mul;
 use num::{complex::ComplexFloat, Complex, Float, One, Zero};
 use thiserror::Error;
 
-use crate::{MaybeList, ProductSequence, System, Zpk};
+use crate::{MaybeList, ProductSequence, System, ToZpk, Zpk};
 
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum SfTransError
@@ -15,17 +15,17 @@ pub enum SfTransError
     ZeroPoles
 }
 
-pub trait SfTrans<'a>: System
+pub trait SfTrans: System
 {
     type Output: System<Domain = Self::Domain>;
 
-    fn sftrans<const W: usize>(&'a self, w: [<Self::Domain as ComplexFloat>::Real; W], stop: bool) -> Result<Self::Output, SfTransError>
+    fn sftrans<const W: usize>(self, w: [<Self::Domain as ComplexFloat>::Real; W], stop: bool) -> Result<Self::Output, SfTransError>
     where
         [(); W - 1]:,
         [(); 2 - W]:;
 }
 
-impl<'a, T, Z, P, K> SfTrans<'a> for Zpk<T, Z, P, K>
+impl<T, Z, P, K> SfTrans for Zpk<T, Z, P, K>
 where
     T: ComplexFloat + Mul<T::Real, Output = T> + Div<T::Real, Output = T> + Sub<T::Real, Output = T> + Into<Complex<T::Real>>,
     K: ComplexFloat<Real = T::Real> + DivAssign<T::Real> + MulAssign<T::Real>,
@@ -33,17 +33,16 @@ where
     Complex<T::Real>: Add<T, Output = Complex<T::Real>>,
     Z: MaybeList<T>,
     P: MaybeList<T>,
-    Self: 'a,
-    &'a Self: Into<Zpk<T, Vec<T>, Vec<T>, K>>
+    Self: ToZpk<T, Vec<T>, Vec<T>, K, (), ()> + System<Domain = K>
 {
     type Output = Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, K>;
 
-    fn sftrans<const W: usize>(&'a self, w: [T::Real; W], stop: bool) -> Result<Self::Output, SfTransError>
+    fn sftrans<const W: usize>(self, w: [T::Real; W], stop: bool) -> Result<Self::Output, SfTransError>
     where
         [(); W - 1]:,
         [(); 2 - W]:
     {
-        let Zpk::<T, Vec<T>, Vec<T>, K> {z: sz, p: sp, k: mut sg} = self.into();
+        let Zpk::<T, Vec<T>, Vec<T>, K> {z: sz, p: sp, k: mut sg} = self.to_zpk((), ());
     
         let two = T::Real::one() + T::Real::one();
         let c = T::Real::one();

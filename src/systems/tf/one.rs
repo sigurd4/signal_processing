@@ -15,4 +15,8 @@ where
     {
         Self::one()
     }
+    fn is_one(&self) -> bool
+    {
+        self.is_one()
+    }
 }

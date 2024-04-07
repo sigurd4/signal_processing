@@ -133,7 +133,7 @@ impl<T> FirGr<usize> for Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>
 where
     T: Float + FloatConst,
     Complex<T>: ComplexFloat<Real = T>,
-    Tf<T, Vec<T>, ()>: FirGr<usize> + for<'a> ToZpk<'a, Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T, (), ()> + System<Domain = T>
+    Tf<T, Vec<T>, ()>: FirGr<usize> + ToZpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T, (), ()> + System<Domain = T>
 {
     fn firgr<const B: usize>(
         order: usize,
@@ -164,7 +164,7 @@ where
 impl<T> FirGr<usize> for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: Float + FloatConst,
-    Tf<T, Vec<T>, ()>: FirGr<usize> + for<'a> ToSs<'a, T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>
+    Tf<T, Vec<T>, ()>: FirGr<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>
 {
     fn firgr<const B: usize>(
         order: usize,

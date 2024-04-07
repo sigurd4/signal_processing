@@ -1,6 +1,6 @@
-use core::ops::{Add, Div, Mul, Sub};
+use core::ops::{Add, Div, Mul, Neg, Sub};
 
-use num::complex::ComplexFloat;
+use num::{complex::ComplexFloat, traits::Inv};
 
 use crate::{MaybeList, MaybeLists, Polynomial};
 
@@ -17,6 +17,7 @@ moddef::moddef!(
         pow,
         product,
         sub,
+        sum,
         zero
     }
 );
@@ -82,7 +83,19 @@ impl<T: ComplexFloat, B: MaybeLists<T>, A: MaybeList<T>> Tf<T, B, A>
     {
         Tf {b: Polynomial::new(B::default()), ..Default::default()}
     }
-    pub fn z() -> Self
+    pub fn is_one(&self) -> bool
+    where
+        B: MaybeList<T>
+    {
+        !self.b.is_zero() && !self.a.is_zero() && self.a == self.b
+    }
+    pub fn is_zero(&self) -> bool
+    where
+        B: MaybeList<T>
+    {
+        self.b.is_zero() && !self.a.is_zero()
+    }
+    pub fn s() -> Self
     where
         for<'a> &'a Tf<T, [T; 2], ()>: Into<Self>
     {
@@ -105,7 +118,30 @@ impl<T: ComplexFloat, B: MaybeLists<T>, A: MaybeList<T>> Tf<T, B, A>
     }
 }
 
-macro_rules! impl_op_extra {
+macro_rules! impl_op1_extra {
+    ($t:ident :: $f:tt) => {
+        impl<'a, T, B, A, O> $t for &'a Tf<T, B, A>
+        where
+            T: ComplexFloat,
+            B: MaybeLists<T>,
+            A: MaybeList<T>,
+            B::View<'a>: MaybeLists<T>,
+            A::View<'a>: MaybeList<T>,
+            Tf<T, B::View<'a>, A::View<'a>>: $t<Output = O>
+        {
+            type Output = O;
+
+            fn $f(self) -> Self::Output
+            {
+                self.as_view().$f()
+            }
+        }
+    };
+}
+impl_op1_extra!(Neg::neg);
+impl_op1_extra!(Inv::inv);
+
+macro_rules! impl_op2_extra {
     ($t:ident :: $f:tt) => {
         impl<'a, T1, B1, A1, T2, B2, A2, O> $t<Tf<T2, B2, A2>> for &'a Tf<T1, B1, A1>
         where
@@ -237,7 +273,7 @@ macro_rules! impl_op_extra {
         }
     };
 }
-impl_op_extra!(Add::add);
-impl_op_extra!(Sub::sub);
-impl_op_extra!(Mul::mul);
-impl_op_extra!(Div::div);
+impl_op2_extra!(Add::add);
+impl_op2_extra!(Sub::sub);
+impl_op2_extra!(Mul::mul);
+impl_op2_extra!(Div::div);

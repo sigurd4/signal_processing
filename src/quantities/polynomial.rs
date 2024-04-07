@@ -1,9 +1,9 @@
-use core::{marker::PhantomData};
+use core::marker::PhantomData;
 
-use array_math::ArrayOps;
-use num::{complex::ComplexFloat, Zero};
+use array_math::{ArrayOps, SliceMath};
+use num::{complex::ComplexFloat, One, Zero};
 
-use crate::{Lists, MaybeLists, TruncateIm};
+use crate::{Lists, MaybeList, MaybeLists, TruncateIm};
 
 moddef::moddef!(
     mod {
@@ -12,11 +12,13 @@ moddef::moddef!(
         borrow_mut,
         deref,
         deref_mut,
+        eq,
         r#fn,
         from,
         mul,
         neg,
         one,
+        partial_eq,
         pow,
         product,
         sub
@@ -139,5 +141,28 @@ where
         Polynomial<T, [T; 0]>: Into<Self>
     {
         Polynomial::new([]).into()
+    }
+    pub fn is_zero(&self) -> bool
+    where
+        T: Zero,
+        C: MaybeList<T>
+    {
+        if let Some(s) = self.as_view_slice_option()
+        {
+            return s.trim_zeros_front().len() == 0
+        }
+        false
+    }
+    pub fn is_one(&self) -> bool
+    where
+        T: One + Zero + PartialEq,
+        C: MaybeList<T>
+    {
+        if let Some(s) = self.as_view_slice_option()
+        {
+            let s = s.trim_zeros_front();
+            return s.len() == 1 && s[0].is_one()
+        }
+        true
     }
 }

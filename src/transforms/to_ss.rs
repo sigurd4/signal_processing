@@ -12,7 +12,7 @@ pub enum ToSsError
     NonCausal
 }
 
-pub trait ToSs<'a, T, A, B, C, D>: System
+pub trait ToSs<T, A, B, C, D>: System
 where
     T: ComplexFloat,
     A: Matrix<T>,
@@ -20,10 +20,10 @@ where
     C: Matrix<T>,
     D: Matrix<T>
 {
-    fn to_ss(&'a self) -> Result<Ss<T, A, B, C, D>, ToSsError>;
+    fn to_ss(self) -> Result<Ss<T, A, B, C, D>, ToSsError>;
 }
 
-impl<'a, T1, A1, B1, C1, D1, T2, A2, B2, C2, D2> ToSs<'a, T2, A2, B2, C2, D2> for Ss<T1, A1, B1, C1, D1>
+impl<T1, A1, B1, C1, D1, T2, A2, B2, C2, D2> ToSs<T2, A2, B2, C2, D2> for Ss<T1, A1, B1, C1, D1>
 where
     T1: ComplexFloat,
     T2: ComplexFloat,
@@ -35,36 +35,34 @@ where
     B2: Matrix<T2>,
     C2: Matrix<T2>,
     D2: Matrix<T2>,
-    Self: 'a,
-    A1::View<'a>: Into<A2>,
-    B1::View<'a>: Into<B2>,
-    C1::View<'a>: Into<C2>,
-    D1::View<'a>: Into<D2>,
+    A1: Into<A2>,
+    B1: Into<B2>,
+    C1: Into<C2>,
+    D1: Into<D2>,
 {
-    fn to_ss(&'a self) -> Result<Ss<T2, A2, B2, C2, D2>, ToSsError>
+    fn to_ss(self) -> Result<Ss<T2, A2, B2, C2, D2>, ToSsError>
     {
         Ok(Ss::new(
-            self.a.as_view().into(),
-            self.b.as_view().into(),
-            self.c.as_view().into(),
-            self.d.as_view().into()
+            self.a.into(),
+            self.b.into(),
+            self.c.into(),
+            self.d.into()
         ))
     }
 }
 
-impl<'a, T1, T2, B, A> ToSs<'a, T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>> for Tf<T1, B, A>
+impl<T1, T2, B, A> ToSs<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>> for Tf<T1, B, A>
 where
     T1: ComplexFloat,
     T2: ComplexFloat + Default,
     B: MaybeLists<T1>,
     A: MaybeList<T1>,
-    Self: 'a,
-    &'a Self: Into<Tf<T2, Vec<Vec<T2>>, Vec<T2>>>,
+    Self: ToTf<T2, Vec<Vec<T2>>, Vec<T2>, (), ()>,
     Tf<T2, Vec<Vec<T2>>, Vec<T2>>: Normalize
 {
-    fn to_ss(&'a self) -> Result<Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>, ToSsError>
+    fn to_ss(self) -> Result<Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>, ToSsError>
     {
-        let mut tf: Tf<T2, Vec<Vec<T2>>, Vec<T2>> = self.into();
+        let mut tf: Tf<T2, Vec<Vec<T2>>, Vec<T2>> = self.to_tf((), ());
         tf.normalize();
         let m_min = tf.b.iter()
             .map(|b| b.len())
@@ -136,34 +134,34 @@ where
     }
 }
 
-impl<'a, T1, T2, Z, P, K> ToSs<'a, T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>> for Zpk<T1, Z, P, K>
+impl<T1, T2, Z, P, K> ToSs<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>> for Zpk<T1, Z, P, K>
 where
     T1: ComplexFloat,
     T2: ComplexFloat,
     K: ComplexFloat<Real = T1::Real>,
     Z: MaybeList<T1>,
     P: MaybeList<T1>,
-    Self: ToTf<'a, T2, Vec<T2>, Vec<T2>, (), ()>,
-    Tf<T2, Vec<T2>, Vec<T2>>: for<'b> ToSs<'b, T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>
+    Self: ToTf<T2, Vec<T2>, Vec<T2>, (), ()>,
+    Tf<T2, Vec<T2>, Vec<T2>>: ToSs<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>
 {
-    fn to_ss(&'a self) -> Result<Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>, ToSsError>
+    fn to_ss(self) -> Result<Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>, ToSsError>
     {
         self.to_tf((), ())
             .to_ss()
     }
 }
 
-impl<'a, T1, T2, B, A, S> ToSs<'a, T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>> for Sos<T1, B, A, S>
+impl<'a, T1, T2, B, A, S> ToSs<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>> for Sos<T1, B, A, S>
 where
     T1: ComplexFloat,
     T2: ComplexFloat,
     B: Maybe<[T1; 3]> + MaybeList<T1>,
     A: Maybe<[T1; 3]> + MaybeList<T1>,
     S: MaybeList<Tf<T1, B, A>>,
-    Self: ToTf<'a, T2, Vec<T2>, Vec<T2>, (), ()>,
-    Tf<T2, Vec<T2>, Vec<T2>>: for<'b> ToSs<'b, T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>
+    Self: ToTf<T2, Vec<T2>, Vec<T2>, (), ()>,
+    Tf<T2, Vec<T2>, Vec<T2>>: ToSs<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>
 {
-    fn to_ss(&'a self) -> Result<Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>, ToSsError>
+    fn to_ss(self) -> Result<Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>, ToSsError>
     {
         self.to_tf((), ())
             .to_ss()

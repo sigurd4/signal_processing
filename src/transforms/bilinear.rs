@@ -14,28 +14,27 @@ pub enum BilinearError
     ZeroPoles
 }
 
-pub trait Bilinear<'a>: System
+pub trait Bilinear: System
 {
     type Output: Sized;
 
-    fn bilinear(&'a self, sampling_frequency: <Self::Domain as ComplexFloat>::Real) -> Result<Self::Output, BilinearError>;
+    fn bilinear(self, sampling_frequency: <Self::Domain as ComplexFloat>::Real) -> Result<Self::Output, BilinearError>;
 }
 
-impl<'a, T, Z, P, K> Bilinear<'a> for Zpk<T, Z, P, K>
+impl<'a, T, Z, P, K> Bilinear for Zpk<T, Z, P, K>
 where
     T: ComplexFloat + Add<T::Real, Output = T> + Div<T::Real, Output = T> + Mul<T::Real, Output = T> + MulAssign + Product + 'static,
     K: ComplexFloat<Real = T::Real> + MulAssign<K::Real> + Mul<K::Real, Output = K> + Div<K::Real, Output = K> + 'static,
     Z: MaybeList<T>,
     P: MaybeList<T>,
     T::Real: Into<T>,
-    Self: 'a,
-    &'a Self: Into<Zpk<T, Vec<T>, Vec<T>, K>>
+    Self: ToZpk<T, Vec<T>, Vec<T>, K, (), ()> + System<Domain = K>
 {
     type Output = Zpk<T, Vec<T>, Vec<T>, K>;
 
-    fn bilinear(&'a self, t: K::Real) -> Result<Self::Output, BilinearError>
+    fn bilinear(self, t: K::Real) -> Result<Self::Output, BilinearError>
     {
-        let Zpk::<T, Vec<T>, Vec<T>, K> {z: sz, p: sp, k: sg} = self.into();
+        let Zpk::<T, Vec<T>, Vec<T>, K> {z: sz, p: sp, k: sg} = self.to_zpk((), ());
     
         let p = sp.len();
         let z = sz.len();
@@ -95,17 +94,17 @@ where
     }
 }
 
-impl<'a, T, B, A> Bilinear<'a> for Tf<T, B, A>
+impl<T, B, A> Bilinear for Tf<T, B, A>
 where
     T: ComplexFloat,
     B: MaybeList<T>,
     A: MaybeList<T>,
-    Self: ToZpk<'a, Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T, (), ()> + System<Domain = T>,
-    Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T>: for<'b> Bilinear<'b, Output: for<'c> ToTf<'c, T, Vec<T>, Vec<T>, (), ()>> + System<Domain = T>,
+    Self: ToZpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T, (), ()> + System<Domain = T>,
+    Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T>: Bilinear<Output: ToTf<T, Vec<T>, Vec<T>, (), ()>> + System<Domain = T>,
 {
     type Output = Tf<T, Vec<T>, Vec<T>>;
 
-    fn bilinear(&'a self, t: T::Real) -> Result<Self::Output, BilinearError>
+    fn bilinear(self, t: T::Real) -> Result<Self::Output, BilinearError>
     {
         Ok(self.to_zpk((), ()).bilinear(t)?.to_tf((), ()))
     }

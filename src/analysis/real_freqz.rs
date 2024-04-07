@@ -1,4 +1,4 @@
-use core::{ops::{AddAssign, MulAssign}};
+use core::ops::{AddAssign, MulAssign};
 
 use array_math::{ArrayOps, SliceMath};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast, One, Zero};
@@ -174,18 +174,21 @@ where
 impl<'a, T, Z, P, K, H, W, N> RealFreqZ<'a, H, W, N> for Zpk<T, Z, P, K>
 where
     T: ComplexFloat<Real = K>,
-    Z: MaybeList<T>,
-    P: MaybeList<T>,
+    Z: MaybeList<T> + 'a,
+    P: MaybeList<T> + 'a,
     K: Float + FloatConst,
     H: Lists<Complex<K>>,
     W: List<K>,
     N: Maybe<usize>,
-    Self: ToSos<'a, K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>, (), ()> + System<Domain = K>,
+    Z::View<'a>: MaybeList<T>,
+    P::View<'a>: MaybeList<T>,
+    Zpk<T, Z::View<'a>, P::View<'a>, K>: ToSos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>, (), ()> + System<Domain = K>,
     Sos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>>: for<'b> RealFreqZ<'b, H, W, N> + System<Domain = K>
 {
     fn real_freqz(&'a self, n: N) -> (H, W)
     {
-        self.to_sos((), ())
+        self.as_view()
+            .to_sos((), ())
             .real_freqz(n)
     }
 }

@@ -26,8 +26,8 @@ impl<T> Butter<usize> for Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>
 where
     T: Float + FloatConst,
     Complex<T>: ComplexFloat<Real = T>,
-    Zpk<Complex<T>, (), Vec<Complex<T>>, T>: ButtAP<usize> + for<'a> SfTrans<'a, Output = Self> + System<Domain = T>,
-    Self: for<'a> Bilinear<'a, Output = Self> + System<Domain = T>
+    Zpk<Complex<T>, (), Vec<Complex<T>>, T>: ButtAP<usize> + SfTrans<Output = Self> + System<Domain = T>,
+    Self: Bilinear<Output = Self> + System<Domain = T>
 {
     fn butter<const F: usize>(
         order: usize,
@@ -109,7 +109,7 @@ where
 impl<T> Butter<usize> for Tf<T, Vec<T>, Vec<T>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Butter<usize> + for<'a> ToTf<'a, T, Vec<T>, Vec<T>, (), ()> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Butter<usize> + ToTf<T, Vec<T>, Vec<T>, (), ()> + System<Domain = T>
 {
     fn butter<const F: usize>(
         order: usize,
@@ -152,7 +152,7 @@ where
 impl<T> Butter<usize> for Sos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Butter<usize> + for<'a> ToSos<'a, T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Butter<usize> + ToSos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()> + System<Domain = T>
 {
     fn butter<const F: usize>(
         order: usize,
@@ -196,7 +196,7 @@ where
 impl<T> Butter<usize> for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Butter<usize> + for<'a> ToSs<'a, T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Butter<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>
 {
     fn butter<const F: usize>(
         order: usize,

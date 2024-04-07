@@ -1,10 +1,10 @@
 
 
 
-use ndarray::{ArrayBase, ArrayView, Dimension, OwnedRepr};
+use ndarray::{ArrayBase, ArrayView, Dimension, NdIndex, OwnedRepr};
+use option_trait::Maybe;
 
-
-
+use crate::Container;
 
 pub trait MaybeContainer<T>
 {
@@ -12,6 +12,11 @@ pub trait MaybeContainer<T>
     where
         Self: 'a;
     type Owned: MaybeContainer<T> + Sized;
+    type Some: Container<T> + ?Sized;
+    type MaybeSome: Maybe<Self::Some> + ?Sized
+    where
+        (): Maybe<Self::Some>;
+    type MaybeMapped<M>: MaybeContainer<M> + Sized;
 
     fn as_view(&self) -> Self::View<'_>;
     fn to_owned(&self) -> Self::Owned
@@ -21,12 +26,30 @@ pub trait MaybeContainer<T>
     where
         Self: Sized,
         T: Clone;
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>;
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>;
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>;
 }
 
 impl<T> MaybeContainer<T> for ()
 {
     type View<'a> = ();
     type Owned = ();
+    type Some = [T; 1];
+    type MaybeSome = ()
+    where
+        (): Maybe<Self::Some>;
+    type MaybeMapped<M> = ();
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -43,6 +66,28 @@ impl<T> MaybeContainer<T> for ()
     {
 
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, _map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+
+    }
+    fn maybe_map_into_owned<F>(self, _map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+
+    }
 }
 
 impl<T> MaybeContainer<T> for Vec<T>
@@ -51,6 +96,11 @@ impl<T> MaybeContainer<T> for Vec<T>
     where
         Self: 'a;
     type Owned = Vec<T>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -69,6 +119,28 @@ impl<T> MaybeContainer<T> for Vec<T>
     {
         self
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T> MaybeContainer<T> for [T]
 {
@@ -76,6 +148,11 @@ impl<T> MaybeContainer<T> for [T]
     where
         Self: 'a;
     type Owned = Vec<T>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -94,6 +171,28 @@ impl<T> MaybeContainer<T> for [T]
     {
         self.to_vec()
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T, const N: usize> MaybeContainer<T> for [T; N]
 {
@@ -101,6 +200,11 @@ impl<T, const N: usize> MaybeContainer<T> for [T; N]
     where
         Self: 'a;
     type Owned = [T; N];
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -119,6 +223,28 @@ impl<T, const N: usize> MaybeContainer<T> for [T; N]
     {
         self
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T> MaybeContainer<T> for &[T]
 {
@@ -126,6 +252,11 @@ impl<T> MaybeContainer<T> for &[T]
     where
         Self: 'a;
     type Owned = Vec<T>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -144,6 +275,28 @@ impl<T> MaybeContainer<T> for &[T]
     {
         self.to_vec()
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T, const N: usize> MaybeContainer<T> for &[T; N]
 {
@@ -151,6 +304,11 @@ impl<T, const N: usize> MaybeContainer<T> for &[T; N]
     where
         Self: 'a;
     type Owned = [T; N];
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -168,6 +326,28 @@ impl<T, const N: usize> MaybeContainer<T> for &[T; N]
         T: Clone
     {
         self.clone()
+    }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
     }
 }
 
@@ -177,6 +357,11 @@ impl<T> MaybeContainer<T> for Vec<Vec<T>>
     where
         Self: 'a;
     type Owned = Vec<Vec<T>>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -197,6 +382,28 @@ impl<T> MaybeContainer<T> for Vec<Vec<T>>
     {
         self
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T, const M: usize> MaybeContainer<T> for [Vec<T>; M]
 {
@@ -204,6 +411,11 @@ impl<T, const M: usize> MaybeContainer<T> for [Vec<T>; M]
     where
         Self: 'a;
     type Owned = [Vec<T>; M];
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -224,6 +436,28 @@ impl<T, const M: usize> MaybeContainer<T> for [Vec<T>; M]
     {
         self
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T> MaybeContainer<T> for [Vec<T>]
 {
@@ -231,6 +465,11 @@ impl<T> MaybeContainer<T> for [Vec<T>]
     where
         Self: 'a;
     type Owned = Vec<Vec<T>>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -251,6 +490,28 @@ impl<T> MaybeContainer<T> for [Vec<T>]
     {
         self.to_vec()
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T, const M: usize> MaybeContainer<T> for &[Vec<T>; M]
 {
@@ -258,6 +519,11 @@ impl<T, const M: usize> MaybeContainer<T> for &[Vec<T>; M]
     where
         Self: 'a;
     type Owned = [Vec<T>; M];
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -277,6 +543,28 @@ impl<T, const M: usize> MaybeContainer<T> for &[Vec<T>; M]
     {
         self.clone()
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T> MaybeContainer<T> for &[Vec<T>]
 {
@@ -284,6 +572,11 @@ impl<T> MaybeContainer<T> for &[Vec<T>]
     where
         Self: 'a;
     type Owned = Vec<Vec<T>>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -303,6 +596,28 @@ impl<T> MaybeContainer<T> for &[Vec<T>]
         T: Clone
     {
         self.to_vec()
+    }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
     }
 }
 
@@ -312,6 +627,11 @@ impl<T, const N: usize> MaybeContainer<T> for Vec<[T; N]>
     where
         Self: 'a;
     type Owned = Vec<[T; N]>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -331,6 +651,28 @@ impl<T, const N: usize> MaybeContainer<T> for Vec<[T; N]>
     {
         self
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeContainer<T> for [[T; N]; M]
 {
@@ -338,6 +680,11 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for [[T; N]; M]
     where
         Self: 'a;
     type Owned = [[T; N]; M];
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -357,6 +704,28 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for [[T; N]; M]
     {
         self
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T, const N: usize> MaybeContainer<T> for [[T; N]]
 {
@@ -364,6 +733,11 @@ impl<T, const N: usize> MaybeContainer<T> for [[T; N]]
     where
         Self: 'a;
     type Owned = Vec<[T; N]>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -383,6 +757,28 @@ impl<T, const N: usize> MaybeContainer<T> for [[T; N]]
     {
         self.to_vec()
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[[T; N]; M]
 {
@@ -390,6 +786,11 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[[T; N]; M]
     where
         Self: 'a;
     type Owned = [[T; N]; M];
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -408,6 +809,28 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[[T; N]; M]
     {
         self.clone()
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T, const N: usize> MaybeContainer<T> for &[[T; N]]
 {
@@ -415,6 +838,11 @@ impl<T, const N: usize> MaybeContainer<T> for &[[T; N]]
     where
         Self: 'a;
     type Owned = Vec<[T; N]>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -433,6 +861,28 @@ impl<T, const N: usize> MaybeContainer<T> for &[[T; N]]
     {
         self.to_vec()
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 
 impl<T> MaybeContainer<T> for Vec<&[T]>
@@ -441,6 +891,11 @@ impl<T> MaybeContainer<T> for Vec<&[T]>
     where
         Self: 'a;
     type Owned = Vec<Vec<T>>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -463,6 +918,28 @@ impl<T> MaybeContainer<T> for Vec<&[T]>
             .map(|s| s.to_vec())
             .collect()
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T, const M: usize> MaybeContainer<T> for [&[T]; M]
 {
@@ -470,6 +947,11 @@ impl<T, const M: usize> MaybeContainer<T> for [&[T]; M]
     where
         Self: 'a;
     type Owned = [Vec<T>; M];
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -487,6 +969,28 @@ impl<T, const M: usize> MaybeContainer<T> for [&[T]; M]
         T: Clone
     {
         self.map(|s| s.to_vec())
+    }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
     }
 }
 impl<T> MaybeContainer<T> for [&[T]]
@@ -495,6 +999,11 @@ impl<T> MaybeContainer<T> for [&[T]]
     where
         Self: 'a;
     type Owned = Vec<Vec<T>>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -517,6 +1026,28 @@ impl<T> MaybeContainer<T> for [&[T]]
             .map(|&s| s.to_vec())
             .collect()
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T, const M: usize> MaybeContainer<T> for &[&[T]; M]
 {
@@ -524,6 +1055,11 @@ impl<T, const M: usize> MaybeContainer<T> for &[&[T]; M]
     where
         Self: 'a;
     type Owned = [Vec<T>; M];
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -541,6 +1077,28 @@ impl<T, const M: usize> MaybeContainer<T> for &[&[T]; M]
         T: Clone
     {
         self.map(|s| s.to_vec())
+    }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
     }
 }
 impl<T> MaybeContainer<T> for &[&[T]]
@@ -549,6 +1107,11 @@ impl<T> MaybeContainer<T> for &[&[T]]
     where
         Self: 'a;
     type Owned = Vec<Vec<T>>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -570,6 +1133,28 @@ impl<T> MaybeContainer<T> for &[&[T]]
         self.iter()
             .map(|&s| s.to_vec())
             .collect()
+    }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
     }
 }
 
@@ -579,6 +1164,11 @@ impl<T, const N: usize> MaybeContainer<T> for Vec<&[T; N]>
     where
         Self: 'a;
     type Owned = Vec<[T; N]>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -601,6 +1191,28 @@ impl<T, const N: usize> MaybeContainer<T> for Vec<&[T; N]>
             .map(|&s| s.clone())
             .collect()
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeContainer<T> for [&[T; N]; M]
 {
@@ -608,6 +1220,11 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for [&[T; N]; M]
     where
         Self: 'a;
     type Owned = [[T; N]; M];
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -625,6 +1242,28 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for [&[T; N]; M]
         T: Clone
     {
         self.map(|s| s.clone())
+    }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
     }
 }
 impl<T, const N: usize> MaybeContainer<T> for [&[T; N]]
@@ -633,6 +1272,11 @@ impl<T, const N: usize> MaybeContainer<T> for [&[T; N]]
     where
         Self: 'a;
     type Owned = Vec<[T; N]>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -655,6 +1299,28 @@ impl<T, const N: usize> MaybeContainer<T> for [&[T; N]]
             .map(|&s| s.clone())
             .collect()
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[&[T; N]; M]
 {
@@ -662,6 +1328,11 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[&[T; N]; M]
     where
         Self: 'a;
     type Owned = [[T; N]; M];
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -679,6 +1350,28 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[&[T; N]; M]
         T: Clone
     {
         self.map(|s| s.clone())
+    }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
     }
 }
 impl<T, const N: usize> MaybeContainer<T> for &[&[T; N]]
@@ -687,6 +1380,11 @@ impl<T, const N: usize> MaybeContainer<T> for &[&[T; N]]
     where
         Self: 'a;
     type Owned = Vec<[T; N]>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -709,17 +1407,45 @@ impl<T, const N: usize> MaybeContainer<T> for &[&[T; N]]
             .map(|&s| s.clone())
             .collect()
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 
 impl<T, D> MaybeContainer<T> for ArrayBase<OwnedRepr<T>, D>
 where
-    D: Dimension
+    D: Dimension,
+    <D as Dimension>::Pattern: NdIndex<D>
 {
     type View<'a> = ArrayView<'a, T, D>
     where
         T: 'a,
         Self: 'a;
     type Owned = ArrayBase<OwnedRepr<T>, D>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -738,17 +1464,45 @@ where
     {
         self
     }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
+    }
 }
 
 impl<'b, T, D> MaybeContainer<T> for ArrayView<'b, T, D>
 where
-    D: Dimension
+    D: Dimension,
+    <D as Dimension>::Pattern: NdIndex<D>
 {
     type View<'a> = ArrayView<'b, T, D>
     where
         T: 'a,
         Self: 'a;
     type Owned = ArrayBase<OwnedRepr<T>, D>;
+    type Some = Self;
+    type MaybeSome = Self
+    where
+        (): Maybe<Self>;
+    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
 
     fn as_view(&self) -> Self::View<'_>
     {
@@ -766,5 +1520,27 @@ where
         T: Clone
     {
         self.to_owned()
+    }
+    fn into_maybe_some(self) -> Self::MaybeSome
+    where
+        Self: Sized,
+        (): Maybe<Self::Some>
+    {
+        self
+    }
+    fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: 'a,
+        F: FnMut<(&'a T,)>
+    {
+        self.map_to_owned(map)
+    }
+    fn maybe_map_into_owned<F>(self, map: F) -> Self::MaybeMapped<F::Output>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut<(T,)>
+    {
+        self.map_into_owned(map)
     }
 }

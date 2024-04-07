@@ -25,8 +25,8 @@ where
     T: Float + FloatConst,
     Z: MaybeList<Complex<T>>,
     P: MaybeList<Complex<T>>,
-    Zpk<Complex<T>, (), P, T>: BesselAP<usize> + for<'a> SfTrans<'a, Output = Self> + System<Domain = T>,
-    Self: for<'a> Bilinear<'a, Output = Self> + System<Domain = T>
+    Zpk<Complex<T>, (), P, T>: BesselAP<usize> + SfTrans<Output = Self> + System<Domain = T>,
+    Self: Bilinear<Output = Self> + System<Domain = T>
 {
     fn besself<const F: usize>(
         order: usize,
@@ -108,7 +108,7 @@ where
 impl<T> BesselF<usize> for Tf<T, Vec<T>, Vec<T>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + for<'a> ToTf<'a, T, Vec<T>, Vec<T>, (), ()> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + ToTf<T, Vec<T>, Vec<T>, (), ()> + System<Domain = T>
 {
     fn besself<const F: usize>(
         order: usize,
@@ -151,7 +151,7 @@ where
 impl<T> BesselF<usize> for Sos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + for<'a> ToSos<'a, T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + ToSos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()> + System<Domain = T>
 {
     fn besself<const F: usize>(
         order: usize,
@@ -195,7 +195,7 @@ where
 impl<T> BesselF<usize> for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + for<'a> ToSs<'a, T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>
 {
     fn besself<const F: usize>(
         order: usize,

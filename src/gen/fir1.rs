@@ -1,4 +1,4 @@
-use core::{ops::{AddAssign, Deref, Mul, MulAssign}};
+use core::{ops::{AddAssign, Mul, MulAssign}};
 
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, One, Zero};
 use option_trait::Maybe;

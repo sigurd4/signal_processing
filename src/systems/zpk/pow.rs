@@ -2,7 +2,7 @@ use core::ops::{BitAnd, Shr};
 
 use num::{complex::ComplexFloat, pow::Pow, traits::Inv, Integer, One};
 
-use crate::{MaybeList, Zpk};
+use crate::{MaybeList, ToZpk, Zpk};
 
 
 impl<T, Z, P, K, I> Pow<I> for Zpk<T, Z, P, K>
@@ -12,7 +12,7 @@ where
     P: MaybeList<T>,
     K: ComplexFloat<Real = T::Real>,
     I: Integer + BitAnd<I, Output = I> + Shr<usize, Output = I> + Copy,
-    Self: Into<Zpk<T, Vec<T>, Vec<T>, K>> + Inv<Output: Into<Zpk<T, Vec<T>, Vec<T>, K>>>
+    Self: ToZpk<T, Vec<T>, Vec<T>, K, (), ()> + Inv<Output: ToZpk<T, Vec<T>, Vec<T>, K, (), ()>>
 {
     type Output = Zpk<T, Vec<T>, Vec<T>, K>;
 
@@ -20,11 +20,12 @@ where
     {
         let mut x = if n < I::zero()
         {
-            self.inv().into()
+            self.inv()
+                .to_zpk((), ())
         }
         else
         {
-            self.into()
+            self.to_zpk((), ())
         };
         let mut r = if (n & I::one()) == I::one()
         {

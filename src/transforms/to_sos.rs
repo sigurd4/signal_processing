@@ -6,7 +6,7 @@ use option_trait::Maybe;
 
 use crate::{Lists, MaybeList, Polynomial, ProductSequence, Sos, System, Tf, ToZpk, Zpk};
 
-pub trait ToSos<'a, T, B, A, S, I, O>: System
+pub trait ToSos<T, B, A, S, I, O>: System
 where
     T: ComplexFloat,
     B: Maybe<[T; 3]> + MaybeList<T>,
@@ -15,10 +15,10 @@ where
     I: Maybe<usize>,
     O: Maybe<usize>
 {
-    fn to_sos(&'a self, input: I, output: O) -> Sos<T, B, A, S>;
+    fn to_sos(self, input: I, output: O) -> Sos<T, B, A, S>;
 }
 
-impl<'a, T1, T2, B1, B2, A1, A2, S1, S2> ToSos<'a, T2, B2, A2, S2, (), ()> for Sos<T1, B1, A1, S1>
+impl<T1, T2, B1, B2, A1, A2, S1, S2> ToSos<T2, B2, A2, S2, (), ()> for Sos<T1, B1, A1, S1>
 where
     T1: ComplexFloat,
     T2: ComplexFloat,
@@ -28,16 +28,17 @@ where
     A2: Maybe<[T2; 3]> + MaybeList<T2>,
     S1: MaybeList<Tf<T1, B1, A1>>,
     S2: MaybeList<Tf<T2, B2, A2>>,
-    Self: 'a,
-    &'a Self: Into<Sos<T2, B2, A2, S2>>
+    ProductSequence<Tf<T1, B1, A1>, S1>: Into<ProductSequence<Tf<T2, B2, A2>, S2>>
 {
-    fn to_sos(&'a self, (): (), (): ()) -> Sos<T2, B2, A2, S2>
+    fn to_sos(self, (): (), (): ()) -> Sos<T2, B2, A2, S2>
     {
-        self.into()
+        Sos {
+            sos: self.sos.into()
+        }
     }
 }
 
-impl<'a, T1, T2, Z, P, K> ToSos<'a, T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>, (), ()> for Zpk<T1, Z, P, K>
+impl<T1, T2, Z, P, K> ToSos<T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>, (), ()> for Zpk<T1, Z, P, K>
 where
     T1: ComplexFloat + Into<Complex<T1::Real>>,
     T2: ComplexFloat + Into<Complex<T2::Real>> + AddAssign + MulAssign + 'static,
@@ -49,10 +50,9 @@ where
     Complex<T2::Real>: AddAssign,
     T1::Real: Into<T2>,
     T2::Real: Into<T2>,
-    Self: 'a,
-    &'a Self: Into<Zpk<T1, Vec<T1>, Vec<T1>, K>>
+    Self: ToZpk<T1, Vec<T1>, Vec<T1>, K, (), ()>
 {
-    fn to_sos(&'a self, (): (), (): ()) -> Sos<T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>>
+    fn to_sos(self, (): (), (): ()) -> Sos<T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>>
     {
         let (zc, pc, zr, pr, k) = self.complex_real(()).unwrap();
 
@@ -109,18 +109,17 @@ where
     }
 }
 
-impl<'a, T1, T2, B, A, O> ToSos<'a, T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>, (), O> for Tf<T1, B, A>
+impl<T1, T2, B, A, O> ToSos<T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>, (), O> for Tf<T1, B, A>
 where
     T1: ComplexFloat,
     T2: ComplexFloat,
     B: Lists<T1>,
     A: MaybeList<T1>,
     O: Maybe<usize>,
-    Self: 'a,
-    Self: ToZpk<'a, Complex<T1::Real>, Vec<Complex<T1::Real>>, Vec<Complex<T1::Real>>, T1, (), O>,
-    Zpk<Complex<T1::Real>, Vec<Complex<T1::Real>>, Vec<Complex<T1::Real>>, T1>: for<'b> ToSos<'b, T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>, (), ()>
+    Self: ToZpk<Complex<T1::Real>, Vec<Complex<T1::Real>>, Vec<Complex<T1::Real>>, T1, (), O>,
+    Zpk<Complex<T1::Real>, Vec<Complex<T1::Real>>, Vec<Complex<T1::Real>>, T1>: ToSos<T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>, (), ()>
 {
-    fn to_sos(&'a self, (): (), output: O) -> Sos<T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>>
+    fn to_sos(self, (): (), output: O) -> Sos<T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>>
     {
         self.to_zpk((), output)
             .to_sos((), ())

@@ -6,10 +6,10 @@ use num::{complex::ComplexFloat, Complex, One, Zero};
 
 use option_trait::Maybe;
 
-use crate::{Matrix, MaybeList, MaybeLists, Normalize, Polynomial, Sos, Ss, System, Tf, Zpk};
+use crate::{Matrix, MaybeList, MaybeLists, Normalize, Polynomial, Sos, Ss, System, Tf, ToSos, ToZpk, Zpk};
 
 
-pub trait ToTf<'a, T, B, A, I, O>: System
+pub trait ToTf<T, B, A, I, O>: System
 where
     T: ComplexFloat,
     B: MaybeLists<T>,
@@ -17,10 +17,10 @@ where
     I: Maybe<usize>,
     O: Maybe<usize>
 {
-    fn to_tf(&'a self, input: I, output: O) -> Tf<T, B, A>;
+    fn to_tf(self, input: I, output: O) -> Tf<T, B, A>;
 }
 
-impl<'a, T1, B1, A1, T2, B2, A2> ToTf<'a, T2, B2, A2, (), ()> for Tf<T1, B1, A1>
+impl<'a, T1, B1, A1, T2, B2, A2> ToTf<T2, B2, A2, (), ()> for Tf<T1, B1, A1>
 where
     T1: ComplexFloat,
     T2: ComplexFloat,
@@ -28,15 +28,18 @@ where
     A1: MaybeList<T1>,
     B2: MaybeLists<T2>,
     A2: MaybeList<T2>,
-    Self: 'a,
-    &'a Self: Into<Tf<T2, B2, A2>>
+    Polynomial<T1, B1>: Into<Polynomial<T2, B2>>,
+    Polynomial<T1, A1>: Into<Polynomial<T2, A2>>
 {
-    fn to_tf(&'a self, (): (), (): ()) -> Tf<T2, B2, A2>
+    fn to_tf(self, (): (), (): ()) -> Tf<T2, B2, A2>
     {
-        self.into()
+        Tf {
+            b: self.b.into(),
+            a: self.a.into()
+        }
     }
 }
-impl<'a, T1, B1, A1, T2, B2, A2> ToTf<'a, T2, B2, A2, (), usize> for Tf<T1, B1, A1>
+impl<T1, B1, A1, T2, B2, A2> ToTf<T2, B2, A2, (), usize> for Tf<T1, B1, A1>
 where
     T1: ComplexFloat + 'static,
     T2: ComplexFloat,
@@ -44,21 +47,19 @@ where
     A1: MaybeList<T1>,
     B2: MaybeLists<T2>,
     A2: MaybeList<T2>,
-    A1::View<'a>: MaybeList<T1>,
-    Self: 'a,
-    Polynomial<T1, B1::RowView<'a>>: Into<Polynomial<T2, B2>>,
-    Polynomial<T1, A1::View<'a>>: Into<Polynomial<T2, A2>>,
+    for<'a> Polynomial<T1, B1::RowView<'a>>: Into<Polynomial<T2, B2>>,
+    for<'a> Polynomial<T1, A1>: Into<Polynomial<T2, A2>>,
 {
-    fn to_tf(&'a self, (): (), output: usize) -> Tf<T2, B2, A2>
+    fn to_tf(self, (): (), output: usize) -> Tf<T2, B2, A2>
     {
         Tf {
             b: Polynomial::new(self.b.index_view(output)).into(),
-            a: self.a.as_view().into()
+            a: self.a.into()
         }
     }
 }
 
-impl<'a, T1, T2, Z, P, K> ToTf<'a, T2, Vec<T2>, Vec<T2>, (), ()> for Zpk<T1, Z, P, K>
+impl<'a, T1, T2, Z, P, K> ToTf<T2, Vec<T2>, Vec<T2>, (), ()> for Zpk<T1, Z, P, K>
 where
     T1: ComplexFloat,
     T2: ComplexFloat<Real = T1::Real> + 'static,
@@ -68,12 +69,11 @@ where
     K: ComplexFloat<Real = T1::Real>,
     Z: MaybeList<T1>,
     P: MaybeList<T1>,
-    Self: 'a,
-    &'a Self: Into<Zpk<Complex<T2::Real>, Vec<Complex<T2::Real>>, Vec<Complex<T2::Real>>, T2>>
+    Self: ToZpk<Complex<T2::Real>, Vec<Complex<T2::Real>>, Vec<Complex<T2::Real>>, T2, (), ()>
 {
-    fn to_tf(&'a self, (): (), (): ()) -> Tf<T2, Vec<T2>, Vec<T2>>
+    fn to_tf(self, (): (), (): ()) -> Tf<T2, Vec<T2>, Vec<T2>>
     {
-        let Zpk::<Complex<T2::Real>, Vec<Complex<T2::Real>>, Vec<Complex<T2::Real>>, T2> {z, p, k} = self.into();
+        let Zpk::<Complex<T2::Real>, Vec<Complex<T2::Real>>, Vec<Complex<T2::Real>>, T2> {z, p, k} = self.to_zpk((), ());
 
         let b = z.into_inner()
             .into_iter()
@@ -93,7 +93,7 @@ where
     }
 }
 
-impl<'a, T1, T2, A, B, C, D> ToTf<'a, T2, Vec<Vec<T2>>, Vec<T2>, usize, ()> for Ss<T1, A, B, C, D>
+impl<T1, T2, A, B, C, D> ToTf<T2, Vec<Vec<T2>>, Vec<T2>, usize, ()> for Ss<T1, A, B, C, D>
 where
     T1: ComplexFloat + Into<T2> + 'static,
     T2: ComplexFloat + 'static,
@@ -104,10 +104,9 @@ where
     A: Matrix<T1>,
     B: Matrix<T1>,
     C: Matrix<T1>,
-    D: Matrix<T1>,
-    Self: 'a
+    D: Matrix<T1>
 {
-    fn to_tf(&self, input: usize, (): ()) -> Tf<T2, Vec<Vec<T2>>, Vec<T2>>
+    fn to_tf(self, input: usize, (): ()) -> Tf<T2, Vec<Vec<T2>>, Vec<T2>>
     {
         let mut ss = Ss::new(
             self.a.to_array2(),
@@ -194,21 +193,20 @@ where
     }
 }
 
-impl<'a, T1, T2, B, A, S> ToTf<'a, T2, Vec<T2>, Vec<T2>, (), ()> for Sos<T1, B, A, S>
+impl<T1, T2, B, A, S> ToTf<T2, Vec<T2>, Vec<T2>, (), ()> for Sos<T1, B, A, S>
 where
     T1: ComplexFloat + Into<T2>,
     T2: ComplexFloat + 'static,
     B: Maybe<[T1; 3]> + MaybeList<T1>,
     A: Maybe<[T1; 3]> + MaybeList<T1>,
-    Self: 'a,
-    &'a Self: Into<Sos<T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>>>,
+    Self: ToSos<T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>, (), ()>,
     Polynomial<T2, Vec<T2>>: One,
     S: MaybeList<Tf<T1, B, A>>,
     Tf<T2, Vec<T2>, Vec<T2>>: Normalize
 {
-    fn to_tf(&'a self, (): (), (): ()) -> Tf<T2, Vec<T2>, Vec<T2>>
+    fn to_tf(self, (): (), (): ()) -> Tf<T2, Vec<T2>, Vec<T2>>
     {
-        let Sos {sos}: Sos<T2, [T2; 3], [T2; 3], Vec<_>> = self.into();
+        let Sos {sos}: Sos<T2, [T2; 3], [T2; 3], Vec<_>> = self.to_sos((), ());
         
         let b = sos.iter()
             .map(|sos| sos.b.as_view())
