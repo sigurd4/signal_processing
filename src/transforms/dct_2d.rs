@@ -116,6 +116,19 @@ mod test
         let mut r = r.dct_ii_2d();
         let mut g = g.dct_ii_2d();
         let mut b = b.dct_ii_2d();
+        
+        for i in 0..m
+        {
+            for j in 0..n
+            {
+                let r = (r[(i, j)]*255.0).max(0.0).min(255.0) as u8;
+                let g = (g[(i, j)]*255.0).max(0.0).min(255.0) as u8;
+                let b = (b[(i, j)]*255.0).max(0.0).min(255.0) as u8;
+                img.put_pixel(j as u32, i as u32, Rgba([r, g, b, 255]))
+            }
+        }
+
+        img.save("images/lena_dct_2d_transformed.png").unwrap();
 
         // Truncation
         for i in M..m
