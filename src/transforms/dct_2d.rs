@@ -130,7 +130,7 @@ mod test
 
         img.save("images/lena_dct_2d_transformed.png").unwrap();
 
-        // Truncation
+        // Truncate
         for i in M..m
         {
             for j in 0..n
