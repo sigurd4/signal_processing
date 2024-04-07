@@ -28,7 +28,7 @@ where
     Self: 'a,
     &'a Self: Into<Tf<Complex<T::Real>, Vec<Vec<Complex<T::Real>>>, Vec<Complex<T::Real>>>>
 {
-    fn grpdelay<FS>(&'a self, n: (), sampling_rate: FS) -> (B::RowsMapped<[T::Real; N]>, [T::Real; N])
+    fn grpdelay<FS>(&'a self, (): (), sampling_rate: FS) -> (B::RowsMapped<[T::Real; N]>, [T::Real; N])
     where
         FS: Maybe<<Self::Domain as ComplexFloat>::Real>
     {
