@@ -5,17 +5,17 @@ use array_math::{ArrayMath, SliceMath};
 
 use crate::{Container, List, ListOrSingle, Lists, OwnedLists, DFT, TruncateIm};
 
-pub trait DCT<'a, T>: Lists<T>
+pub trait DST<'a, T>: Lists<T>
 where
     T: ComplexFloat
 {
-    fn dct_i(&'a self) -> Self::Owned;
-    fn dct_ii(&'a self) -> Self::Owned;
-    fn dct_iii(&'a self) -> Self::Owned;
-    fn dct_iv(&'a self) -> Self::Owned;
+    fn dst_i(&'a self) -> Self::Owned;
+    fn dst_ii(&'a self) -> Self::Owned;
+    fn dst_iii(&'a self) -> Self::Owned;
+    fn dst_iv(&'a self) -> Self::Owned;
 }
 
-impl<'a, T, L> DCT<'a, T> for L
+impl<'a, T, L> DST<'a, T> for L
 where
     T: ComplexFloat + Into<Complex<T::Real>> + MulAssign<T::Real> + DivAssign<T::Real> + 'static,
     L: Lists<T, IndexView<'a>: List<T>> + 'a,
@@ -26,43 +26,43 @@ where
     T::Real: Into<T> + Into<Complex<T::Real>>,
     Self: DFT<T>,
 {
-    fn dct_i(&'a self) -> Self::Owned
+    fn dst_i(&'a self) -> Self::Owned
     {
         let mut y = self.to_owned();
         for x in y.as_mut_slice2()
             .into_iter()
         {
-            SliceMath::dct_i(x)
+            SliceMath::dst_i(x)
         }
         y
     }
-    fn dct_ii(&'a self) -> Self::Owned
+    fn dst_ii(&'a self) -> Self::Owned
     {
         let mut y = self.to_owned();
         for x in y.as_mut_slice2()
             .into_iter()
         {
-            SliceMath::dct_ii(x)
+            SliceMath::dst_ii(x)
         }
         y
     }
-    fn dct_iii(&'a self) -> Self::Owned
+    fn dst_iii(&'a self) -> Self::Owned
     {
         let mut y = self.to_owned();
         for x in y.as_mut_slice2()
             .into_iter()
         {
-            SliceMath::dct_iii(x)
+            SliceMath::dst_iii(x)
         }
         y
     }
-    fn dct_iv(&'a self) -> Self::Owned
+    fn dst_iv(&'a self) -> Self::Owned
     {
         let mut y = self.to_owned();
         for x in y.as_mut_slice2()
             .into_iter()
         {
-            SliceMath::dct_iv(x)
+            SliceMath::dst_iv(x)
         }
         y
     }
@@ -76,7 +76,7 @@ mod test
     use array_math::{ArrayOps};
     use linspace::LinspaceArray;
 
-    use crate::{plot, DCT};
+    use crate::{plot, DST};
 
     #[test]
     fn test()
@@ -88,15 +88,15 @@ mod test
         let x: [_; N] = ArrayOps::fill(|i| (TAU*F*i as f64/N as f64*T).sin());
 
         let xf = [
-            x.dct_i(),
-            x.dct_ii(),
-            x.dct_iii(),
-            x.dct_iv()
+            x.dst_i(),
+            x.dst_ii(),
+            x.dst_iii(),
+            x.dst_iv()
         ];
 
         let w = (0.0..TAU).linspace_array();
 
-        plot::plot_curves("X(e^jw)", "plots/x_z_dct.png", [
+        plot::plot_curves("X(e^jw)", "plots/x_z_dst.png", [
                 &w.zip(xf[0]),
                 &w.zip(xf[1]),
                 &w.zip(xf[2]),
