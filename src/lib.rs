@@ -19,6 +19,7 @@
 #![feature(float_gamma)]
 #![feature(fn_traits)]
 #![feature(lazy_cell)]
+#![feature(coerce_unsized)]
 
 #![allow(internal_features)]
 #![allow(incomplete_features)]

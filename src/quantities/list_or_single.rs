@@ -1,13 +1,13 @@
 
 
 use ndarray::{Array1, ArrayView1};
-use option_trait::Maybe;
+use option_trait::StaticMaybe;
 
-use crate::{OwnedList};
+use crate::OwnedList;
 
 pub trait ListOrSingle<T>
 {
-    type Length: Maybe<usize>;
+    type Length: StaticMaybe<usize>;
     const LENGTH: usize;
     type Resized<const M: usize>: OwnedList<T>;
 
