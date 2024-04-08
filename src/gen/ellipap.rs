@@ -28,7 +28,6 @@ where
         passband_ripple = passband_ripple.abs();
         stopband_ripple = stopband_ripple.abs();
 
-        let _zero = T::zero();
         let one = T::one();
         let two = one + one;
         let half = two.recip();
@@ -90,11 +89,11 @@ where
         let l = (two*n).recip()*((ten.powf(passband_ripple/twenty) + one)/(ten.powf(passband_ripple/twenty) - one)).ln();
 
         let sig01 = (0..=30).map(|m| {
-            let s = one - T::from((m % 2)*2).unwrap();
+            let s = T::from(1 - (m % 2) as i8*2).unwrap();
             s*q.powi(m*(m + 1))*(T::from(2*m + 1).unwrap()*l).sinh()
         }).sum::<T>();
         let sig02 = (1..=30).map(|m| {
-            let s = one - T::from((m % 2)*2).unwrap();
+            let s = T::from(1 - (m % 2) as i8*2).unwrap();
             s*q.powi(m*m)*(T::from(2*m).unwrap()*l).cosh()
         }).sum::<T>();
         let sig0 = ((Complex::from(q).sqrt().sqrt()*(two*sig01))/(one + two*sig02)).abs();
@@ -108,11 +107,11 @@ where
                 mu -= half;
             }
             let soma1 = (0..=30).map(|m| {
-                let s = one - T::from((m % 2)*2).unwrap();
-                Complex::from(q).sqrt().sqrt()*two*(s*q.powi(m*(m + 1))*((T::from(2*m+1).unwrap()*T::PI()*mu)/n).sin())
+                let s = T::from(1 - (m % 2) as i8*2).unwrap();
+                Complex::from(q).sqrt().sqrt()*two*(s*q.powi(m*(m + 1))*((T::from(2*m + 1).unwrap()*T::PI()*mu)/n).sin())
             }).sum::<Complex<T>>();
             let soma2 = (1..=30).map(|m| {
-                let s = one - T::from((m % 2)*2).unwrap();
+                let s = T::from(1 - (m % 2) as i8*2).unwrap();
                 two*s*q.powi(m*m)*((T::from(2*m).unwrap()*T::PI()*mu)/n).cos()
             }).sum::<T>();
 
@@ -178,11 +177,12 @@ where
             poles.push(Complex::from(-sig0))
         }
 
+        let ws_sqrt = ws.sqrt();
         for z in [&mut zeros, &mut poles]
         {
             for z in z.iter_mut()
             {
-                *z *= ws
+                *z *= ws_sqrt
             }
         }
 

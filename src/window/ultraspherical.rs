@@ -49,7 +49,7 @@ where
         if bad
         {
             //panic!("Invalid parameters");
-            return None
+            //return None
         }
 
         let mut w = [zero; N];
