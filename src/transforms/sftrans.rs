@@ -12,20 +12,26 @@ pub enum SfTransError
     #[error("Non causal system, i.e. it contains one or more poles at infinity.")]
     NonCausal,
     #[error("The system must contain at least one pole.")]
-    ZeroPoles
+    ZeroPoles,
+    #[error("Frequencies must be monotonic starting at zero.")]
+    FrequenciesNotNondecreasing,
 }
 
-pub trait SfTrans: System
+pub trait SfTrans<const W: usize>: System
+where
+    [(); W - 1]:
 {
     type Output: System<Domain = Self::Domain>;
 
-    fn sftrans<const W: usize>(self, w: [<Self::Domain as ComplexFloat>::Real; W], stop: bool) -> Result<Self::Output, SfTransError>
-    where
-        [(); W - 1]:,
-        [(); 2 - W]:;
+    fn sftrans(
+        self,
+        wo: <Self::Domain as ComplexFloat>::Real,
+        w: [<Self::Domain as ComplexFloat>::Real; W],
+        stop: bool
+    ) -> Result<Self::Output, SfTransError>;
 }
 
-impl<T, Z, P, K> SfTrans for Zpk<T, Z, P, K>
+impl<T, Z, P, K, const W: usize> SfTrans<W> for Zpk<T, Z, P, K>
 where
     T: ComplexFloat + Mul<T::Real, Output = T> + Div<T::Real, Output = T> + Sub<T::Real, Output = T> + Into<Complex<T::Real>>,
     K: ComplexFloat<Real = T::Real> + DivAssign<T::Real> + MulAssign<T::Real>,
@@ -33,19 +39,28 @@ where
     Complex<T::Real>: Add<T, Output = Complex<T::Real>>,
     Z: MaybeList<T>,
     P: MaybeList<T>,
-    Self: ToZpk<T, Vec<T>, Vec<T>, K, (), ()> + System<Domain = K>
+    Self: ToZpk<T, Vec<T>, Vec<T>, K, (), ()> + System<Domain = K>,
+    [(); W - 1]:,
+    [(); 2 - W]:,
 {
     type Output = Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, K>;
 
-    fn sftrans<const W: usize>(self, w: [T::Real; W], stop: bool) -> Result<Self::Output, SfTransError>
-    where
-        [(); W - 1]:,
-        [(); 2 - W]:
+    fn sftrans(
+        self,
+        wo: <Self::Domain as ComplexFloat>::Real,
+        w: [T::Real; W],
+        stop: bool
+    ) -> Result<Self::Output, SfTransError>
     {
+        if !w.is_sorted()
+        {
+            return Err(SfTransError::FrequenciesNotNondecreasing)
+        }
+
         let Zpk::<T, Vec<T>, Vec<T>, K> {z: sz, p: sp, k: mut sg} = self.to_zpk((), ());
     
         let two = T::Real::one() + T::Real::one();
-        let c = T::Real::one();
+        let c = wo;
         let p = sp.len();
         let z = sz.len();
         if z > p
@@ -225,5 +240,30 @@ where
                 })
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod test
+{
+    use array_math::ArrayOps;
+
+    use crate::{plot, Bilinear, Butter, FilterGenPlane, FilterGenType, RealFreqZ, SfTrans, Zpk};
+
+    #[test]
+    fn test()
+    {
+        let h0 = Zpk::butter(6, [0.5], FilterGenType::LowPass, FilterGenPlane::S)
+            .unwrap();
+
+        let h = h0.sftrans(0.5, [0.2, 0.8], true)
+            .unwrap()
+            .bilinear(4.0)
+            .unwrap();
+
+        const N: usize = 1024;
+        let (h_f, w): ([_; N], _) = h.real_freqz(());
+
+        plot::plot_curves("H(e^jw)", "plots/h_z_sftrans.png", [&w.zip(h_f.map(|h| h.norm()))]).unwrap();
     }
 }

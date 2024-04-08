@@ -25,7 +25,7 @@ where
     T: Float + FloatConst,
     Z: MaybeList<Complex<T>>,
     P: MaybeList<Complex<T>>,
-    Zpk<Complex<T>, (), P, T>: BesselAP<usize> + SfTrans<Output = Self> + System<Domain = T>,
+    Zpk<Complex<T>, (), P, T>: BesselAP<usize> + SfTrans<1, Output = Self> + SfTrans<2, Output = Self> + System<Domain = T>,
     Self: Bilinear<Output = Self> + System<Domain = T>
 {
     fn besself<const F: usize>(
@@ -60,7 +60,8 @@ where
             FilterGenType::BandPass => true,
             FilterGenType::BandStop => true
         };
-        let two = T::from(2.0).unwrap();
+        let one = T::one();
+        let two = one + one;
         let t = if let FilterGenPlane::Z { sampling_frequency } = plane
         {
             let t = sampling_frequency.unwrap_or(two);
@@ -83,15 +84,19 @@ where
         
         let zpk = if !band && F == 2
         {
-            zpk.sftrans::<1>([frequencies[!stop as usize]], stop).unwrap()
+            SfTrans::<1>::sftrans(zpk, one, [frequencies[!stop as usize]], stop).unwrap()
         }
         else if band && F == 1
         {
-            zpk.sftrans::<2>([frequencies[0], frequencies[0]], stop).unwrap()
+            SfTrans::<2>::sftrans(zpk, one, [frequencies[0], frequencies[0]], stop).unwrap()
+        }
+        else if F == 1
+        {
+            SfTrans::<1>::sftrans(zpk, one, [frequencies[0]], stop).unwrap()
         }
         else
         {
-            zpk.sftrans(frequencies, stop).unwrap()
+            SfTrans::<2>::sftrans(zpk, one, [frequencies[0], frequencies[1]], stop).unwrap()
         };
     
         if let Some(t) = t

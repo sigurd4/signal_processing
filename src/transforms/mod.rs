@@ -18,6 +18,7 @@ moddef::moddef!(
         to_sos,
         to_ss,
         to_tf,
-        to_zpk
+        to_zpk,
+        zftrans,
     }
 );

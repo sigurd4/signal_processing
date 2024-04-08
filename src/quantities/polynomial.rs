@@ -7,6 +7,7 @@ use crate::{Lists, MaybeList, MaybeLists, TruncateIm};
 
 moddef::moddef!(
     mod {
+        add_assign,
         add,
         borrow,
         borrow_mut,
@@ -15,12 +16,14 @@ moddef::moddef!(
         eq,
         r#fn,
         from,
+        mul_assign,
         mul,
         neg,
         one,
         partial_eq,
         pow,
         product,
+        sub_assign,
         sub
     }
 );
