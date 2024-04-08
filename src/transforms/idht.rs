@@ -3,25 +3,25 @@
 
 use num::{complex::ComplexFloat, Complex};
 
-use crate::{Container, Lists, DFT};
+use crate::{Container, Lists, IDFT};
 
 pub trait IDHT<T>: Lists<T>
 where
     T: ComplexFloat
 {
-    fn dht(self) -> Self::Mapped<T::Real>;
+    fn idht(self) -> Self::Mapped<T::Real>;
 }
 
 impl<T, L> IDHT<T> for L
 where
     T: ComplexFloat,
     L: Lists<T>,
-    Self: DFT<T>,
+    Self: IDFT<T>,
     Self::Mapped<Complex<T::Real>>: Lists<Complex<T::Real>, Mapped<T::Real> = Self::Mapped<T::Real>>,
 {
-    fn dht(self) -> Self::Mapped<T::Real>
+    fn idht(self) -> Self::Mapped<T::Real>
     {
-        let y = self.dft();
+        let y = self.idft();
         y.map_into_owned(|y| y.re + y.im)
     }
 }
@@ -34,22 +34,22 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, IDHT};
+    use crate::{plot, DHT, IDHT};
 
     #[test]
     fn test()
     {
         const N: usize = 1024;
-        const T: f64 = 1.0;
+        const T: f64 = 0.1;
         const F: f64 = 220.0;
         
-        let x: [_; N] = ArrayOps::fill(|i| (TAU*F*i as f64/N as f64*T).sin());
+        let t: [_; N] = (0.0..T).linspace_array();
+        let x = t.map(|t| (TAU*F*t).sin());
 
         let xf = x.dht();
+        let y = xf.idht();
 
-        let w = (0.0..TAU).linspace_array();
-
-        plot::plot_curves("X(e^jw)", "plots/x_z_dht.png", [&w.zip(xf)])
+        plot::plot_curves("x(t)", "plots/x_t_idht.png", [&t.zip(y.map(|y| y))])
             .unwrap()
     }
 }
