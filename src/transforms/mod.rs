@@ -10,6 +10,8 @@ moddef::moddef!(
         dst,
         dwht,
         hilbert,
+        idft,
+        idht,
         idwht,
         sftrans,
         to_sos,
