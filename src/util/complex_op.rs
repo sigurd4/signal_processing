@@ -7,27 +7,20 @@ where
     type Output: ComplexFloat;
 }
 
-impl<T> ComplexOp<T> for T
-where
-    T: Float + FloatConst
-{
-    type Output = T;
+macro_rules! impl_complex_op {
+    ($t:ty;) => {
+        impl_complex_op!($t, $t => $t);
+        impl_complex_op!(Complex<$t>, $t => Complex<$t>);
+        impl_complex_op!($t, Complex<$t> => Complex<$t>);
+        impl_complex_op!(Complex<$t>, Complex<$t> => Complex<$t>);
+    };
+    ($t1:ty, $t2:ty => $t3:ty) => {
+        impl ComplexOp<$t2> for $t1
+        {
+            type Output = $t3;
+        }
+    };
 }
-impl<T> ComplexOp<Complex<T>> for T
-where
-    T: Float + FloatConst
-{
-    type Output = Complex<T>;
-}
-impl<T> ComplexOp<T> for Complex<T>
-where
-    T: Float + FloatConst
-{
-    type Output = Complex<T>;
-}
-default impl<T> ComplexOp<T> for T
-where
-    T: ComplexFloat
-{
-    type Output = Complex<T::Real>;
-}
+
+impl_complex_op!(f32;);
+impl_complex_op!(f64;);

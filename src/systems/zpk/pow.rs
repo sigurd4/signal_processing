@@ -2,15 +2,15 @@ use core::ops::{BitAnd, Shr};
 
 use num::{complex::ComplexFloat, pow::Pow, traits::Inv, Integer, One};
 
-use crate::{MaybeList, ToZpk, Zpk};
+use crate::{ComplexOp, MaybeList, ToZpk, Zpk};
 
 
 impl<T, Z, P, K, I> Pow<I> for Zpk<T, Z, P, K>
 where
-    T: ComplexFloat,
+    T: ComplexFloat + ComplexOp<T, Output = T>,
     Z: MaybeList<T>,
     P: MaybeList<T>,
-    K: ComplexFloat<Real = T::Real>,
+    K: ComplexFloat<Real = T::Real> + ComplexOp<K, Output = K>,
     I: Integer + BitAnd<I, Output = I> + Shr<usize, Output = I> + Copy,
     Self: ToZpk<T, Vec<T>, Vec<T>, K, (), ()> + Inv<Output: ToZpk<T, Vec<T>, Vec<T>, K, (), ()>>
 {
