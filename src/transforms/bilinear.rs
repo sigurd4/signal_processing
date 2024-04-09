@@ -32,10 +32,12 @@ where
 {
     type Output = Zpk<T, Vec<T>, Vec<T>, K>;
 
-    fn bilinear(self, t: K::Real) -> Result<Self::Output, BilinearError>
+    fn bilinear(self, sampling_frequency: K::Real) -> Result<Self::Output, BilinearError>
     {
         let Zpk::<T, Vec<T>, Vec<T>, K> {z: sz, p: sp, k: sg} = self.to_zpk((), ());
     
+        let t = sampling_frequency;
+
         let p = sp.len();
         let z = sz.len();
         if z > p
@@ -104,8 +106,8 @@ where
 {
     type Output = Tf<T, Vec<T>, Vec<T>>;
 
-    fn bilinear(self, t: T::Real) -> Result<Self::Output, BilinearError>
+    fn bilinear(self, sampling_frequency: T::Real) -> Result<Self::Output, BilinearError>
     {
-        Ok(self.to_zpk((), ()).bilinear(t)?.to_tf((), ()))
+        Ok(self.to_zpk((), ()).bilinear(sampling_frequency)?.to_tf((), ()))
     }
 }

@@ -48,7 +48,7 @@ where
     B2: MaybeLists<T2>,
     A2: MaybeList<T2>,
     for<'a> Polynomial<T1, B1::RowView<'a>>: Into<Polynomial<T2, B2>>,
-    for<'a> Polynomial<T1, A1>: Into<Polynomial<T2, A2>>,
+    Polynomial<T1, A1>: Into<Polynomial<T2, A2>>,
 {
     fn to_tf(self, (): (), output: usize) -> Tf<T2, B2, A2>
     {
@@ -113,8 +113,7 @@ where
             self.b.to_array2(),
             self.c.to_array2(),
             self.d.to_array2()
-        );
-        ss.normalize();
+        ).normalize();
 
         let (nout, _nin) = ss.d.dim();
 
@@ -202,7 +201,7 @@ where
     Self: ToSos<T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>, (), ()>,
     Polynomial<T2, Vec<T2>>: One,
     S: MaybeList<Tf<T1, B, A>>,
-    Tf<T2, Vec<T2>, Vec<T2>>: Normalize
+    Tf<T2, Vec<T2>, Vec<T2>>: Normalize<Output = Tf<T2, Vec<T2>, Vec<T2>>>
 {
     fn to_tf(self, (): (), (): ()) -> Tf<T2, Vec<T2>, Vec<T2>>
     {
@@ -214,11 +213,9 @@ where
         let a = sos.iter()
             .map(|sos| sos.a.as_view())
             .product::<Polynomial<T2, Vec<T2>>>();
-        let mut tf = Tf {
+        Tf {
             b,
             a
-        };
-        tf.normalize();
-        tf
+        }.normalize()
     }
 }

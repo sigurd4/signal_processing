@@ -1,6 +1,6 @@
 use core::ops::{Add, Div, Mul, Neg, Sub};
 
-use num::{complex::ComplexFloat, traits::Inv};
+use num::{complex::ComplexFloat, traits::Inv, NumCast};
 
 use crate::{MaybeList, MaybeLists, Polynomial};
 
@@ -21,7 +21,6 @@ moddef::moddef!(
         zero
     }
 );
-
 
 #[derive(Debug, Clone, Copy)]
 pub struct Tf<T: ComplexFloat, B: MaybeLists<T> = (), A: MaybeList<T> = ()>
@@ -96,6 +95,15 @@ impl<T: ComplexFloat, B: MaybeLists<T>, A: MaybeList<T>> Tf<T, B, A>
         self.b.is_zero() && !self.a.is_zero()
     }
     pub fn s() -> Self
+    where
+        for<'a> &'a Tf<T, [T; 2], ()>: Into<Self>
+    {
+        (&Tf {
+            b: Polynomial::new([T::one(), T::zero()]),
+            a: Polynomial::new(())
+        }).into()
+    }
+    pub fn z() -> Self
     where
         for<'a> &'a Tf<T, [T; 2], ()>: Into<Self>
     {

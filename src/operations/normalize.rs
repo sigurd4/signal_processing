@@ -1,111 +1,81 @@
-use core::ops::DivAssign;
+use core::ops::{AddAssign, DivAssign, MulAssign};
 
 use ndarray::{Array1, Array2};
-use num::{complex::ComplexFloat, Zero};
+use num::{complex::ComplexFloat, traits::Euclid, Zero, Float};
 
-use crate::{Ss, Tf};
+use crate::{ListOrSingle, MaybeList, MaybeLists, OwnedLists, Polynomial, Ss, System, Tf};
 
-pub trait Normalize
+pub trait Normalize: System
 {
-    fn normalize(&mut self);
+    type Output: System<Domain = Self::Domain>;
+
+    fn normalize(self) -> Self::Output;
 }
 
-impl<T> Normalize for Tf<T, Vec<T>, Vec<T>>
+impl<T, B, A, B2> Normalize for Tf<T, B, A>
 where
-    T: ComplexFloat + DivAssign
+    T: ComplexFloat + AddAssign + MulAssign + DivAssign,
+    B: MaybeLists<T, RowsMapped<Vec<T>> = B2>,
+    A: MaybeList<T>,
+    B2: OwnedLists<T, RowOwned = Vec<T>, RowsMapped<Vec<T>> = B2> + Clone,
+    Polynomial<T, B>: Into<Polynomial<T, B2>>,
+    Polynomial<T, A>: Into<Polynomial<T, Vec<T>>>,
+    Polynomial<T, Vec<T>>: Euclid
 {
-    fn normalize(&mut self)
+    type Output = Tf<T, B::RowsMapped<Vec<T>>, Vec<T>>;
+
+    fn normalize(self) -> Self::Output
     {
-        // Trim zeros
-        while self.b.first() == Some(&T::zero())
+        let Tf::<T, B::RowsMapped<Vec<T>>, Vec<T>> {mut b, mut a} = Tf {
+            b: self.b.into(),
+            a: self.a.into()
+        };
+
+        let gcd: Vec<Polynomial<T, Vec<T>>> = b.clone()
+            .gcd::<&[T]>(a.as_view())
+            .to_vec();
+        if let Some(gcd) = gcd.into_iter()
+            .reduce(|a, b| a.gcd::<Vec<T>>(b))
         {
-            self.b.remove(0);
+            b = Polynomial::new(b.into_inner()
+                .map_rows_into_owned(|b| {
+                    (Polynomial::new(b)/gcd.clone()).into_inner()
+                }));
+            a = a/gcd;
         }
-        while self.a.first() == Some(&T::zero())
+
+        // Trim zeros
+        b = Polynomial::new(b.into_inner()
+            .map_rows_into_owned(|mut b| {
+                while b.first().is_some_and(|x| x.abs() < T::Real::epsilon())
+                {
+                    b.remove(0);
+                }
+                b
+            }));
+        while a.first().is_some_and(|x| x.abs() < T::Real::epsilon())
         {
-            self.a.remove(0);
+            a.remove(0);
         }
     
-        if let Some(&norm) = self.a.first()
+        if let Some(&norm) = a.first()
         {
-            for b in self.b.iter_mut()
-            {
-                *b /= norm
-            }
-            for a in self.a.iter_mut()
-            {
-                *a /= norm
-            }
-        }
-    }
-}
-impl<T> Normalize for Tf<T, Vec<Vec<T>>, Vec<T>>
-where
-    T: ComplexFloat + DivAssign
-{
-    fn normalize(&mut self)
-    {
-        // Trim zeros
-        for b in self.b.iter_mut()
-        {
-            while b.first() == Some(&T::zero())
-            {
-                b.remove(0);
-            }
-        }
-        while self.a.first() == Some(&T::zero())
-        {
-            self.a.remove(0);
-        }
-    
-        if let Some(&norm) = self.a.first()
-        {
-            for b in self.b.iter_mut()
+            for b in b.as_mut_slices()
             {
                 for b in b.iter_mut()
                 {
                     *b /= norm
                 }
             }
-            for a in self.a.iter_mut()
+            for a in a.iter_mut()
             {
                 *a /= norm
             }
         }
-    }
-}
-impl<T, const K: usize> Normalize for Tf<T, [Vec<T>; K], Vec<T>>
-where
-    T: ComplexFloat + DivAssign
-{
-    fn normalize(&mut self)
-    {
-        // Trim zeros
-        for b in self.b.iter_mut()
-        {
-            while b.first() == Some(&T::zero())
-            {
-                b.remove(0);
-            }
-        }
-        while self.a.first() == Some(&T::zero())
-        {
-            self.a.remove(0);
-        }
-    
-        if let Some(&norm) = self.a.first()
-        {
-            for b in self.b.iter_mut()
-            {
-                for b in b.iter_mut()
-                {
-                    *b /= norm
-                }
-            }
-            for a in self.a.iter_mut()
-            {
-                *a /= norm
-            }
+
+        Tf {
+            b,
+            a
         }
     }
 }
@@ -114,7 +84,9 @@ impl<T> Normalize for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: ComplexFloat
 {
-    fn normalize(&mut self)
+    type Output = Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>;
+
+    fn normalize(mut self) -> Self::Output
     {
         let (ma, na) = self.a.dim();
         let (mb, nb) = self.b.dim();
@@ -145,5 +117,7 @@ where
         resize(&mut self.b, (p, q));
         resize(&mut self.c, (r, p));
         resize(&mut self.d, (r, q));
+
+        self
     }
 }

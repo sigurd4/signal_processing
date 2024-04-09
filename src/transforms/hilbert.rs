@@ -26,7 +26,7 @@ where
         let one = T::Real::one();
         
         let mut x = self.to_owned();
-        for x in x.as_mut_slice2()
+        for x in x.as_mut_slices()
         {
             let mut y: Vec<Complex<_>> = x.iter()
                 .map(|&x| x.into())

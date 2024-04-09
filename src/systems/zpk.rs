@@ -34,6 +34,15 @@ where
     P: MaybeList<T>,
     K: ComplexFloat<Real = T::Real>
 {
+    pub fn new(z: Z, p: P, k: K) -> Self
+    {
+        Self {
+            z: ProductSequence::new(z),
+            p: ProductSequence::new(p),
+            k: k
+        }
+    }
+
     pub type View<'a> = Zpk<T, Z::View<'a>, P::View<'a>, K>
     where
         Z: 'a,

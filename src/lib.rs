@@ -20,6 +20,7 @@
 #![feature(fn_traits)]
 #![feature(lazy_cell)]
 #![feature(coerce_unsized)]
+#![feature(decl_macro)]
 
 #![allow(internal_features)]
 #![allow(incomplete_features)]
@@ -33,6 +34,7 @@
 moddef::moddef!(
     flat(pub) mod {
         analysis,
+        decompositions,
         error,
         gen,
         operations,
@@ -61,6 +63,29 @@ mod tests
     use num::Complex;
 
     use crate::{plot, BesselAP, BesselF, ButtAP, Butter, Cheb1AP, Cheb2AP, EllipAP, FilterGenType, FreqS, FreqZ, Tf, Zpk};
+
+    #[test]
+    fn testt()
+    {
+        let b1 = [1.0, 3.0];
+        let a1 = [1.0, 0.5];
+
+        let h1 = Tf::new(b1, a1);
+        
+        let b2 = [3.0, 1.0];
+        let a2 = [1.0, 0.5];
+
+        let h2 = Tf::new(b2, a2);
+
+        const N: usize = 1024;
+        let (h1f, w): ([_; N], _) = h1.freqz(());
+        let (h2f, _) = h2.freqz(());
+
+        plot::plot_curves("|H(e^jw)|", "plots_temp/temp.png", [&w.zip(h1f.map(|h| h.norm())), &w.zip(h2f.map(|h| h.norm()))])
+            .unwrap();
+        plot::plot_curves("<H(e^jw)", "plots_temp/temp_phase.png", [&w.zip(h1f.map(|h| h.arg())), &w.zip(h2f.map(|h| h.arg()))])
+            .unwrap();
+    }
 
     #[test]
     fn test_ap()

@@ -2,7 +2,7 @@ use core::ops::{AddAssign, Div, DivAssign};
 use std::ops::Mul;
 
 use array_math::{ArrayOps, SliceOps};
-use num::{complex::ComplexFloat, traits::FloatConst, Float, NumCast, One, Zero};
+use num::{complex::ComplexFloat, traits::FloatConst, Float, NumCast, One};
 use option_trait::Maybe;
 use thiserror::Error;
 
@@ -197,7 +197,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, Butter, Ellip, FilterGenPlane, FilterGenType, RealFreqZ, Tf, ZfTrans, Zpk};
+    use crate::{plot, Ellip, FilterGenPlane, FilterGenType, RealFreqZ, Tf, ZfTrans};
 
     #[test]
     fn test()
@@ -209,7 +209,7 @@ mod test
             .unwrap();
 
         const N: usize = 1024;
-        let (h_f, w): ([_; N], _) = h.real_freqz(());
+        let (h_f, _): ([_; N], _) = h.real_freqz(());
 
         plot::plot_curves("H(e^jw)", "plots/h_z_zftrans.png", [&(0.0..1.0).linspace_array().zip(h_f.map(|h| h.norm()))]).unwrap();
     }

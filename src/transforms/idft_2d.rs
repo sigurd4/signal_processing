@@ -23,12 +23,12 @@ where
     fn idft_2d(self) -> <<Self::Mapped<Complex<T::Real>> as Matrix<Complex<T::Real>>>::Transpose as Matrix<Complex<T::Real>>>::Transpose
     {
         let mut h = self.map_into_owned(|h| h.into());
-        for h in h.as_mut_slice2()
+        for h in h.as_mut_slices()
         {
             h.ifft();
         }
         let mut ht = h.matrix_transpose();
-        for ht in ht.as_mut_slice2()
+        for ht in ht.as_mut_slices()
         {
             ht.ifft();
         }

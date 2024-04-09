@@ -10,10 +10,9 @@ pub trait TruncateIm: ComplexFloat
         Self::Real: Into<T>;
 }
 
-impl<F> TruncateIm for Complex<F>
+impl<C> TruncateIm for C
 where
-    F: Float + 'static,
-    Self: ComplexFloat<Real = F>
+    Self: ComplexFloat + 'static
 {
     fn truncate_im<T>(self) -> T
     where
@@ -27,7 +26,7 @@ where
         }
         else
         {
-            t = self.re.into()
+            t = self.re().into()
         }
         t
     }

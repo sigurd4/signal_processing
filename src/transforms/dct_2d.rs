@@ -26,12 +26,12 @@ where
     fn dct_i_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
     {
         let mut h = self.into_owned();
-        for h in h.as_mut_slice2()
+        for h in h.as_mut_slices()
         {
             h.dct_i();
         }
         let mut ht = h.matrix_transpose();
-        for ht in ht.as_mut_slice2()
+        for ht in ht.as_mut_slices()
         {
             ht.dct_i();
         }
@@ -40,12 +40,12 @@ where
     fn dct_ii_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
     {
         let mut h = self.into_owned();
-        for h in h.as_mut_slice2()
+        for h in h.as_mut_slices()
         {
             h.dct_ii();
         }
         let mut ht = h.matrix_transpose();
-        for ht in ht.as_mut_slice2()
+        for ht in ht.as_mut_slices()
         {
             ht.dct_ii();
         }
@@ -54,12 +54,12 @@ where
     fn dct_iii_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
     {
         let mut h = self.into_owned();
-        for h in h.as_mut_slice2()
+        for h in h.as_mut_slices()
         {
             h.dct_iii();
         }
         let mut ht = h.matrix_transpose();
-        for ht in ht.as_mut_slice2()
+        for ht in ht.as_mut_slices()
         {
             ht.dct_iii();
         }
@@ -68,12 +68,12 @@ where
     fn dct_iv_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
     {
         let mut h = self.into_owned();
-        for h in h.as_mut_slice2()
+        for h in h.as_mut_slices()
         {
             h.dct_iv();
         }
         let mut ht = h.matrix_transpose();
-        for ht in ht.as_mut_slice2()
+        for ht in ht.as_mut_slices()
         {
             ht.dct_iv();
         }

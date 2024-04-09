@@ -48,13 +48,14 @@ where
     B: MaybeLists<T>,
     A: MaybeList<T>,
     Self: ToTf<K, Vec<K>, Vec<K>, (), usize>,
+
     Complex<<K as ComplexFloat>::Real>: From<K> + AddAssign + SubAssign + MulAssign + DivAssign + DivAssign<<K as ComplexFloat>::Real>,
     K: ComplexFloat + ndarray_linalg::Lapack<Complex = Complex<<K as ComplexFloat>::Real>>
 {
     fn to_zpk(self, (): (), output: usize) -> Zpk<Complex<<K as ComplexFloat>::Real>, Vec<Complex<<K as ComplexFloat>::Real>>, Vec<Complex<<K as ComplexFloat>::Real>>, K>
     {
-        let mut tf: Tf<K, Vec<K>, Vec<K>> = self.to_tf((), output);
-        tf.normalize();
+        let tf: Tf<K, Vec<K>, Vec<K>> = self.to_tf((), output);
+        let mut tf = tf.normalize();
         let k = tf.b.first().copied().unwrap_or(K::zero());
         for b in tf.b.iter_mut()
         {
@@ -81,8 +82,8 @@ where
 {
     fn to_zpk(self, (): (), (): ()) -> Zpk<Complex<<K as ComplexFloat>::Real>, Vec<Complex<<K as ComplexFloat>::Real>>, Vec<Complex<<K as ComplexFloat>::Real>>, K>
     {
-        let mut tf: Tf<K, Vec<K>, Vec<K>> = self.to_tf((), ());
-        tf.normalize();
+        let tf: Tf<K, Vec<K>, Vec<K>> = self.to_tf((), ());
+        let mut tf = tf.normalize();
         let k = tf.b.first().copied().unwrap_or(K::zero());
         for b in tf.b.iter_mut()
         {

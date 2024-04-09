@@ -58,12 +58,12 @@ where
     B: MaybeLists<T1>,
     A: MaybeList<T1>,
     Self: ToTf<T2, Vec<Vec<T2>>, Vec<T2>, (), ()>,
-    Tf<T2, Vec<Vec<T2>>, Vec<T2>>: Normalize
+    Tf<T2, Vec<Vec<T2>>, Vec<T2>>: Normalize<Output = Tf<T2, Vec<Vec<T2>>, Vec<T2>>>
 {
     fn to_ss(self) -> Result<Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>, ToSsError>
     {
-        let mut tf: Tf<T2, Vec<Vec<T2>>, Vec<T2>> = self.to_tf((), ());
-        tf.normalize();
+        let tf: Tf<T2, Vec<Vec<T2>>, Vec<T2>> = self.to_tf((), ());
+        let mut tf = tf.normalize();
         let m_min = tf.b.iter()
             .map(|b| b.len())
             .min()

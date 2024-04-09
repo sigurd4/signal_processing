@@ -25,7 +25,7 @@ where
     fn dst_i(self) -> Self::Owned
     {
         let mut y = self.into_owned();
-        for x in y.as_mut_slice2()
+        for x in y.as_mut_slices()
             .into_iter()
         {
             SliceMath::dst_i(x)
@@ -35,7 +35,7 @@ where
     fn dst_ii(self) -> Self::Owned
     {
         let mut y = self.into_owned();
-        for x in y.as_mut_slice2()
+        for x in y.as_mut_slices()
             .into_iter()
         {
             SliceMath::dst_ii(x)
@@ -45,7 +45,7 @@ where
     fn dst_iii(self) -> Self::Owned
     {
         let mut y = self.into_owned();
-        for x in y.as_mut_slice2()
+        for x in y.as_mut_slices()
             .into_iter()
         {
             SliceMath::dst_iii(x)
@@ -55,7 +55,7 @@ where
     fn dst_iv(self) -> Self::Owned
     {
         let mut y = self.into_owned();
-        for x in y.as_mut_slice2()
+        for x in y.as_mut_slices()
             .into_iter()
         {
             SliceMath::dst_iv(x)

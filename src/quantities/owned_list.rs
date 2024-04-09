@@ -1,8 +1,8 @@
 use ndarray::Array1;
 
-use crate::List;
+use crate::{List, MaybeOwnedList};
 
-pub trait OwnedList<T>: List<T> + Sized
+pub trait OwnedList<T>: List<T> + MaybeOwnedList<T> + Sized
 {
     fn as_mut_slice(&mut self) -> &'_ mut [T];
 }

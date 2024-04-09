@@ -1,13 +1,10 @@
-
-
-
 use ndarray::{Array1, Array2};
 
-use crate::{Lists};
+use crate::{Lists, MaybeOwnedLists};
 
-pub trait OwnedLists<T>: Lists<T> + Sized
+pub trait OwnedLists<T>: Lists<T> + MaybeOwnedLists<T> + Sized
 {
-    fn as_mut_slice2<'a>(&'a mut self) -> Vec<&'a mut [T]>
+    fn as_mut_slices<'a>(&'a mut self) -> Vec<&'a mut [T]>
     where
         T: Clone + 'a,
         Self: 'a;
@@ -15,7 +12,7 @@ pub trait OwnedLists<T>: Lists<T> + Sized
 
 impl<T> OwnedLists<T> for Vec<T>
 {
-    fn as_mut_slice2<'a>(&'a mut self) -> Vec<&'a mut [T]>
+    fn as_mut_slices<'a>(&'a mut self) -> Vec<&'a mut [T]>
     where
         T: Clone + 'a,
         Self: 'a
@@ -25,7 +22,7 @@ impl<T> OwnedLists<T> for Vec<T>
 }
 impl<T, const N: usize> OwnedLists<T> for [T; N]
 {
-    fn as_mut_slice2<'a>(&'a mut self) -> Vec<&'a mut [T]>
+    fn as_mut_slices<'a>(&'a mut self) -> Vec<&'a mut [T]>
     where
         T: Clone + 'a,
         Self: 'a
@@ -36,7 +33,7 @@ impl<T, const N: usize> OwnedLists<T> for [T; N]
 
 impl<T> OwnedLists<T> for Vec<Vec<T>>
 {
-    fn as_mut_slice2<'a>(&'a mut self) -> Vec<&'a mut [T]>
+    fn as_mut_slices<'a>(&'a mut self) -> Vec<&'a mut [T]>
     where
         T: Clone + 'a,
         Self: 'a
@@ -48,7 +45,7 @@ impl<T> OwnedLists<T> for Vec<Vec<T>>
 }
 impl<T, const M: usize> OwnedLists<T> for [Vec<T>; M]
 {
-    fn as_mut_slice2<'a>(&'a mut self) -> Vec<&'a mut [T]>
+    fn as_mut_slices<'a>(&'a mut self) -> Vec<&'a mut [T]>
     where
         T: Clone + 'a,
         Self: 'a
@@ -61,7 +58,7 @@ impl<T, const M: usize> OwnedLists<T> for [Vec<T>; M]
 
 impl<T, const N: usize> OwnedLists<T> for Vec<[T; N]>
 {
-    fn as_mut_slice2<'a>(&'a mut self) -> Vec<&'a mut [T]>
+    fn as_mut_slices<'a>(&'a mut self) -> Vec<&'a mut [T]>
     where
         T: Clone + 'a,
         Self: 'a
@@ -73,7 +70,7 @@ impl<T, const N: usize> OwnedLists<T> for Vec<[T; N]>
 }
 impl<T, const N: usize, const M: usize> OwnedLists<T> for [[T; N]; M]
 {
-    fn as_mut_slice2<'a>(&'a mut self) -> Vec<&'a mut [T]>
+    fn as_mut_slices<'a>(&'a mut self) -> Vec<&'a mut [T]>
     where
         T: Clone + 'a,
         Self: 'a
@@ -86,7 +83,7 @@ impl<T, const N: usize, const M: usize> OwnedLists<T> for [[T; N]; M]
 
 impl<T> OwnedLists<T> for Array1<T>
 {
-    fn as_mut_slice2<'a>(&'a mut self) -> Vec<&'a mut [T]>
+    fn as_mut_slices<'a>(&'a mut self) -> Vec<&'a mut [T]>
     where
         T: Clone + 'a,
         Self: 'a
@@ -97,7 +94,7 @@ impl<T> OwnedLists<T> for Array1<T>
 
 impl<T> OwnedLists<T> for Array2<T>
 {
-    fn as_mut_slice2<'a>(&'a mut self) -> Vec<&'a mut [T]>
+    fn as_mut_slices<'a>(&'a mut self) -> Vec<&'a mut [T]>
     where
         T: Clone + 'a,
         Self: 'a

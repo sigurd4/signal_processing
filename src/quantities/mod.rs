@@ -8,6 +8,8 @@ moddef::moddef!(
         maybe_container,
         maybe_list,
         maybe_lists,
+        maybe_owned_list,
+        maybe_owned_lists,
         owned_list,
         owned_lists,
         owned_matrix,

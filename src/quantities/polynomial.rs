@@ -1,7 +1,7 @@
-use core::marker::PhantomData;
+use core::{marker::PhantomData, ops::DivAssign};
 
-use array_math::{ArrayOps, SliceMath};
-use num::{complex::ComplexFloat, One, Zero};
+use array_math::{ArrayOps, SliceMath, SliceOps};
+use num::{complex::ComplexFloat, traits::Euclid, One, Zero, Float};
 
 use crate::{Lists, MaybeList, MaybeLists, TruncateIm};
 
@@ -14,6 +14,7 @@ moddef::moddef!(
         deref,
         deref_mut,
         eq,
+        euclid,
         r#fn,
         from,
         mul_assign,
@@ -167,5 +168,39 @@ where
             return s.len() == 1 && s[0].is_one()
         }
         true
+    }
+
+    pub fn gcd<C2>(self, rhs: Polynomial<T, C2>) -> C::RowsMapped<Polynomial<T, Vec<T>>>
+    where
+        T: ComplexFloat + DivAssign,
+        C::RowOwned: MaybeList<T>,
+        C2: MaybeList<T> + Clone,
+        Polynomial<T, C2>: Into<Polynomial<T, Vec<T>>>,
+        Polynomial<T, C::RowOwned>: Into<Polynomial<T, Vec<T>>>,
+        Polynomial<T, Vec<T>>: Euclid
+    {
+        self.into_inner()
+            .map_rows_into_owned(|lhs| {
+                let mut a: Polynomial<T, Vec<T>> = Polynomial::new(lhs).into();
+                let mut b: Polynomial<T, Vec<T>> = rhs.clone().into();
+
+                while !b.iter()
+                    .all(|b| b.abs() < T::Real::epsilon())
+                {
+                    let r = a.rem_euclid(&b);
+                    a = b;
+                    b = r;
+                }
+                if a.is_zero()
+                {
+                    Polynomial::one()
+                }
+                else
+                {
+                    let norm = a[0];
+                    a.div_assign_all(norm);
+                    a
+                }
+            })
     }
 }

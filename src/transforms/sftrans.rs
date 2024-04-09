@@ -247,6 +247,7 @@ where
 mod test
 {
     use array_math::ArrayOps;
+    use linspace::LinspaceArray;
 
     use crate::{plot, Bilinear, Butter, FilterGenPlane, FilterGenType, RealFreqZ, SfTrans, Zpk};
 
@@ -258,12 +259,12 @@ mod test
 
         let h = h0.sftrans(0.5, [0.2, 0.8], true)
             .unwrap()
-            .bilinear(4.0)
+            .bilinear(2.0)
             .unwrap();
 
         const N: usize = 1024;
-        let (h_f, w): ([_; N], _) = h.real_freqz(());
+        let (h_f, _): ([_; N], _) = h.real_freqz(());
 
-        plot::plot_curves("H(e^jw)", "plots/h_z_sftrans.png", [&w.zip(h_f.map(|h| h.norm()))]).unwrap();
+        plot::plot_curves("H(e^jw)", "plots/h_z_sftrans.png", [&(0.0..1.0).linspace_array().zip(h_f.map(|h| h.norm()))]).unwrap();
     }
 }

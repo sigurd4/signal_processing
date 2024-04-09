@@ -22,7 +22,7 @@ where
     fn dft(self) -> Self::Mapped<Complex<T::Real>>
     {
         let mut h = self.map_into_owned(|h| h.into());
-        for h in h.as_mut_slice2()
+        for h in h.as_mut_slices()
         {
             h.fft()
         }
