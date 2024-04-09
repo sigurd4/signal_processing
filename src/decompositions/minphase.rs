@@ -98,3 +98,21 @@ where
         (hmin.to_sos((), ()), hap.to_sos((), ()))
     }
 }
+
+#[cfg(test)]
+mod test
+{
+    use crate::{tf, MinPhase};
+
+    #[test]
+    fn test()
+    {
+        let h1 = tf!(f64[s] = (s + 3)/(s + 0.5));
+
+        let (h2, h2ap) = h1.minphase();
+        let h3 = h2*h2ap;
+        
+        println!("b = {:?}", h3.b);
+        println!("a = {:?}", h3.a);
+    }
+}

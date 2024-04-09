@@ -285,3 +285,87 @@ impl_op2_extra!(Add::add);
 impl_op2_extra!(Sub::sub);
 impl_op2_extra!(Mul::mul);
 impl_op2_extra!(Div::div);
+
+macro tf_build {
+    ($t:path[s]=) => {
+        Tf::<$t, _, _>::new([], ())
+    },
+    ($t:path[z]=) => {
+        Tf::<$t, _, _>::new([], ())
+    },
+    ($t:path[s]= $c:literal) => {
+        Tf::<$t, _, _>::new([<$t as num::NumCast>::from($c).unwrap()], ())
+    },
+    ($t:path[z]= $c:literal) => {
+        Tf::<$t, _, _>::new([<$t as num::NumCast>::from($c).unwrap()], ())
+    },
+    ($t:path[s]= $c:literal + $ci:literal j) => {
+        Tf::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _>::new([num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], ())
+    },
+    ($t:path[z]= $c:literal + $ci:literal j) => {
+        Tf::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _>::new([num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], ())
+    },
+    ($t:path[s]= $c:literal - $ci:literal j) => {
+        Tf::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _>::new([num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], ())
+    },
+    ($t:path[z]= $c:literal - $ci:literal j) => {
+        Tf::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _>::new([num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], ())
+    },
+    ($t:path[s]= $ci:literal j) => {
+        Tf::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _>::new([num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], ())
+    },
+    ($t:path[z]= $ci:literal j) => {
+        Tf::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _>::new([num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], ())
+    },
+    ($t:path[$s:ident]= $ss:ident) => {
+        {
+            let $s = Tf::<$t, [_; 2], ()>::$s();
+            Tf::<$t, [_; 2], ()>::from($ss)
+        }
+    },
+    ($t:path[s]= $c:literal^$pc:literal) => {
+        num::traits::Pow::pow(Tf::<$t, _, _>::new([<$t as num::NumCast>::from($c).unwrap()], ()), $pc)
+    },
+    ($t:path[z]= $c:literal^$pc:literal) => {
+        num::traits::Pow::pow(Tf::<$t, _, _>::new([<$t as num::NumCast>::from($c).unwrap()], ()), $pc)
+    },
+    ($t:path[$s:ident]= $ss:ident^$ps:literal) => {
+        {
+            let $s = Tf::<$t, [_; 2], ()>::$s();
+            num::traits::Pow::pow(Tf::<$t, [_; 2], ()>::from($ss), $ps)
+        }
+    },
+    ($t:path[$s:ident]= ($($lhs:tt)*)^$lp:literal $($op:tt ($($rhs:tt)*))?) => {
+        num::traits::Pow::pow(tf_build!($t[$s]= $($lhs)*), $lp)$($op tf_build!($t[$s]= $($rhs)*))*
+    },
+    ($t:path[$s:ident]= ($($lhs:tt)*) $($op:tt ($($rhs:tt)*))?) => {
+        tf_build!($t[$s]= $($lhs)*)$($op tf_build!($t[$s]= $($rhs)*))*
+    },
+    ($t:path[$s:ident]= $lhs:tt$(^$lp:literal)? $($op:tt $rhs:tt$(^$rp:literal)?)*) => {
+        tf_build!($t[$s]= $lhs$(^$lp)?)$($op tf_build!($t[$s]= $rhs$(^$rp)?))*
+    },
+}
+
+pub macro tf {
+    ($t:path[$s:ident]= $($etc:tt)*) => {
+        {
+            let tf = tf_build!($t[$s]= $($etc)*);
+            Tf {
+                b: tf.b.truncate_im::<$t>(),
+                a: tf.a.truncate_im::<$t>()
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod test
+{
+    use super::tf;
+
+    #[test]
+    fn test()
+    {
+        let h = tf!(f64[s] = (((2*(s^-3))^-2) + 1 + (s^2))/(s + 1)*2);
+    }
+}
