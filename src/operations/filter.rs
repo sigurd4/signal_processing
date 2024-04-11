@@ -1,7 +1,7 @@
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{ComplexOp, FilterMut, ListOrSingle, Lists, Rtf, RtfOrSystem, System};
+use crate::{ComplexOp, FilterMut, Lists, Rtf, RtfOrSystem, System};
 
 pub trait Filter<'a, X, XX>: System
 where
@@ -9,13 +9,12 @@ where
     X: Into<<Self::Domain as ComplexOp<X>>::Output> + ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>,
     XX: Lists<X>
 {
-    type Y: Lists<<Self::Domain as ComplexOp<X>>::Output>;
-    type Output: ListOrSingle<Self::Y>;
+    type Output: Lists<<Self::Domain as ComplexOp<X>>::Output>;
 
     fn filter<W: Maybe<Vec<<Self::Domain as ComplexOp<X>>::Output>>>(&'a self, x: XX, w: W) -> Self::Output;
 }
 
-impl<'a, W, S, X, XX, Y, O> Filter<'a, X, XX> for S
+impl<'a, W, S, X, XX, O> Filter<'a, X, XX> for S
 where
     S: System,
     S::Domain: ComplexOp<X, Output = W>,
@@ -23,11 +22,9 @@ where
     XX: Lists<X>,
     W: ComplexOp<X, Output = W> + ComplexFloat<Real = <S::Domain as ComplexFloat>::Real> + 'a,
     S: 'a,
-    Rtf<'a, W, S>: FilterMut<X, XX, Y = Y, Output = O> + RtfOrSystem<Domain = W>,
-    O: ListOrSingle<Y>,
-    Y: Lists<W>
+    Rtf<'a, W, S>: FilterMut<X, XX, Output = O> + RtfOrSystem<Domain = W>,
+    O: Lists<W>
 {
-    type Y = Y;
     type Output = O;
 
     fn filter<WW: Maybe<Vec<W>>>(&'a self, x: XX, w: WW) -> Self::Output
@@ -44,12 +41,12 @@ mod test
     use linspace::LinspaceArray;
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, Butter, Filter, FilterGenPlane, FilterGenType, Tf};
+    use crate::{plot, Butter, Filter, FilterGenPlane, FilterGenType, Sos, Tf};
 
     #[test]
     fn test()
     {
-        let h = Tf::butter(10, [220.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(1000.0) })
+        let h = Sos::butter(10, [220.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(1000.0) })
             .unwrap();
 
         const N: usize = 64;
@@ -60,7 +57,7 @@ mod test
 
         let t: [_; N] = (0.0..N as f64).linspace_array();
 
-        plot::plot_curves("h(t)", "plots/h_t_filter.png", [&t.zip(x), &t.zip(y)])
+        plot::plot_curves("x(t), y(t)", "plots/xy_t_filter.png", [&t.zip(x), &t.zip(y)])
             .unwrap()
     }
 }

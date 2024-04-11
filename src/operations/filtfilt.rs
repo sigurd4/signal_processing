@@ -151,7 +151,7 @@ mod test
 
         let t: [_; N] = (0.0..N as f64).linspace_array();
 
-        plot::plot_curves("h(t)", "plots/h_t_filtfilt.png", [&t.zip(x), &t.zip(y)])
+        plot::plot_curves("x(t), y(t)", "plots/xy_t_filtfilt.png", [&t.zip(x), &t.zip(y)])
             .unwrap()
     }
 }
