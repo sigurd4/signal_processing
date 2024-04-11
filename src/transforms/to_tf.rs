@@ -4,9 +4,9 @@ use ndarray::{Array1, Array2};
 use ndarray_linalg::EigVals;
 use num::{complex::ComplexFloat, Complex, One, Zero};
 
-use option_trait::{Maybe, NotVoid, StaticMaybe};
+use option_trait::{Maybe, MaybeOr, NotVoid, StaticMaybe};
 
-use crate::{Matrix, MaybeList, MaybeLists, MaybeOwnedList, Normalize, Polynomial, Sos, SplitNumerDenom, Ss, System, Tf, ToSos, ToZpk, Zpk};
+use crate::{List, Matrix, MaybeContainer, MaybeList, MaybeLists, MaybeOwnedList, Normalize, Polynomial, Sos, SplitNumerDenom, Ss, System, Tf, ToSos, ToZpk, Zpk};
 
 
 pub trait ToTf<T, B, A, I, O>: System
@@ -59,7 +59,7 @@ where
     }
 }
 
-impl<'a, T1, T2, Z, P, K> ToTf<T2, Vec<T2>, Vec<T2>, (), ()> for Zpk<T1, Z, P, K>
+impl<'a, T1, T2, Z, Z2, P, P2, K, BB, B, A> ToTf<T2, B, A, (), ()> for Zpk<T1, Z, P, K>
 where
     T1: ComplexFloat,
     T2: ComplexFloat<Real = T1::Real> + 'static,
@@ -67,28 +67,55 @@ where
     Polynomial<T2, Vec<T2>>: Mul<Polynomial<T2, [T2; 1]>, Output = Polynomial<T2, Vec<T2>>>,
     T1::Real: Into<T2> + 'static,
     K: ComplexFloat<Real = T1::Real>,
-    Z: MaybeList<T1>,
-    P: MaybeList<T1>,
-    Self: ToZpk<Complex<T2::Real>, Vec<Complex<T2::Real>>, Vec<Complex<T2::Real>>, T2, (), ()>
+    Z: MaybeList<T1, MaybeSome: StaticMaybe<Z::Some, Maybe<Vec<Complex<T1::Real>>> = Z2>>,
+    P: MaybeList<T1, MaybeSome: StaticMaybe<P::Some, Maybe<Vec<Complex<T1::Real>>> = P2>>,
+    B: MaybeList<T2>,
+    A: MaybeList<T2> + StaticMaybe<Vec<T2>>,
+    Z2: MaybeList<Complex<T1::Real>, MaybeSome: StaticMaybe<Z2::Some, Maybe<Vec<T2>> = BB>> + Maybe<Vec<Complex<T2::Real>>>,
+    P2: MaybeList<Complex<T1::Real>, MaybeSome: StaticMaybe<P2::Some, Maybe<Vec<T2>>: MaybeOr<Vec<T2>, A, Output = A>>> + Maybe<Vec<Complex<T2::Real>>>,
+    BB: MaybeList<T2, Some: List<T2> + Sized, MaybeSome: Sized> + StaticMaybe<Vec<T2>>,
+    Polynomial<T2, <BB as MaybeContainer<T2>>::Some>: Into<Polynomial<T2, B>>,
+    Polynomial<T2, [T2; 1]>: Into<Polynomial<T2, B>>,
+    Self: ToZpk<Complex<T2::Real>, Z2, P2, T2, (), ()>
 {
-    fn to_tf(self, (): (), (): ()) -> Tf<T2, Vec<T2>, Vec<T2>>
+    fn to_tf(self, (): (), (): ()) -> Tf<T2, B, A>
     {
-        let Zpk::<Complex<T2::Real>, Vec<Complex<T2::Real>>, Vec<Complex<T2::Real>>, T2> {z, p, k} = self.to_zpk((), ());
+        let Zpk::<Complex<T2::Real>, Z2, P2, T2> {z, p, k} = self.to_zpk((), ());
 
-        let b = z.into_inner()
-            .into_iter()
-            .map(|z| Polynomial::new([One::one(), -z]))
-            .product::<Polynomial<Complex<T2::Real>, Vec<Complex<T2::Real>>>>()
-            .truncate_im::<T2>()
-            *Polynomial::new([k]);
-        let a = p.into_inner()
-            .into_iter()
-            .map(|p| Polynomial::new([One::one(), -p]))
-            .product::<Polynomial<Complex<T2::Real>, Vec<Complex<T2::Real>>>>()
-            .truncate_im::<T2>();
+        let z_op: Option<Vec<_>> = z.into_inner().into_option();
+        let b = if let Some(z) = z_op
+        {
+            Some(z.into_iter()
+                .map(|z| Polynomial::new([One::one(), -z]))
+                .product::<Polynomial<Complex<T2::Real>, Vec<Complex<T2::Real>>>>()
+                .truncate_im::<T2>()
+                *Polynomial::new([k]))
+        }
+        else
+        {
+            None
+        };
+        let p_op: Option<Vec<_>> = p.into_inner().into_option();
+        let a = if let Some(p) = p_op
+        {
+            Some(p.into_iter()
+                .map(|p| Polynomial::new([One::one(), -p]))
+                .product::<Polynomial<Complex<T2::Real>, Vec<Complex<T2::Real>>>>()
+                .truncate_im::<T2>())
+        }
+        else
+        {
+            None
+        };
         Tf {
-            b,
-            a
+            b: b.map(|b| {
+                let b = BB::maybe_from_fn(|| b.into_inner());
+                b.into_maybe_some()
+                    .into_option()
+                    .map(|b| Polynomial::new(b).into())
+                    .unwrap_or_else(|| Polynomial::new([k]).into())
+            }).unwrap_or_else(|| Polynomial::new([k]).into()),
+            a: Polynomial::new(StaticMaybe::maybe_from_fn(|| a.unwrap().into_inner()))
         }
     }
 }

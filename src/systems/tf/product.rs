@@ -2,15 +2,15 @@ use std::{iter::Product, ops::Mul};
 
 use num::{complex::ComplexFloat, One};
 
-use crate::{Lists, MaybeList, Tf, ToTf};
+use crate::{MaybeList, MaybeLists, Tf, ToTf};
 
 impl<T1, B1, A1, T2, B2, A2> Product<Tf<T1, B1, A1>> for Tf<T2, B2, A2>
 where
     T1: ComplexFloat,
     T2: ComplexFloat,
-    B1: Lists<T1>,
+    B1: MaybeLists<T1>,
     A1: MaybeList<T1>,
-    B2: Lists<T2>,
+    B2: MaybeLists<T2>,
     A2: MaybeList<T2>,
     Tf<T1, B1, A1>: ToTf<T2, B2, A2, (), ()>,
     Tf<T2, B2, A2>: Mul<Output = Tf<T2, B2, A2>> + One

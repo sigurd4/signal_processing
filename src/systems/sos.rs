@@ -66,8 +66,8 @@ where
     }
     pub fn zero() -> Self
     where
-        Tf<T, B, A>: Default,
-        B: Default,
+        Polynomial<T, [T; 0]>: Into<Polynomial<T, B>>,
+        Polynomial<T, ()>: Into<Polynomial<T, A>>,
         ProductSequence<Tf<T, B, A>, [Tf<T, B, A>; 1]>: Into<ProductSequence<Tf<T, B, A>, S>>
     {
         Sos {

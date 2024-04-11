@@ -157,11 +157,12 @@ where
     pub fn is_zero(&self) -> bool
     where
         T: Zero,
-        C: MaybeList<T>
+        C: MaybeLists<T>
     {
-        if let Some(s) = self.as_view_slice_option()
+        if let Some(s) = self.as_view_slices_option()
         {
-            return s.trim_zeros_front().len() == 0
+            return s.iter()
+                .all(|s| s.trim_zeros_front().len() == 0)
         }
         false
     }

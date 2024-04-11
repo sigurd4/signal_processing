@@ -7,6 +7,7 @@ use crate::{ComplexRealError, ListOrSingle, MaybeList, ProductSequence, ToZpk};
 
 moddef::moddef!(
     mod {
+        add,
         default,
         div,
         from,
@@ -15,7 +16,8 @@ moddef::moddef!(
         neg,
         one,
         pow,
-        product
+        product,
+        sub
     }
 );
 
@@ -39,7 +41,7 @@ where
         Self {
             z: ProductSequence::new(z),
             p: ProductSequence::new(p),
-            k: k
+            k
         }
     }
 
@@ -353,21 +355,30 @@ pub macro zpk {
         {
             Zpk::<$t, [_; 1], (), $t>::$s();
             s!($s);
-            Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap()))
+            Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(
+                <$t as num::NumCast>::from($c).unwrap(),
+                <$t as num::NumCast>::from($ci).unwrap()
+            ))
         }
     },
     ($t:path[$s:ident]= $c:literal - $ci:literal j) => {
         {
             Zpk::<$t, [_; 1], (), $t>::$s();
             s!($s);
-            Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap()))
+            Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(
+                <$t as num::NumCast>::from($c).unwrap(),
+                -<$t as num::NumCast>::from($ci).unwrap()
+            ))
         }
     },
     ($t:path[$s:ident]= $ci:literal j) => {
         {
             Zpk::<$t, [_; 1], (), $t>::$s();
             s!($s);
-            Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from($ci).unwrap()))
+            Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(
+                <$t as num::NumCast>::from(0).unwrap(),
+                <$t as num::NumCast>::from($ci).unwrap()
+            ))
         }
     },
 
@@ -377,7 +388,6 @@ pub macro zpk {
             let $s = Zpk::<$t, [_; 1], (), $t>::$s();
             s!($s);
             s!($ss);
-            #[allow(unused)]
             let _ = $ss;
             Zpk::<$t, _, _, $t>::new([-<$t as num::NumCast>::from($c).unwrap()], (), <$t as num::NumCast>::from(1).unwrap())
         }
@@ -388,9 +398,11 @@ pub macro zpk {
             let $s = Zpk::<$t, [_; 1], (), $t>::$s();
             s!($s);
             s!($ss);
-            #[allow(unused)]
             let _ = $ss;
-            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(-<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(
+                -<$t as num::NumCast>::from($c).unwrap(),
+                -<$t as num::NumCast>::from($ci).unwrap()
+            )], (), <$t as num::NumCast>::from(1).unwrap())
         }
     },
     ($t:path[$s:ident]= $ss:ident + $c:literal - $ci:literal j) => {
@@ -399,9 +411,11 @@ pub macro zpk {
             let $s = Zpk::<$t, [_; 1], (), $t>::$s();
             s!($s);
             s!($ss);
-            #[allow(unused)]
             let _ = $ss;
-            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(-<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(
+                -<$t as num::NumCast>::from($c).unwrap(),
+                <$t as num::NumCast>::from($ci).unwrap()
+            )], (), <$t as num::NumCast>::from(1).unwrap())
         }
     },
     ($t:path[$s:ident]= $ss:ident + $ci:literal j) => {
@@ -410,9 +424,11 @@ pub macro zpk {
             let $s = Zpk::<$t, [_; 1], (), $t>::$s();
             s!($s);
             s!($ss);
-            #[allow(unused)]
             let _ = $ss;
-            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(
+                <$t as num::NumCast>::from(0).unwrap(),
+                -<$t as num::NumCast>::from($ci).unwrap()
+            )], (), <$t as num::NumCast>::from(1).unwrap())
         }
     },
     
@@ -422,7 +438,6 @@ pub macro zpk {
             let $s = Zpk::<$t, [_; 1], (), $t>::$s();
             s!($s);
             s!($ss);
-            #[allow(unused)]
             let _ = $ss;
             Zpk::<$t, _, _, $t>::new([<$t as num::NumCast>::from($c).unwrap()], (), <$t as num::NumCast>::from(1).unwrap())
         }
@@ -433,9 +448,11 @@ pub macro zpk {
             let $s = Zpk::<$t, [_; 1], (), $t>::$s();
             s!($s);
             s!($ss);
-            #[allow(unused)]
             let _ = $ss;
-            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(
+                <$t as num::NumCast>::from($c).unwrap(),
+                -<$t as num::NumCast>::from($ci).unwrap()
+            )], (), <$t as num::NumCast>::from(1).unwrap())
         }
     },
     ($t:path[$s:ident]= $ss:ident - $c:literal - $ci:literal j) => {
@@ -444,9 +461,11 @@ pub macro zpk {
             let $s = Zpk::<$t, [_; 1], (), $t>::$s();
             s!($s);
             s!($ss);
-            #[allow(unused)]
             let _ = $ss;
-            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(
+                <$t as num::NumCast>::from($c).unwrap(),
+                <$t as num::NumCast>::from($ci).unwrap()
+            )], (), <$t as num::NumCast>::from(1).unwrap())
         }
     },
     ($t:path[$s:ident]= $ss:ident - $ci:literal j) => {
@@ -455,9 +474,11 @@ pub macro zpk {
             let $s = Zpk::<$t, [_; 1], (), $t>::$s();
             s!($s);
             s!($ss);
-            #[allow(unused)]
             let _ = $ss;
-            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(
+                <$t as num::NumCast>::from(0).unwrap(),
+                <$t as num::NumCast>::from($ci).unwrap()
+            )], (), <$t as num::NumCast>::from(1).unwrap())
         }
     },
 
@@ -476,7 +497,6 @@ pub macro zpk {
             let $s = Zpk::<$t, [_; 1], (), $t>::$s();
             s!($s);
             s!($ss);
-            #[allow(unused)]
             let _ = $ss;
             num::traits::Pow::pow(Zpk::<$t, _, _, $t>::new((), (), <$t as num::NumCast>::from($c).unwrap()), $pc)
         }
@@ -509,9 +529,11 @@ mod test
     #[test]
     fn test()
     {
-        let h = zpk!(f64[s] = (s - 1 + 1 j));
-        let h2 = zpk!(f64[s] = {h}/(s - 1 + 1 j));
+        let h1 = zpk!(f64[s] = (s - 1 + 1 j)*(s - 1 - 1 j));
+        let h2 = zpk!(f64[s] = s + 2);
 
-        println!("{:?}", h2)
+        let h = (h1 + h2)/zpk!(f64[s] = 1 - s);
+
+        println!("{:?}", h);
     }
 }

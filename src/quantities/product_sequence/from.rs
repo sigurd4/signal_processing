@@ -3,36 +3,36 @@
 
 use crate::ProductSequence;
 
-impl<T> From<ProductSequence<T, ()>> for ProductSequence<T, [T; 0]>
+impl<T1, T2> From<ProductSequence<T1, ()>> for ProductSequence<T2, [T2; 0]>
 {
-    fn from(_: ProductSequence<T, ()>) -> Self
+    fn from(_: ProductSequence<T1, ()>) -> Self
     {
         Self::new(
             []
         )
     }
 }
-impl<T> From<ProductSequence<T, ()>> for ProductSequence<T, &[T; 0]>
+impl<T1, T2> From<ProductSequence<T1, ()>> for ProductSequence<T2, &[T2; 0]>
 {
-    fn from(_: ProductSequence<T, ()>) -> Self
+    fn from(_: ProductSequence<T1, ()>) -> Self
     {
         Self::new(
             &[]
         )
     }
 }
-impl<T> From<ProductSequence<T, ()>> for ProductSequence<T, Vec<T>>
+impl<T1, T2> From<ProductSequence<T1, ()>> for ProductSequence<T2, Vec<T2>>
 {
-    fn from(_: ProductSequence<T, ()>) -> Self
+    fn from(_: ProductSequence<T1, ()>) -> Self
     {
         Self::new(
             vec![]
         )
     }
 }
-impl<T> From<ProductSequence<T, ()>> for ProductSequence<T, &[T]>
+impl<T1, T2> From<ProductSequence<T1, ()>> for ProductSequence<T2, &[T2]>
 {
-    fn from(_: ProductSequence<T, ()>) -> Self
+    fn from(_: ProductSequence<T1, ()>) -> Self
     {
         Self::new(
             &[]
@@ -40,36 +40,42 @@ impl<T> From<ProductSequence<T, ()>> for ProductSequence<T, &[T]>
     }
 }
 
-impl<T, const M: usize> From<ProductSequence<T, [T; M]>> for ProductSequence<T, Vec<T>>
+impl<T1, T2, const M: usize> From<ProductSequence<T1, [T1; M]>> for ProductSequence<T2, Vec<T2>>
+where
+    T1: Into<T2>
 {
-    fn from(s: ProductSequence<T, [T; M]>) -> Self
+    fn from(s: ProductSequence<T1, [T1; M]>) -> Self
     {
         Self::new(
             s.s.into_iter()
+                .map(Into::into)
                 .collect()
         )
     }
 }
 
-impl<T, const M: usize> From<ProductSequence<T, &[T; M]>> for ProductSequence<T, [T; M]>
+impl<T1, T2, const M: usize> From<ProductSequence<T1, &[T1; M]>> for ProductSequence<T2, [T2; M]>
 where
-    T: Clone
+    T1: Clone + Into<T2>
 {
-    fn from(s: ProductSequence<T, &[T; M]>) -> Self
+    fn from(s: ProductSequence<T1, &[T1; M]>) -> Self
     {
         Self::new(
             s.s.clone()
+                .map(Into::into)
         )
     }
 }
-impl<T, const M: usize> From<ProductSequence<T, &[T; M]>> for ProductSequence<T, Vec<T>>
+impl<T1, T2, const M: usize> From<ProductSequence<T1, &[T1; M]>> for ProductSequence<T2, Vec<T2>>
 where
-    T: Clone
+    T1: Clone + Into<T2>
 {
-    fn from(s: ProductSequence<T, &[T; M]>) -> Self
+    fn from(s: ProductSequence<T1, &[T1; M]>) -> Self
     {
         Self::new(
-            s.s.to_vec()
+            s.s.iter()
+                .map(|s| s.clone().into())
+                .collect()
         )
     }
 }
@@ -83,14 +89,16 @@ impl<'a, T, const M: usize> From<ProductSequence<T, &'a [T; M]>> for ProductSequ
     }
 }
 
-impl<T> From<ProductSequence<T, &[T]>> for ProductSequence<T, Vec<T>>
+impl<T1, T2> From<ProductSequence<T1, &[T1]>> for ProductSequence<T2, Vec<T2>>
 where
-    T: Clone
+    T1: Clone + Into<T2>
 {
-    fn from(s: ProductSequence<T, &[T]>) -> Self
+    fn from(s: ProductSequence<T1, &[T1]>) -> Self
     {
         Self::new(
-            s.s.to_vec()
+            s.s.iter()
+                .map(|s| s.clone().into())
+                .collect()
         )
     }
 }

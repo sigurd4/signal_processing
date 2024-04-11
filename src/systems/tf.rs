@@ -77,10 +77,13 @@ impl<T: ComplexFloat, B: MaybeLists<T>, A: MaybeList<T>> Tf<T, B, A>
     }
     pub fn zero() -> Self
     where
-        Self: Default,
-        B: Default
+        Polynomial<T, [T; 0]>: Into<Polynomial<T, B>>,
+        Polynomial<T, ()>: Into<Polynomial<T, A>>
     {
-        Tf {b: Polynomial::new(B::default()), ..Default::default()}
+        Tf {
+            b: Polynomial::new([]).into(),
+            a: Polynomial::new(()).into()
+        }
     }
     pub fn is_one(&self) -> bool
     where
@@ -90,7 +93,7 @@ impl<T: ComplexFloat, B: MaybeLists<T>, A: MaybeList<T>> Tf<T, B, A>
     }
     pub fn is_zero(&self) -> bool
     where
-        B: MaybeList<T>
+        B: MaybeLists<T>
     {
         self.b.is_zero() && !self.a.is_zero()
     }

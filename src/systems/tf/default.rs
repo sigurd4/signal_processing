@@ -1,4 +1,4 @@
-use num::{complex::ComplexFloat};
+use num::complex::ComplexFloat;
 
 use crate::{MaybeList, MaybeLists, Polynomial, Tf};
 

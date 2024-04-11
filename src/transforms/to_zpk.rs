@@ -20,7 +20,7 @@ where
 
 impl<T1, Z1, P1, K1, T2, Z2, P2, K2> ToZpk<T2, Z2, P2, K2, (), ()> for Zpk<T1, Z1, P1, K1>
 where
-    T1: ComplexFloat,
+    T1: ComplexFloat + Into<T2>,
     T2: ComplexFloat,
     K1: ComplexFloat<Real = T1::Real> + Into<K2>,
     K2: ComplexFloat<Real = T2::Real>,
@@ -28,14 +28,16 @@ where
     P1: MaybeList<T1>,
     Z2: MaybeList<T2>,
     P2: MaybeList<T2>,
-    ProductSequence<T1, Z1>: Into<ProductSequence<T2, Z2>>,
-    ProductSequence<T1, P1>: Into<ProductSequence<T2, P2>>
+    Z1::MaybeMapped<T2>: MaybeList<T2>,
+    P1::MaybeMapped<T2>: MaybeList<T2>,
+    ProductSequence<T2, Z1::MaybeMapped<T2>>: Into<ProductSequence<T2, Z2>>,
+    ProductSequence<T2, P1::MaybeMapped<T2>>: Into<ProductSequence<T2, P2>>
 {
     fn to_zpk(self, (): (), (): ()) -> Zpk<T2, Z2, P2, K2>
     {
         Zpk {
-            z: self.z.into(),
-            p: self.p.into(),
+            z: ProductSequence::new(self.z.into_inner().maybe_map_into_owned(|z| z.into())).into(),
+            p: ProductSequence::new(self.p.into_inner().maybe_map_into_owned(|p| p.into())).into(),
             k: self.k.into()
         }
     }

@@ -106,44 +106,52 @@ where
     }
 }
 
-impl<T, Z, P, K> Normalize for Zpk<T, Z, P, K>
+impl<T, Z, P, Z2, P2, K> Normalize for Zpk<T, Z, P, K>
 where
     T: ComplexFloat,
-    Z: MaybeList<T>,
-    P: MaybeList<T>,
+    Z: MaybeList<T, MaybeSome: StaticMaybe<Z::Some, Maybe<Vec<T>> = Z2>>,
+    P: MaybeList<T, MaybeSome: StaticMaybe<Z::Some, Maybe<Vec<T>> = P2>>,
     K: ComplexFloat<Real = T::Real>,
-    ProductSequence<T, Z>: Into<ProductSequence<T, Vec<T>>>,
-    ProductSequence<T, P>: Into<ProductSequence<T, Vec<T>>>,
+    ProductSequence<T, Z>: Into<ProductSequence<T, Z2>>,
+    ProductSequence<T, P>: Into<ProductSequence<T, P2>>,
+    Z2: MaybeList<T> + Maybe<Vec<T>>,
+    P2: MaybeList<T> + Maybe<Vec<T>>,
 {
-    type Output = Zpk<T, Vec<T>, Vec<T>, K>;
+    type Output = Zpk<T, Z2, P2, K>;
 
     fn normalize(self) -> Self::Output
     {
-        let Zpk::<T, Vec<T>, Vec<T>, K> {mut z, mut p, k} = Zpk {
+        let Zpk::<T, Z2, P2, K> {mut z, mut p, k} = Zpk {
             z: self.z.into(),
             p: self.p.into(),
             k: self.k
         };
 
-        let mut i = 0;
-        'lp:
-        while i < z.len()
+        let z_op: Option<&mut Vec<_>> = z.deref_mut().as_option_mut();
+        let p_op: Option<&mut Vec<_>> = p.deref_mut().as_option_mut();
+
+        if let Some(z) = z_op && let Some(p) = p_op
         {
-            let mut j = 0;
-            while j < p.len()
+            let mut i = 0;
+            'lp:
+            while i < z.len()
             {
-                if (z[i] - p[i]).abs() < T::Real::epsilon()
+                let mut j = 0;
+                while j < p.len()
                 {
-                    z.remove(i);
-                    p.remove(j);
-                    continue 'lp;
+                    if (z[i] - p[j]).abs() < T::Real::epsilon()
+                    {
+                        z.remove(i);
+                        p.remove(j);
+                        continue 'lp;
+                    }
+                    else
+                    {
+                        j += 1;
+                    }
                 }
-                else
-                {
-                    j += 1;
-                }
+                i += 1;
             }
-            i += 1;
         }
 
         Zpk {
