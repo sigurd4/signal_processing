@@ -9,12 +9,13 @@ where
     X: Into<<Self::Domain as ComplexOp<X>>::Output> + ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>,
     XX: Lists<X>
 {
-    type Output: ListOrSingle<XX::Mapped<<Self::Domain as ComplexOp<X>>::Output>>;
+    type Y: Lists<<Self::Domain as ComplexOp<X>>::Output>;
+    type Output: ListOrSingle<Self::Y>;
 
     fn filter<W: Maybe<Vec<<Self::Domain as ComplexOp<X>>::Output>>>(&'a self, x: XX, w: W) -> Self::Output;
 }
 
-impl<'a, W, S, X, XX, O> Filter<'a, X, XX> for S
+impl<'a, W, S, X, XX, Y, O> Filter<'a, X, XX> for S
 where
     S: System,
     S::Domain: ComplexOp<X, Output = W>,
@@ -22,9 +23,11 @@ where
     XX: Lists<X>,
     W: ComplexOp<X, Output = W> + ComplexFloat<Real = <S::Domain as ComplexFloat>::Real> + 'a,
     S: 'a,
-    Rtf<'a, W, S>: FilterMut<X, XX, Output = O> + RtfOrSystem<Domain = W>,
-    O: ListOrSingle<XX::Mapped<<W as ComplexOp<X>>::Output>>
+    Rtf<'a, W, S>: FilterMut<X, XX, Y = Y, Output = O> + RtfOrSystem<Domain = W>,
+    O: ListOrSingle<Y>,
+    Y: Lists<W>
 {
+    type Y = Y;
     type Output = O;
 
     fn filter<WW: Maybe<Vec<W>>>(&'a self, x: XX, w: WW) -> Self::Output

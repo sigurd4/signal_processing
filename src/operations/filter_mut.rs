@@ -5,20 +5,20 @@ use num::{complex::ComplexFloat, Zero};
 
 use crate::{ComplexOp, ListOrSingle, Lists, MaybeList, MaybeLists, Rtf, RtfOrSystem, Tf};
 
-pub trait FilterMut<X, XX, YY>: RtfOrSystem
+pub trait FilterMut<X, XX>: RtfOrSystem
 where
     Self::Domain: ComplexOp<X>,
     X: Into<<Self::Domain as ComplexOp<X>>::Output>,
     X: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>,
-    XX: Lists<X>,
-    YY: Lists<<Self::Domain as ComplexOp<X>>::Output>
+    XX: Lists<X>
 {
-    type Output: ListOrSingle<YY>;
+    type Y: Lists<<Self::Domain as ComplexOp<X>>::Output>;
+    type Output: ListOrSingle<Self::Y>;
 
     fn filter_mut(&mut self, x: XX) -> Self::Output;
 }
 
-impl<'b, W, T, B, A, X, XX> FilterMut<X, XX, XX::Mapped<W>> for Rtf<'b, W, Tf<T, B, A>>
+impl<'b, W, T, B, A, X, XX> FilterMut<X, XX> for Rtf<'b, W, Tf<T, B, A>>
 where
     W: ComplexFloat<Real = T::Real>,
     T: ComplexFloat + ComplexOp<X>,
@@ -29,9 +29,11 @@ where
     &'b Tf<T, B, A>: Into<Tf<T, Vec<Vec<T>>, Vec<T>>>,
     T: ComplexOp<X, Output = W>,
     W: ComplexOp<X, Output = W> + AddAssign + SubAssign,
-    X: Into<W>
+    X: Into<W>,
+    XX::Mapped<W>: Lists<W>
 {
-    type Output = B::RowsMapped<XX::Mapped<W>>;
+    type Y = XX::Mapped<W>;
+    type Output = B::RowsMapped<Self::Y>;
 
     fn filter_mut(&mut self, x: XX) -> Self::Output
     {
