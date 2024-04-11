@@ -1,6 +1,7 @@
 moddef::moddef!(
     flat(pub) mod {
         maxphase,
-        minphase
+        minphase,
+        split_numer_denom
     }
 );

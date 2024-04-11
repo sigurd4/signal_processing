@@ -1,8 +1,8 @@
-use core::{iter::Product, ops::{AddAssign, DivAssign, MulAssign, SubAssign}};
+use core::{iter::Product, ops::{AddAssign, DerefMut, DivAssign, MulAssign, SubAssign}};
 
-use num::{complex::ComplexFloat, Complex};
+use num::{complex::ComplexFloat, Complex, One};
 use array_math::SliceMath;
-use option_trait::Maybe;
+use option_trait::{Maybe, MaybeOr, StaticMaybe};
 
 use crate::{Matrix, MaybeList, MaybeLists, Normalize, ProductSequence, Sos, Ss, System, Tf, ToSos, ToTf, Zpk};
 
@@ -41,56 +41,56 @@ where
     }
 }
 
-impl<'a, T, K, B, A> ToZpk<Complex<<K as ComplexFloat>::Real>, Vec<Complex<<K as ComplexFloat>::Real>>, Vec<Complex<<K as ComplexFloat>::Real>>, K, (), usize> for Tf<T, B, A>
+impl<T, K, B, B2, A, A2, Z, P, O> ToZpk<Complex<<K as ComplexFloat>::Real>, Z, P, K, (), O> for Tf<T, B, A>
 where
-    T: ComplexFloat + 'static,
-    K: ComplexFloat + DivAssign,
-    B: MaybeLists<T>,
-    A: MaybeList<T>,
-    Self: ToTf<K, Vec<K>, Vec<K>, (), usize>,
-
-    Complex<<K as ComplexFloat>::Real>: From<K> + AddAssign + SubAssign + MulAssign + DivAssign + DivAssign<<K as ComplexFloat>::Real>,
-    K: ComplexFloat + ndarray_linalg::Lapack<Complex = Complex<<K as ComplexFloat>::Real>>
-{
-    fn to_zpk(self, (): (), output: usize) -> Zpk<Complex<<K as ComplexFloat>::Real>, Vec<Complex<<K as ComplexFloat>::Real>>, Vec<Complex<<K as ComplexFloat>::Real>>, K>
-    {
-        let tf: Tf<K, Vec<K>, Vec<K>> = self.to_tf((), output);
-        let mut tf = tf.normalize();
-        let k = tf.b.first().copied().unwrap_or(K::zero());
-        for b in tf.b.iter_mut()
-        {
-            *b /= k;
-        }
-        let z = ProductSequence::new(tf.b.rpolynomial_roots());
-        let p = ProductSequence::new(tf.a.rpolynomial_roots());
-        Zpk {
-            z,
-            p,
-            k
-        }
-    }
-}
-impl<T, K, B, A> ToZpk<Complex<<K as ComplexFloat>::Real>, Vec<Complex<<K as ComplexFloat>::Real>>, Vec<Complex<<K as ComplexFloat>::Real>>, K, (), ()> for Tf<T, B, A>
-where
+    O: Maybe<usize>,
     T: ComplexFloat,
     K: ComplexFloat + DivAssign,
-    B: MaybeList<T>,
-    A: MaybeList<T>,
-    Self: ToTf<K, Vec<K>, Vec<K>, (), ()>,
+    B: MaybeLists<T, MaybeSome: StaticMaybe<B::Some, Maybe<Vec<Complex<<K as ComplexFloat>::Real>>>: MaybeOr<Vec<Complex<<K as ComplexFloat>::Real>>, Z, Output = Z>>>,
+    A: MaybeList<T, MaybeSome: StaticMaybe<A::Some, Maybe<Vec<Complex<<K as ComplexFloat>::Real>>>: MaybeOr<Vec<Complex<<K as ComplexFloat>::Real>>, P, Output = P>>>,
+    Z: MaybeList<Complex<<K as ComplexFloat>::Real>> + StaticMaybe<Vec<Complex<<K as ComplexFloat>::Real>>, Maybe<Vec<K>> = B2>,
+    P: MaybeList<Complex<<K as ComplexFloat>::Real>> + StaticMaybe<Vec<Complex<<K as ComplexFloat>::Real>>, Maybe<Vec<K>> = A2>,
+    Self: Normalize<Output: ToTf<K, B2, A2, (), O>>,
+    B2: MaybeList<K> + Maybe<Vec<K>>,
+    A2: MaybeList<K> + Maybe<Vec<K>>,
     Complex<<K as ComplexFloat>::Real>: From<K> + AddAssign + SubAssign + MulAssign + DivAssign + DivAssign<<K as ComplexFloat>::Real>,
     K: ComplexFloat + ndarray_linalg::Lapack<Complex = Complex<<K as ComplexFloat>::Real>>
 {
-    fn to_zpk(self, (): (), (): ()) -> Zpk<Complex<<K as ComplexFloat>::Real>, Vec<Complex<<K as ComplexFloat>::Real>>, Vec<Complex<<K as ComplexFloat>::Real>>, K>
+    fn to_zpk(self, (): (), output: O) -> Zpk<Complex<<K as ComplexFloat>::Real>, Z, P, K>
     {
-        let tf: Tf<K, Vec<K>, Vec<K>> = self.to_tf((), ());
-        let mut tf = tf.normalize();
-        let k = tf.b.first().copied().unwrap_or(K::zero());
-        for b in tf.b.iter_mut()
+        let mut tf: Tf<K, B2, A2> = self.normalize().to_tf((), output);
+
+        let mut b_op: Option<&mut Vec<K>> = tf.b.deref_mut().as_option_mut();
+        let kb = if let Some(b) = &mut b_op
         {
-            *b /= k;
+            let k = b.first().copied().unwrap_or(K::zero());
+            for b in b.iter_mut()
+            {
+                *b /= k;
+            }
+            k
         }
-        let z = ProductSequence::new(tf.b.rpolynomial_roots());
-        let p = ProductSequence::new(tf.a.rpolynomial_roots());
+        else
+        {
+            One::one()
+        };
+        let mut a_op: Option<&mut Vec<K>> = tf.a.deref_mut().as_option_mut();
+        let ka = if let Some(a) = &mut a_op
+        {
+            let k = a.first().copied().unwrap_or(K::zero());
+            for a in a.iter_mut()
+            {
+                *a /= k;
+            }
+            k
+        }
+        else
+        {
+            One::one()
+        };
+        let k = kb/ka;
+        let z = ProductSequence::new(StaticMaybe::maybe_from_fn(|| b_op.unwrap().rpolynomial_roots()));
+        let p = ProductSequence::new(StaticMaybe::maybe_from_fn(|| a_op.unwrap().rpolynomial_roots()));
         Zpk {
             z,
             p,

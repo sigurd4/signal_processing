@@ -1,9 +1,9 @@
-use core::{iter::Product, ops::{Add, Div, Mul, Neg, Sub}};
+use core::ops::{Add, Div, Mul, Neg, Sub};
 
 use num::{complex::ComplexFloat, traits::Inv};
 use option_trait::Maybe;
 
-use crate::{MaybeList, MaybeLists, Polynomial, ProductSequence, Tf};
+use crate::{MaybeList, Polynomial, ProductSequence, Tf, ToTf};
 
 moddef::moddef!(
     mod {
@@ -74,19 +74,13 @@ where
             sos: ProductSequence::new([Tf::zero()]).into()
         }
     }
-    pub fn is_one<'a>(&'a self) -> bool
+    pub fn is_one(&self) -> bool
     where
-        B::View<'a>: MaybeLists<T>,
-        A::View<'a>: MaybeList<T>,
-        Tf<T, Vec<T>, Vec<T>>: Product<Tf<T, B::View<'a>, A::View<'a>>>
+        Self: ToTf<T, Vec<T>, Vec<T>, (), ()> + Clone
     {
-        !self.sos.as_view_slice_option()
-            .is_some_and(|sos| {
-                !sos.iter()
-                    .map(|sos| sos.as_view())
-                    .product::<Tf<T, Vec<T>, Vec<T>>>()
-                    .is_one()
-            })
+        self.clone()
+            .to_tf((), ())
+            .is_one()
     }
     pub fn is_zero(&self) -> bool
     {
@@ -95,6 +89,22 @@ where
                 sos.iter()
                     .any(|sos| sos.is_zero())
             })
+    }
+
+    pub fn s() -> Self
+    where
+        Polynomial<T, [T; 3]>: Into<Polynomial<T, B>>,
+        Polynomial<T, ()>: Into<Polynomial<T, A>>,
+        ProductSequence<Tf<T, B, A>, [Tf<T, B, A>; 1]>: Into<ProductSequence<Tf<T, B, A>, S>>
+    {
+        Sos {
+            sos: ProductSequence::new([
+                Tf {
+                    b: Polynomial::new([T::zero(), T::one(), T::zero()]).into(),
+                    a: Polynomial::new(()).into()
+                }
+            ]).into()
+        }
     }
 }
 
@@ -214,3 +224,102 @@ impl_op2_extra!(Add::add);
 impl_op2_extra!(Sub::sub);
 impl_op2_extra!(Mul::mul);
 impl_op2_extra!(Div::div);
+
+#[allow(unused)]
+macro s {
+    (s) => {},
+    (z) => {},
+}
+pub macro sos {
+    ($t:path[$s:ident]= {$e:expr}) => {
+        {
+            Sos::<$t, [$t; 3], (), [_; 1]>::$s();
+            s!($s);
+            $e
+        }
+    },
+    ($t:path[$s:ident]=) => {
+        {
+            Sos::<$t, [$t; 3], (), [_; 1]>::$s();
+            s!($s);
+            Tf::<$t, _, _>::new([], ())
+        }
+    },
+    ($t:path[$s:ident]= $c:literal) => {
+        {
+            Sos::<$t, [$t; 3], (), [_; 1]>::$s();
+            s!($s);
+            Sos::<$t, _, _, _>::new([Tf::<$t, _, _>::new([<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from($c).unwrap()], ())])
+        }
+    },
+    ($t:path[$s:ident]= $c:literal + $ci:literal j) => {
+        {
+            Sos::<$t, [$t; 3], (), [_; 1]>::$s();
+            s!($s);
+            Sos::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, _>::new([Tf::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _>::new([num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from(0).unwrap()), num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from(0).unwrap()), num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], ())])
+        }
+    },
+    ($t:path[$s:ident]= $c:literal - $ci:literal j) => {
+        {
+            Sos::<$t, [$t; 3], (), [_; 1]>::$s();
+            s!($s);
+            Sos::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, _>::new([Tf::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _>::new([num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from(0).unwrap()), num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from(0).unwrap()), num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], ())])
+        }
+    },
+    ($t:path[$s:ident]= $ci:literal j) => {
+        {
+            Sos::<$t, [$t; 3], (), [_; 1]>::$s();
+            s!($s);
+            Sos::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, _>::new([Tf::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _>::new([num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from(0).unwrap()), num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from(0).unwrap()), num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], ())])
+        }
+    },
+    ($t:path[$s:ident]= $ss:ident) => {
+        {
+            #[allow(unused)]
+            let $s = Sos::<$t, [$t; 3], (), [_; 1]>::$s();
+            s!($s);
+            s!($ss);
+            Sos::<$t, [$t; 3], (), [_; 1]>::from($ss)
+        }
+    },
+    ($t:path[$s:ident]= $c:literal^$pc:literal) => {
+        {
+            Sos::<$t, [$t; 3], (), [_; 1]>::$s();
+            s!($s);
+            num::traits::Pow::pow(Sos::<$t, _, _, _>::new([Tf::<$t, _, _>::new([<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from($c).unwrap()], ())]), $pc)
+        }
+    },
+    ($t:path[$s:ident]= $ss:ident^$ps:literal) => {
+        {
+            #[allow(unused)]
+            let $s = Sos::<$t, [$t; 3], (), [_; 1]>::$s();
+            s!($s);
+            s!($ss);
+            num::traits::Pow::pow(Sos::<$t, [$t; 3], (), [_; 1]>::from($ss), $ps)
+        }
+    },
+    ($t:path[$s:ident]= ($($lhs:tt)*)^$lp:literal $($op:tt ($($rhs:tt)*))?) => {
+        num::traits::Pow::pow(sos!($t[$s]= $($lhs)*), $lp)$($op sos!($t[$s]= $($rhs)*))*
+    },
+    ($t:path[$s:ident]= ($($lhs:tt)*) $($op:tt ($($rhs:tt)*))?) => {
+        sos!($t[$s]= $($lhs)*)$($op sos!($t[$s]= $($rhs)*))*
+    },
+    ($t:path[$s:ident]= $lhs:tt$(^$lp:literal)? $($op:tt $rhs:tt$(^$rp:literal)?)*) => {
+        sos!($t[$s]= $lhs$(^$lp)?)$($op sos!($t[$s]= $rhs$(^$rp)?))*
+    },
+}
+
+#[cfg(test)]
+mod test
+{
+    use super::sos;
+
+    #[test]
+    fn test()
+    {
+        let h = sos!(f64[s] = (((2*(s^-3))^-2) + 1 + 2*(s^2))/(s + 1)*2);
+        let h2 = sos!(f64[s] = {h}*2);
+
+        println!("{:?}", h2);
+    }
+}

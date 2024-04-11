@@ -15,3 +15,13 @@ where
         Polynomial::new(()).into()
     }
 }
+impl<T> One for Polynomial<T, ()>
+where
+    Self: Mul<Output = Self>,
+    Polynomial<T, ()>: Into<Self>
+{
+    fn one() -> Self
+    {
+        Polynomial::new(()).into()
+    }
+}

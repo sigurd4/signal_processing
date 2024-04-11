@@ -1,12 +1,12 @@
-use core::ops::Mul;
+use core::{iter::Product, ops::Mul};
 
 use ndarray::{Array1, Array2};
 use ndarray_linalg::EigVals;
 use num::{complex::ComplexFloat, Complex, One, Zero};
 
-use option_trait::Maybe;
+use option_trait::{Maybe, NotVoid, StaticMaybe};
 
-use crate::{Matrix, MaybeList, MaybeLists, Normalize, Polynomial, Sos, Ss, System, Tf, ToSos, ToZpk, Zpk};
+use crate::{Matrix, MaybeList, MaybeLists, MaybeOwnedList, Normalize, Polynomial, Sos, SplitNumerDenom, Ss, System, Tf, ToSos, ToZpk, Zpk};
 
 
 pub trait ToTf<T, B, A, I, O>: System
@@ -108,7 +108,7 @@ where
 {
     fn to_tf(self, input: usize, (): ()) -> Tf<T2, Vec<Vec<T2>>, Vec<T2>>
     {
-        let mut ss = Ss::new(
+        let ss = Ss::new(
             self.a.to_array2(),
             self.b.to_array2(),
             self.c.to_array2(),
@@ -192,27 +192,57 @@ where
     }
 }
 
-impl<T1, T2, B, A, S> ToTf<T2, Vec<T2>, Vec<T2>, (), ()> for Sos<T1, B, A, S>
+impl<T1, T2, B, A, S, BS, AS> ToTf<T2, B::Maybe<Vec<T2>>, A::Maybe<Vec<T2>>, (), ()> for Sos<T1, B, A, S>
 where
     T1: ComplexFloat + Into<T2>,
     T2: ComplexFloat + 'static,
-    B: Maybe<[T1; 3]> + MaybeList<T1>,
-    A: Maybe<[T1; 3]> + MaybeList<T1>,
-    Self: ToSos<T2, [T2; 3], [T2; 3], Vec<Tf<T2, [T2; 3], [T2; 3]>>, (), ()>,
-    Polynomial<T2, Vec<T2>>: One,
+    B: StaticMaybe<[T1; 3]> + MaybeList<T1>,
+    A: StaticMaybe<[T1; 3]> + MaybeList<T1>,
+    B::MaybeMapped<T2>: StaticMaybe<[T2; 3]> + MaybeList<T2>,
+    A::MaybeMapped<T2>: StaticMaybe<[T2; 3]> + MaybeList<T2>,
+    Self: ToSos<T2, B::MaybeMapped<T2>, A::MaybeMapped<T2>, Vec<Tf<T2, B::MaybeMapped<T2>, A::MaybeMapped<T2>>>, (), ()>,
+    Polynomial<T2, B::Maybe<Vec<T2>>>: Product<Polynomial<T2, B::MaybeMapped<T2>>> + One,
+    Polynomial<T2, A::Maybe<Vec<T2>>>: Product<Polynomial<T2, A::MaybeMapped<T2>>> + One,
     S: MaybeList<Tf<T1, B, A>>,
-    Tf<T2, Vec<T2>, Vec<T2>>: Normalize<Output = Tf<T2, Vec<T2>, Vec<T2>>>
+    B::Maybe<Vec<T2>>: MaybeOwnedList<T2>,
+    A::Maybe<Vec<T2>>: MaybeOwnedList<T2>,
+    Vec<T1>: NotVoid,
+    Vec<T2>: NotVoid,
+    Tf<T2, B::Maybe<Vec<T2>>, A::Maybe<Vec<T2>>>: Normalize<Output = Tf<T2, B::Maybe<Vec<T2>>, A::Maybe<Vec<T2>>>>,
+    Sos<T2, B::MaybeMapped<T2>, A::MaybeMapped<T2>, Vec<Tf<T2, B::MaybeMapped<T2>, A::MaybeMapped<T2>>>>: SplitNumerDenom<OutputNum = Sos<T2, B::MaybeMapped<T2>, (), BS>, OutputDen = Sos<T2, (), A::MaybeMapped<T2>, AS>>,
+    BS: Maybe<Vec<Tf<T2, B::MaybeMapped<T2>, ()>>> + MaybeList<Tf<T2, B::MaybeMapped<T2>, ()>>,
+    AS: Maybe<Vec<Tf<T2, (), A::MaybeMapped<T2>>>> + MaybeList<Tf<T2, (), A::MaybeMapped<T2>>>
 {
-    fn to_tf(self, (): (), (): ()) -> Tf<T2, Vec<T2>, Vec<T2>>
+    fn to_tf(self, (): (), (): ()) -> Tf<T2, B::Maybe<Vec<T2>>, A::Maybe<Vec<T2>>>
     {
-        let Sos {sos}: Sos<T2, [T2; 3], [T2; 3], Vec<_>> = self.to_sos((), ());
+        let sos: Sos<T2, B::MaybeMapped<T2>, A::MaybeMapped<T2>, Vec<_>> = self.to_sos((), ());
         
-        let b = sos.iter()
-            .map(|sos| sos.b.as_view())
-            .product::<Polynomial<T2, Vec<T2>>>();
-        let a = sos.iter()
-            .map(|sos| sos.a.as_view())
-            .product::<Polynomial<T2, Vec<T2>>>();
+        let (b, a) = sos.split_numer_denom();
+
+        let b_op: Option<Vec<Tf<T2, B::MaybeMapped<T2>, ()>>> = b.sos.into_inner()
+            .into_option();
+        let b = if let Some(b) = b_op
+        {
+            b.into_iter()
+                .map(|sos| sos.b)
+                .product::<Polynomial<T2, B::Maybe<Vec<T2>>>>()
+        }
+        else
+        {
+            One::one()
+        };
+        let a_op: Option<Vec<Tf<T2, (), A::MaybeMapped<T2>>>> = a.sos.into_inner()
+            .into_option();
+        let a = if let Some(a) = a_op
+        {
+            a.into_iter()
+                .map(|sos| sos.a)
+                .product::<Polynomial<T2, A::Maybe<Vec<T2>>>>()
+        }
+        else
+        {
+            One::one()
+        };
         Tf {
             b,
             a

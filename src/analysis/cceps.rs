@@ -29,7 +29,8 @@ where
     T::Real: AddAssign + SubAssign + Sum + Into<Complex<T::Real>> + Into<T>,
     L: List<T>,
     C: List<T>,
-    Vec<T>: TryInto<C>
+    Vec<T>: TryInto<C>,
+    <C::Length as StaticMaybe<usize>>::Opposite: Sized
 {
     fn cceps(&self, n: <C::Length as StaticMaybe<usize>>::Opposite) -> Result<C, CCepsError>
     {

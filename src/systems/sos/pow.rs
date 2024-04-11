@@ -1,7 +1,7 @@
 use core::ops::{BitAnd, Shr};
 
-use num::{complex::ComplexFloat, pow::Pow, traits::Inv, Integer, One};
-use option_trait::Maybe;
+use num::{complex::ComplexFloat, pow::Pow, traits::Inv, Integer};
+use option_trait::{Maybe, MaybeOr};
 
 use crate::{MaybeList, Sos, Tf, ToSos};
 
@@ -10,9 +10,10 @@ where
     T: ComplexFloat,
     B: Maybe<[T; 3]> + MaybeList<T>,
     A: Maybe<[T; 3]> + MaybeList<T>,
+    [T; 3]: MaybeOr<[T; 3], [T; 3], Output = [T; 3]>,
     S: MaybeList<Tf<T, B, A>>,
     I: Integer + BitAnd<I, Output = I> + Shr<usize, Output = I> + Copy,
-    Self: ToSos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()> + Inv<Output: ToSos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()>> + One,
+    Self: ToSos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()> + Inv<Output: ToSos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()>>,
 {
     type Output = Sos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>>;
 

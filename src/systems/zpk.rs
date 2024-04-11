@@ -321,103 +321,172 @@ macro_rules! impl_op2_extra {
 impl_op2_extra!(Mul::mul);
 impl_op2_extra!(Div::div);
 
+#[allow(unused)]
+macro s {
+    (s) => {},
+    (z) => {},
+}
+
 pub macro zpk {
-    ($t:path[s]=) => {
-        Zpk::<$t, _, _, $t>::new((), ())
+    ($t:path[$s:ident]= {$e:expr}) => {
+        {
+            Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            $e
+        }
     },
-    ($t:path[z]=) => {
-        Zpk::<$t, _, _, $t>::new((), ())
+    ($t:path[$s:ident]=) => {
+        {
+            Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            Zpk::<$t, _, _, $t>::new((), ())
+        }
     },
-    ($t:path[s]= $c:literal) => {
-        Zpk::<$t, _, _, $t>::new((), (), <$t as num::NumCast>::from($c).unwrap())
+    ($t:path[$s:ident]= $c:literal) => {
+        {
+            Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            Zpk::<$t, _, _, $t>::new((), (), <$t as num::NumCast>::from($c).unwrap())
+        }
     },
-    ($t:path[z]= $c:literal) => {
-        Zpk::<$t, _, _, $t>::new((), (), <$t as num::NumCast>::from($c).unwrap())
+    ($t:path[$s:ident]= $c:literal + $ci:literal j) => {
+        {
+            Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap()))
+        }
     },
-    ($t:path[s]= $c:literal + $ci:literal j) => {
-        Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap()))
+    ($t:path[$s:ident]= $c:literal - $ci:literal j) => {
+        {
+            Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap()))
+        }
     },
-    ($t:path[z]= $c:literal + $ci:literal j) => {
-        Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap()))
-    },
-    ($t:path[s]= $c:literal - $ci:literal j) => {
-        Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap()))
-    },
-    ($t:path[z]= $c:literal - $ci:literal j) => {
-        Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap()))
-    },
-    ($t:path[s]= $ci:literal j) => {
-        Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from($ci).unwrap()))
-    },
-    ($t:path[z]= $ci:literal j) => {
-        Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from($ci).unwrap()))
+    ($t:path[$s:ident]= $ci:literal j) => {
+        {
+            Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            Zpk::<$t, _, _, num::Complex<<$t as num::complex::ComplexFloat>::Real>>::new((), (), num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from($ci).unwrap()))
+        }
     },
 
-    ($t:path[s]= s + $c:literal) => {
-        Zpk::<$t, _, _, $t>::new([-<$t as num::NumCast>::from($c).unwrap()], (), <$t as num::NumCast>::from(1).unwrap())
+    ($t:path[$s:ident]= $ss:ident + $c:literal) => {
+        {
+            #[allow(unused)]
+            let $s = Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            s!($ss);
+            #[allow(unused)]
+            let _ = $ss;
+            Zpk::<$t, _, _, $t>::new([-<$t as num::NumCast>::from($c).unwrap()], (), <$t as num::NumCast>::from(1).unwrap())
+        }
     },
-    ($t:path[z]= s + $c:literal) => {
-        Zpk::<$t, _, _, $t>::new([-<$t as num::NumCast>::from($c).unwrap()], (), <$t as num::NumCast>::from(1).unwrap())
+    ($t:path[$s:ident]= $ss:ident + $c:literal + $ci:literal j) => {
+        {
+            #[allow(unused)]
+            let $s = Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            s!($ss);
+            #[allow(unused)]
+            let _ = $ss;
+            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(-<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+        }
     },
-    ($t:path[s]= s + $c:literal + $ci:literal j) => {
-        Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(-<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+    ($t:path[$s:ident]= $ss:ident + $c:literal - $ci:literal j) => {
+        {
+            #[allow(unused)]
+            let $s = Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            s!($ss);
+            #[allow(unused)]
+            let _ = $ss;
+            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(-<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+        }
     },
-    ($t:path[z]= s + $c:literal + $ci:literal j) => {
-        Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(-<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
-    },
-    ($t:path[s]= s + $c:literal - $ci:literal j) => {
-        Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(-<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
-    },
-    ($t:path[z]= s + $c:literal - $ci:literal j) => {
-        Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(-<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
-    },
-    ($t:path[s]= s + $ci:literal j) => {
-        Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
-    },
-    ($t:path[z]= s + $ci:literal j) => {
-        Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+    ($t:path[$s:ident]= $ss:ident + $ci:literal j) => {
+        {
+            #[allow(unused)]
+            let $s = Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            s!($ss);
+            #[allow(unused)]
+            let _ = $ss;
+            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+        }
     },
     
-    ($t:path[s]= s - $c:literal) => {
-        Zpk::<$t, _, _, $t>::new([<$t as num::NumCast>::from($c).unwrap()], (), <$t as num::NumCast>::from(1).unwrap())
+    ($t:path[$s:ident]= $ss:ident - $c:literal) => {
+        {
+            #[allow(unused)]
+            let $s = Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            s!($ss);
+            #[allow(unused)]
+            let _ = $ss;
+            Zpk::<$t, _, _, $t>::new([<$t as num::NumCast>::from($c).unwrap()], (), <$t as num::NumCast>::from(1).unwrap())
+        }
     },
-    ($t:path[z]= s - $c:literal) => {
-        Zpk::<$t, _, _, $t>::new([<$t as num::NumCast>::from($c).unwrap()], (), <$t as num::NumCast>::from(1).unwrap())
+    ($t:path[$s:ident]= $ss:ident - $c:literal + $ci:literal j) => {
+        {
+            #[allow(unused)]
+            let $s = Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            s!($ss);
+            #[allow(unused)]
+            let _ = $ss;
+            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+        }
     },
-    ($t:path[s]= s - $c:literal + $ci:literal j) => {
-        Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+    ($t:path[$s:ident]= $ss:ident - $c:literal - $ci:literal j) => {
+        {
+            #[allow(unused)]
+            let $s = Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            s!($ss);
+            #[allow(unused)]
+            let _ = $ss;
+            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+        }
     },
-    ($t:path[z]= s - $c:literal + $ci:literal j) => {
-        Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), -<$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
-    },
-    ($t:path[s]= s - $c:literal - $ci:literal j) => {
-        Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
-    },
-    ($t:path[z]= s - $c:literal - $ci:literal j) => {
-        Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from($c).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
-    },
-    ($t:path[s]= s - $ci:literal j) => {
-        Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
-    },
-    ($t:path[z]= s - $ci:literal j) => {
-        Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+    ($t:path[$s:ident]= $ss:ident - $ci:literal j) => {
+        {
+            #[allow(unused)]
+            let $s = Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            s!($ss);
+            #[allow(unused)]
+            let _ = $ss;
+            Zpk::<num::Complex<<$t as num::complex::ComplexFloat>::Real>, _, _, $t>::new([num::Complex::new(<$t as num::NumCast>::from(0).unwrap(), <$t as num::NumCast>::from($ci).unwrap())], (), <$t as num::NumCast>::from(1).unwrap())
+        }
     },
 
     ($t:path[$s:ident]= $ss:ident) => {
         {
+            #[allow(unused)]
             let $s = Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            s!($ss);
             Zpk::<$t, [_; 1], (), $t>::from($ss)
         }
     },
-    ($t:path[s]= $c:literal^$pc:literal) => {
-        num::traits::Pow::pow(Zpk::<$t, _, _, $t>::new((), (), <$t as num::NumCast>::from($c).unwrap()), $pc)
-    },
-    ($t:path[z]= $c:literal^$pc:literal) => {
-        num::traits::Pow::pow(Zpk::<$t, _, _, $t>::new((), (), <$t as num::NumCast>::from($c).unwrap()), $pc)
+    ($t:path[$s:ident]= $c:literal^$pc:literal) => {
+        {
+            #[allow(unused)]
+            let $s = Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            s!($ss);
+            #[allow(unused)]
+            let _ = $ss;
+            num::traits::Pow::pow(Zpk::<$t, _, _, $t>::new((), (), <$t as num::NumCast>::from($c).unwrap()), $pc)
+        }
     },
     ($t:path[$s:ident]= $ss:ident^$ps:literal) => {
         {
+            #[allow(unused)]
             let $s = Zpk::<$t, [_; 1], (), $t>::$s();
+            s!($s);
+            s!($ss);
             num::traits::Pow::pow(Zpk::<$t, [_; 1], (), $t>::from($ss), $ps)
         }
     },
@@ -435,11 +504,14 @@ pub macro zpk {
 #[cfg(test)]
 mod test
 {
-    use crate::{zpk, Chain};
+    use crate::zpk;
 
     #[test]
     fn test()
     {
-        let h = zpk!(f64[s] = (s + 1 + 1 j)*(s + 1 - 1 j)/(s - 1)/(s - 1));
+        let h = zpk!(f64[s] = (s - 1 + 1 j));
+        let h2 = zpk!(f64[s] = {h}/(s - 1 + 1 j));
+
+        println!("{:?}", h2)
     }
 }

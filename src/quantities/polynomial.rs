@@ -2,6 +2,7 @@ use core::{marker::PhantomData, ops::DivAssign};
 
 use array_math::{ArrayOps, SliceMath, SliceOps};
 use num::{complex::ComplexFloat, traits::Euclid, One, Zero, Float};
+use option_trait::NotVoid;
 
 use crate::{Lists, MaybeList, MaybeLists, TruncateIm};
 
@@ -38,6 +39,13 @@ where
     phantom: PhantomData<T>
 }
 
+impl<T, C> NotVoid for Polynomial<T, C>
+where
+    C: MaybeLists<T>
+{
+
+}
+
 impl<T, C> Polynomial<T, C>
 where
     C: MaybeLists<T>
@@ -58,13 +66,13 @@ where
     where
         C::Owned: MaybeLists<T>;
 
-    pub fn as_view<'a>(&'a self) -> Self::View<'a>
+    pub fn as_view<'a>(&'a self) -> Polynomial<T, C::View<'a>>
     where
         C::View<'a>: MaybeLists<T>
     {
         Polynomial::new(self.c.as_view())
     }
-    pub fn to_owned(&self) -> Self::Owned
+    pub fn to_owned(&self) -> Polynomial<T, C::Owned>
     where
         C::Owned: MaybeLists<T>,
         T: Clone

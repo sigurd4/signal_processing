@@ -1,10 +1,11 @@
 
 
 use ndarray::{prelude::ArrayView, ArrayBase, Dimension, NdIndex, OwnedRepr};
+use option_trait::NotVoid;
 
 use crate::MaybeContainer;
 
-pub trait Container<T>: MaybeContainer<T>
+pub trait Container<T>: MaybeContainer<T> + NotVoid
 {
     type Mapped<M>: Container<M> + Sized;
 
@@ -700,7 +701,7 @@ impl<'b, 'c, T, const N: usize> Container<T> for &'b [&'c [T; N]]
 
 impl<T, D> Container<T> for ArrayBase<OwnedRepr<T>, D>
 where
-    D: Dimension,
+    D: Dimension + NotVoid,
     <D as Dimension>::Pattern: NdIndex<D>
 {
     type Mapped<M> = ArrayBase<OwnedRepr<M>, D>;
@@ -725,7 +726,7 @@ where
 
 impl<'c, T, D> Container<T> for ArrayView<'c, T, D>
 where
-    D: Dimension,
+    D: Dimension + NotVoid,
     <D as Dimension>::Pattern: NdIndex<D>
 {
     type Mapped<M> = ArrayBase<OwnedRepr<M>, D>;

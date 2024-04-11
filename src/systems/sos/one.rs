@@ -1,10 +1,9 @@
-use core::iter::Product;
 use std::ops::Mul;
 
 use num::{complex::ComplexFloat, One};
 use option_trait::Maybe;
 
-use crate::{MaybeList, MaybeLists, Sos, Tf};
+use crate::{MaybeList, Sos, Tf, ToTf};
 
 impl<T, B, A, S> One for Sos<T, B, A, S>
 where
@@ -12,10 +11,7 @@ where
     B: Maybe<[T; 3]> + MaybeList<T>,
     A: Maybe<[T; 3]> + MaybeList<T>,
     S: MaybeList<Tf<T, B, A>>,
-    Self: Mul<Output = Self> + Default,
-    for<'a> B::View<'a>: MaybeLists<T>,
-    for<'a> A::View<'a>: MaybeList<T>,
-    Tf<T, Vec<T>, Vec<T>>: for<'a> Product<Tf<T, B::View<'a>, A::View<'a>>>
+    Self: Mul<Output = Self> + Default + ToTf<T, Vec<T>, Vec<T>, (), ()> + Clone,
 {
     fn one() -> Self
     {

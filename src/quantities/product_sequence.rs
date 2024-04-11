@@ -1,5 +1,7 @@
 use core::marker::PhantomData;
 
+use option_trait::NotVoid;
+
 use crate::MaybeList;
 
 moddef::moddef!(
@@ -25,6 +27,13 @@ where
 {
     s: S,
     phantom: PhantomData<T>
+}
+
+impl<T, S> NotVoid for ProductSequence<T, S>
+where
+    S: MaybeList<T>
+{
+
 }
 
 impl<T, S> ProductSequence<T, S>

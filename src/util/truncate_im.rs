@@ -1,6 +1,6 @@
 use core::any::Any;
 
-use num::{complex::ComplexFloat, Complex, Float};
+use num::complex::ComplexFloat;
 
 pub trait TruncateIm: ComplexFloat
 {
