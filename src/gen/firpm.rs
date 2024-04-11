@@ -6,7 +6,7 @@ use option_trait::MaybeCell;
 use rand::distributions::uniform::SampleUniform;
 use thiserror::Error;
 
-use crate::{Polynomial, Ss, System, Tf, ToSs, ToZpk, Zpk};
+use crate::{Polynomial, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToSs, ToZpk, Zpk};
 
 moddef::moddef!(
     mod {
@@ -258,7 +258,8 @@ where
 impl<T> FirPm for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: Float + FloatConst,
-    Tf<T, Vec<T>, ()>: FirPm + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>
+    Tf<T, Vec<T>, ()>: FirPm + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>,
+    Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>>+ SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>
 {
     fn firpm<'a, const B2: usize, const R: usize, const W: usize, const RES: bool>(
         order: usize,

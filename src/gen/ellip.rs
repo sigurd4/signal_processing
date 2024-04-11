@@ -1,11 +1,11 @@
 
 
-use ndarray::{Array2};
+use ndarray::Array2;
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 
 
-use crate::{Bilinear, EllipAP, FilterGenError, FilterGenPlane, FilterGenType, SfTrans, Sos, Ss, System, Tf, ToSos, ToSs, ToTf, Zpk};
+use crate::{Bilinear, EllipAP, FilterGenError, FilterGenPlane, FilterGenType, SfTrans, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToSos, ToSs, ToTf, Zpk};
 
 pub trait Ellip<O>: System + Sized
 where
@@ -214,7 +214,8 @@ where
 impl<T> Ellip<usize> for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Ellip<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Ellip<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>,
+    Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>>+ SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>
 {
     fn ellip<const F: usize>(
         order: usize,

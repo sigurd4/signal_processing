@@ -2,7 +2,7 @@ use ndarray::prelude::Array2;
 use num::{traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 
-use crate::{BesselAP, Bilinear, FilterGenError, FilterGenPlane, FilterGenType, MaybeList, SfTrans, Sos, Ss, System, Tf, ToSos, ToSs, ToTf, Zpk};
+use crate::{BesselAP, Bilinear, FilterGenError, FilterGenPlane, FilterGenType, MaybeList, SfTrans, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToSos, ToSs, ToTf, Zpk};
 
 pub trait BesselF<O>: System + Sized
 where
@@ -200,7 +200,8 @@ where
 impl<T> BesselF<usize> for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>,
+    Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>>+ SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>
 {
     fn besself<const F: usize>(
         order: usize,

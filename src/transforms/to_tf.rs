@@ -6,7 +6,7 @@ use num::{complex::ComplexFloat, Complex, One, Zero};
 
 use option_trait::{Maybe, MaybeOr, NotVoid, StaticMaybe};
 
-use crate::{List, Matrix, MaybeContainer, MaybeList, MaybeLists, MaybeOwnedList, Normalize, Polynomial, Sos, SplitNumerDenom, Ss, System, Tf, ToSos, ToZpk, Zpk};
+use crate::{List, MaybeContainer, MaybeList, MaybeLists, MaybeOwnedList, Normalize, Polynomial, Sos, SplitNumerDenom, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToSos, ToZpk, Zpk};
 
 
 pub trait ToTf<T, B, A, I, O>: System
@@ -128,19 +128,15 @@ where
     Polynomial<Complex<T1::Real>, Vec<Complex<T1::Real>>>: One,
     Polynomial<T1, Vec<T1>>: One,
     T1::Real: Into<T1>,
-    A: Matrix<T1>,
-    B: Matrix<T1>,
-    C: Matrix<T1>,
-    D: Matrix<T1>
+    A: SsAMatrix<T1, B, C, D>,
+    B: SsBMatrix<T1, A, C, D>,
+    C: SsCMatrix<T1, A, B, D>,
+    D: SsDMatrix<T1, A, B, C>,
+    Array2<T1>: SsAMatrix<T1, Array2<T1>, Array2<T1>, Array2<T1>> + SsBMatrix<T1, Array2<T1>, Array2<T1>, Array2<T1>> + SsCMatrix<T1, Array2<T1>, Array2<T1>, Array2<T1>>+ SsDMatrix<T1, Array2<T1>, Array2<T1>, Array2<T1>>
 {
     fn to_tf(self, input: usize, (): ()) -> Tf<T2, Vec<Vec<T2>>, Vec<T2>>
     {
-        let ss = Ss::new(
-            self.a.to_array2(),
-            self.b.to_array2(),
-            self.c.to_array2(),
-            self.d.to_array2()
-        ).normalize();
+        let ss = self.normalize();
 
         let (nout, _nin) = ss.d.dim();
 

@@ -1,9 +1,9 @@
 use ndarray::Array2;
-use num::{complex::ComplexFloat};
+use num::complex::ComplexFloat;
 use option_trait::Maybe;
 use thiserror::Error;
 
-use crate::{Matrix, MaybeList, MaybeLists, Normalize, Sos, Ss, System, Tf, ToTf, Zpk};
+use crate::{MaybeList, MaybeLists, Normalize, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToTf, Zpk};
 
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum ToSsError
@@ -15,38 +15,38 @@ pub enum ToSsError
 pub trait ToSs<T, A, B, C, D>: System
 where
     T: ComplexFloat,
-    A: Matrix<T>,
-    B: Matrix<T>,
-    C: Matrix<T>,
-    D: Matrix<T>
+    A: SsAMatrix<T, B, C, D>,
+    B: SsBMatrix<T, A, C, D>,
+    C: SsCMatrix<T, A, B, D>,
+    D: SsDMatrix<T, A, B, C>
 {
     fn to_ss(self) -> Result<Ss<T, A, B, C, D>, ToSsError>;
 }
 
 impl<T1, A1, B1, C1, D1, T2, A2, B2, C2, D2> ToSs<T2, A2, B2, C2, D2> for Ss<T1, A1, B1, C1, D1>
 where
-    T1: ComplexFloat,
+    T1: ComplexFloat + Clone + Into<T2>,
     T2: ComplexFloat,
-    A1: Matrix<T1>,
-    B1: Matrix<T1>,
-    C1: Matrix<T1>,
-    D1: Matrix<T1>,
-    A2: Matrix<T2>,
-    B2: Matrix<T2>,
-    C2: Matrix<T2>,
-    D2: Matrix<T2>,
-    A1: Into<A2>,
-    B1: Into<B2>,
-    C1: Into<C2>,
-    D1: Into<D2>,
+    A1: SsAMatrix<T1, B1, C1, D1>,
+    A2: SsAMatrix<T2, B2, C2, D2>,
+    B1: SsBMatrix<T1, A1, C1, D1>,
+    B2: SsBMatrix<T2, A2, C2, D2>,
+    C1: SsCMatrix<T1, A1, B1, D1>,
+    C2: SsCMatrix<T2, A2, B2, D2>,
+    D1: SsDMatrix<T1, A1, B1, C1>,
+    D2: SsDMatrix<T2, A2, B2, C2>,
+    A1::Mapped<T2>: Into<A2>,
+    B1::Mapped<T2>: Into<B2>,
+    C1::Mapped<T2>: Into<C2>,
+    D1::Mapped<T2>: Into<D2>,
 {
     fn to_ss(self) -> Result<Ss<T2, A2, B2, C2, D2>, ToSsError>
     {
         Ok(Ss::new(
-            self.a.into(),
-            self.b.into(),
-            self.c.into(),
-            self.d.into()
+            self.a.map_into_owned(|x| x.into()).into(),
+            self.b.map_into_owned(|x| x.into()).into(),
+            self.c.map_into_owned(|x| x.into()).into(),
+            self.d.map_into_owned(|x| x.into()).into()
         ))
     }
 }
@@ -58,7 +58,8 @@ where
     B: MaybeLists<T1>,
     A: MaybeList<T1>,
     Self: ToTf<T2, Vec<Vec<T2>>, Vec<T2>, (), ()>,
-    Tf<T2, Vec<Vec<T2>>, Vec<T2>>: Normalize<Output = Tf<T2, Vec<Vec<T2>>, Vec<T2>>>
+    Tf<T2, Vec<Vec<T2>>, Vec<T2>>: Normalize<Output = Tf<T2, Vec<Vec<T2>>, Vec<T2>>>,
+    Array2<T2>: SsAMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>> + SsBMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>> + SsCMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>>+ SsDMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>>
 {
     fn to_ss(self) -> Result<Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>, ToSsError>
     {
@@ -142,7 +143,8 @@ where
     Z: MaybeList<T1>,
     P: MaybeList<T1>,
     Self: ToTf<T2, Vec<T2>, Vec<T2>, (), ()>,
-    Tf<T2, Vec<T2>, Vec<T2>>: ToSs<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>
+    Tf<T2, Vec<T2>, Vec<T2>>: ToSs<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>,
+    Array2<T2>: SsAMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>> + SsBMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>> + SsCMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>>+ SsDMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>>
 {
     fn to_ss(self) -> Result<Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>, ToSsError>
     {
@@ -159,7 +161,8 @@ where
     A: Maybe<[T1; 3]> + MaybeList<T1>,
     S: MaybeList<Tf<T1, B, A>>,
     Self: ToTf<T2, Vec<T2>, Vec<T2>, (), ()>,
-    Tf<T2, Vec<T2>, Vec<T2>>: ToSs<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>
+    Tf<T2, Vec<T2>, Vec<T2>>: ToSs<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>,
+    Array2<T2>: SsAMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>> + SsBMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>> + SsCMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>>+ SsDMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>>
 {
     fn to_ss(self) -> Result<Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>, ToSsError>
     {

@@ -4,7 +4,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 
 
-use crate::{Bilinear, ButtAP, FilterGenError, FilterGenPlane, FilterGenType, SfTrans, Sos, Ss, System, Tf, ToSos, ToSs, ToTf, Zpk};
+use crate::{Bilinear, ButtAP, FilterGenError, FilterGenPlane, FilterGenType, SfTrans, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToSos, ToSs, ToTf, Zpk};
 
 pub trait Butter<O>: System + Sized
 where
@@ -201,7 +201,8 @@ where
 impl<T> Butter<usize> for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Butter<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Butter<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>,
+    Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>>+ SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>
 {
     fn butter<const F: usize>(
         order: usize,

@@ -6,7 +6,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 use thiserror::Error;
 
-use crate::{Polynomial, Ss, System, Tf, ToSs, ToZpk, Zpk, FilterClassType};
+use crate::{FilterClassType, Polynomial, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToSs, ToZpk, Zpk};
 
 moddef::moddef!(
     mod {
@@ -164,7 +164,8 @@ where
 impl<T> FirGr<usize> for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: Float + FloatConst,
-    Tf<T, Vec<T>, ()>: FirGr<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>
+    Tf<T, Vec<T>, ()>: FirGr<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>,
+    Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>>+ SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>
 {
     fn firgr<const B: usize>(
         order: usize,

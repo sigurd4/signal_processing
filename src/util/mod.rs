@@ -4,6 +4,7 @@ moddef::moddef!(
     flat(pub) mod {
         chain,
         complex_op,
+        len_eq,
         not_range,
         truncate_im
     }

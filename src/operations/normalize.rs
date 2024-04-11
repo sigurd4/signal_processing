@@ -4,7 +4,7 @@ use ndarray::{Array1, Array2};
 use num::{complex::ComplexFloat, traits::Euclid, Zero, Float};
 use option_trait::{Maybe, MaybeOr, NotVoid, StaticMaybe};
 
-use crate::{ListOrSingle, MaybeList, MaybeLists, OwnedLists, Polynomial, ProductSequence, Ss, System, Tf, Zpk};
+use crate::{ListOrSingle, MaybeList, MaybeLists, OwnedLists, Polynomial, ProductSequence, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, Zpk};
 
 pub trait Normalize: System
 {
@@ -163,18 +163,30 @@ where
 }
 
 
-impl<T> Normalize for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
+impl<T, A, B, C, D> Normalize for Ss<T, A, B, C, D>
 where
-    T: ComplexFloat
+    T: ComplexFloat,
+    A: SsAMatrix<T, B, C, D>,
+    B: SsBMatrix<T, A, C, D>,
+    C: SsCMatrix<T, A, B, D>,
+    D: SsDMatrix<T, A, B, C>,
+    Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>>+ SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>
 {
     type Output = Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>;
 
-    fn normalize(mut self) -> Self::Output
+    fn normalize(self) -> Self::Output
     {
-        let (ma, na) = self.a.dim();
-        let (mb, nb) = self.b.dim();
-        let (mc, nc) = self.c.dim();
-        let (md, nd) = self.d.dim();
+        let Ss {mut a, mut b, mut c, mut d, ..} = Ss::new(
+            self.a.to_array2(),
+            self.b.to_array2(),
+            self.c.to_array2(),
+            self.d.to_array2()
+        );
+
+        let (ma, na) = a.dim();
+        let (mb, nb) = b.dim();
+        let (mc, nc) = c.dim();
+        let (md, nd) = d.dim();
 
         let p = ma.max(na).max(mb).max(nc);
         let q = nb.max(nd);
@@ -196,11 +208,11 @@ where
             }
         }
 
-        resize(&mut self.a, (p, p));
-        resize(&mut self.b, (p, q));
-        resize(&mut self.c, (r, p));
-        resize(&mut self.d, (r, q));
+        resize(&mut a, (p, p));
+        resize(&mut b, (p, q));
+        resize(&mut c, (r, p));
+        resize(&mut d, (r, q));
 
-        self
+        Ss::new(a, b, c, d)
     }
 }

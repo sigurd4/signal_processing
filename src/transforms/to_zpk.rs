@@ -4,7 +4,7 @@ use num::{complex::ComplexFloat, Complex, One};
 use array_math::SliceMath;
 use option_trait::{Maybe, MaybeOr, StaticMaybe};
 
-use crate::{Matrix, MaybeList, MaybeLists, Normalize, ProductSequence, Sos, Ss, System, Tf, ToSos, ToTf, Zpk};
+use crate::{MaybeList, MaybeLists, Normalize, ProductSequence, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToSos, ToTf, Zpk};
 
 pub trait ToZpk<T, Z, P, K, I, O>: System
 where
@@ -105,10 +105,10 @@ impl<'a, T, A, B, C, D, K> ToZpk<Complex<K::Real>, Vec<Complex<K::Real>>, Vec<Co
 where
     T: ComplexFloat,
     K: ComplexFloat,
-    A: Matrix<T>,
-    B: Matrix<T>,
-    C: Matrix<T>,
-    D: Matrix<T>,
+    A: SsAMatrix<T, B, C, D>,
+    B: SsBMatrix<T, A, C, D>,
+    C: SsCMatrix<T, A, B, D>,
+    D: SsDMatrix<T, A, B, C>,
     Self: ToTf<K, Vec<K>, Vec<K>, usize, ()>,
     Tf<K, Vec<K>, Vec<K>>: ToZpk<Complex<K::Real>, Vec<Complex<K::Real>>, Vec<Complex<K::Real>>, K, (), usize>
 {
