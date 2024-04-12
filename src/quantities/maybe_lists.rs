@@ -36,6 +36,10 @@ pub trait MaybeLists<T>: MaybeContainer<T>
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>;
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone,
+        Self: Sized;
 }
 
 impl<T> MaybeLists<T> for ()
@@ -83,6 +87,12 @@ impl<T> MaybeLists<T> for ()
         F: FnMut<(Self::RowOwned,)>
     {
         map(())
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        vec![()]
     }
 }
 
@@ -132,6 +142,12 @@ impl<T> MaybeLists<T> for Vec<T>
     {
         map(self)
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        vec![self]
+    }
 }
 impl<T> MaybeLists<T> for [T]
 {
@@ -178,6 +194,13 @@ impl<T> MaybeLists<T> for [T]
         F: FnMut<(Self::RowOwned,)>
     {
         map(self.to_vec())
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        vec![self.to_vec()]
     }
 }
 impl<T, const N: usize> MaybeLists<T> for [T; N]
@@ -226,6 +249,12 @@ impl<T, const N: usize> MaybeLists<T> for [T; N]
     {
         map(self)
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        vec![self]
+    }
 }
 impl<T> MaybeLists<T> for &[T]
 {
@@ -273,6 +302,12 @@ impl<T> MaybeLists<T> for &[T]
     {
         map(self.to_vec())
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        vec![self.to_vec()]
+    }
 }
 impl<T, const N: usize> MaybeLists<T> for &[T; N]
 {
@@ -319,6 +354,12 @@ impl<T, const N: usize> MaybeLists<T> for &[T; N]
         F: FnMut<(Self::RowOwned,)>
     {
         map(self.clone())
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        vec![self.clone()]
     }
 }
 
@@ -372,6 +413,12 @@ impl<T> MaybeLists<T> for Vec<Vec<T>>
             .map(|r| map(r))
             .collect()
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self
+    }
 }
 impl<T, const M: usize> MaybeLists<T> for [Vec<T>; M]
 {
@@ -419,6 +466,13 @@ impl<T, const M: usize> MaybeLists<T> for [Vec<T>; M]
         F: FnMut<(Self::RowOwned,)>
     {
         self.map(|r| map(r))
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.into_iter()
+            .collect()
     }
 }
 impl<T> MaybeLists<T> for [Vec<T>]
@@ -471,6 +525,15 @@ impl<T> MaybeLists<T> for [Vec<T>]
             .map(|r| map(r.clone()))
             .collect()
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        self.iter()
+            .map(|r| r.clone())
+            .collect()
+    }
 }
 impl<T, const M: usize> MaybeLists<T> for &[Vec<T>; M]
 {
@@ -519,6 +582,14 @@ impl<T, const M: usize> MaybeLists<T> for &[Vec<T>; M]
     {
         self.each_ref()
             .map(|r| map(r.clone()))
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.clone())
+            .collect()
     }
 }
 impl<T> MaybeLists<T> for &[Vec<T>]
@@ -569,6 +640,14 @@ impl<T> MaybeLists<T> for &[Vec<T>]
     {
         self.iter()
             .map(|r| map(r.clone()))
+            .collect()
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.clone())
             .collect()
     }
 }
@@ -623,6 +702,12 @@ impl<T, const N: usize> MaybeLists<T> for Vec<[T; N]>
             .map(|r| map(r))
             .collect()
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for [[T; N]; M]
 {
@@ -670,6 +755,13 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [[T; N]; M]
         F: FnMut<(Self::RowOwned,)>
     {
         self.map(|r| map(r))
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.into_iter()
+            .collect()
     }
 }
 impl<T, const N: usize> MaybeLists<T> for [[T; N]]
@@ -722,6 +814,15 @@ impl<T, const N: usize> MaybeLists<T> for [[T; N]]
             .map(|r| map(r.clone()))
             .collect()
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        self.iter()
+            .map(|r| r.clone())
+            .collect()
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for &[[T; N]; M]
 {
@@ -770,6 +871,14 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[[T; N]; M]
     {
         self.each_ref()
             .map(|r| map(r.clone()))
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.clone())
+            .collect()
     }
 }
 impl<T, const N: usize> MaybeLists<T> for &[[T; N]]
@@ -820,6 +929,14 @@ impl<T, const N: usize> MaybeLists<T> for &[[T; N]]
     {
         self.iter()
             .map(|r| map(r.clone()))
+            .collect()
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.clone())
             .collect()
     }
 }
@@ -874,6 +991,14 @@ impl<T> MaybeLists<T> for Vec<&[T]>
             .map(|r| map(r.to_vec()))
             .collect()
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.into_iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
 }
 impl<T, const M: usize> MaybeLists<T> for [&[T]; M]
 {
@@ -921,6 +1046,14 @@ impl<T, const M: usize> MaybeLists<T> for [&[T]; M]
         F: FnMut<(Self::RowOwned,)>
     {
         self.map(|r| map(r.to_vec()))
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.into_iter()
+            .map(|r| r.to_vec())
+            .collect()
     }
 }
 impl<T> MaybeLists<T> for [&[T]]
@@ -973,6 +1106,15 @@ impl<T> MaybeLists<T> for [&[T]]
             .map(|&r| map(r.to_vec()))
             .collect()
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        self.iter()
+            .map(|&r| r.to_vec())
+            .collect()
+    }
 }
 impl<T, const M: usize> MaybeLists<T> for &[&[T]; M]
 {
@@ -1020,6 +1162,14 @@ impl<T, const M: usize> MaybeLists<T> for &[&[T]; M]
         F: FnMut<(Self::RowOwned,)>
     {
         self.map(|r| map(r.to_vec()))
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
     }
 }
 impl<T> MaybeLists<T> for &[&[T]]
@@ -1070,6 +1220,14 @@ impl<T> MaybeLists<T> for &[&[T]]
     {
         self.iter()
             .map(|&r| map(r.to_vec()))
+            .collect()
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|&r| r.to_vec())
             .collect()
     }
 }
@@ -1124,6 +1282,14 @@ impl<T, const N: usize> MaybeLists<T> for Vec<&[T; N]>
             .map(|r| map(r.clone()))
             .collect()
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.into_iter()
+            .map(|r| r.clone())
+            .collect()
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for [&[T; N]; M]
 {
@@ -1171,6 +1337,14 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [&[T; N]; M]
         F: FnMut<(Self::RowOwned,)>
     {
         self.map(|r| map(r.clone()))
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.into_iter()
+            .map(|r| r.clone())
+            .collect()
     }
 }
 impl<T, const N: usize> MaybeLists<T> for [&[T; N]]
@@ -1223,6 +1397,15 @@ impl<T, const N: usize> MaybeLists<T> for [&[T; N]]
             .map(|&r| map(r.clone()))
             .collect()
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        self.iter()
+            .map(|&r| r.clone())
+            .collect()
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for &[&[T; N]; M]
 {
@@ -1270,6 +1453,14 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[&[T; N]; M]
         F: FnMut<(Self::RowOwned,)>
     {
         self.map(|r| map(r.clone()))
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        (*self).into_iter()
+            .map(|r| r.clone())
+            .collect()
     }
 }
 impl<T, const N: usize> MaybeLists<T> for &[&[T; N]]
@@ -1322,6 +1513,14 @@ impl<T, const N: usize> MaybeLists<T> for &[&[T; N]]
             .map(|&r| map(r.clone()))
             .collect()
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|&r| r.clone())
+            .collect()
+    }
 }
 
 impl<T> MaybeLists<T> for Array1<T>
@@ -1370,6 +1569,12 @@ impl<T> MaybeLists<T> for Array1<T>
     {
         map(self)
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        vec![self]
+    }
 }
 impl<'c, T> MaybeLists<T> for ArrayView1<'c, T>
 {
@@ -1416,6 +1621,12 @@ impl<'c, T> MaybeLists<T> for ArrayView1<'c, T>
         F: FnMut<(Self::RowOwned,)>
     {
         map(self.to_owned())
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        vec![self.to_owned()]
     }
 }
 
@@ -1471,6 +1682,15 @@ impl<T> MaybeLists<T> for Array2<T>
             .map(|r| map(r.to_owned()))
             .collect()
     }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.rows()
+            .into_iter()
+            .map(|r| r.to_owned())
+            .collect()
+    }
 }
 impl<'b, T> MaybeLists<T> for ArrayView2<'b, T>
 {
@@ -1522,6 +1742,15 @@ impl<'b, T> MaybeLists<T> for ArrayView2<'b, T>
         self.rows()
             .into_iter()
             .map(|r| map(r.to_owned()))
+            .collect()
+    }
+    fn into_owned_rows(self) -> Vec<Self::RowOwned>
+    where
+        T: Clone
+    {
+        self.rows()
+            .into_iter()
+            .map(|r| r.to_owned())
             .collect()
     }
 }

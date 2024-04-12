@@ -2,7 +2,7 @@ use array_math::SliceMath;
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{ListOrSingle, MaybeList, MaybeLists, Sos, System, Tf, Zpk};
+use crate::{ListOrSingle, MaybeList, MaybeLists, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, Zpk};
 
 pub trait FiltOrd: System
 {
@@ -85,3 +85,24 @@ where
     }
 }
 
+impl<T, A, B, C, D> FiltOrd for Ss<T, A, B, C, D>
+where
+    T: ComplexFloat,
+    A: SsAMatrix<T, B, C, D>,
+    B: SsBMatrix<T, A, C, D>,
+    C: SsCMatrix<T, A, B, D>,
+    D: SsDMatrix<T, A, B, C>,
+{
+    type Output = usize;
+
+    fn filtord(&self) -> Self::Output
+    {
+        let (ma, na) = self.a.matrix_dim();
+        let (mb, _) = self.b.matrix_dim();
+        let (_, nc) = self.c.matrix_dim();
+
+        let n = ma.max(na).max(mb).max(nc);
+
+        n
+    }
+}

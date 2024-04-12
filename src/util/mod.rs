@@ -5,7 +5,9 @@ moddef::moddef!(
         chain,
         complex_op,
         len_eq,
+        maybe_len_eq,
         not_range,
+        overlay,
         truncate_im
     }
 );

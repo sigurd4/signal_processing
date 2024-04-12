@@ -1,6 +1,5 @@
 use core::ops::{AddAssign, DerefMut, DivAssign, MulAssign};
 
-use ndarray::{Array1, Array2};
 use num::{complex::ComplexFloat, traits::Euclid, Zero, Float};
 use option_trait::{Maybe, MaybeOr, NotVoid, StaticMaybe};
 
@@ -166,52 +165,30 @@ where
 impl<T, A, B, C, D> Normalize for Ss<T, A, B, C, D>
 where
     T: ComplexFloat,
-    A: SsAMatrix<T, B, C, D>,
-    B: SsBMatrix<T, A, C, D>,
-    C: SsCMatrix<T, A, B, D>,
-    D: SsDMatrix<T, A, B, C>,
-    Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>>+ SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>
+    A: SsAMatrix<T, B, C, D, Owned: SsAMatrix<T, B::Owned, C::Owned, D::Owned>, Height: StaticMaybe<usize, Opposite: Sized>, Width: StaticMaybe<usize, Opposite: Sized>>,
+    B: SsBMatrix<T, A, C, D, Owned: SsBMatrix<T, A::Owned, C::Owned, D::Owned>, Height: StaticMaybe<usize, Opposite: Sized>, Width: StaticMaybe<usize, Opposite: Sized>>,
+    C: SsCMatrix<T, A, B, D, Owned: SsCMatrix<T, A::Owned, B::Owned, D::Owned>, Height: StaticMaybe<usize, Opposite: Sized>, Width: StaticMaybe<usize, Opposite: Sized>>,
+    D: SsDMatrix<T, A, B, C, Owned: SsDMatrix<T, A::Owned, B::Owned, C::Owned>, Height: StaticMaybe<usize, Opposite: Sized>, Width: StaticMaybe<usize, Opposite: Sized>>
 {
-    type Output = Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>;
+    type Output = Ss<T, A::Owned, B::Owned, C::Owned, D::Owned>;
 
     fn normalize(self) -> Self::Output
     {
-        let Ss {mut a, mut b, mut c, mut d, ..} = Ss::new(
-            self.a.to_array2(),
-            self.b.to_array2(),
-            self.c.to_array2(),
-            self.d.to_array2()
-        );
+        let (ma, na) = self.a.matrix_dim();
+        let (mb, nb) = self.b.matrix_dim();
+        let (mc, nc) = self.c.matrix_dim();
+        let (md, nd) = self.d.matrix_dim();
 
-        let (ma, na) = a.dim();
-        let (mb, nb) = b.dim();
-        let (mc, nc) = c.dim();
-        let (md, nd) = d.dim();
+        let n = ma.max(na).max(mb).max(nc);
+        let p = nb.max(nd);
+        let q = mc.max(md);
 
-        let p = ma.max(na).max(mb).max(nc);
-        let q = nb.max(nd);
-        let r = mc.max(md);
+        let Ss {a, b, c, d, ..} = self;
 
-        fn resize<T>(m: &mut Array2<T>, dim: (usize, usize))
-        where
-            T: Zero + Clone
-        {
-            let row = Array1::from_elem(m.dim().1, T::zero());
-            while m.dim().0 < dim.0
-            {
-                m.push_row(row.view()).unwrap();
-            }
-            let col = Array1::from_elem(m.dim().0, T::zero());
-            while m.dim().1 < dim.1
-            {
-                m.push_column(col.view()).unwrap();
-            }
-        }
-
-        resize(&mut a, (p, p));
-        resize(&mut b, (p, q));
-        resize(&mut c, (r, p));
-        resize(&mut d, (r, q));
+        let a = a.resize_to_owned((StaticMaybe::maybe_from_fn(|| n), StaticMaybe::maybe_from_fn(|| n)), Zero::zero);
+        let b = b.resize_to_owned((StaticMaybe::maybe_from_fn(|| n), StaticMaybe::maybe_from_fn(|| p)), Zero::zero);
+        let c = c.resize_to_owned((StaticMaybe::maybe_from_fn(|| q), StaticMaybe::maybe_from_fn(|| n)), Zero::zero);
+        let d = d.resize_to_owned((StaticMaybe::maybe_from_fn(|| q), StaticMaybe::maybe_from_fn(|| p)), Zero::zero);
 
         Ss::new(a, b, c, d)
     }

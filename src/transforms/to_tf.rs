@@ -6,7 +6,7 @@ use num::{complex::ComplexFloat, Complex, One, Zero};
 
 use option_trait::{Maybe, MaybeOr, NotVoid, StaticMaybe};
 
-use crate::{List, MaybeContainer, MaybeList, MaybeLists, MaybeOwnedList, Normalize, Polynomial, Sos, SplitNumerDenom, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToSos, ToZpk, Zpk};
+use crate::{List, MaybeContainer, MaybeList, MaybeLists, MaybeOwnedList, Normalize, Polynomial, Sos, SplitNumerDenom, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToSos, ToSs, ToZpk, Zpk};
 
 
 pub trait ToTf<T, B, A, I, O>: System
@@ -132,11 +132,12 @@ where
     B: SsBMatrix<T1, A, C, D>,
     C: SsCMatrix<T1, A, B, D>,
     D: SsDMatrix<T1, A, B, C>,
+    Self: Normalize<Output: ToSs<T1, Array2<T1>, Array2<T1>, Array2<T1>, Array2<T1>>>,
     Array2<T1>: SsAMatrix<T1, Array2<T1>, Array2<T1>, Array2<T1>> + SsBMatrix<T1, Array2<T1>, Array2<T1>, Array2<T1>> + SsCMatrix<T1, Array2<T1>, Array2<T1>, Array2<T1>>+ SsDMatrix<T1, Array2<T1>, Array2<T1>, Array2<T1>>
 {
     fn to_tf(self, input: usize, (): ()) -> Tf<T2, Vec<Vec<T2>>, Vec<T2>>
     {
-        let ss = self.normalize();
+        let ss = self.normalize().to_ss().unwrap();
 
         let (nout, _nin) = ss.d.dim();
 

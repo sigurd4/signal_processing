@@ -1,15 +1,10 @@
 use array_math::{Array2dOps, ArrayOps};
 use ndarray::{Array1, Array2, ArrayView1, ArrayView2};
-use option_trait::Maybe;
 
 use crate::{ListOrSingle, Lists, MaybeLists, OwnedMatrix};
 
 pub trait Matrix<T>: Lists<T>
 {
-    type Height: Maybe<usize>;
-    type Width: Maybe<usize>;
-    const HEIGHT: usize;
-    const WIDTH: usize;
     type Transpose: OwnedMatrix<T>;
     type ColsMapped<M>: ListOrSingle<M> = <Self::Transpose as MaybeLists<T>>::RowsMapped<M>;
 
@@ -26,10 +21,6 @@ pub trait Matrix<T>: Lists<T>
 
 impl<T> Matrix<T> for Vec<T>
 {
-    type Height = usize;
-    type Width = ();
-    const HEIGHT: usize = 1;
-    const WIDTH: usize = usize::MAX;
     type Transpose = Array2<T>;
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -53,10 +44,6 @@ impl<T> Matrix<T> for Vec<T>
 }
 impl<T> Matrix<T> for [T]
 {
-    type Height = usize;
-    type Width = ();
-    const HEIGHT: usize = 1;
-    const WIDTH: usize = usize::MAX;
     type Transpose = Array2<T>;
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -80,10 +67,6 @@ impl<T> Matrix<T> for [T]
 }
 impl<T, const N: usize> Matrix<T> for [T; N]
 {
-    type Height = usize;
-    type Width = usize;
-    const HEIGHT: usize = 1;
-    const WIDTH: usize = N;
     type Transpose = [[T; 1]; N];
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -107,10 +90,6 @@ impl<T, const N: usize> Matrix<T> for [T; N]
 }
 impl<T> Matrix<T> for &[T]
 {
-    type Height = usize;
-    type Width = ();
-    const HEIGHT: usize = 1;
-    const WIDTH: usize = usize::MAX;
     type Transpose = Array2<T>;
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -134,10 +113,6 @@ impl<T> Matrix<T> for &[T]
 }
 impl<T, const N: usize> Matrix<T> for &[T; N]
 {
-    type Height = usize;
-    type Width = usize;
-    const HEIGHT: usize = 1;
-    const WIDTH: usize = N;
     type Transpose = [[T; 1]; N];
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -162,10 +137,6 @@ impl<T, const N: usize> Matrix<T> for &[T; N]
 
 impl<T, const N: usize, const M: usize> Matrix<T> for [[T; N]; M]
 {
-    type Height = usize;
-    type Width = usize;
-    const HEIGHT: usize = M;
-    const WIDTH: usize = N;
     type Transpose = [[T; M]; N];
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -189,10 +160,6 @@ impl<T, const N: usize, const M: usize> Matrix<T> for [[T; N]; M]
 }
 impl<T, const N: usize, const M: usize> Matrix<T> for &[[T; N]; M]
 {
-    type Height = usize;
-    type Width = usize;
-    const HEIGHT: usize = M;
-    const WIDTH: usize = N;
     type Transpose = [[T; M]; N];
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -217,10 +184,6 @@ impl<T, const N: usize, const M: usize> Matrix<T> for &[[T; N]; M]
 
 impl<T, const N: usize, const M: usize> Matrix<T> for [&[T; N]; M]
 {
-    type Height = usize;
-    type Width = usize;
-    const HEIGHT: usize = M;
-    const WIDTH: usize = N;
     type Transpose = [[T; M]; N];
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -244,10 +207,6 @@ impl<T, const N: usize, const M: usize> Matrix<T> for [&[T; N]; M]
 }
 impl<T, const N: usize, const M: usize> Matrix<T> for &[&[T; N]; M]
 {
-    type Height = usize;
-    type Width = usize;
-    const HEIGHT: usize = M;
-    const WIDTH: usize = N;
     type Transpose = [[T; M]; N];
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -272,10 +231,6 @@ impl<T, const N: usize, const M: usize> Matrix<T> for &[&[T; N]; M]
 
 impl<T, const N: usize> Matrix<T> for Vec<[T; N]>
 {
-    type Height = ();
-    type Width = usize;
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = N;
     type Transpose = Array2<T>;
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -299,10 +254,6 @@ impl<T, const N: usize> Matrix<T> for Vec<[T; N]>
 }
 impl<T, const N: usize> Matrix<T> for &[[T; N]]
 {
-    type Height = ();
-    type Width = usize;
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = N;
     type Transpose = Array2<T>;
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -326,10 +277,6 @@ impl<T, const N: usize> Matrix<T> for &[[T; N]]
 }
 impl<T, const N: usize> Matrix<T> for [[T; N]]
 {
-    type Height = ();
-    type Width = usize;
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = N;
     type Transpose = Array2<T>;
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -354,10 +301,6 @@ impl<T, const N: usize> Matrix<T> for [[T; N]]
 
 impl<T, const N: usize> Matrix<T> for Vec<&[T; N]>
 {
-    type Height = ();
-    type Width = usize;
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = N;
     type Transpose = Array2<T>;
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -381,10 +324,6 @@ impl<T, const N: usize> Matrix<T> for Vec<&[T; N]>
 }
 impl<T, const N: usize> Matrix<T> for &[&[T; N]]
 {
-    type Height = ();
-    type Width = usize;
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = N;
     type Transpose = Array2<T>;
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -408,10 +347,6 @@ impl<T, const N: usize> Matrix<T> for &[&[T; N]]
 }
 impl<T, const N: usize> Matrix<T> for [&[T; N]]
 {
-    type Height = ();
-    type Width = usize;
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = N;
     type Transpose = Array2<T>;
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -436,10 +371,6 @@ impl<T, const N: usize> Matrix<T> for [&[T; N]]
 
 impl<T> Matrix<T> for Array1<T>
 {
-    type Height = usize;
-    type Width = ();
-    const HEIGHT: usize = 1;
-    const WIDTH: usize = usize::MAX;
     type Transpose = Array2<T>;
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -463,10 +394,6 @@ impl<T> Matrix<T> for Array1<T>
 }
 impl<'b, T> Matrix<T> for ArrayView1<'b, T>
 {
-    type Height = ();
-    type Width = ();
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = usize::MAX;
     type Transpose = Array2<T>;
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -491,10 +418,6 @@ impl<'b, T> Matrix<T> for ArrayView1<'b, T>
 
 impl<T> Matrix<T> for Array2<T>
 {
-    type Height = ();
-    type Width = ();
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = usize::MAX;
     type Transpose = Array2<T>;
 
     fn matrix_dim(&self) -> (usize, usize)
@@ -519,10 +442,6 @@ impl<T> Matrix<T> for Array2<T>
 }
 impl<'b, T> Matrix<T> for ArrayView2<'b, T>
 {
-    type Height = ();
-    type Width = ();
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = usize::MAX;
     type Transpose = Array2<T>;
 
     fn matrix_dim(&self) -> (usize, usize)

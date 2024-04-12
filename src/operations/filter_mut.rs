@@ -1,10 +1,11 @@
 use core::ops::{AddAssign, SubAssign};
 
 use array_math::SliceOps;
+use ndarray::{Array1, Array2};
 use num::{complex::ComplexFloat, Zero};
-use option_trait::Maybe;
+use option_trait::{Maybe, StaticMaybe};
 
-use crate::{ComplexOp, List, Lists, MaybeList, MaybeLists, Rtf, RtfOrSystem, Sos, Tf, Container};
+use crate::{ComplexOp, Container, List, Lists, Matrix, MaybeLenEq, MaybeList, MaybeLists, Overlay, OwnedList, Rtf, RtfOrSystem, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf};
 
 pub trait FilterMut<X, XX>: RtfOrSystem
 where
@@ -140,5 +141,141 @@ where
         }
 
         y
+    }
+}
+
+impl<'b, W, T, A, B, C, D, DD, X, XX> FilterMut<X, XX> for Rtf<'b, W, Ss<T, A, B, C, D>>
+where
+    T: ComplexFloat + Into<W>,
+    A: SsAMatrix<T, B, C, D, Mapped<W>: Matrix<W>>,
+    B: SsBMatrix<T, A, C, D, Mapped<W>: Matrix<W>>,
+    C: SsCMatrix<T, A, B, D, Mapped<W>: Matrix<W>> + Matrix<T, Mapped<()>: Matrix<()>>,
+    D: SsDMatrix<T, A, B, C, Mapped<W>: Matrix<W>> + Matrix<T, Mapped<()>: Matrix<(), Transpose: Matrix<(), RowOwned: Overlay<(), <<C::Mapped<()> as Matrix<()>>::Transpose as MaybeLists<()>>::RowOwned, Output = DD>>>>,
+    W: ComplexFloat<Real = T::Real> + ComplexOp<X, Output = W> + SubAssign + AddAssign + 'static,
+    X: ComplexFloat<Real = T::Real> + Into<W>,
+    XX: Matrix<X, Mapped<W>: Matrix<W>> + Matrix<X, Mapped<()>: Matrix<(), Owned: Matrix<(), RowOwned: List<(), Mapped<W> = <XX::RowOwned as Container<X>>::Mapped<W>>>, Width: StaticMaybe<usize, Opposite: Sized>, Height: StaticMaybe<usize, Opposite: Sized>>>,
+    XX::RowOwned: List<X>,
+    DD: OwnedList<(), Owned = DD, Width: StaticMaybe<usize, Opposite: Sized>, Height: StaticMaybe<usize, Opposite: Sized>>,
+    DD::Mapped<<XX::RowOwned as Container<X>>::Mapped<W>>: Matrix<W>,
+    <XX::Transpose as MaybeLists<X>>::RowOwned: MaybeLenEq<D::RowOwned, true>,
+    Array2<W>: SsAMatrix<W, Array2<W>, Array2<W>, Array2<W>> + SsBMatrix<W, Array2<W>, Array2<W>, Array2<W>> + SsCMatrix<W, Array2<W>, Array2<W>, Array2<W>>+ SsDMatrix<W, Array2<W>, Array2<W>, Array2<W>>
+{
+    type Output = DD::Mapped<<XX::RowOwned as Container<X>>::Mapped<W>>;
+
+    fn filter_mut(&mut self, x: XX) -> Self::Output
+    {
+        let Ss {mut a, mut b, mut c, mut d, ..} = Ss::new(
+            self.sys.a.to_array2().map(|&a| a.into()),
+            self.sys.b.to_array2().map(|&b| b.into()),
+            self.sys.c.to_array2().map(|&c| c.into()),
+            self.sys.d.to_array2().map(|&d| d.into())
+        );
+
+        let (mu, nu) = x.matrix_dim();
+        let (ma, na) = a.dim();
+        let (mb, nb) = b.dim();
+        let (mc, nc) = c.dim();
+        let (md, nd) = d.dim();
+
+        let n = ma.max(na).max(mb).max(nc);
+        let p = nb.max(nd).max(mu);
+        let q = mc.max(md);
+
+        fn resize<T>(m: &mut Array2<T>, dim: (usize, usize))
+        where
+            T: Zero + Clone
+        {
+            let row = Array1::from_elem(m.dim().1, T::zero());
+            while m.dim().0 < dim.0
+            {
+                m.push_row(row.view()).unwrap();
+            }
+            let col = Array1::from_elem(m.dim().0, T::zero());
+            while m.dim().1 < dim.1
+            {
+                m.push_column(col.view()).unwrap();
+            }
+        }
+
+        resize(&mut a, (n, n));
+        resize(&mut b, (n, p));
+        resize(&mut c, (q, n));
+        resize(&mut d, (q, p));
+        
+        self.w.resize(n, W::zero());
+
+        let mut y_t: Vec<std::vec::IntoIter<W>> = x.to_array2()
+            .columns()
+            .into_iter()
+            .map(|u| {
+                let mut x = Array2::from_shape_fn((n, 1), |(i, _)| self.w[i]);
+                let u = Array2::from_shape_fn((p, 1), |(i, _)| u.get(i).map(|&u| u).unwrap_or_else(Zero::zero).into());
+
+                let y = c.dot(&x) + d.dot(&u);
+                x = a.dot(&x) + b.dot(&u);
+
+                for (&x, w) in x.column(0)
+                    .into_iter()
+                    .zip(self.w.iter_mut())
+                {
+                    *w = x;
+                }
+
+                y.column(0)
+                    .to_vec()
+                    .into_iter()
+            }).collect();
+        let mut y = vec![];
+        'lp:
+        loop
+        {
+            let mut first = true;
+
+            for y_t in y_t.iter_mut()
+            {
+                if let Some(y_t) = y_t.next()
+                {
+                    if first
+                    {
+                        y.push(vec![]);
+                        first = false;
+                    }
+                    let y = y.last_mut().unwrap();
+                    y.push(y_t)
+                }
+                else
+                {
+                    break 'lp
+                }
+            }
+        }
+        let mut y = y.into_iter();
+
+        let d_empty = self.sys.d.map_to_owned(|_| ());
+        let c_empty = self.sys.c.map_to_owned(|_| ());
+        let d_empty_t = d_empty.matrix_transpose();
+        let c_empty_t = c_empty.matrix_transpose();
+        let d_empty_c = d_empty_t.into_owned_rows()
+            .into_iter()
+            .next()
+            .unwrap();
+        let c_empty_c = c_empty_t.into_owned_rows()
+            .into_iter()
+            .next()
+            .unwrap();
+        let dr_empty_c = d_empty_c.overlay(c_empty_c)
+            .resize_to_owned((StaticMaybe::maybe_from_fn(|| 1), StaticMaybe::maybe_from_fn(|| y.len())), || ());
+        let mut x_r = x.map_to_owned(|_| ())
+            .resize_to_owned((StaticMaybe::maybe_from_fn(|| p), StaticMaybe::maybe_from_fn(|| nu)), || ())
+            .into_owned_rows()
+            .into_iter();
+        dr_empty_c.map_into_owned(|()| {
+            let mut y = y.next()
+                .unwrap()
+                .into_iter();
+            x_r.next()
+                .unwrap()
+                .map_to_owned(|_| y.next().unwrap())
+        })
     }
 }

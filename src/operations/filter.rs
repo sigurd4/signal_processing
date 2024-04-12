@@ -41,13 +41,30 @@ mod test
     use linspace::LinspaceArray;
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, Butter, Filter, FilterGenPlane, FilterGenType, Sos, Tf};
+    use crate::{plot, ss, Butter, Filter, FilterGenPlane, FilterGenType, FilterMut, Rtf, Sos, Ss, Tf};
 
     #[test]
     fn test()
     {
-        let h = Sos::butter(10, [220.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(1000.0) })
+        let h = Ss::butter(2, [0.5], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
+
+        /*let h = ss!(f64[z]
+            let A = [
+                [0.0000, 0.1716],
+                [-1.0000, 0]
+            ],
+            let B = [
+                [-0.2426],
+                [0.5858]
+            ],
+            let C = [
+                [0, 1]
+            ],
+            let D = [
+                [0.2929]
+            ]
+        );*/
 
         const N: usize = 64;
         let mut rng = rand::thread_rng();
@@ -57,7 +74,7 @@ mod test
 
         let t: [_; N] = (0.0..N as f64).linspace_array();
 
-        plot::plot_curves("x(t), y(t)", "plots/xy_t_filter.png", [&t.zip(x), &t.zip(y)])
+        plot::plot_curves("x(t), y(t)", "plots/xy_t_filter.png", [&t.zip(x), &t.zip(y[0])])
             .unwrap()
     }
 }

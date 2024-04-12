@@ -88,17 +88,25 @@ macro abcd {
     (A, B, C, D) => {},
 }
 
+#[allow(unused)]
+macro s {
+    (s) => {},
+    (z) => {},
+}
+
 pub macro ss {
-    ($t:path[]
+    ($t:path[$s:ident]
         let $a:ident = [$($([$($($am:literal),+$(,)?)?]),+$(,)?)?],
         let $b:ident = [$($([$($($bm:literal),+$(,)?)?]),+$(,)?)?],
         let $c:ident = [$($([$($($cm:literal),+$(,)?)?]),+$(,)?)?],
         let $d:ident = [$($([$($($dm:literal),+$(,)?)?]),+$(,)?)?]$(,)?
     ) => {
         {
-            const N: usize = [$($([$($($am),*)?]),*)?].len();
-            const P: usize = [$($([$($($dm),*)?]),*)?][0].len();
-            const Q: usize = [$($([$($($dm),*)?]),*)?].len();
+            s!($s);
+
+            const N: usize = [$($([$($({let _ = $am; ()}),*)?]),*)?].len();
+            const P: usize = [$($([$($({let _ = $dm; ()}),*)?]),*)?][0].len();
+            const Q: usize = [$($([$($({let _ = $dm; ()}),*)?]),*)?].len();
 
             #[allow(non_snake_case)]
             let $a : [[$t; N]; N] = [$($([$($(<$t as num::NumCast>::from($am).unwrap()),*)?]),*)?];
@@ -122,20 +130,20 @@ mod test
     #[test]
     fn test()
     {
-        let h = ss!(f64[]
+        let h = ss!(f64[z]
             let A = [
-                [1, 2],
-                [3, 4]
+                [0.0000, 0.1716],
+                [-1.0000, 0]
             ],
             let B = [
-                [1],
-                [2]
+                [-0.2426],
+                [0.5858]
             ],
             let C = [
-                [1, 2]
+                [0, 1]
             ],
             let D = [
-                [1]
+                [0.2929]
             ]
         );
 
