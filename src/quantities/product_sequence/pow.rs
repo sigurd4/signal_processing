@@ -1,6 +1,6 @@
 use core::ops::{BitAnd, Shr};
 
-use num::{pow::Pow, Integer, One, Unsigned};
+use num::{pow::Pow, Integer, Unsigned};
 
 use crate::{MaybeList, ProductSequence};
 
@@ -22,7 +22,7 @@ where
         }
         else
         {
-            One::one()
+            ProductSequence::one()
         };
     
         loop

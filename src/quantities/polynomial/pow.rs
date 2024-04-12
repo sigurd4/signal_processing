@@ -6,12 +6,11 @@ use crate::{MaybeList, Polynomial};
 
 impl<T, S, I> Pow<I> for Polynomial<T, S>
 where
-    T: Clone,
+    T: Clone + One,
     S: MaybeList<T>,
     I: Unsigned + Integer + BitAnd<I, Output = I> + Shr<usize, Output = I> + Copy,
     Self: Into<Polynomial<T, Vec<T>>>,
-    Polynomial<T, Vec<T>>: One + for<'b> Mul<Polynomial<T, &'b [T]>, Output = Polynomial<T, Vec<T>>>,
-    for<'a, 'b> Polynomial<T, &'a [T]>: Mul<Polynomial<T, &'b [T]>, Output = Polynomial<T, Vec<T>>>
+    Polynomial<T, Vec<T>>: Mul<Polynomial<T, Vec<T>>, Output = Polynomial<T, Vec<T>>>
 {
     type Output = Polynomial<T, Vec<T>>;
 
@@ -24,7 +23,7 @@ where
         }
         else
         {
-            One::one()
+            Polynomial::one()
         };
     
         loop
@@ -34,10 +33,10 @@ where
             {
                 break;
             }
-            x = x.as_view()*x.as_view();
+            x = x.clone()*x.clone();
             if (n & I::one()) == I::one()
             {
-                r = r*x.as_view();
+                r = r*x.clone();
             }
         }
     

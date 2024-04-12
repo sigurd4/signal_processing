@@ -14,6 +14,7 @@ moddef::moddef!(
         owned_lists,
         owned_matrix,
         polynomial,
-        product_sequence
+        product_sequence,
+        sum_sequence
     }
 );

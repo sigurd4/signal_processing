@@ -1,28 +1,29 @@
-use core::{iter::Product, marker::PhantomData};
+use core::{iter::Sum, marker::PhantomData};
 
-use num::One;
+use num::Zero;
 use option_trait::NotVoid;
 
 use crate::MaybeList;
 
 moddef::moddef!(
     mod {
+        add,
         borrow_mut,
         borrow,
         default,
         deref_mut,
         deref,
         from,
-        mul,
-        one,
-        pow,
-        product,
-        try_from
+        neg,
+        sub,
+        sum,
+        try_from,
+        zero
     }
 );
 
 #[derive(Debug, Clone, Copy)]
-pub struct ProductSequence<T, S>
+pub struct SumSequence<T, S>
 where
     S: MaybeList<T>
 {
@@ -30,14 +31,14 @@ where
     phantom: PhantomData<T>
 }
 
-impl<T, S> NotVoid for ProductSequence<T, S>
+impl<T, S> NotVoid for SumSequence<T, S>
 where
     S: MaybeList<T>
 {
 
 }
 
-impl<T, S> ProductSequence<T, S>
+impl<T, S> SumSequence<T, S>
 where
     S: MaybeList<T>
 {
@@ -49,11 +50,11 @@ where
         }
     }
     
-    pub type View<'a> = ProductSequence<T, S::View<'a>>
+    pub type View<'a> = SumSequence<T, S::View<'a>>
     where
         S::View<'a>: MaybeList<T>,
         Self: 'a;
-    pub type Owned = ProductSequence<T, S::Owned>
+    pub type Owned = SumSequence<T, S::Owned>
     where
         S::Owned: MaybeList<T>;
 
@@ -61,35 +62,35 @@ where
     where
         S::View<'a>: MaybeList<T>
     {
-        ProductSequence::new(self.s.as_view())
+        SumSequence::new(self.s.as_view())
     }
     pub fn to_owned(&self) -> Self::Owned
     where
         S::Owned: MaybeList<T>,
         T: Clone
     {
-        ProductSequence::new(self.s.to_owned())
+        SumSequence::new(self.s.to_owned())
     }
     pub fn into_inner(self) -> S
     {
         self.s
     }
-    pub fn one() -> Self
+    pub fn zero() -> Self
     where
-        ProductSequence<T, ()>: Into<Self>
+        SumSequence<T, ()>: Into<Self>
     {
-        ProductSequence::new(()).into()
+        SumSequence::new(()).into()
     }
-    pub fn is_one(&self) -> bool
+    pub fn is_zero(&self) -> bool
     where
-        T: Clone + Product + One + PartialEq
+        T: Zero + Clone + Sum
     {
         if let Some(s) = self.as_view_slice_option()
         {
             let y: T = s.iter()
                 .map(|s| s.clone())
-                .product();
-            return y.is_one()
+                .sum();
+            return y.is_zero()
         }
         true
     }

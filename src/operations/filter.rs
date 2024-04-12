@@ -41,12 +41,12 @@ mod test
     use linspace::LinspaceArray;
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, ss, Butter, Filter, FilterGenPlane, FilterGenType, FilterMut, Rtf, Sos, Ss, Tf};
+    use crate::{plot, Butter, Filter, FilterGenPlane, FilterGenType, Ss};
 
     #[test]
     fn test()
     {
-        let h = Ss::butter(2, [0.5], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: None })
+        let h = Ss::butter(4, [0.2], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
 
         /*let h = ss!(f64[z]
