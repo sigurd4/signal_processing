@@ -1,7 +1,7 @@
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{MaybeList, MaybeLists, RtfOrSystem, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk};
+use crate::{MaybeList, MaybeLists, Rpk, RtfOrSystem, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk};
 
 pub trait System: RtfOrSystem
 {
@@ -46,4 +46,15 @@ where
     S: MaybeList<Tf<T, B, A>>
 {
     
+}
+
+impl<T, R, P, RP, K> System for Rpk<T, R, P, RP, K>
+where
+    T: ComplexFloat,
+    R: ComplexFloat<Real = T::Real>,
+    P: ComplexFloat<Real = T::Real>,
+    RP: MaybeList<(R, P)>,
+    K: MaybeList<T>
+{
+
 }

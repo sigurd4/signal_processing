@@ -4,7 +4,9 @@ use crate::{MaybeList, Polynomial, SumSequence};
 
 moddef::moddef!(
     mod {
-        add
+        add,
+        neg,
+        sub
     }
 );
 

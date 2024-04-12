@@ -1,7 +1,7 @@
 use core::ops::{AddAssign, Div, DivAssign, Mul, MulAssign, SubAssign};
 
 use ndarray_linalg::Lapack;
-use num::{complex::ComplexFloat, pow::Pow, traits::{float::TotalOrder, Euclid, FloatConst}, Complex, Float, One, Zero};
+use num::{complex::ComplexFloat, traits::{float::TotalOrder, Euclid, FloatConst}, Complex, Float, One, Zero};
 
 use array_math::SliceMath;
 use option_trait::Maybe;
@@ -196,7 +196,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{Residue, Rpk, Tf};
+    use crate::{Residue, Tf};
 
     #[test]
     fn test()
@@ -206,12 +206,6 @@ mod test
             [4.0, 5.0, 6.0]
         );
         let rpk = h.residue(());
-        //println!("{:?}", rpk)
-
-        let r1 = Rpk::new([(1.0, 1.0), (1.0, 2.0), (1.0, 2.0), (1.0, 3.0)], [0.0; 0]);
-        let r2 = Rpk::new([(1.0, 1.0), (1.0, 2.0), (1.0, 3.0)], [0.0; 0]);
-        let r = r1 + r2;
-
-        println!("{:?}", r)
+        println!("{:?}", rpk)
     }
 }
