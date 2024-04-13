@@ -62,6 +62,16 @@ impl<T: ComplexFloat, B: MaybeLists<T>, A: MaybeList<T>> Tf<T, B, A>
             a: self.a.to_owned()
         }
     }
+    pub fn into_owned(self) -> Tf<T, B::Owned, A::Owned>
+    where
+        B::Owned: MaybeLists<T>,
+        A::Owned: MaybeList<T>
+    {
+        Tf {
+            b: self.b.into_owned(),
+            a: self.a.into_owned()
+        }
+    }
     pub fn new(b: B, a: A) -> Self
     {
         Self {

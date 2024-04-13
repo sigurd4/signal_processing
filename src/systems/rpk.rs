@@ -38,4 +38,46 @@ where
             k: Polynomial::new(k)
         }
     }
+
+    pub type Owned = Rpk<T, R, P, RP::Owned, K::Owned>
+    where
+        RP::Owned: MaybeList<(R, P)>,
+        K::Owned: MaybeList<T>;
+    pub type View<'a> = Rpk<T, R, P, RP::View<'a>, K::View<'a>>
+    where
+        Self: 'a,
+        RP::View<'a>: MaybeList<(R, P)>,
+        K::View<'a>: MaybeList<T>;
+
+    pub fn as_view<'a>(&'a self) -> Rpk<T, R, P, RP::View<'a>, K::View<'a>>
+    where
+        Self: 'a,
+        RP::View<'a>: MaybeList<(R, P)>,
+        K::View<'a>: MaybeList<T>
+    {
+        Rpk {
+            rp: self.rp.as_view(),
+            k: self.k.as_view()
+        }
+    }
+    pub fn to_owned(&self) -> Rpk<T, R, P, RP::Owned, K::Owned>
+    where
+        RP::Owned: MaybeList<(R, P)>,
+        K::Owned: MaybeList<T>
+    {
+        Rpk {
+            rp: self.rp.to_owned(),
+            k: self.k.to_owned()
+        }
+    }
+    pub fn into_owned(self) -> Rpk<T, R, P, RP::Owned, K::Owned>
+    where
+        RP::Owned: MaybeList<(R, P)>,
+        K::Owned: MaybeList<T>
+    {
+        Rpk {
+            rp: self.rp.into_owned(),
+            k: self.k.into_owned()
+        }
+    }
 }

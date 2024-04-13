@@ -70,6 +70,13 @@ where
     {
         ProductSequence::new(self.s.to_owned())
     }
+    pub fn into_owned(self) -> ProductSequence<T, S::Owned>
+    where
+        S::Owned: MaybeList<T>,
+        T: Clone
+    {
+        ProductSequence::new(self.s.into_owned())
+    }
     pub fn into_inner(self) -> S
     {
         self.s

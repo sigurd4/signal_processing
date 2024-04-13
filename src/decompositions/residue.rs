@@ -6,7 +6,7 @@ use num::{complex::ComplexFloat, traits::{float::TotalOrder, Euclid, FloatConst}
 use array_math::SliceMath;
 use option_trait::Maybe;
 
-use crate::{MaybeList, Normalize, Polynomial, Rpk, SumSequence, System, Tf, ToTf};
+use crate::{MaybeContainer, MaybeList, Normalize, Polynomial, Rpk, SumSequence, System, Tf, ToTf};
 
 pub trait Residue: System
 {
@@ -73,24 +73,7 @@ where
             k
         };
 
-        let tol = tol.into_option()
-            .map(|tol| Float::abs(tol))
-            .unwrap_or_else(|| R::from(1e-3).unwrap());
-        let mut unique_poles_multiplicity: Vec<(Complex<_>, usize)> = vec![];
-        'lp:
-        for p in poles
-        {
-            for (pu, n) in unique_poles_multiplicity.iter_mut()
-            {
-                if (p - *pu).abs() < tol
-                {
-                    *n += 1;
-                    continue 'lp;
-                }
-            }
-            unique_poles_multiplicity.push((p, 1));
-        }
-        unique_poles_multiplicity.sort_by(|a, b| a.0.norm_sqr().total_cmp(&b.0.norm_sqr()));
+        let unique_poles_multiplicity = group_poles(poles, tol);
 
         let residues = compute_residues(unique_poles_multiplicity.as_slice(), b);
 
@@ -107,6 +90,32 @@ where
             k
         }
     }
+}
+
+fn group_poles<T, TOL>(poles: Vec<Complex<T>>, tol: TOL) -> Vec<(Complex<T>, usize)>
+where
+    T: Float + FloatConst + TotalOrder,
+    TOL: Maybe<T>
+{
+    let tol = tol.into_option()
+        .map(|tol| Float::abs(tol))
+        .unwrap_or_else(|| T::from(1e-3).unwrap());
+    let mut unique_poles_multiplicity: Vec<(Complex<_>, usize)> = vec![];
+    'lp:
+    for p in poles
+    {
+        for (pu, n) in unique_poles_multiplicity.iter_mut()
+        {
+            if (p - *pu).abs() < tol
+            {
+                *n += 1;
+                continue 'lp;
+            }
+        }
+        unique_poles_multiplicity.push((p, 1));
+    }
+    unique_poles_multiplicity.sort_by(|a, b| a.0.norm_sqr().total_cmp(&b.0.norm_sqr()));
+    unique_poles_multiplicity
 }
 
 fn compute_residues<T>(unique_poles_multiplicity: &[(Complex<T::Real>, usize)], numer: Polynomial<T, Vec<T>>)
@@ -191,6 +200,55 @@ where
     (factors, current.truncate_im())
 }
 
+impl<T, R, P, RP, K> Residue for Rpk<T, R, P, RP, K>
+where
+    T: ComplexFloat<Real: Into<T> + TotalOrder> + Into<Complex<T::Real>> + 'static,
+    R: ComplexFloat<Real = T::Real> + Into<Complex<T::Real>>,
+    P: ComplexFloat<Real = T::Real> + Into<Complex<T::Real>>,
+    RP: MaybeList<(R, P)>,
+    K: MaybeList<T, MaybeMapped<Complex<T::Real>>: MaybeList<Complex<T::Real>>>,
+    Polynomial<Complex<T::Real>, <K as MaybeContainer<T>>::MaybeMapped<Complex<T::Real>>>: Mul<Polynomial<Complex<T::Real>, Vec<Complex<T::Real>>>, Output = Polynomial<Complex<T::Real>, Vec<Complex<T::Real>>>>,
+    Complex<T::Real>: AddAssign
+{
+    type Output = Tf<T, Vec<T>, Vec<T>>;
+
+    fn residue<TOL>(self, tol: TOL) -> Self::Output
+    where
+        TOL: Maybe<T::Real>
+    {
+        let mut r = vec![];
+        let mut p = vec![];
+        let _ = self.rp.into_inner()
+            .maybe_map_into_owned(|(r_, p_)| {
+                r.push(r_);
+                p.push(p_.into())
+            });
+        let k = Polynomial::new(self.k.into_inner().maybe_map_into_owned(|k| k.into()));
+
+        let unique_poles_multiplicity = group_poles(p, tol);
+        let (factors, denom) = compute_residue_factors::<Complex<_>>(&unique_poles_multiplicity, true);
+
+        let mut numer = if k.is_zero()
+        {
+            Polynomial::zero()
+        }
+        else
+        {
+            k*denom.clone()
+        };
+        for (residue, factor) in r.into_iter()
+            .zip(factors)
+        {
+            numer = numer + factor*Polynomial::new([residue.into()])
+        }
+
+        Tf {
+            b: numer.truncate_im(),
+            a: denom.truncate_im()
+        }
+    }
+}
+
 #[cfg(test)]
 mod test
 {
@@ -204,6 +262,9 @@ mod test
             [4.0, 5.0, 6.0]
         );
         let rpk = h.residue(());
-        println!("{:?}", rpk)
+        println!("{:?}", rpk);
+
+        let h = rpk.residue(());
+        println!("{:?}", h);
     }
 }

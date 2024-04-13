@@ -79,6 +79,13 @@ where
     {
         Polynomial::new(self.c.to_owned())
     }
+    pub fn into_owned(self) -> Polynomial<T, C::Owned>
+    where
+        C::Owned: MaybeLists<T>,
+        T: Clone
+    {
+        Polynomial::new(self.c.into_owned())
+    }
     pub fn into_inner(self) -> C
     {
         self.c

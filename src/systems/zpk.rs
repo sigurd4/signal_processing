@@ -78,6 +78,17 @@ where
             k: self.k
         }
     }
+    pub fn into_owned(self) -> Zpk<T, Z::Owned, P::Owned, K>
+    where
+        Z::Owned: MaybeList<T>,
+        P::Owned: MaybeList<T>
+    {
+        Zpk {
+            z: self.z.into_owned(),
+            p: self.p.into_owned(),
+            k: self.k
+        }
+    }
     pub fn s() -> Self
     where
         T: Zero,
