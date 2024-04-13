@@ -16,6 +16,10 @@ pub trait ListOrSingle<T>
     fn to_vec(&self) -> Vec<T>
     where
         T: Clone;
+    fn into_vec(self) -> Vec<T>
+    where
+        Self: Sized,
+        T: Clone;
 }
 
 impl<T> ListOrSingle<T> for T
@@ -37,6 +41,13 @@ impl<T> ListOrSingle<T> for T
             T: Clone
     {
         vec![self.clone()]
+    }
+    fn into_vec(self) -> Vec<T>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        vec![self]
     }
 }
 
@@ -60,6 +71,13 @@ impl<T> ListOrSingle<T> for Vec<T>
     {
         self.clone()
     }
+    fn into_vec(self) -> Vec<T>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self
+    }
 }
 impl<T> ListOrSingle<T> for [T]
 {
@@ -77,6 +95,13 @@ impl<T> ListOrSingle<T> for [T]
     }
     fn to_vec(&self) -> Vec<T>
     where
+        T: Clone
+    {
+        self.to_vec()
+    }
+    fn into_vec(self) -> Vec<T>
+    where
+        Self: Sized,
         T: Clone
     {
         self.to_vec()
@@ -102,6 +127,14 @@ impl<T, const N: usize> ListOrSingle<T> for [T; N]
     {
         self.as_slice().to_vec()
     }
+    fn into_vec(self) -> Vec<T>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.into_iter()
+            .collect()
+    }
 }
 impl<T> ListOrSingle<T> for &[T]
 {
@@ -123,6 +156,13 @@ impl<T> ListOrSingle<T> for &[T]
     {
         (*self).to_vec()
     }
+    fn into_vec(self) -> Vec<T>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.to_vec()
+    }
 }
 impl<T, const N: usize> ListOrSingle<T> for &[T; N]
 {
@@ -140,6 +180,13 @@ impl<T, const N: usize> ListOrSingle<T> for &[T; N]
     }
     fn to_vec(&self) -> Vec<T>
     where
+        T: Clone
+    {
+        self.as_slice().to_vec()
+    }
+    fn into_vec(self) -> Vec<T>
+    where
+        Self: Sized,
         T: Clone
     {
         self.as_slice().to_vec()
@@ -166,6 +213,13 @@ impl<T> ListOrSingle<T> for Array1<T>
     {
         self.to_vec()
     }
+    fn into_vec(self) -> Vec<T>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.to_vec()
+    }
 }
 impl<'a, T> ListOrSingle<T> for ArrayView1<'a, T>
 {
@@ -183,6 +237,13 @@ impl<'a, T> ListOrSingle<T> for ArrayView1<'a, T>
     }
     fn to_vec(&self) -> Vec<T>
     where
+        T: Clone
+    {
+        self.to_vec()
+    }
+    fn into_vec(self) -> Vec<T>
+    where
+        Self: Sized,
         T: Clone
     {
         self.to_vec()

@@ -29,7 +29,7 @@ where
 
     fn filter<WW: Maybe<Vec<W>>>(&'a self, x: XX, w: WW) -> Self::Output
     {
-        Rtf::new(self, w)
+        Rtf::<W, S>::new(self, w)
             .filter_mut(x)
     }
 }
@@ -68,9 +68,9 @@ mod test
 
         const N: usize = 64;
         let mut rng = rand::thread_rng();
-        let x: [_; N] = ArrayOps::fill(|_| (-1.0..1.0).sample_single(&mut rng));
+        let x: [f64; N] = ArrayOps::fill(|_| (-1.0..1.0).sample_single(&mut rng));
 
-        let y = h.filter(x, ());
+        let y = Filter::<f64, [_; _]>::filter(&h, x, ());
 
         let t: [_; N] = (0.0..N as f64).linspace_array();
 

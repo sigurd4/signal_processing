@@ -1,9 +1,10 @@
 use array_math::{ArrayMath, SliceMath};
-use num::{Zero};
+use num::Zero;
+use option_trait::NotVoid;
 
-use core::{ops::{AddAssign, Mul}};
+use core::ops::{AddAssign, Mul};
 
-use crate::{Polynomial, ListOrSingle, MaybeContainer};
+use crate::{Polynomial, ListOrSingle, MaybeContainer, Lists, NotPolynomial};
 
 macro_rules! impl_mul {
     (($(<$($a:lifetime),* $(,)? $($c:ident),* >)?) (), $rhs:ty $(where $($w:tt)*)?) => {
@@ -426,3 +427,19 @@ impl_mul!((<M>) &[&[T1]] => [], [T2; M] []);
 impl_mul!((<'b, M>) &[&[T1]] => [], &'b [T2; M] []);
 impl_mul!(() &[&[T1]] => [], Vec<T2> []);
 impl_mul!((<'b>) &[&[T1]] => [], &'b [T2] []);
+
+impl<T1, T2, T3, C> Mul<T2> for Polynomial<T1, C>
+where
+    C: Lists<T1> + NotVoid,
+    T2: NotPolynomial + Clone,
+    T1: Mul<T2, Output = T3> + Clone,
+    C::Mapped<T3>: Lists<T3>
+{
+    type Output = Polynomial<T3, C::Mapped<T3>>;
+
+    #[inline]
+    fn mul(self, rhs: T2) -> Self::Output
+    {
+        self.map_into_owned(|lhs| lhs*rhs.clone())
+    }
+}

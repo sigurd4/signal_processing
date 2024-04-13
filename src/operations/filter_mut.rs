@@ -144,7 +144,7 @@ where
     }
 }
 
-impl<'b, W, T, A, B, C, D, DD, X, XX> FilterMut<X, XX> for Rtf<'b, W, Ss<T, A, B, C, D>>
+impl<'b, W, T, A, B, C, D, DD, X, XX, XW> FilterMut<X, XX> for Rtf<'b, W, Ss<T, A, B, C, D>>
 where
     T: ComplexFloat + Into<W>,
     A: SsAMatrix<T, B, C, D, Mapped<W>: Matrix<W>>,
@@ -153,14 +153,14 @@ where
     D: SsDMatrix<T, A, B, C, Mapped<W>: Matrix<W>> + Matrix<T, Mapped<()>: Matrix<(), Transpose: Matrix<(), RowOwned: Overlay<(), <<C::Mapped<()> as Matrix<()>>::Transpose as MaybeLists<()>>::RowOwned, Output = DD>>>>,
     W: ComplexFloat<Real = T::Real> + ComplexOp<X, Output = W> + SubAssign + AddAssign + 'static,
     X: ComplexFloat<Real = T::Real> + Into<W>,
-    XX: Matrix<X, Mapped<W>: Matrix<W>> + Matrix<X, Mapped<()>: Matrix<(), Owned: Matrix<(), RowOwned: List<(), Mapped<W> = <XX::RowOwned as Container<X>>::Mapped<W>>>, Width: StaticMaybe<usize, Opposite: Sized>, Height: StaticMaybe<usize, Opposite: Sized>>>,
-    XX::RowOwned: List<X>,
+    XX: Matrix<X, Mapped<W>: Matrix<W>> + Matrix<X, Mapped<()>: Matrix<(), Owned: Matrix<(), RowOwned: List<(), Mapped<W> = XW>>, Width: StaticMaybe<usize, Opposite: Sized>, Height: StaticMaybe<usize, Opposite: Sized>>>,
     DD: OwnedList<(), Owned = DD, Width: StaticMaybe<usize, Opposite: Sized>, Height: StaticMaybe<usize, Opposite: Sized>>,
-    DD::Mapped<<XX::RowOwned as Container<X>>::Mapped<W>>: Matrix<W>,
+    XW: List<W>,
+    DD::Mapped<XW>: Lists<W>,
     <XX::Transpose as MaybeLists<X>>::RowOwned: MaybeLenEq<D::RowOwned, true>,
     Array2<W>: SsAMatrix<W, Array2<W>, Array2<W>, Array2<W>> + SsBMatrix<W, Array2<W>, Array2<W>, Array2<W>> + SsCMatrix<W, Array2<W>, Array2<W>, Array2<W>>+ SsDMatrix<W, Array2<W>, Array2<W>, Array2<W>>
 {
-    type Output = DD::Mapped<<XX::RowOwned as Container<X>>::Mapped<W>>;
+    type Output = DD::Mapped<XW>;
 
     fn filter_mut(&mut self, x: XX) -> Self::Output
     {

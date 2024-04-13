@@ -208,9 +208,10 @@ where
     RP: MaybeList<(R, P)>,
     K: MaybeList<T, MaybeMapped<Complex<T::Real>>: MaybeList<Complex<T::Real>>>,
     Polynomial<Complex<T::Real>, <K as MaybeContainer<T>>::MaybeMapped<Complex<T::Real>>>: Mul<Polynomial<Complex<T::Real>, Vec<Complex<T::Real>>>, Output = Polynomial<Complex<T::Real>, Vec<Complex<T::Real>>>>,
-    Complex<T::Real>: AddAssign
+    Complex<T::Real>: AddAssign,
+    Tf<T, Vec<T>, Vec<T>>: Normalize + System<Domain = T>
 {
-    type Output = Tf<T, Vec<T>, Vec<T>>;
+    type Output = <Tf<T, Vec<T>, Vec<T>> as Normalize>::Output;
 
     fn residue<TOL>(self, tol: TOL) -> Self::Output
     where
@@ -245,7 +246,7 @@ where
         Tf {
             b: numer.truncate_im(),
             a: denom.truncate_im()
-        }
+        }.normalize()
     }
 }
 

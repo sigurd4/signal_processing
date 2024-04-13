@@ -1,4 +1,4 @@
-use num::{traits::FloatConst, Float};
+use num::{traits::FloatConst, Float, Integer, NumCast, ToPrimitive, Unsigned};
 
 moddef::moddef!(
     flat(pub) mod {
@@ -30,7 +30,7 @@ where
     (one + lambda*lambda*x*x).sqrt().sqrt().recip()*x.cosh()*(p0 + p1*x*x)/(one + q1*x*x)
 }
 
-/*pub(crate) fn gamma<T>(x: T) -> T
+pub(crate) fn gamma<T>(x: T) -> T
 where
     T: Float
 {
@@ -53,7 +53,30 @@ where
     }.max(T::one())
 }
 
-pub(crate) fn gegenbauer_polynomial<T>(n: usize, alpha: T) -> Polynomial<T, Vec<T>>
+pub(crate) fn bincoeff<T, U>(n: U, k: U) -> T
+where
+    T: Float,
+    U: Unsigned + Integer + ToPrimitive + Copy
+{
+    let nn: u128 = NumCast::from(n).unwrap();
+    let kk: u128 = NumCast::from(k).unwrap();
+
+    let b = if let Some(b) = (nn + 1).checked_sub(kk)
+        .and_then(|nmkp1| {
+            (nmkp1..=nn).try_fold(nn, u128::checked_mul)
+        })
+    {
+        T::from(b).unwrap()
+    }
+    else
+    {
+        factorial::<T, u128>(nn)/gamma(-T::from(n - k).unwrap())
+    };
+    b/factorial(kk)
+}
+
+
+/*pub(crate) fn gegenbauer_polynomial<T>(n: usize, alpha: T) -> Polynomial<T, Vec<T>>
 where
     T: Float + AddAssign + MulAssign + DivAssign
 {

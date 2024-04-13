@@ -47,6 +47,11 @@ where
 
 }
 
+pub auto trait NotPolynomial {}
+impl<T, C> !NotPolynomial for Polynomial<T, C>
+where
+    C: MaybeLists<T> {}
+
 impl<T, C> Polynomial<T, C>
 where
     C: MaybeLists<T>
@@ -111,25 +116,41 @@ where
     {
         Polynomial::new(self.c.map_into_owned(map))
     }
-
-    pub fn re(&self) -> Polynomial<T::Real, C::Mapped<T::Real>>
+    
+    pub fn maybe_map_to_owned<'a, F>(&'a self, map: F) -> Polynomial<F::Output, C::MaybeMapped<F::Output>>
     where
-        C: Lists<T>,
-        T: ComplexFloat,
-        C::Mapped<T::Real>: MaybeLists<T::Real>
+        T: 'a,
+        F: FnMut<(&'a T,)>,
+        C::MaybeMapped<F::Output>: MaybeLists<F::Output>
     {
-        self.map_to_owned(|c| c.re())
+        Polynomial::new(self.c.maybe_map_to_owned(map))
+    }
+
+    pub fn maybe_map_into_owned<F>(self, map: F) -> Polynomial<F::Output, C::MaybeMapped<F::Output>>
+    where
+        T: Clone,
+        F: FnMut<(T,)>,
+        C::MaybeMapped<F::Output>: MaybeLists<F::Output>
+    {
+        Polynomial::new(self.c.maybe_map_into_owned(map))
+    }
+
+    pub fn re(self) -> Polynomial<T::Real, C::MaybeMapped<T::Real>>
+    where
+        T: ComplexFloat,
+        C::MaybeMapped<T::Real>: MaybeLists<T::Real>
+    {
+        self.maybe_map_into_owned(|c| c.re())
     }
     
-    pub fn truncate_im<U>(&self) -> Polynomial<U, C::Mapped<U>>
+    pub fn truncate_im<U>(self) -> Polynomial<U, C::MaybeMapped<U>>
     where
-        C: Lists<T>,
         T: TruncateIm,
         T::Real: Into<U>,
         U: ComplexFloat<Real = T::Real> + 'static,
-        C::Mapped<U>: MaybeLists<U>
+        C::MaybeMapped<U>: MaybeLists<U>
     {
-        self.map_to_owned(|c| c.truncate_im())
+        self.maybe_map_into_owned(|c| c.truncate_im())
     }
 
     pub fn truncate<const N: usize>(self) -> Polynomial<T, [T; N]>

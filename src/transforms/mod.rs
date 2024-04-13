@@ -14,7 +14,7 @@ moddef::moddef!(
         idft,
         idht,
         idwht,
-        //impinvar,
+        impinvar,
         sftrans,
         to_sos,
         to_ss,

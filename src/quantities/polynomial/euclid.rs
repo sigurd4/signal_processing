@@ -4,7 +4,7 @@ use num::{traits::Euclid, Zero};
 
 use array_math::SliceMath;
 
-use crate::{MaybeList, Polynomial};
+use crate::{MaybeList, Polynomial, Lists, NotPolynomial};
 
 impl<T, C1, C2> Div<Polynomial<T, C2>> for Polynomial<T, C1>
 where
@@ -19,6 +19,22 @@ where
     fn div(self, rhs: Polynomial<T, C2>) -> Self::Output
     {
         self.into().div_euclid(&rhs.into())
+    }
+}
+
+impl<T1, T2, T3, C> Div<T2> for Polynomial<T1, C>
+where
+    C: Lists<T1>,
+    T2: NotPolynomial + Clone,
+    T1: Div<T2, Output = T3> + Clone,
+    C::Mapped<T3>: Lists<T3>
+{
+    type Output = Polynomial<T3, C::Mapped<T3>>;
+
+    #[inline]
+    fn div(self, rhs: T2) -> Self::Output
+    {
+        self.map_into_owned(|lhs| lhs/rhs.clone())
     }
 }
 
