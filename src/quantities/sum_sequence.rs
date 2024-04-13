@@ -58,13 +58,13 @@ where
     where
         S::Owned: MaybeList<T>;
 
-    pub fn as_view<'a>(&'a self) -> Self::View<'a>
+    pub fn as_view<'a>(&'a self) -> SumSequence<T, S::View<'a>>
     where
         S::View<'a>: MaybeList<T>
     {
         SumSequence::new(self.s.as_view())
     }
-    pub fn to_owned(&self) -> Self::Owned
+    pub fn to_owned(&self) -> SumSequence<T, S::Owned>
     where
         S::Owned: MaybeList<T>,
         T: Clone

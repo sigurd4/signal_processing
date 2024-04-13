@@ -42,7 +42,7 @@ impl<T: ComplexFloat, B: MaybeLists<T>, A: MaybeList<T>> Tf<T, B, A>
         B::Owned: MaybeLists<T>,
         A::Owned: MaybeList<T>;
 
-    pub fn as_view<'a>(&'a self) -> Self::View<'a>
+    pub fn as_view<'a>(&'a self) -> Tf<T, B::View<'a>, A::View<'a>>
     where
         B::View<'a>: MaybeLists<T>,
         A::View<'a>: MaybeList<T>
@@ -52,7 +52,7 @@ impl<T: ComplexFloat, B: MaybeLists<T>, A: MaybeList<T>> Tf<T, B, A>
             a: self.a.as_view()
         }
     }
-    pub fn to_owned(&self) -> Self::Owned
+    pub fn to_owned(&self) -> Tf<T, B::Owned, A::Owned>
     where
         B::Owned: MaybeLists<T>,
         A::Owned: MaybeList<T>
