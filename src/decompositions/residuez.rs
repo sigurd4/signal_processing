@@ -161,7 +161,11 @@ mod test
         let rpk = h.residuez(());
         println!("{:?}", rpk);
 
+        let rpk = &rpk + &rpk;
+        
+        println!("\n{:?}", rpk);
+
         let h = rpk.residuez(());
-        println!("{:?}", h);
+        println!("\n{:?}", h);
     }
 }

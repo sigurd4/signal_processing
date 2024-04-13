@@ -43,9 +43,9 @@ where
         let mut rp2 = rp2.into_inner()
             .into_iter();
         let mut rp2_next = rp2.next();
-        let mut next = || match (&rp1_next, &rp2_next)
+        let mut next = |prev| match (&rp1_next, &rp2_next)
         {
-            (Some(a), Some(b)) => if !(a.1.abs() > b.1.abs())
+            (Some(a), Some(b)) => if !(a.1.abs() > b.1.abs()) && ((a.1.abs() != b.1.abs()) || Some(b.1) != prev)
             {
                 let n = rp1_next;
                 rp1_next = rp1.next();
@@ -74,7 +74,7 @@ where
         let mut mult_in = [1, 1];
         let mut prev = None;
         let mut i = 0;
-        while let Some(((r, p), which)) = next()
+        while let Some(((r, p), which)) = next(prev)
         {
             if prev_in[which as usize] == Some(p)
             {
