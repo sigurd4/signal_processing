@@ -10,6 +10,7 @@ moddef::moddef!(
         add,
         borrow_mut,
         borrow,
+        debug,
         default,
         deref_mut,
         deref,
@@ -22,7 +23,7 @@ moddef::moddef!(
     }
 );
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct SumSequence<T, S>
 where
     S: MaybeList<T>

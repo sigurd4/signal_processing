@@ -12,6 +12,7 @@ moddef::moddef!(
         add,
         borrow,
         borrow_mut,
+        debug,
         deref,
         deref_mut,
         eq,
@@ -30,7 +31,7 @@ moddef::moddef!(
     }
 );
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct Polynomial<T, C>
 where
     C: MaybeLists<T>

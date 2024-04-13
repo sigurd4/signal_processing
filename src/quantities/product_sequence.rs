@@ -10,6 +10,7 @@ moddef::moddef!(
         borrow_mut,
         borrow,
         default,
+        debug,
         deref_mut,
         deref,
         from,
@@ -21,7 +22,7 @@ moddef::moddef!(
     }
 );
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct ProductSequence<T, S>
 where
     S: MaybeList<T>
