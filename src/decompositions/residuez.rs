@@ -1,36 +1,40 @@
-use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
+use core::ops::Mul;
+
+use num::{complex::ComplexFloat, traits::FloatConst, Float};
 use option_trait::Maybe;
 use array_math::SliceMath;
 
 use crate::{MaybeList, MaybeOwnedList, Normalize, Residue, Rpk, System, Tf};
 
-pub trait ResidueZ<T, R, P, RP, K>: System
-where
-    T: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>,
-    R: ComplexFloat<Real = T::Real>,
-    P: ComplexFloat<Real = T::Real>,
-    RP: MaybeList<(R, P)>,
-    K: MaybeList<T>
+pub trait ResidueZ: System
 {
-    fn residuez<TOL>(self, tol: TOL) -> Rpk<T, R, P, RP, K>
+    type Output: System<Domain: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>>;
+    
+    fn residuez<TOL>(self, tol: TOL) -> Self::Output
     where
-        TOL: Maybe<T::Real>;
+        TOL: Maybe<<Self::Domain as ComplexFloat>::Real>;
 }
 
-impl<T, B, B2, A, A2, R> ResidueZ<T, Complex<R>, Complex<R>, Vec<(Complex<R>, Complex<R>)>, Vec<T>> for Tf<T, B, A>
+impl<T, B, B2, A, A2, TR, R, P, RP, K> ResidueZ for Tf<T, B, A>
 where
-    T: ComplexFloat<Real = R>,
+    T: ComplexFloat<Real = TR>,
     B: MaybeList<T>,
     A: MaybeList<T>,
     B2: MaybeOwnedList<T>,
     A2: MaybeOwnedList<T>,
-    R: Float + FloatConst,
+    TR: Float + FloatConst,
     Self: Normalize<Output = Tf<T, B2, A2>> + System<Domain = T>,
-    Tf<T, B2, A2>: Residue<T, Complex<R>, Complex<R>, Vec<(Complex<R>, Complex<R>)>, Vec<T>> + System<Domain = T>
+    Tf<T, B2, A2>: Residue<Output = Rpk<T, R, P, RP, K>> + System<Domain = T>,
+    RP: MaybeOwnedList<(R, P)>,
+    K: MaybeOwnedList<T>,
+    R: ComplexFloat<Real = TR> + Mul<P, Output = R>,
+    P: ComplexFloat<Real = TR>
 {
-    fn residuez<TOL>(self, tol: TOL) -> Rpk<T, Complex<R>, Complex<R>, Vec<(Complex<R>, Complex<R>)>, Vec<T>>
+    type Output = Rpk<T, R, P, RP, K>;
+
+    fn residuez<TOL>(self, tol: TOL) -> Self::Output
     where
-        TOL: Maybe<R>
+        TOL: Maybe<TR>
     {
         let mut tf = self.normalize();
 
@@ -47,25 +51,31 @@ where
 
         let mut rpk = tf.residue(tol);
 
-        let mut p_prev = None;
-        let mut m = 1;
-        for (r, p) in rpk.rp.iter_mut()
+        if let Some(rp) = rpk.rp.as_mut_slice_option()
         {
-            if p_prev == Some(*p)
+            let mut p_prev = None;
+            let mut m = 1;
+            for (r, p) in rp.iter_mut()
             {
-                m += 1
-            }
-            else
-            {
-                m = 1;
-                p_prev = Some(*p)
-            }
+                if p_prev == Some(*p)
+                {
+                    m += 1
+                }
+                else
+                {
+                    m = 1;
+                    p_prev = Some(*p)
+                }
 
-            *p = p.recip();
-            *r = *r*((-*p).powi(m));
+                *p = p.recip();
+                *r = *r*((-*p).powi(m));
+            }
         }
-        rpk.k.reverse();
-        rpk.k.conj_assign_all();
+        if let Some(k) = rpk.k.as_mut_slice_option()
+        {
+            k.reverse();
+            k.conj_assign_all();
+        }
 
         rpk
     }

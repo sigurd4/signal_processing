@@ -8,20 +8,16 @@ use option_trait::Maybe;
 
 use crate::{MaybeList, Normalize, Polynomial, Rpk, SumSequence, System, Tf, ToTf};
 
-pub trait Residue<T, R, P, RP, K>: System
-where
-    T: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>,
-    R: ComplexFloat<Real = T::Real>,
-    P: ComplexFloat<Real = T::Real>,
-    RP: MaybeList<(R, P)>,
-    K: MaybeList<T>
+pub trait Residue: System
 {
-    fn residue<TOL>(self, tol: TOL) -> Rpk<T, R, P, RP, K>
+    type Output: System<Domain: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>>;
+
+    fn residue<TOL>(self, tol: TOL) -> Self::Output
     where
-        TOL: Maybe<T::Real>;
+        TOL: Maybe<<Self::Domain as ComplexFloat>::Real>;
 }
 
-impl<T, B, A, R> Residue<T, Complex<R>, Complex<R>, Vec<(Complex<R>, Complex<R>)>, Vec<T>> for Tf<T, B, A>
+impl<T, B, A, R> Residue for Tf<T, B, A>
 where
     T: ComplexFloat<Real = R> + Lapack<Complex = Complex<R>> + 'static,
     R: Float + FloatConst + TotalOrder + Into<T>,
@@ -31,7 +27,9 @@ where
     Complex<R>: AddAssign + SubAssign + MulAssign + DivAssign + From<T> + DivAssign<R> + Div<T, Output = Complex<R>>,
     Polynomial<T, Vec<T>>: Euclid
 {
-    fn residue<TOL>(self, tol: TOL) -> Rpk<T, Complex<R>, Complex<R>, Vec<(Complex<R>, Complex<R>)>, Vec<T>>
+    type Output = Rpk<T, Complex<R>, Complex<R>, Vec<(Complex<R>, Complex<R>)>, Vec<T>>;
+
+    fn residue<TOL>(self, tol: TOL) -> Self::Output
     where
         TOL: Maybe<R>
     {
