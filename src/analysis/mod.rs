@@ -11,6 +11,7 @@ moddef::moddef!(
         fwhm,
         grpdelay,
         impz,
+        isallpass,
         real_freqz,
         real_specgram,
         specgram,
