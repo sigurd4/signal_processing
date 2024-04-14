@@ -1,18 +1,21 @@
 use core::ops::DivAssign;
 
-use num::complex::ComplexFloat;
+use num::{Float, complex::ComplexFloat};
 use array_math::{SliceMath, SliceOps};
+use option_trait::Maybe;
 
-use crate::{ListOrSingle, MaybeList, MaybeLists, System, Tf};
+use crate::{ListOrSingle, MaybeList, MaybeLists, Sos, System, Tf, ToTf, Zpk};
 
-pub trait IsAllPass: System
+pub trait IsAllPass<'a>: System
 {
     type Output: ListOrSingle<bool>;
 
-    fn isallpass(&self) -> Self::Output;
+    fn is_allpass<TOL>(&'a self, tol: TOL) -> Self::Output
+    where
+        TOL: Maybe<<Self::Domain as ComplexFloat>::Real>;
 }
 
-impl<T, B, A> IsAllPass for Tf<T, B, A>
+impl<'a, T, B, A> IsAllPass<'a> for Tf<T, B, A>
 where
     T: ComplexFloat + DivAssign,
     B: MaybeLists<T>,
@@ -20,8 +23,13 @@ where
 {
     type Output = B::RowsMapped<bool>;
 
-    fn isallpass(&self) -> Self::Output
+    fn is_allpass<TOL>(&'a self, tol: TOL) -> Self::Output
+    where
+        TOL: Maybe<T::Real>
     {
+        let tol = tol.into_option()
+            .unwrap_or_else(T::Real::epsilon);
+
         let a = self.a.to_vec_option()
             .map(|mut a| {
                 while a.first() == Some(&T::zero())
@@ -53,9 +61,79 @@ where
                 })
                 .unwrap_or_else(|| vec![T::one()]);
 
-            b == a || b.into_iter()
-                .zip(a.iter())
-                .all(|(b, a)| b == -*a)
+            b.len() == 0 || b.len() == a.len() && (
+                b.iter()
+                    .zip(a.iter())
+                    .all(|(b, a)| (*b - *a).abs() <= tol)
+                || b.into_iter()
+                    .zip(a.iter())
+                    .all(|(b, a)| (b + *a).abs() <= tol)
+            )
         })
+    }
+}
+
+impl<'a, T, B, A, S> IsAllPass<'a> for Sos<T, B, A, S>
+where
+    T: ComplexFloat,
+    B: Maybe<[T; 3]> + MaybeList<T>,
+    A: Maybe<[T; 3]> + MaybeList<T>,
+    S: MaybeList<Tf<T, B, A>> + 'a,
+    S::View<'a>: MaybeList<Tf<T, B, A>>,
+    Sos<T, B, A, S::View<'a>>: ToTf<T, Vec<T>, Vec<T>, (), ()>,
+    Tf<T, Vec<T>, Vec<T>>: for<'b> IsAllPass<'b, Output = bool> + System<Domain = T>
+{
+    type Output = bool;
+
+    fn is_allpass<TOL>(&'a self, tol: TOL) -> Self::Output
+    where
+        TOL: Maybe<T::Real>
+    {
+        self.as_view()
+            .to_tf((), ())
+            .is_allpass(tol)
+    }
+}
+
+impl<'a, T, Z, P, K> IsAllPass<'a> for  Zpk<T, Z, P, K>
+where
+    T: ComplexFloat,
+    Z: MaybeList<T>,
+    P: MaybeList<T>,
+    K: ComplexFloat<Real = T::Real>
+{
+    type Output = bool;
+
+    fn is_allpass<TOL>(&'a self, tol: TOL) -> Self::Output
+    where
+        TOL: Maybe<T::Real>
+    {
+        let tol = tol.into_option()
+            .unwrap_or_else(T::Real::epsilon);
+
+        let z = self.z.to_vec_option()
+            .unwrap_or_else(|| vec![]);
+        let mut p = self.p.to_vec_option()
+            .unwrap_or_else(|| vec![]);
+
+        'lp:
+        for z in z.into_iter()
+        {
+            let mut i = 0;
+            while i < p.len()
+            {
+                if (p[i].conj().recip() - z).abs() <= tol
+                {
+                    p.remove(i);
+                    continue 'lp;
+                }
+                else
+                {
+                    i += 1
+                }
+            }
+            return false
+        }
+        p.len() == 0
     }
 }
