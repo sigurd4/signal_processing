@@ -40,6 +40,13 @@ pub trait MaybeLists<T>: MaybeContainer<T>
     where
         T: Clone,
         Self: Sized;
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone;
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized;
 }
 
 impl<T> MaybeLists<T> for ()
@@ -93,6 +100,19 @@ impl<T> MaybeLists<T> for ()
         T: Clone
     {
         vec![()]
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        None
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        None
     }
 }
 
@@ -148,6 +168,19 @@ impl<T> MaybeLists<T> for Vec<T>
     {
         vec![self]
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 impl<T> MaybeLists<T> for [T]
 {
@@ -202,6 +235,19 @@ impl<T> MaybeLists<T> for [T]
     {
         vec![self.to_vec()]
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 impl<T, const N: usize> MaybeLists<T> for [T; N]
 {
@@ -254,6 +300,19 @@ impl<T, const N: usize> MaybeLists<T> for [T; N]
         T: Clone
     {
         vec![self]
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }
 impl<T> MaybeLists<T> for &[T]
@@ -308,6 +367,19 @@ impl<T> MaybeLists<T> for &[T]
     {
         vec![self.to_vec()]
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 impl<T, const N: usize> MaybeLists<T> for &[T; N]
 {
@@ -360,6 +432,19 @@ impl<T, const N: usize> MaybeLists<T> for &[T; N]
         T: Clone
     {
         vec![self.clone()]
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }
 
@@ -419,6 +504,19 @@ impl<T> MaybeLists<T> for Vec<Vec<T>>
     {
         self
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 impl<T, const M: usize> MaybeLists<T> for [Vec<T>; M]
 {
@@ -473,6 +571,19 @@ impl<T, const M: usize> MaybeLists<T> for [Vec<T>; M]
     {
         self.into_iter()
             .collect()
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }
 impl<T> MaybeLists<T> for [Vec<T>]
@@ -534,6 +645,19 @@ impl<T> MaybeLists<T> for [Vec<T>]
             .map(|r| r.clone())
             .collect()
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 impl<T, const M: usize> MaybeLists<T> for &[Vec<T>; M]
 {
@@ -590,6 +714,19 @@ impl<T, const M: usize> MaybeLists<T> for &[Vec<T>; M]
         self.iter()
             .map(|r| r.clone())
             .collect()
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }
 impl<T> MaybeLists<T> for &[Vec<T>]
@@ -650,6 +787,19 @@ impl<T> MaybeLists<T> for &[Vec<T>]
             .map(|r| r.clone())
             .collect()
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 
 impl<T, const N: usize> MaybeLists<T> for Vec<[T; N]>
@@ -708,6 +858,19 @@ impl<T, const N: usize> MaybeLists<T> for Vec<[T; N]>
     {
         self
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for [[T; N]; M]
 {
@@ -762,6 +925,19 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [[T; N]; M]
     {
         self.into_iter()
             .collect()
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }
 impl<T, const N: usize> MaybeLists<T> for [[T; N]]
@@ -823,6 +999,19 @@ impl<T, const N: usize> MaybeLists<T> for [[T; N]]
             .map(|r| r.clone())
             .collect()
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for &[[T; N]; M]
 {
@@ -879,6 +1068,19 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[[T; N]; M]
         self.iter()
             .map(|r| r.clone())
             .collect()
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }
 impl<T, const N: usize> MaybeLists<T> for &[[T; N]]
@@ -938,6 +1140,19 @@ impl<T, const N: usize> MaybeLists<T> for &[[T; N]]
         self.iter()
             .map(|r| r.clone())
             .collect()
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }
 
@@ -999,6 +1214,19 @@ impl<T> MaybeLists<T> for Vec<&[T]>
             .map(|r| r.to_vec())
             .collect()
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 impl<T, const M: usize> MaybeLists<T> for [&[T]; M]
 {
@@ -1054,6 +1282,19 @@ impl<T, const M: usize> MaybeLists<T> for [&[T]; M]
         self.into_iter()
             .map(|r| r.to_vec())
             .collect()
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }
 impl<T> MaybeLists<T> for [&[T]]
@@ -1115,6 +1356,19 @@ impl<T> MaybeLists<T> for [&[T]]
             .map(|&r| r.to_vec())
             .collect()
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 impl<T, const M: usize> MaybeLists<T> for &[&[T]; M]
 {
@@ -1170,6 +1424,19 @@ impl<T, const M: usize> MaybeLists<T> for &[&[T]; M]
         self.iter()
             .map(|r| r.to_vec())
             .collect()
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }
 impl<T> MaybeLists<T> for &[&[T]]
@@ -1229,6 +1496,19 @@ impl<T> MaybeLists<T> for &[&[T]]
         self.iter()
             .map(|&r| r.to_vec())
             .collect()
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }
 
@@ -1290,6 +1570,19 @@ impl<T, const N: usize> MaybeLists<T> for Vec<&[T; N]>
             .map(|r| r.clone())
             .collect()
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for [&[T; N]; M]
 {
@@ -1345,6 +1638,19 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [&[T; N]; M]
         self.into_iter()
             .map(|r| r.clone())
             .collect()
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }
 impl<T, const N: usize> MaybeLists<T> for [&[T; N]]
@@ -1406,6 +1712,19 @@ impl<T, const N: usize> MaybeLists<T> for [&[T; N]]
             .map(|&r| r.clone())
             .collect()
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for &[&[T; N]; M]
 {
@@ -1461,6 +1780,19 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[&[T; N]; M]
         (*self).into_iter()
             .map(|r| r.clone())
             .collect()
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }
 impl<T, const N: usize> MaybeLists<T> for &[&[T; N]]
@@ -1521,6 +1853,19 @@ impl<T, const N: usize> MaybeLists<T> for &[&[T; N]]
             .map(|&r| r.clone())
             .collect()
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 
 impl<T> MaybeLists<T> for Array1<T>
@@ -1575,6 +1920,19 @@ impl<T> MaybeLists<T> for Array1<T>
     {
         vec![self]
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 impl<'c, T> MaybeLists<T> for ArrayView1<'c, T>
 {
@@ -1627,6 +1985,19 @@ impl<'c, T> MaybeLists<T> for ArrayView1<'c, T>
         T: Clone
     {
         vec![self.to_owned()]
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }
 
@@ -1691,6 +2062,19 @@ impl<T> MaybeLists<T> for Array2<T>
             .map(|r| r.to_owned())
             .collect()
     }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
+    }
 }
 impl<'b, T> MaybeLists<T> for ArrayView2<'b, T>
 {
@@ -1752,5 +2136,18 @@ impl<'b, T> MaybeLists<T> for ArrayView2<'b, T>
             .into_iter()
             .map(|r| r.to_owned())
             .collect()
+    }
+    fn to_vecs_option(&self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone
+    {
+        Some(self.to_vecs())
+    }
+    fn into_vecs_option(self) -> Option<Vec<Vec<T>>>
+    where
+        T: Clone,
+        Self: Sized
+    {
+        Some(self.into_vecs())
     }
 }

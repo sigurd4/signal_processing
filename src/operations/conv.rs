@@ -459,37 +459,6 @@ impl_conv!((<'b, M>) &[&[T1]] => [], &'b [T2; M] []);
 impl_conv!(() &[&[T1]] => [], Vec<T2> []);
 impl_conv!((<'b>) &[&[T1]] => [], &'b [T2] []);
 
-/*impl<'a, 'b, T1, T2> Conv<T1, T2, &'b [T2]> for &'a [T1]
-where
-    T1: ComplexFloat<Real: Float> + MulAssign + AddAssign + From<Complex<T1::Real>> + Sum + Mul<T2>,
-    T2: ComplexFloat<Real: Float> + MulAssign + AddAssign + From<Complex<T2::Real>> + Sum,
-    <T1 as Mul<T2>>::Output: ComplexFloat<Real: Float> + MulAssign + AddAssign + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum
-{
-    type Output = Vec<<T1 as Mul<T2>>::Output>;
-
-    fn conv(self, rhs: &'b [T2]) -> Self::Output
-    {
-        self.as_view_slice().convolve_fft(rhs.as_view_slice())
-    }
-}
-
-impl<T1, T2, const N: usize, const M: usize> Conv<T1, T2, [T2; M]> for [T1; N]
-where
-    T1: ComplexFloat<Real: Float> + MulAssign + AddAssign + From<Complex<T1::Real>> + Sum + Mul<T2>,
-    T2: ComplexFloat<Real: Float> + MulAssign + AddAssign + From<Complex<T2::Real>> + Sum,
-    <T1 as Mul<T2>>::Output: ComplexFloat<Real: Float> + MulAssign + AddAssign + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum,
-    [(); (N + M - 1).next_power_of_two() - N]:,
-    [(); (N + M - 1).next_power_of_two() - M]:,
-    [(); (N + M - 1).next_power_of_two() - (N + M - 1)]:
-{
-    type Output = [<T1 as Mul<T2>>::Output; N + M - 1];
-
-    fn conv(self, rhs: [T2; M]) -> Self::Output
-    {
-        self.to_owned().convolve_fft(rhs.to_owned())
-    }
-}*/
-
 #[cfg(test)]
 mod test
 {
@@ -500,9 +469,11 @@ mod test
     #[test]
     fn test()
     {
-        let a: [Complex<f32>; _] = [1.0, 2.0, 3.0].map(Complex::from);
-        let b: [Complex<f32>; _] = [2.0, 2.0].map(Complex::from);
+        let a: [f32; _] = [1.0, 2.0, 3.0];
+        let b: [f32; _] = [2.0, 2.0];
 
-        let _c = a.conv(b);
+        let c = a.conv(b);
+
+        println!("{:?}", c)
     }
 }

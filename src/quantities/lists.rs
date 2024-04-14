@@ -3,7 +3,7 @@
 use ndarray::{Array1, Array2, ArrayBase, ArrayView1, ArrayView2};
 use option_trait::StaticMaybe;
 
-use crate::{Container, MaybeContainer, MaybeLists};
+use crate::{Container, ListOrSingle, MaybeContainer, MaybeLists};
 
 pub trait Lists<T>: MaybeLists<T> + Container<T>
 {
@@ -28,6 +28,13 @@ pub trait Lists<T>: MaybeLists<T> + Container<T>
         F: FnMut() -> T,
         <Self::Height as StaticMaybe<usize>>::Opposite: Sized,
         <Self::Width as StaticMaybe<usize>>::Opposite: Sized;
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone;
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone;
 }
 
 impl<T> Lists<T> for Vec<T>
@@ -63,6 +70,19 @@ impl<T> Lists<T> for Vec<T>
     {
         self.resize_with(size.1, fill);
         self
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        vec![self.clone()]
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        vec![self]
     }
 }
 impl<T> Lists<T> for [T]
@@ -100,6 +120,19 @@ impl<T> Lists<T> for [T]
         v.resize_with(size.1, fill);
         v
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        vec![self.to_vec()]
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        vec![self.to_vec()]
+    }
 }
 impl<T, const N: usize> Lists<T> for [T; N]
 {
@@ -133,6 +166,19 @@ impl<T, const N: usize> Lists<T> for [T; N]
         F: FnMut() -> T
     {
         self
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        vec![self.as_slice().to_vec()]
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        vec![self.into_iter().collect()]
     }
 }
 impl<T> Lists<T> for &[T]
@@ -170,6 +216,19 @@ impl<T> Lists<T> for &[T]
         v.resize_with(size.1, fill);
         v
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        vec![self.to_vec()]
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        vec![self.to_vec()]
+    }
 }
 impl<T, const N: usize> Lists<T> for &[T; N]
 {
@@ -203,6 +262,19 @@ impl<T, const N: usize> Lists<T> for &[T; N]
         F: FnMut() -> T
     {
         self.clone()
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        vec![self.as_slice().to_vec()]
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        vec![self.as_slice().to_vec()]
     }
 }
 
@@ -247,6 +319,19 @@ impl<T> Lists<T> for Vec<Vec<T>>
         }
         self
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.clone()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self
+    }
 }
 impl<T, const M: usize> Lists<T> for [Vec<T>; M]
 {
@@ -288,6 +373,19 @@ impl<T, const M: usize> Lists<T> for [Vec<T>; M]
             v.resize_with(size.1, &mut fill);
         }
         self
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.to_vec()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.into_vec()
     }
 }
 impl<T> Lists<T> for [Vec<T>]
@@ -333,6 +431,19 @@ impl<T> Lists<T> for [Vec<T>]
         }
         v
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.to_vec()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.into_vec()
+    }
 }
 impl<T, const M: usize> Lists<T> for &[Vec<T>; M]
 {
@@ -375,6 +486,19 @@ impl<T, const M: usize> Lists<T> for &[Vec<T>; M]
             v.resize_with(size.1, &mut fill)
         }
         v
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.to_vec()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.into_vec()
     }
 }
 impl<T> Lists<T> for &[Vec<T>]
@@ -420,6 +544,19 @@ impl<T> Lists<T> for &[Vec<T>]
         }
         v
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.to_vec()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.into_vec()
+    }
 }
 
 impl<T, const N: usize> Lists<T> for Vec<[T; N]>
@@ -459,6 +596,23 @@ impl<T, const N: usize> Lists<T> for Vec<[T; N]>
         self.resize_with(size.0, || core::array::from_fn(|_| fill()));
         self
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.into_iter()
+            .map(|r| r.into_vec())
+            .collect()
+    }
 }
 impl<T, const N: usize, const M: usize> Lists<T> for [[T; N]; M]
 {
@@ -495,6 +649,23 @@ impl<T, const N: usize, const M: usize> Lists<T> for [[T; N]; M]
         F: FnMut() -> T
     {
         self
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.into_iter()
+            .map(|r| r.into_vec())
+            .collect()
     }
 }
 impl<T, const N: usize> Lists<T> for [[T; N]]
@@ -535,6 +706,23 @@ impl<T, const N: usize> Lists<T> for [[T; N]]
         v.resize_with(size.0, || core::array::from_fn(|_| fill()));
         v
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
 }
 impl<T, const N: usize, const M: usize> Lists<T> for &[[T; N]; M]
 {
@@ -571,6 +759,23 @@ impl<T, const N: usize, const M: usize> Lists<T> for &[[T; N]; M]
         F: FnMut() -> T
     {
         self.clone()
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
     }
 }
 impl<T, const N: usize> Lists<T> for &[[T; N]]
@@ -610,6 +815,23 @@ impl<T, const N: usize> Lists<T> for &[[T; N]]
         let mut v = self.to_vec();
         v.resize_with(size.0, || core::array::from_fn(|_| fill()));
         v
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
     }
 }
 
@@ -654,6 +876,23 @@ impl<T> Lists<T> for Vec<&[T]>
         }
         v
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.into_iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
 }
 impl<T, const M: usize> Lists<T> for [&[T]; M]
 {
@@ -694,6 +933,23 @@ impl<T, const M: usize> Lists<T> for [&[T]; M]
             v.resize_with(size.1, &mut fill)
         }
         v
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.into_iter()
+            .map(|r| r.to_vec())
+            .collect()
     }
 }
 impl<T> Lists<T> for [&[T]]
@@ -737,6 +993,23 @@ impl<T> Lists<T> for [&[T]]
         }
         v
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
 }
 impl<T, const M: usize> Lists<T> for &[&[T]; M]
 {
@@ -777,6 +1050,23 @@ impl<T, const M: usize> Lists<T> for &[&[T]; M]
             v.resize_with(size.1, &mut fill)
         }
         v
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
     }
 }
 impl<T> Lists<T> for &[&[T]]
@@ -820,6 +1110,23 @@ impl<T> Lists<T> for &[&[T]]
         }
         v
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
 }
 
 impl<T, const N: usize> Lists<T> for Vec<&[T; N]>
@@ -861,6 +1168,23 @@ impl<T, const N: usize> Lists<T> for Vec<&[T; N]>
         v.resize_with(size.0, || core::array::from_fn(|_| fill()));
         v
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.into_iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
 }
 impl<T, const N: usize, const M: usize> Lists<T> for [&[T; N]; M]
 {
@@ -897,6 +1221,23 @@ impl<T, const N: usize, const M: usize> Lists<T> for [&[T; N]; M]
         F: FnMut() -> T
     {
         self.map(|r| r.clone())
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.into_iter()
+            .map(|r| r.to_vec())
+            .collect()
     }
 }
 impl<T, const N: usize> Lists<T> for [&[T; N]]
@@ -938,6 +1279,23 @@ impl<T, const N: usize> Lists<T> for [&[T; N]]
         v.resize_with(size.0, || core::array::from_fn(|_| fill()));
         v
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
 }
 impl<T, const N: usize, const M: usize> Lists<T> for &[&[T; N]; M]
 {
@@ -974,6 +1332,23 @@ impl<T, const N: usize, const M: usize> Lists<T> for &[&[T; N]; M]
         F: FnMut() -> T
     {
         (*self).map(|r| r.clone())
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
     }
 }
 impl<T, const N: usize> Lists<T> for &[&[T; N]]
@@ -1015,6 +1390,23 @@ impl<T, const N: usize> Lists<T> for &[&[T; N]]
         v.resize_with(size.0, || core::array::from_fn(|_| fill()));
         v
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
 }
 
 impl<T> Lists<T> for Array1<T>
@@ -1050,6 +1442,19 @@ impl<T> Lists<T> for Array1<T>
     {
         ArrayBase::from_shape_fn(size.1, |i| self.get(i).map(|x| x.clone()).unwrap_or_else(&mut fill))
     }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        vec![self.to_vec()]
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        vec![self.to_vec()]
+    }
 }
 impl<'b, T> Lists<T> for ArrayView1<'b, T>
 {
@@ -1083,6 +1488,19 @@ impl<'b, T> Lists<T> for ArrayView1<'b, T>
         F: FnMut() -> T
     {
         ArrayBase::from_shape_fn(size.1, |i| self.get(i).map(|x| x.clone()).unwrap_or_else(&mut fill))
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        vec![self.to_vec()]
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        vec![self.to_vec()]
     }
 }
 
@@ -1123,6 +1541,25 @@ impl<T> Lists<T> for Array2<T>
         F: FnMut() -> T
     {
         ArrayBase::from_shape_fn(size, |i| self.get(i).map(|x| x.clone()).unwrap_or_else(&mut fill))
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.rows()
+            .into_iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.rows()
+            .into_iter()
+            .map(|r| r.to_vec())
+            .collect()
     }
 }
 impl<'b, 'c, T> Lists<T> for ArrayView2<'c, T>
@@ -1165,5 +1602,24 @@ where
         F: FnMut() -> T
     {
         ArrayBase::from_shape_fn(size, |i| self.get(i).map(|x| x.clone()).unwrap_or_else(&mut fill))
+    }
+    fn to_vecs(&self) -> Vec<Vec<T>>
+    where
+        T: Clone
+    {
+        self.rows()
+            .into_iter()
+            .map(|r| r.to_vec())
+            .collect()
+    }
+    fn into_vecs(self) -> Vec<Vec<T>>
+    where
+        Self: Sized,
+        T: Clone
+    {
+        self.rows()
+            .into_iter()
+            .map(|r| r.to_vec())
+            .collect()
     }
 }

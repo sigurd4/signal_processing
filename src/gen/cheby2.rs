@@ -232,8 +232,6 @@ where
 mod test
 {
     use array_math::ArrayOps;
-    
-    
 
     use crate::{plot, Cheby2, FilterGenPlane, RealFreqZ, Tf};
 

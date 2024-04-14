@@ -49,23 +49,6 @@ mod test
         let h = Ss::butter(4, [0.2], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
 
-        /*let h = ss!(f64[z]
-            let A = [
-                [0.0000, 0.1716],
-                [-1.0000, 0]
-            ],
-            let B = [
-                [-0.2426],
-                [0.5858]
-            ],
-            let C = [
-                [0, 1]
-            ],
-            let D = [
-                [0.2929]
-            ]
-        );*/
-
         const N: usize = 64;
         let mut rng = rand::thread_rng();
         let x: [f64; N] = ArrayOps::fill(|_| (-1.0..1.0).sample_single(&mut rng));
