@@ -30,7 +30,8 @@ moddef::moddef!(
         gauspuls,
         gmonopuls,
         invfreqs,
-        invfreqz
+        invfreqz,
+        kaiserord
     }
 );
 

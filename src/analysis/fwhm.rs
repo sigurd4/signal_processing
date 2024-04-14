@@ -173,7 +173,7 @@ mod test
             ("Boxcar", Boxcar.window_gen((), WindowRange::Symmetric)),
             ("Hamming", Hamming.window_gen((), WindowRange::Symmetric)),
             ("Hann", Hann.window_gen((), WindowRange::Symmetric)),
-            ("Kaiser", Kaiser {alpha: 3.0}.window_gen((), WindowRange::Symmetric)),
+            ("Kaiser", Kaiser {beta: PI*3.0}.window_gen((), WindowRange::Symmetric)),
             ("Triangular", Triangular.window_gen((), WindowRange::Symmetric)),
         ];
         

@@ -1,6 +1,6 @@
 use core::ops::{DivAssign, MulAssign};
 
-use array_math::{ArrayMath};
+use array_math::ArrayMath;
 use num::{traits::FloatConst, Float, NumCast};
 
 use crate::{validate_filter_bands, FilterBandError, FilterGenPlane, FilterGenType};

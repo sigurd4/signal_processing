@@ -11,7 +11,7 @@ pub struct Kaiser<T>
 where
     T: Float
 {
-    pub alpha: T
+    pub beta: T
 }
 
 impl<T, const N: usize> WindowGen<T, [T; N], ()> for Kaiser<T>
@@ -39,10 +39,10 @@ where
         let l = T::from(m).unwrap();
         let one = T::one();
         let two = one + one;
-        let d = i0(T::PI()*self.alpha);
+        let d = i0(self.beta);
         ArrayOps::fill(|i| {
             let z = two*T::from(i).unwrap()/l - one;
-            i0(T::PI()*self.alpha*(one - z*z).sqrt())/d
+            i0(self.beta*(one - z*z).sqrt())/d
         })
     }
 }
@@ -71,10 +71,10 @@ where
         let l = T::from(m).unwrap();
         let one = T::one();
         let two = one + one;
-        let d = i0(T::PI()*self.alpha);
+        let d = i0(self.beta);
         (0..n).map(|i| {
             let z = two*T::from(i).unwrap()/l - one;
-            i0(T::PI()*self.alpha*(one - z*z).sqrt())/d
+            i0(self.beta*(one - z*z).sqrt())/d
         }).collect()
     }
 }
@@ -95,7 +95,7 @@ mod test
     fn test()
     {
         const N: usize = 1024;
-        let w: [_; N/2] = Kaiser {alpha: 3.0}.window_gen((), WindowRange::Symmetric);
+        let w: [_; N/2] = Kaiser {beta: PI*3.0}.window_gen((), WindowRange::Symmetric);
         let n = (0.0..1.0).linspace_array();
 
         plot::plot_curves("g(n/N)", "plots/windows/g_n_kaiser.png", [&n.zip(w)]).unwrap();
