@@ -6,6 +6,7 @@ moddef::moddef!(
         filter_mut,
         filter,
         filtfilt,
+        interp,
         normalize,
         window
     }

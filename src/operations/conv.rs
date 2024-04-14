@@ -462,8 +462,6 @@ impl_conv!((<'b>) &[&[T1]] => [], &'b [T2] []);
 #[cfg(test)]
 mod test
 {
-    use num::Complex;
-
     use crate::Conv;
 
     #[test]
