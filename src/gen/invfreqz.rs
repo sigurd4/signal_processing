@@ -41,7 +41,7 @@ where
 impl<T, B, A, H, W, HFW> InvFreqZ<H, W, HFW, <B::Width as StaticMaybe<usize>>::Opposite, <A::Width as StaticMaybe<usize>>::Opposite> for Tf<T, B, A>
 where
     T: Float + FloatConst + Lapack<Real = T> + AddAssign + 'static,
-    B: MaybeList<T>,
+    B: List<T>,
     A: MaybeList<T>,
     H: ComplexFloat<Real = T>,
     HFW: List<(H, T, W)>,
