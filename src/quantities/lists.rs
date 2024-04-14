@@ -7,11 +7,6 @@ use crate::{Container, ListOrSingle, MaybeContainer, MaybeLists};
 
 pub trait Lists<T>: MaybeLists<T> + Container<T>
 {
-    type Height: StaticMaybe<usize>;
-    type Width: StaticMaybe<usize>;
-    const HEIGHT: usize;
-    const WIDTH: usize;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -39,11 +34,6 @@ pub trait Lists<T>: MaybeLists<T> + Container<T>
 
 impl<T> Lists<T> for Vec<T>
 {
-    type Height = usize;
-    type Width = ();
-    const HEIGHT: usize = 1;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -87,11 +77,6 @@ impl<T> Lists<T> for Vec<T>
 }
 impl<T> Lists<T> for [T]
 {
-    type Height = usize;
-    type Width = ();
-    const HEIGHT: usize = 1;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -136,11 +121,6 @@ impl<T> Lists<T> for [T]
 }
 impl<T, const N: usize> Lists<T> for [T; N]
 {
-    type Height = usize;
-    type Width = usize;
-    const HEIGHT: usize = 1;
-    const WIDTH: usize = N;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -183,11 +163,6 @@ impl<T, const N: usize> Lists<T> for [T; N]
 }
 impl<T> Lists<T> for &[T]
 {
-    type Height = usize;
-    type Width = ();
-    const HEIGHT: usize = 1;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -232,11 +207,6 @@ impl<T> Lists<T> for &[T]
 }
 impl<T, const N: usize> Lists<T> for &[T; N]
 {
-    type Height = usize;
-    type Width = usize;
-    const HEIGHT: usize = 1;
-    const WIDTH: usize = N;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -280,11 +250,6 @@ impl<T, const N: usize> Lists<T> for &[T; N]
 
 impl<T> Lists<T> for Vec<Vec<T>>
 {
-    type Height = ();
-    type Width = ();
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -335,11 +300,6 @@ impl<T> Lists<T> for Vec<Vec<T>>
 }
 impl<T, const M: usize> Lists<T> for [Vec<T>; M]
 {
-    type Height = usize;
-    type Width = ();
-    const HEIGHT: usize = M;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -390,11 +350,6 @@ impl<T, const M: usize> Lists<T> for [Vec<T>; M]
 }
 impl<T> Lists<T> for [Vec<T>]
 {
-    type Height = ();
-    type Width = ();
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -447,11 +402,6 @@ impl<T> Lists<T> for [Vec<T>]
 }
 impl<T, const M: usize> Lists<T> for &[Vec<T>; M]
 {
-    type Height = usize;
-    type Width = ();
-    const HEIGHT: usize = M;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -503,11 +453,6 @@ impl<T, const M: usize> Lists<T> for &[Vec<T>; M]
 }
 impl<T> Lists<T> for &[Vec<T>]
 {
-    type Height = ();
-    type Width = ();
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -561,11 +506,6 @@ impl<T> Lists<T> for &[Vec<T>]
 
 impl<T, const N: usize> Lists<T> for Vec<[T; N]>
 {
-    type Height = ();
-    type Width = usize;
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = N;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -616,11 +556,6 @@ impl<T, const N: usize> Lists<T> for Vec<[T; N]>
 }
 impl<T, const N: usize, const M: usize> Lists<T> for [[T; N]; M]
 {
-    type Height = usize;
-    type Width = usize;
-    const HEIGHT: usize = M;
-    const WIDTH: usize = N;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -670,11 +605,6 @@ impl<T, const N: usize, const M: usize> Lists<T> for [[T; N]; M]
 }
 impl<T, const N: usize> Lists<T> for [[T; N]]
 {
-    type Height = ();
-    type Width = usize;
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = N;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -726,11 +656,6 @@ impl<T, const N: usize> Lists<T> for [[T; N]]
 }
 impl<T, const N: usize, const M: usize> Lists<T> for &[[T; N]; M]
 {
-    type Height = usize;
-    type Width = usize;
-    const HEIGHT: usize = M;
-    const WIDTH: usize = N;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -780,11 +705,6 @@ impl<T, const N: usize, const M: usize> Lists<T> for &[[T; N]; M]
 }
 impl<T, const N: usize> Lists<T> for &[[T; N]]
 {
-    type Height = ();
-    type Width = usize;
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = N;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -837,11 +757,6 @@ impl<T, const N: usize> Lists<T> for &[[T; N]]
 
 impl<T> Lists<T> for Vec<&[T]>
 {
-    type Height = ();
-    type Width = ();
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -896,11 +811,6 @@ impl<T> Lists<T> for Vec<&[T]>
 }
 impl<T, const M: usize> Lists<T> for [&[T]; M]
 {
-    type Height = usize;
-    type Width = ();
-    const HEIGHT: usize = M;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -954,11 +864,6 @@ impl<T, const M: usize> Lists<T> for [&[T]; M]
 }
 impl<T> Lists<T> for [&[T]]
 {
-    type Height = ();
-    type Width = ();
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -1013,11 +918,6 @@ impl<T> Lists<T> for [&[T]]
 }
 impl<T, const M: usize> Lists<T> for &[&[T]; M]
 {
-    type Height = usize;
-    type Width = ();
-    const HEIGHT: usize = M;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -1071,11 +971,6 @@ impl<T, const M: usize> Lists<T> for &[&[T]; M]
 }
 impl<T> Lists<T> for &[&[T]]
 {
-    type Height = ();
-    type Width = ();
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -1131,11 +1026,6 @@ impl<T> Lists<T> for &[&[T]]
 
 impl<T, const N: usize> Lists<T> for Vec<&[T; N]>
 {
-    type Height = ();
-    type Width = usize;
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = N;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -1188,11 +1078,6 @@ impl<T, const N: usize> Lists<T> for Vec<&[T; N]>
 }
 impl<T, const N: usize, const M: usize> Lists<T> for [&[T; N]; M]
 {
-    type Height = usize;
-    type Width = usize;
-    const HEIGHT: usize = M;
-    const WIDTH: usize = N;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -1242,11 +1127,6 @@ impl<T, const N: usize, const M: usize> Lists<T> for [&[T; N]; M]
 }
 impl<T, const N: usize> Lists<T> for [&[T; N]]
 {
-    type Height = ();
-    type Width = usize;
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = N;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -1299,11 +1179,6 @@ impl<T, const N: usize> Lists<T> for [&[T; N]]
 }
 impl<T, const N: usize, const M: usize> Lists<T> for &[&[T; N]; M]
 {
-    type Height = usize;
-    type Width = usize;
-    const HEIGHT: usize = M;
-    const WIDTH: usize = N;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -1353,11 +1228,6 @@ impl<T, const N: usize, const M: usize> Lists<T> for &[&[T; N]; M]
 }
 impl<T, const N: usize> Lists<T> for &[&[T; N]]
 {
-    type Height = ();
-    type Width = usize;
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = N;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -1411,11 +1281,6 @@ impl<T, const N: usize> Lists<T> for &[&[T; N]]
 
 impl<T> Lists<T> for Array1<T>
 {
-    type Height = usize;
-    type Width = ();
-    const HEIGHT: usize = 1;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
         where
             T: 'a,
@@ -1458,11 +1323,6 @@ impl<T> Lists<T> for Array1<T>
 }
 impl<'b, T> Lists<T> for ArrayView1<'b, T>
 {
-    type Height = usize;
-    type Width = ();
-    const HEIGHT: usize = 1;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
         where
             T: 'a,
@@ -1506,11 +1366,6 @@ impl<'b, T> Lists<T> for ArrayView1<'b, T>
 
 impl<T> Lists<T> for Array2<T>
 {
-    type Height = ();
-    type Width = ();
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -1567,11 +1422,6 @@ where
     'b: 'c,
     Self: 'b
 {
-    type Height = ();
-    type Width = ();
-    const HEIGHT: usize = usize::MAX;
-    const WIDTH: usize = usize::MAX;
-
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,

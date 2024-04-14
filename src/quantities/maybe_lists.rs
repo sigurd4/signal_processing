@@ -1,12 +1,18 @@
 
 
 use ndarray::{prelude::Array1, Array2, ArrayView1, ArrayView2};
+use option_trait::StaticMaybe;
 
 
 use crate::{ListOrSingle, Lists, MaybeContainer, MaybeList};
 
 pub trait MaybeLists<T>: MaybeContainer<T>
 {
+    type Height: StaticMaybe<usize>;
+    type Width: StaticMaybe<usize>;
+    const HEIGHT: usize;
+    const WIDTH: usize;
+
     type RowsMapped<M>: ListOrSingle<M>;
     type RowView<'a>: MaybeList<T> + 'a
     where
@@ -51,6 +57,11 @@ pub trait MaybeLists<T>: MaybeContainer<T>
 
 impl<T> MaybeLists<T> for ()
 {
+    type Height = usize;
+    type Width = usize;
+    const HEIGHT: usize = 1;
+    const WIDTH: usize = 1;
+
     type RowsMapped<M> = M;
     type RowView<'a> = ()
     where
@@ -118,6 +129,11 @@ impl<T> MaybeLists<T> for ()
 
 impl<T> MaybeLists<T> for Vec<T>
 {
+    type Height = usize;
+    type Width = ();
+    const HEIGHT: usize = 1;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<M> = M;
     type RowView<'a> = &'a [T]
     where
@@ -184,6 +200,11 @@ impl<T> MaybeLists<T> for Vec<T>
 }
 impl<T> MaybeLists<T> for [T]
 {
+    type Height = usize;
+    type Width = ();
+    const HEIGHT: usize = 1;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<M> = M;
     type RowView<'a> = &'a [T]
     where
@@ -251,6 +272,11 @@ impl<T> MaybeLists<T> for [T]
 }
 impl<T, const N: usize> MaybeLists<T> for [T; N]
 {
+    type Height = usize;
+    type Width = usize;
+    const HEIGHT: usize = 1;
+    const WIDTH: usize = N;
+
     type RowsMapped<M> = M;
     type RowView<'a> = &'a [T; N]
     where
@@ -317,6 +343,11 @@ impl<T, const N: usize> MaybeLists<T> for [T; N]
 }
 impl<T> MaybeLists<T> for &[T]
 {
+    type Height = usize;
+    type Width = ();
+    const HEIGHT: usize = 1;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<M> = M;
     type RowView<'a> = &'a [T]
     where
@@ -383,6 +414,11 @@ impl<T> MaybeLists<T> for &[T]
 }
 impl<T, const N: usize> MaybeLists<T> for &[T; N]
 {
+    type Height = usize;
+    type Width = usize;
+    const HEIGHT: usize = 1;
+    const WIDTH: usize = N;
+
     type RowsMapped<M> = M;
     type RowView<'a> = &'a [T; N]
     where
@@ -450,6 +486,11 @@ impl<T, const N: usize> MaybeLists<T> for &[T; N]
 
 impl<T> MaybeLists<T> for Vec<Vec<T>>
 {
+    type Height = ();
+    type Width = ();
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T]
     where
@@ -520,6 +561,11 @@ impl<T> MaybeLists<T> for Vec<Vec<T>>
 }
 impl<T, const M: usize> MaybeLists<T> for [Vec<T>; M]
 {
+    type Height = usize;
+    type Width = ();
+    const HEIGHT: usize = M;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T]
     where
@@ -588,6 +634,11 @@ impl<T, const M: usize> MaybeLists<T> for [Vec<T>; M]
 }
 impl<T> MaybeLists<T> for [Vec<T>]
 {
+    type Height = ();
+    type Width = ();
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T]
     where
@@ -661,6 +712,11 @@ impl<T> MaybeLists<T> for [Vec<T>]
 }
 impl<T, const M: usize> MaybeLists<T> for &[Vec<T>; M]
 {
+    type Height = usize;
+    type Width = ();
+    const HEIGHT: usize = M;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T]
     where
@@ -731,6 +787,11 @@ impl<T, const M: usize> MaybeLists<T> for &[Vec<T>; M]
 }
 impl<T> MaybeLists<T> for &[Vec<T>]
 {
+    type Height = ();
+    type Width = ();
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T]
     where
@@ -804,6 +865,11 @@ impl<T> MaybeLists<T> for &[Vec<T>]
 
 impl<T, const N: usize> MaybeLists<T> for Vec<[T; N]>
 {
+    type Height = ();
+    type Width = usize;
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = N;
+
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T; N]
     where
@@ -874,6 +940,11 @@ impl<T, const N: usize> MaybeLists<T> for Vec<[T; N]>
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for [[T; N]; M]
 {
+    type Height = usize;
+    type Width = usize;
+    const HEIGHT: usize = M;
+    const WIDTH: usize = N;
+
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T; N]
     where
@@ -942,6 +1013,11 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [[T; N]; M]
 }
 impl<T, const N: usize> MaybeLists<T> for [[T; N]]
 {
+    type Height = ();
+    type Width = usize;
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = N;
+
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T; N]
     where
@@ -1015,6 +1091,11 @@ impl<T, const N: usize> MaybeLists<T> for [[T; N]]
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for &[[T; N]; M]
 {
+    type Height = usize;
+    type Width = usize;
+    const HEIGHT: usize = M;
+    const WIDTH: usize = N;
+
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T; N]
     where
@@ -1085,6 +1166,11 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[[T; N]; M]
 }
 impl<T, const N: usize> MaybeLists<T> for &[[T; N]]
 {
+    type Height = ();
+    type Width = usize;
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = N;
+
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T; N]
     where
@@ -1158,6 +1244,11 @@ impl<T, const N: usize> MaybeLists<T> for &[[T; N]]
 
 impl<T> MaybeLists<T> for Vec<&[T]>
 {
+    type Height = ();
+    type Width = ();
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T]
     where
@@ -1230,6 +1321,11 @@ impl<T> MaybeLists<T> for Vec<&[T]>
 }
 impl<T, const M: usize> MaybeLists<T> for [&[T]; M]
 {
+    type Height = usize;
+    type Width = ();
+    const HEIGHT: usize = M;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T]
     where
@@ -1299,6 +1395,11 @@ impl<T, const M: usize> MaybeLists<T> for [&[T]; M]
 }
 impl<T> MaybeLists<T> for [&[T]]
 {
+    type Height = ();
+    type Width = ();
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T]
     where
@@ -1372,6 +1473,11 @@ impl<T> MaybeLists<T> for [&[T]]
 }
 impl<T, const M: usize> MaybeLists<T> for &[&[T]; M]
 {
+    type Height = usize;
+    type Width = ();
+    const HEIGHT: usize = M;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T]
     where
@@ -1441,6 +1547,11 @@ impl<T, const M: usize> MaybeLists<T> for &[&[T]; M]
 }
 impl<T> MaybeLists<T> for &[&[T]]
 {
+    type Height = ();
+    type Width = ();
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T]
     where
@@ -1514,6 +1625,11 @@ impl<T> MaybeLists<T> for &[&[T]]
 
 impl<T, const N: usize> MaybeLists<T> for Vec<&[T; N]>
 {
+    type Height = ();
+    type Width = usize;
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = N;
+
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T; N]
     where
@@ -1586,6 +1702,11 @@ impl<T, const N: usize> MaybeLists<T> for Vec<&[T; N]>
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for [&[T; N]; M]
 {
+    type Height = usize;
+    type Width = usize;
+    const HEIGHT: usize = M;
+    const WIDTH: usize = N;
+
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T; N]
     where
@@ -1655,6 +1776,11 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [&[T; N]; M]
 }
 impl<T, const N: usize> MaybeLists<T> for [&[T; N]]
 {
+    type Height = ();
+    type Width = usize;
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = N;
+
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T; N]
     where
@@ -1728,6 +1854,11 @@ impl<T, const N: usize> MaybeLists<T> for [&[T; N]]
 }
 impl<T, const N: usize, const M: usize> MaybeLists<T> for &[&[T; N]; M]
 {
+    type Height = usize;
+    type Width = usize;
+    const HEIGHT: usize = M;
+    const WIDTH: usize = N;
+
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T; N]
     where
@@ -1797,6 +1928,11 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[&[T; N]; M]
 }
 impl<T, const N: usize> MaybeLists<T> for &[&[T; N]]
 {
+    type Height = ();
+    type Width = usize;
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = N;
+
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T; N]
     where
@@ -1870,6 +2006,11 @@ impl<T, const N: usize> MaybeLists<T> for &[&[T; N]]
 
 impl<T> MaybeLists<T> for Array1<T>
 {
+    type Height = usize;
+    type Width = ();
+    const HEIGHT: usize = 1;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<M> = M;
     type RowView<'a> = ArrayView1<'a, T>
     where
@@ -1936,6 +2077,11 @@ impl<T> MaybeLists<T> for Array1<T>
 }
 impl<'c, T> MaybeLists<T> for ArrayView1<'c, T>
 {
+    type Height = usize;
+    type Width = ();
+    const HEIGHT: usize = 1;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<M> = M;
     type RowView<'a> = ArrayView1<'a, T>
     where
@@ -2003,6 +2149,11 @@ impl<'c, T> MaybeLists<T> for ArrayView1<'c, T>
 
 impl<T> MaybeLists<T> for Array2<T>
 {
+    type Height = ();
+    type Width = ();
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = usize::MAX;
+
     type RowsMapped<M> = Vec<M>;
     type RowView<'a> = ArrayView1<'a, T>
     where
@@ -2078,6 +2229,11 @@ impl<T> MaybeLists<T> for Array2<T>
 }
 impl<'b, T> MaybeLists<T> for ArrayView2<'b, T>
 {
+    type Height = ();
+    type Width = ();
+    const HEIGHT: usize = usize::MAX;
+    const WIDTH: usize = usize::MAX;
+    
     type RowsMapped<M> = Vec<M>;
     type RowView<'a> = ArrayView1<'a, T>
     where

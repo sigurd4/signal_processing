@@ -28,7 +28,9 @@ moddef::moddef!(
         firpm,
         firpmord,
         gauspuls,
-        gmonopuls
+        gmonopuls,
+        invfreqs,
+        invfreqz
     }
 );
 
