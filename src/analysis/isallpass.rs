@@ -28,6 +28,7 @@ where
         TOL: Maybe<T::Real>
     {
         let tol = tol.into_option()
+            .map(|tol| Float::abs(tol))
             .unwrap_or_else(T::Real::epsilon);
 
         let a = self.a.to_vec_option()
@@ -109,6 +110,7 @@ where
         TOL: Maybe<T::Real>
     {
         let tol = tol.into_option()
+            .map(|tol| Float::abs(tol))
             .unwrap_or_else(T::Real::epsilon);
 
         let z = self.z.to_vec_option()
