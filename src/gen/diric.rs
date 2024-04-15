@@ -57,7 +57,7 @@ where
             self.start + (self.end - self.start)*p
         });
         
-        (x.diric((), order).0, x)
+        x.diric((), order)
     }
 }
 

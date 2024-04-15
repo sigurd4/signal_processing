@@ -7,6 +7,7 @@ moddef::moddef!(
         chirp,
         diric,
         meyeraux,
+        sigmoid_train,
 
         filter,
         pulse,
