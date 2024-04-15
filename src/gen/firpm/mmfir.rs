@@ -2,7 +2,7 @@ use core::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 use std::{f64::{consts::{FRAC_PI_2, PI}, EPSILON}, ops::Range};
 
 use num::{traits::FloatConst, Complex, Float, NumCast, Zero};
-use option_trait::MaybeCell;
+use option_trait::{Maybe, MaybeCell, StaticMaybe};
 use rand::{distributions::uniform::SampleUniform, rngs::ThreadRng, Rng};
 use array_math::{SliceMath, ArrayOps};
 
@@ -413,7 +413,7 @@ where
 
 const DEBUG: bool = false;
 
-pub fn mmfir<T, const B2: usize, const R: usize, const W: usize, const RES: bool>(
+pub fn mmfir<T, RES, const B2: usize, const R: usize, const W: usize>(
     n0: usize,
     bands: [T; B2],
     response: Response<'_, T, R, W>,
@@ -423,17 +423,17 @@ pub fn mmfir<T, const B2: usize, const R: usize, const W: usize, const RES: bool
     persistence: T,
     robustness: T,
     target: T
-) -> Result<(Tf<T, Vec<T>, ()>, T, MaybeCell<FirPmReport<T>, RES>), FirPmError>
+) -> Result<(Tf<T, Vec<T>, ()>, T, RES), FirPmError>
 where
     T: Float + FloatConst + Default + AddAssign + SubAssign + MulAssign + DivAssign + SampleUniform + 'static,
     Complex<T>: MulAssign + AddAssign,
+    RES: StaticMaybe<FirPmReport<T>>,
     [(); 0 - B2%2]:,
     [(); B2/2 - 1]:,
     [(); B2 - R]:,
     [(); 0 - R % (B2/2)]:,
     [(); B2 - W]:,
-    [(); 0 - W % (B2/2)]:,
-    [(); RES as usize]:
+    [(); 0 - W % (B2/2)]:
 {
     let num_bands = B2/2;
     let n = n0.max(2);
@@ -1039,7 +1039,7 @@ where
         }
     }
 
-    let report = MaybeCell::from_fn(|| {
+    let report = RES::maybe_from_fn(|| {
         let mut report = FirPmReport {
             fgrid: vec![zero; space_length],
             des: vec![zero; space_length],

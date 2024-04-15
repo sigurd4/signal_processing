@@ -7,22 +7,21 @@ use option_trait::Maybe;
 use crate::{List, NotRange};
 
 
-pub trait GausPuls<'a, T, L, N>
+pub trait GausPuls<T, L, N>
 where
     T: Float,
     L: List<T>,
     N: Maybe<usize>
 {
-    fn gauspuls(&'a self, numtaps: N, fc: T, bw: T) -> (L::Mapped<T>, L::Mapped<T>, L::Mapped<T>, L);
+    fn gauspuls(self, numtaps: N, fc: T, bw: T) -> (L::Mapped<T>, L::Mapped<T>, L::Mapped<T>, L);
 }
 
-impl<'a, T, L> GausPuls<'a, T, L::View<'a>, ()> for L
+impl<T, L> GausPuls<T, L, ()> for L
 where
     T: Float + FloatConst,
-    L: List<T> + NotRange,
-    L::View<'a>: List<T, Mapped<T> = L::Mapped<T>>
+    L: List<T> + NotRange
 {
-    fn gauspuls(&'a self, (): (), fc: T, bw: T) -> (L::Mapped<T>, L::Mapped<T>, L::Mapped<T>, L::View<'a>)
+    fn gauspuls(self, (): (), fc: T, bw: T) -> (L::Mapped<T>, L::Mapped<T>, L::Mapped<T>, L)
     {
         let fv = -bw*bw*fc*fc/(T::from(8u8).unwrap()*(T::from(10u8).unwrap().powf(-T::from(3u8).unwrap()/T::from(10u8).unwrap())).ln());
         let tv = (T::TAU()*T::TAU()*fv).recip();
@@ -35,73 +34,69 @@ where
         let ye = self.map_to_owned(|&t| {
             (-t*t/(T::from(2u8).unwrap()*tv)).exp()
         });
-        (yi, yq, ye, self.as_view())
+        (yi, yq, ye, self)
     }
 }
 
-impl<'a, T, const N: usize> GausPuls<'a, T, [T; N], ()> for Range<T>
+impl<T, const N: usize> GausPuls<T, [T; N], ()> for Range<T>
 where
     T: Float + FloatConst,
     [T; N]: NotRange
 {
-    fn gauspuls(&self, (): (), fc: T, bw: T) -> ([T; N], [T; N], [T; N], [T; N])
+    fn gauspuls(self, (): (), fc: T, bw: T) -> ([T; N], [T; N], [T; N], [T; N])
     {
         let x: [_; N] = ArrayOps::fill(|i| {
             let p = T::from(i).unwrap()/T::from(N - 1).unwrap();
             self.start + (self.end - self.start)*p
         });
         
-        let (yi, yq, ye, _) = x.gauspuls((), fc, bw);
-        (yi, yq, ye, x)
+        x.gauspuls((), fc, bw)
     }
 }
-impl<'a, T> GausPuls<'a, T, Vec<T>, usize> for Range<T>
+impl<T> GausPuls<T, Vec<T>, usize> for Range<T>
 where
     T: Float + FloatConst,
     Vec<T>: NotRange
 {
-    fn gauspuls(&self, n: usize, fc: T, bw: T) -> (Vec<T>, Vec<T>, Vec<T>, Vec<T>)
+    fn gauspuls(self, n: usize, fc: T, bw: T) -> (Vec<T>, Vec<T>, Vec<T>, Vec<T>)
     {
         let x: Vec<_> = (0..n).map(|i| {
                 let p = T::from(i).unwrap()/T::from(n - 1).unwrap();
                 self.start + (self.end - self.start)*p
             }).collect();
 
-        let (yi, yq, ye, _) = x.gauspuls((), fc, bw);
-        (yi, yq, ye, x)
+        x.gauspuls((), fc, bw)
     }
 }
 
-impl<'a, T, const N: usize> GausPuls<'a, T, [T; N], ()> for RangeInclusive<T>
+impl<T, const N: usize> GausPuls<T, [T; N], ()> for RangeInclusive<T>
 where
     T: Float + FloatConst,
     [T; N]: NotRange
 {
-    fn gauspuls(&self, (): (), fc: T, bw: T) -> ([T; N], [T; N], [T; N], [T; N])
+    fn gauspuls(self, (): (), fc: T, bw: T) -> ([T; N], [T; N], [T; N], [T; N])
     {
         let x: [_; N] = ArrayOps::fill(|i| {
             let p = T::from(i).unwrap()/T::from(N - 1).unwrap();
             *self.start() + (*self.end() - *self.start())*p
         });
         
-        let (yi, yq, ye, _) = x.gauspuls((), fc, bw);
-        (yi, yq, ye, x)
+        x.gauspuls((), fc, bw)
     }
 }
-impl<'a, T> GausPuls<'a, T, Vec<T>, usize> for RangeInclusive<T>
+impl<T> GausPuls<T, Vec<T>, usize> for RangeInclusive<T>
 where
     T: Float + FloatConst,
     Vec<T>: NotRange
 {
-    fn gauspuls(&self, n: usize, fc: T, bw: T) -> (Vec<T>, Vec<T>, Vec<T>, Vec<T>)
+    fn gauspuls(self, n: usize, fc: T, bw: T) -> (Vec<T>, Vec<T>, Vec<T>, Vec<T>)
     {
         let x: Vec<_> = (0..n).map(|i| {
                 let p = T::from(i).unwrap()/T::from(n - 1).unwrap();
                 *self.start() + (*self.end() - *self.start())*p
             }).collect();
 
-        let (yi, yq, ye, _) = x.gauspuls((), fc, bw);
-        (yi, yq, ye, x)
+        x.gauspuls((), fc, bw)
     }
 }
 

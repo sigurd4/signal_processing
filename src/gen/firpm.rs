@@ -2,7 +2,7 @@ use core::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
 use ndarray::Array2;
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast};
-use option_trait::MaybeCell;
+use option_trait::{Maybe, StaticMaybe};
 use rand::distributions::uniform::SampleUniform;
 use thiserror::Error;
 
@@ -71,26 +71,27 @@ pub trait FirPm: System + Sized
 where
     Self::Domain: Float
 {
-    fn firpm<const B2: usize, const R: usize, const W: usize, const RES: bool>(
+    fn firpm<FS, RES, const B2: usize, const R: usize, const W: usize>(
         order: usize,
         bands: [Self::Domain; B2],
         response: [Self::Domain; R],
         weight: [Self::Domain; W],
         filter_type: FirPmType,
-        sampling_frequency: Option<Self::Domain>,
+        sampling_frequency: FS,
         accuracy: Self::Domain,
         persistence: Self::Domain,
         robustness: Self::Domain,
         target: Self::Domain
-    ) -> Result<(Self, Self::Domain, MaybeCell<FirPmReport<Self::Domain>, RES>), FirPmError>
+    ) -> Result<(Self, Self::Domain, RES), FirPmError>
     where
+        FS: Maybe<Self::Domain>,
+        RES: StaticMaybe<FirPmReport<Self::Domain>>,
         [(); 0 - B2%2]:,
         [(); B2/2 - 1]:,
         [(); B2 - R]:,
         [(); 0 - R % (B2/2)]:,
         [(); B2 - W]:,
-        [(); 0 - W % (B2/2)]:,
-        [(); RES as usize]:;
+        [(); 0 - W % (B2/2)]:;
 }
 
 impl<T> FirPm for Tf<T, Vec<T>, ()>
@@ -98,33 +99,36 @@ where
     T: Float + FloatConst + AddAssign + SubAssign + MulAssign + DivAssign + Default + SampleUniform + 'static,
     Complex<T>: MulAssign + AddAssign + MulAssign<T>
 {
-    fn firpm<'a, const B2: usize, const R: usize, const W: usize, const RES: bool>(
+    fn firpm<FS, RES, const B2: usize, const R: usize, const W: usize>(
         order: usize,
-        bands: [T; B2],
-        response: [T; R],
-        weight: [T; W],
+        bands: [Self::Domain; B2],
+        response: [Self::Domain; R],
+        weight: [Self::Domain; W],
         filter_type: FirPmType,
-        sampling_frequency: Option<T>,
-        accuracy: T,
-        persistence: T,
-        robustness: T,
-        target: T
-    ) -> Result<(Self, T, MaybeCell<FirPmReport<T>, RES>), FirPmError>
+        sampling_frequency: FS,
+        accuracy: Self::Domain,
+        persistence: Self::Domain,
+        robustness: Self::Domain,
+        target: Self::Domain
+    ) -> Result<(Self, Self::Domain, RES), FirPmError>
     where
+        FS: Maybe<Self::Domain>,
+        RES: StaticMaybe<FirPmReport<Self::Domain>>,
         [(); 0 - B2%2]:,
         [(); B2/2 - 1]:,
         [(); B2 - R]:,
         [(); 0 - R % (B2/2)]:,
         [(); B2 - W]:,
-        [(); 0 - W % (B2/2)]:,
-        [(); RES as usize]:
+        [(); 0 - W % (B2/2)]:
     {
         let mut h = Err(FirPmError::NumericalError);
         let mut n = 1;
+
+        let sampling_frequency = sampling_frequency.into_option();
     
         for _ in 0..64
         {
-            let h_ = mmfir::mmfir::<T, B2, R, W, RES>(
+            let h_ = mmfir::mmfir::<T, RES, B2, R, W>(
                 order + 1,
                 bands,
                 mmfir::Response::Bands { response, weight },
@@ -147,7 +151,7 @@ where
                         *e.0 += e.1
                     }
                     *m += m_;
-                    if let Some(r) = r.get_mut() && let Some(r_) = r_.into_option()
+                    if let Some(r) = r.as_option_mut() && let Some(r_) = r_.into_option()
                     {
                         for e in r.des.iter_mut()
                             .zip(r_.des)
@@ -183,7 +187,7 @@ where
                 *e *= s;
             }
             *m *= s;
-            if let Some(r) = r.get_mut()
+            if let Some(r) = r.as_option_mut()
             {
                 for e in r.des.iter_mut()
                 {
@@ -217,26 +221,27 @@ where
     Complex<T>: ComplexFloat<Real = T>,
     Tf<T, Vec<T>, ()>: FirPm + ToZpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T, (), ()> + System<Domain = T>
 {
-    fn firpm<'a, const B2: usize, const R: usize, const W: usize, const RES: bool>(
+    fn firpm<FS, RES, const B2: usize, const R: usize, const W: usize>(
         order: usize,
-        bands: [T; B2],
-        response: [T; R],
-        weight: [T; W],
+        bands: [Self::Domain; B2],
+        response: [Self::Domain; R],
+        weight: [Self::Domain; W],
         filter_type: FirPmType,
-        sampling_frequency: Option<T>,
-        accuracy: T,
-        persistence: T,
-        robustness: T,
-        target: T
-    ) -> Result<(Self, T, MaybeCell<FirPmReport<T>, RES>), FirPmError>
+        sampling_frequency: FS,
+        accuracy: Self::Domain,
+        persistence: Self::Domain,
+        robustness: Self::Domain,
+        target: Self::Domain
+    ) -> Result<(Self, Self::Domain, RES), FirPmError>
     where
+        FS: Maybe<Self::Domain>,
+        RES: StaticMaybe<FirPmReport<Self::Domain>>,
         [(); 0 - B2%2]:,
         [(); B2/2 - 1]:,
         [(); B2 - R]:,
         [(); 0 - R % (B2/2)]:,
         [(); B2 - W]:,
-        [(); 0 - W % (B2/2)]:,
-        [(); RES as usize]:
+        [(); 0 - W % (B2/2)]:
     {
         let (h, m, r) = Tf::<T, Vec<T>, ()>::firpm(
             order,
@@ -261,26 +266,27 @@ where
     Tf<T, Vec<T>, ()>: FirPm + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>,
     Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>>+ SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>
 {
-    fn firpm<'a, const B2: usize, const R: usize, const W: usize, const RES: bool>(
+    fn firpm<FS, RES, const B2: usize, const R: usize, const W: usize>(
         order: usize,
-        bands: [T; B2],
-        response: [T; R],
-        weight: [T; W],
+        bands: [Self::Domain; B2],
+        response: [Self::Domain; R],
+        weight: [Self::Domain; W],
         filter_type: FirPmType,
-        sampling_frequency: Option<T>,
-        accuracy: T,
-        persistence: T,
-        robustness: T,
-        target: T
-    ) -> Result<(Self, T, MaybeCell<FirPmReport<T>, RES>), FirPmError>
+        sampling_frequency: FS,
+        accuracy: Self::Domain,
+        persistence: Self::Domain,
+        robustness: Self::Domain,
+        target: Self::Domain
+    ) -> Result<(Self, Self::Domain, RES), FirPmError>
     where
+        FS: Maybe<Self::Domain>,
+        RES: StaticMaybe<FirPmReport<Self::Domain>>,
         [(); 0 - B2%2]:,
         [(); B2/2 - 1]:,
         [(); B2 - R]:,
         [(); 0 - R % (B2/2)]:,
         [(); B2 - W]:,
-        [(); 0 - W % (B2/2)]:,
-        [(); RES as usize]:
+        [(); 0 - W % (B2/2)]:
     {
         let (h, m, r) = Tf::<T, Vec<T>, ()>::firpm(
             order,
@@ -310,16 +316,16 @@ mod test
     fn test()
     {
         let fs: f64 = 8000.0;
-        let (n, f, a, w) = crate::firpmord([1900.0, 2000.0], [1.0, 0.0], [0.0001, 0.0001], Some(fs))
+        let (n, f, a, w) = crate::firpmord([1900.0, 2000.0], [1.0, 0.0], [0.0001, 0.0001], fs)
             .unwrap();
         println!("{}", n);
-        let (h, _, _) = Tf::firpm::<_, _, _, false>(
+        let (h, _, ()) = Tf::firpm(
             n,
             f,
             a,
             w,
             FirPmType::Symmetric,
-            None,
+            (),
             3.0,
             3.0,
             3.0,

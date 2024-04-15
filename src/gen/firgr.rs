@@ -47,32 +47,40 @@ where
     Self::Domain: Float,
     O: Maybe<usize>
 {
-    fn firgr<const B: usize>(
+    fn firgr<FS, MI, GD, const B: usize>(
         order: O,
         bands: [Self::Domain; B*2],
         response: [Self::Domain; B],
         weight: [Self::Domain; B],
         filter_type: FilterClassType,
-        sampling_frequency: Option<Self::Domain>,
-        max_iter: Option<usize>,
-        grid_density: Option<usize>
-    ) -> Result<Self, FirGrError>;
+        sampling_frequency: FS,
+        max_iter: MI,
+        grid_density: GD
+    ) -> Result<Self, FirGrError>
+    where
+        FS: Maybe<Self::Domain>,
+        MI: Maybe<usize>,
+        GD: Maybe<usize>;
 }
 
 impl<T> FirGr<usize> for Tf<T, Vec<T>, ()>
 where
     T: Float + FloatConst + AddAssign + MulAssign + DivAssign
 {
-    fn firgr<const B: usize>(
+    fn firgr<FS, MI, GD, const B: usize>(
         order: usize,
         bands: [T; B*2],
         response: [T; B],
         weight: [T; B],
         filter_type: FilterClassType,
-        sampling_frequency: Option<T>,
-        max_iter: Option<usize>,
-        grid_density: Option<usize>
+        sampling_frequency: FS,
+        max_iter: MI,
+        grid_density: GD
     ) -> Result<Self, FirGrError>
+    where
+        FS: Maybe<T>,
+        MI: Maybe<usize>,
+        GD: Maybe<usize>
     {
         remez::pre_remez(
             order + 1,
@@ -80,9 +88,9 @@ where
             response,
             weight,
             filter_type,
-            sampling_frequency,
-            max_iter.unwrap_or(40),
-            grid_density.unwrap_or(16),
+            sampling_frequency.into_option(),
+            max_iter.into_option().unwrap_or(40),
+            grid_density.into_option().unwrap_or(16),
             T::infinity()
         ).map(|(h, _)| Tf {
             b: Polynomial::new(h.into_iter().map(Into::into).collect()),
@@ -95,16 +103,20 @@ impl<T, const N: usize> FirGr<()> for Tf<T, [T; N], ()>
 where
     T: Float + FloatConst + AddAssign + MulAssign + DivAssign
 {
-    fn firgr<const B: usize>(
+    fn firgr<FS, MI, GD, const B: usize>(
         (): (),
         bands: [T; B*2],
         response: [T; B],
         weight: [T; B],
         filter_type: FilterClassType,
-        sampling_frequency: Option<T>,
-        max_iter: Option<usize>,
-        grid_density: Option<usize>
+        sampling_frequency: FS,
+        max_iter: MI,
+        grid_density: GD
     ) -> Result<Self, FirGrError>
+    where
+        FS: Maybe<T>,
+        MI: Maybe<usize>,
+        GD: Maybe<usize>
     {
         remez::pre_remez(
             N,
@@ -112,9 +124,9 @@ where
             response,
             weight,
             filter_type,
-            sampling_frequency,
-            max_iter.unwrap_or(40),
-            grid_density.unwrap_or(16),
+            sampling_frequency.into_option(),
+            max_iter.into_option().unwrap_or(40),
+            grid_density.into_option().unwrap_or(16),
             T::infinity()
         ).map(|(h, _)| Tf {
             b: Polynomial::new(h.into_iter()
@@ -135,16 +147,20 @@ where
     Complex<T>: ComplexFloat<Real = T>,
     Tf<T, Vec<T>, ()>: FirGr<usize> + ToZpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T, (), ()> + System<Domain = T>
 {
-    fn firgr<const B: usize>(
+    fn firgr<FS, MI, GD, const B: usize>(
         order: usize,
         bands: [T; B*2],
         response: [T; B],
         weight: [T; B],
         filter_type: FilterClassType,
-        sampling_frequency: Option<T>,
-        max_iter: Option<usize>,
-        grid_density: Option<usize>
+        sampling_frequency: FS,
+        max_iter: MI,
+        grid_density: GD
     ) -> Result<Self, FirGrError>
+    where
+        FS: Maybe<T>,
+        MI: Maybe<usize>,
+        GD: Maybe<usize>
     {
         let h = Tf::firgr(
             order,
@@ -167,16 +183,20 @@ where
     Tf<T, Vec<T>, ()>: FirGr<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>,
     Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>>+ SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>
 {
-    fn firgr<const B: usize>(
+    fn firgr<FS, MI, GD, const B: usize>(
         order: usize,
         bands: [T; B*2],
         response: [T; B],
         weight: [T; B],
         filter_type: FilterClassType,
-        sampling_frequency: Option<T>,
-        max_iter: Option<usize>,
-        grid_density: Option<usize>
+        sampling_frequency: FS,
+        max_iter: MI,
+        grid_density: GD
     ) -> Result<Self, FirGrError>
+    where
+        FS: Maybe<T>,
+        MI: Maybe<usize>,
+        GD: Maybe<usize>
     {
         let h = Tf::firgr(
             order,
@@ -196,7 +216,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::{ArrayOps};
+    use array_math::ArrayOps;
     use crate::{plot, FirGr, FilterClassType, RealFreqZ, Tf};
 
     #[test]
@@ -208,9 +228,9 @@ mod test
             [1.0, 0.0, 1.0],
             [1.0, 1.0, 1.0],
             FilterClassType::Symmetric,
-            None,
-            None,
-            None
+            (),
+            (),
+            ()
         ).unwrap();
     
         const N: usize = 1024;

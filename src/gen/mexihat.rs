@@ -6,106 +6,94 @@ use option_trait::Maybe;
 
 use crate::{List, NotRange};
 
-pub trait Diric<T, L, N>
+pub trait Mexihat<T, L, N>
 where
     T: Float,
     L: List<T>,
     N: Maybe<usize>
 {
-    fn diric(self, numtaps: N, order: usize) -> (L::Mapped<T>, L);
+    fn mexihat(self, numtaps: N) -> (L::Mapped<T>, L);
 }
 
-impl<T, L> Diric<T, L, ()> for L
+impl<T, L> Mexihat<T, L, ()> for L
 where
     T: Float + FloatConst,
     L: List<T> + NotRange
 {
-    fn diric(self, (): (), order: usize) -> (L::Mapped<T>, L)
+    fn mexihat(self, (): ()) -> (L::Mapped<T>, L)
     {
-        let n = T::from(order).unwrap();
         let one = T::one();
         let two = one + one;
 
-        let y = self.map_to_owned(|&x| {
-            if !(x % T::TAU()).is_zero()
-            {
-                (n*x/two).sin()/(n*(x/two).sin())
-            }
-            else if (((n - one)*x) % T::TAU()).abs() < T::FRAC_PI_2()
-            {
-                one
-            }
-            else
-            {
-                -one
-            }
+        let a = two/(T::from(3u8).unwrap()*T::PI().sqrt()).sqrt();
+
+        let psi = self.map_to_owned(|&x| {
+            (one - x*x)*a*(-x*x/two).exp()
         });
 
-        (y, self)
+        (psi, self)
     }
 }
 
-impl<T, const N: usize> Diric<T, [T; N], ()> for Range<T>
+impl<T, const N: usize> Mexihat<T, [T; N], ()> for Range<T>
 where
     T: Float + FloatConst,
     [T; N]: NotRange
 {
-    fn diric(self, (): (), order: usize) -> ([T; N], [T; N])
+    fn mexihat(self, (): ()) -> ([T; N], [T; N])
     {
         let x: [_; N] = ArrayOps::fill(|i| {
             let p = T::from(i).unwrap()/T::from(N).unwrap();
             self.start + (self.end - self.start)*p
         });
         
-        (x.diric((), order).0, x)
+        (x.mexihat(()).0, x)
     }
 }
-
-impl<T> Diric<T, Vec<T>, usize> for Range<T>
+impl<T> Mexihat<T, Vec<T>, usize> for Range<T>
 where
     T: Float + FloatConst,
     Vec<T>: NotRange
 {
-    fn diric(self, n: usize, order: usize) -> (Vec<T>, Vec<T>)
+    fn mexihat(self, n: usize) -> (Vec<T>, Vec<T>)
     {
         let x: Vec<_> = (0..n).map(|i| {
                 let p = T::from(i).unwrap()/T::from(n).unwrap();
                 self.start + (self.end - self.start)*p
             }).collect();
 
-        x.diric((), order)
+        x.mexihat(())
     }
 }
 
-impl<T, const N: usize> Diric<T, [T; N], ()> for RangeInclusive<T>
+impl<T, const N: usize> Mexihat<T, [T; N], ()> for RangeInclusive<T>
 where
     T: Float + FloatConst,
     [T; N]: NotRange
 {
-    fn diric(self, (): (), order: usize) -> ([T; N], [T; N])
+    fn mexihat(self, (): ()) -> ([T; N], [T; N])
     {
         let x: [_; N] = ArrayOps::fill(|i| {
             let p = T::from(i).unwrap()/T::from(N - 1).unwrap();
             *self.start() + (*self.end() - *self.start())*p
         });
         
-        x.diric((), order)
+        x.mexihat(())
     }
 }
-
-impl<T> Diric<T, Vec<T>, usize> for RangeInclusive<T>
+impl<T> Mexihat<T, Vec<T>, usize> for RangeInclusive<T>
 where
     T: Float + FloatConst,
     Vec<T>: NotRange
 {
-    fn diric(self, n: usize, order: usize) -> (Vec<T>, Vec<T>)
+    fn mexihat(self, n: usize) -> (Vec<T>, Vec<T>)
     {
         let x: Vec<_> = (0..n).map(|i| {
                 let p = T::from(i).unwrap()/T::from(n - 1).unwrap();
                 *self.start() + (*self.end() - *self.start())*p
             }).collect();
 
-        x.diric((), order)
+        x.mexihat(())
     }
 }
 
@@ -114,15 +102,15 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Diric};
+    use crate::{plot, Mexihat};
 
     #[test]
     fn test()
     {
         const N: usize = 1024;
-        let (y, t): ([_; N], _) = (-8.0..=8.0).diric((), 6);
+        let (psi, t): ([_; N], _) = (-8.0..=8.0).mexihat(());
 
-        plot::plot_curves("y(t)", "plots/y_t_diric.png", [&t.zip(y)])
+        plot::plot_curves("ψ(t)", "plots/psi_t_mexihat.png", [&t.zip(psi)])
             .unwrap()
     }
 }

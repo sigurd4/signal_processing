@@ -31,7 +31,8 @@ moddef::moddef!(
         gmonopuls,
         invfreqs,
         invfreqz,
-        kaiserord
+        kaiserord,
+        mexihat
     }
 );
 

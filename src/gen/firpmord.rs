@@ -3,6 +3,7 @@ use core::ops::DivAssign;
 
 use array_math::ArrayOps;
 use num::{traits::FloatConst, Float, NumCast};
+use option_trait::Maybe;
 use thiserror::Error;
 
 
@@ -19,14 +20,15 @@ pub enum FirPmOrdError
     DeviationsOutOfRange
 }
 
-pub fn firpmord<T, const F: usize, const D: usize>(
+pub fn firpmord<T, FS, const F: usize, const D: usize>(
     mut frequencies: [T; F],
     amplitudes: [T; (F + 2)/2],
     deviations: [T; D],
-    sampling_frequency: Option<T>
+    sampling_frequency: FS
 ) -> Result<(usize, [T; F + 2], [T; F + 2], [T; (F + 2)/2]), FirPmOrdError>
 where
     T: Float + FloatConst + DivAssign,
+    FS: Maybe<T>,
     [(); 0 - F%2]:,
     [(); F/2]:,
     [(); (F + 2)/2 - D]:,
@@ -37,7 +39,7 @@ where
     let half = two.recip();
     let zero = T::zero();
 
-    if let Some(fs) = sampling_frequency
+    if let Some(fs) = sampling_frequency.into_option()
     {
         let nyq = fs*half;
         if !(fs > zero) || !fs.is_finite()

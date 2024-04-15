@@ -6,23 +6,21 @@ use option_trait::Maybe;
 
 use crate::{List, NotRange};
 
-
-pub trait GMonoPuls<'a, T, L, N>
+pub trait GMonoPuls<T, L, N>
 where
     T: Float,
     L: List<T>,
     N: Maybe<usize>
 {
-    fn gmonopuls(&'a self, numtaps: N, fc: T) -> (L::Mapped<T>, L);
+    fn gmonopuls(self, numtaps: N, fc: T) -> (L::Mapped<T>, L);
 }
 
-impl<'a, T, L> GMonoPuls<'a, T, L::View<'a>, ()> for L
+impl<T, L> GMonoPuls<T, L, ()> for L
 where
     T: Float + FloatConst,
-    L: List<T> + NotRange,
-    L::View<'a>: List<T, Mapped<T> = L::Mapped<T>>
+    L: List<T> + NotRange
 {
-    fn gmonopuls(&'a self, (): (), fc: T) -> (L::Mapped<T>, L::View<'a>)
+    fn gmonopuls(self, (): (), fc: T) -> (L::Mapped<T>, L)
     {
         let scale = T::E().sqrt()*T::TAU()*fc;
         let y = self.map_to_owned(|&t| {
@@ -35,73 +33,69 @@ where
                 T::zero()
             }
         });
-        (y, self.as_view())
+        (y, self)
     }
 }
 
-impl<'a, T, const N: usize> GMonoPuls<'a, T, [T; N], ()> for Range<T>
+impl<T, const N: usize> GMonoPuls<T, [T; N], ()> for Range<T>
 where
     T: Float + FloatConst,
     [T; N]: NotRange
 {
-    fn gmonopuls(&self, (): (), fc: T) -> ([T; N], [T; N])
+    fn gmonopuls(self, (): (), fc: T) -> ([T; N], [T; N])
     {
         let x: [_; N] = ArrayOps::fill(|i| {
             let p = T::from(i).unwrap()/T::from(N - 1).unwrap();
             self.start + (self.end - self.start)*p
         });
         
-        let (y, _) = x.gmonopuls((), fc);
-        (y, x)
+        x.gmonopuls((), fc)
     }
 }
-impl<'a, T> GMonoPuls<'a, T, Vec<T>, usize> for Range<T>
+impl<T> GMonoPuls<T, Vec<T>, usize> for Range<T>
 where
     T: Float + FloatConst,
     Vec<T>: NotRange
 {
-    fn gmonopuls(&self, n: usize, fc: T) -> (Vec<T>, Vec<T>)
+    fn gmonopuls(self, n: usize, fc: T) -> (Vec<T>, Vec<T>)
     {
         let x: Vec<_> = (0..n).map(|i| {
                 let p = T::from(i).unwrap()/T::from(n - 1).unwrap();
                 self.start + (self.end - self.start)*p
             }).collect();
 
-        let (y, _) = x.gmonopuls((), fc);
-        (y, x)
+        x.gmonopuls((), fc)
     }
 }
 
-impl<'a, T, const N: usize> GMonoPuls<'a, T, [T; N], ()> for RangeInclusive<T>
+impl<T, const N: usize> GMonoPuls<T, [T; N], ()> for RangeInclusive<T>
 where
     T: Float + FloatConst,
     [T; N]: NotRange
 {
-    fn gmonopuls(&self, (): (), fc: T) -> ([T; N], [T; N])
+    fn gmonopuls(self, (): (), fc: T) -> ([T; N], [T; N])
     {
         let x: [_; N] = ArrayOps::fill(|i| {
             let p = T::from(i).unwrap()/T::from(N - 1).unwrap();
             *self.start() + (*self.end() - *self.start())*p
         });
         
-        let (y, _) = x.gmonopuls((), fc);
-        (y, x)
+        x.gmonopuls((), fc)
     }
 }
-impl<'a, T> GMonoPuls<'a, T, Vec<T>, usize> for RangeInclusive<T>
+impl<T> GMonoPuls<T, Vec<T>, usize> for RangeInclusive<T>
 where
     T: Float + FloatConst,
     Vec<T>: NotRange
 {
-    fn gmonopuls(&self, n: usize, fc: T) -> (Vec<T>, Vec<T>)
+    fn gmonopuls(self, n: usize, fc: T) -> (Vec<T>, Vec<T>)
     {
         let x: Vec<_> = (0..n).map(|i| {
                 let p = T::from(i).unwrap()/T::from(n - 1).unwrap();
                 *self.start() + (*self.end() - *self.start())*p
             }).collect();
 
-        let (y, _) = x.gmonopuls((), fc);
-        (y, x)
+        x.gmonopuls((), fc)
     }
 }
 
