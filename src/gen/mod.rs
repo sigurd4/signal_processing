@@ -6,6 +6,7 @@ moddef::moddef!(
         cheb,
         chirp,
         diric,
+        meyeraux,
 
         filter,
         pulse,
