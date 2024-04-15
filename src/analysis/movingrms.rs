@@ -57,7 +57,7 @@ where
                         let i_f = <T::Real as NumCast>::from(i).unwrap();
                         i += 1;
                         i_f
-                    }).sigmoid_train((), [(idx, time_constant/fs, time_constant/fs)]).1
+                    }).sigmoid_train((), [(idx, time_constant*fs, time_constant*fs)]).1
                 )
             };
             let mut xf = x.map_into_owned(|x| Into::<Complex<T::Real>>::into(x.conj()*x));
