@@ -48,8 +48,12 @@ pub fn plot_curves<const M: usize>(
         .set_all_tick_mark_size(0.1)
         .draw()?;
     
-    for (i, (x, y)) in x.zip(y).enumerate()
+    for (mut i, (x, y)) in x.zip(y).enumerate()
     {
+        if i >= 2
+        {
+            i += 1
+        }
         let color = Palette99::pick(i);
         chart.draw_series(LineSeries::new(
                 x.zip(y),
