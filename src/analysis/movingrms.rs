@@ -120,7 +120,7 @@ mod test
     #[test]
     fn test()
     {
-        const N: usize = 128;
+        const N: usize = 1024;
 
         let t: [_; N] = (0.0..1.0).linspace_array();
 
