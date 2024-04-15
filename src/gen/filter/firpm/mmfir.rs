@@ -2,7 +2,7 @@ use core::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 use std::{f64::{consts::{FRAC_PI_2, PI}, EPSILON}, ops::Range};
 
 use num::{traits::FloatConst, Complex, Float, NumCast, Zero};
-use option_trait::{Maybe, MaybeCell, StaticMaybe};
+use option_trait::StaticMaybe;
 use rand::{distributions::uniform::SampleUniform, rngs::ThreadRng, Rng};
 use array_math::{SliceMath, ArrayOps};
 

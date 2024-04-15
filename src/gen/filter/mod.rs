@@ -1,0 +1,27 @@
+moddef::moddef!(
+    flat(pub) mod {
+        besselap,
+        besself,
+        buttap,
+        butter,
+        buttord,
+        cheb1ap,
+        cheb1ord,
+        cheb2ap,
+        cheb2ord,
+        cheby1,
+        cheby2,
+        ellip,
+        ellipap,
+        ellipord,
+        fir1,
+        fir2,
+        firgr,
+        firls,
+        firpm,
+        firpmord,
+        invfreqs,
+        invfreqz,
+        kaiserord
+    }
+);

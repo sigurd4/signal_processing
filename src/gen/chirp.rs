@@ -69,8 +69,6 @@ where
 #[cfg(test)]
 mod test
 {
-    
-
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
