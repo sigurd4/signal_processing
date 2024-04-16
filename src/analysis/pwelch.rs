@@ -5,7 +5,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast, Ze
 use option_trait::{Maybe, NotVoid, StaticMaybe};
 use array_math::SliceMath;
 
-use crate::{util, window::{Hamming, WindowGen, WindowRange}, Chain, List, Lists, MaybeLenEq, MaybeList};
+use crate::{util, window::{Hamming, WindowGen, WindowRange}, List, Lists, MaybeLenEq, MaybeList};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PWelchDetrend
@@ -18,7 +18,6 @@ pub enum PWelchDetrend
     LongLinear,
     LongDetrend(usize)
 }
-
 pub trait PWelch<T, Y, YY, W, WW, WWW, WL, N, S>: Lists<T> + MaybeLenEq<YY, true>
 where
     T: ComplexFloat,
@@ -29,8 +28,7 @@ where
     WWW: Maybe<WW>,
     WL: Maybe<usize>,
     N: Maybe<usize>,
-    S: Maybe<bool>,
-    WW::Mapped<T::Real>: Sized + Chain<WW::Mapped<T::Real>>
+    S: Maybe<bool>
 {
     fn pwelch<O, FS, CONF, DT, XPOW, CROSS, TRANS, COHER, YPOW, CONFF, F>(
         self,
@@ -55,7 +53,7 @@ where
         TRANS: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<T::Real>>>>,
         COHER: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<T::Real>>>,
         YPOW: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<T::Real>>>,
-        CONFF: StaticMaybe<<WW::Mapped<T::Real> as Chain<WW::Mapped<T::Real>>>::Output>,
+        CONFF: StaticMaybe<[WW::Mapped<T::Real>; 2]>,
         F: StaticMaybe<WW::Mapped<T::Real>>;
 }
 
@@ -65,8 +63,7 @@ where
     T: ComplexFloat<Real = R>,
     Y: ComplexFloat<Real = T::Real>,
     YY: MaybeList<Y, MaybeSome: StaticMaybe<YY::Some, MaybeOr<Y, T> = Y>>,
-    R: Float + FloatConst + NotVoid,
-    [R; WL]: Chain<[R; WL]>
+    R: Float + FloatConst + NotVoid
 {
     fn pwelch<O, FS, CONF, DT, XPOW, CROSS, TRANS, COHER, YPOW, CONFF, F>(
         self,
@@ -91,7 +88,7 @@ where
         TRANS: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<[Complex<R>; WL]>>,
         COHER: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<[R; WL]>>,
         YPOW: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<[R; WL]>>,
-        CONFF: StaticMaybe<<[R; WL] as Chain<[R; WL]>>::Output>,
+        CONFF: StaticMaybe<[[R; WL]; 2]>,
         F: StaticMaybe<[R; WL]>
     {
         let w = Hamming.window_gen((), WindowRange::Symmetric);
@@ -134,7 +131,7 @@ where
         TRANS: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<Vec<Complex<R>>>>,
         COHER: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<Vec<R>>>,
         YPOW: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<Vec<R>>>,
-        CONFF: StaticMaybe<Vec<R>>,
+        CONFF: StaticMaybe<[Vec<R>; 2]>,
         F: StaticMaybe<Vec<R>>
     {
         let window_length = window_length.into_option()
@@ -164,7 +161,6 @@ where
     Y: ComplexFloat<Real = R> + Into<Complex<R>> + Sum + SubAssign + Div<R, Output = Y> + Lapack,
     YY: MaybeList<Y, MaybeSome: StaticMaybe<YY::Some, MaybeOr<Y, T> = Y>>,
     WW: List<W>,
-    WW::Mapped<R>: Chain<WW::Mapped<R>>,
     R: Float + FloatConst + Sum + AddAssign + SubAssign,
     Complex<R>: AddAssign + MulAssign,
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<R>>>: Sized,
@@ -193,7 +189,7 @@ where
         TRANS: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<R>>>>,
         COHER: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<R>>>,
         YPOW: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<R>>>,
-        CONFF: StaticMaybe<<WW::Mapped<R> as Chain<WW::Mapped<R>>>::Output>,
+        CONFF: StaticMaybe<[WW::Mapped<R>; 2]>,
         F: StaticMaybe<WW::Mapped<R>>
     {
         let zero = R::zero();
@@ -585,8 +581,10 @@ where
                 let mut vxx2 = pxx.iter()
                     .zip(vxx.iter())
                     .map(|(&p, &v)| p + v);
-                window.map_to_owned(|_| vxx1.next().unwrap())
-                    .chain(window.map_to_owned(|_| vxx2.next().unwrap()))
+                [
+                    window.map_to_owned(|_| vxx1.next().unwrap()),
+                    window.map_to_owned(|_| vxx2.next().unwrap())
+                ]
             }),
             F::maybe_from_fn(|| {
                 let mut i = 0;
@@ -614,7 +612,7 @@ mod test
 
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, PWelch};
+    use crate::{plot, RealPWelch};
 
     #[test]
     fn test()
@@ -626,7 +624,7 @@ mod test
         let mut rng = rand::thread_rng();
         let x = n.map(|n| (PI/4.0*n).cos() + (-1.0..1.0).sample_single(&mut rng));
 
-        let (pxx, (), (), (), (), (), f) = x.pwelch((), (), 71, (), 256, (), (), (), (), false);
+        let (pxx, (), (), (), (), (), f) = x.real_pwelch((), (), 71, (), 256, (), (), (), ());
         let pxx: Vec<_> = pxx;
         let f: Vec<_> = f;
 

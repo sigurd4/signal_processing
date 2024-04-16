@@ -18,6 +18,7 @@ moddef::moddef!(
         movingrms,
         pwelch,
         real_freqz,
+        real_pwelch,
         real_specgram,
         specgram,
     }
