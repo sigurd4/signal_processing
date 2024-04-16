@@ -156,7 +156,7 @@ where
                     let ind: Vec<_> = ind.iter()
                         .map(|&ind| T::from(ind).unwrap())
                         .collect();
-                    pp = ind.rpolyfit(&data, 2)
+                    pp = ind.rpolyfit::<Vec<_>>(&data, 2)
                         .try_into()
                         .unwrap();
                     xm = -pp[1]/(two*pp[0]);

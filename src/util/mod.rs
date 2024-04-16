@@ -37,6 +37,13 @@ where
     NumCast::from(f64::gamma(NumCast::from(x).unwrap())).unwrap()
 }
 
+pub(crate) fn erf_inv<T>(x: T) -> T
+where
+    T: Float
+{
+    NumCast::from(statrs::function::erf::erf_inv(NumCast::from(x).unwrap())).unwrap()
+}
+
 pub(crate) fn factorial<T, U>(x: U) -> T
 where
     T: Float,

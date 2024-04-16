@@ -16,6 +16,7 @@ moddef::moddef!(
         isminphase,
         isstable,
         movingrms,
+        pwelch,
         real_freqz,
         real_specgram,
         specgram,
