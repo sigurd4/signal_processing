@@ -22,6 +22,7 @@ moddef::moddef!(
         firpmord,
         invfreqs,
         invfreqz,
-        kaiserord
+        kaiserord,
+        pei_tseng_notch
     }
 );
