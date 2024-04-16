@@ -237,8 +237,8 @@ mod test
 
         const N: usize = 1024;
 
-        let (h1_z, w): ([_; N], _) = h.freqz(());
-        let (h2_z, _) = h2.freqz(());
+        let (h1_z, w): ([_; N], _) = h.freqz((), false);
+        let (h2_z, _) = h2.freqz((), false);
 
         plot::plot_curves("H(e^jw)", "plots/h_z_impz.png", [&w.zip(h1_z.map(|h| h.abs())), &w.zip(h2_z.map(|h| h.abs()))])
             .unwrap()

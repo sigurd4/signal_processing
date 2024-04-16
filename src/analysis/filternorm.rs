@@ -28,7 +28,7 @@ where
     {
         if Float::abs(p) > Float::sqrt(<T::Real as Float>::max_value())
         {
-            let (h, _): (_, [_; FILTER_INF_NORM_RES]) = self.freqz(());
+            let (h, _): (_, [_; FILTER_INF_NORM_RES]) = self.freqz((), false);
             h.map_rows_to_owned(|h| h.as_view_slice()
                 .iter()
                 .map(|&h| h.abs())

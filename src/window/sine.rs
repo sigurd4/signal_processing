@@ -77,7 +77,7 @@ mod test
 
         plot::plot_curves("g(n/N)", "plots/windows/g_n_sine.png", [&n.zip(w)]).unwrap();
 
-        let (mut w_f, mut omega): ([_; N], _) = Tf::new(w, ()).freqz(());
+        let (mut w_f, mut omega): ([_; N], _) = Tf::new(w, ()).freqz((), false);
         omega.map_assign(|omega| (omega + PI) % TAU - PI);
         w_f.rotate_right(N/2);
         omega.rotate_right(N/2);

@@ -328,7 +328,7 @@ mod test
             .unwrap();
 
         const M: usize = 1024;
-        let (h_f, w): ([_; M], _) = h.freqz(());
+        let (h_f, w): ([_; M], _) = h.freqz((), false);
 
         let wg = f.map(|f| f*PI);
         let mut wg_rev = wg.map(|f| TAU - f);

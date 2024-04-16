@@ -12,7 +12,7 @@ where
     W: List<<Self::Domain as ComplexFloat>::Real>,
     N: Maybe<usize>,
 {
-    fn freqz(&'a self, n: N) -> (H, W);
+    fn freqz(&'a self, n: N, shift: bool) -> (H, W);
 }
 
 impl<'a, T, B, A, const N: usize> FreqZ<'a, B::RowsMapped<[Complex<T::Real>; N]>, [T::Real; N], ()> for Tf<T, B, A>
@@ -25,12 +25,12 @@ where
     Self: 'a,
     &'a Self: Into<Tf<Complex<T::Real>, Vec<Vec<Complex<T::Real>>>, Vec<Complex<T::Real>>>>
 {
-    fn freqz(&'a self, (): ()) -> (B::RowsMapped<[Complex<T::Real>; N]>, [T::Real; N])
+    fn freqz(&'a self, (): (), shift: bool) -> (B::RowsMapped<[Complex<T::Real>; N]>, [T::Real; N])
     {
         let Tf { b, mut a }: Tf<Complex<T::Real>, Vec<Vec<Complex<T::Real>>>, Vec<Complex<T::Real>>> = self.into();
 
         let nf = <T::Real as NumCast>::from(N).unwrap();
-        let w = ArrayOps::fill(|i| <T::Real as NumCast>::from(i).unwrap()/nf*T::Real::TAU());
+        let w = ArrayOps::fill(|i| <T::Real as NumCast>::from(i).unwrap()/nf*T::Real::TAU() - if shift {T::Real::PI()} else {T::Real::zero()});
 
         let mut b = b.into_inner()
             .into_iter();
@@ -43,10 +43,13 @@ where
             b.resize(m, Zero::zero());
             a.resize(m, Zero::zero());
             b.fft();
-            a.fft();
-    
+            a.fft(); 
             
-            ArrayOps::fill(|i| {
+            ArrayOps::fill(|mut i| {
+                if shift
+                {
+                    i += N - N/2
+                }
                 let i = i as f64*m as f64/N as f64;
                 let p = i.fract();
                 let q = <T::Real as NumCast>::from(1.0 - p).unwrap();
@@ -70,12 +73,12 @@ where
     Self: 'a,
     &'a Self: Into<Tf<Complex<T::Real>, Vec<Vec<Complex<T::Real>>>, Vec<Complex<T::Real>>>>
 {
-    fn freqz(&'a self, n: usize) -> (B::RowsMapped<Vec<Complex<T::Real>>>, Vec<T::Real>)
+    fn freqz(&'a self, n: usize, shift: bool) -> (B::RowsMapped<Vec<Complex<T::Real>>>, Vec<T::Real>)
     {
         let Tf { b, mut a }: Tf<Complex<T::Real>, Vec<Vec<Complex<T::Real>>>, Vec<Complex<T::Real>>> = self.into();
 
         let nf = <T::Real as NumCast>::from(n).unwrap();
-        let w = (0..n).map(|i| <T::Real as NumCast>::from(i).unwrap()/nf*T::Real::TAU())
+        let w = (0..n).map(|i| <T::Real as NumCast>::from(i).unwrap()/nf*T::Real::TAU() - if shift {T::Real::PI()} else {T::Real::zero()})
             .collect();
 
         let mut b = b.into_inner()
@@ -91,7 +94,11 @@ where
             a.fft();
 
             
-            (0..n).map(|i| {
+            (0..n).map(|mut i| {
+                    if shift
+                    {
+                        i += n - n/2
+                    }
                     let i = i as f64*m as f64/n as f64;
                     let p = i.fract();
                     let q = <T::Real as NumCast>::from(1.0 - p).unwrap();
@@ -115,16 +122,16 @@ where
     &'a Self: Into<Sos<T, B, A, &'a [Tf<T, B, A>]>>,
     Tf<T, B, A>: FreqZ<'a, [Complex<T::Real>; N], [T::Real; N], ()> + System<Domain = T>
 {
-    fn freqz(&'a self, (): ()) -> ([Complex<T::Real>; N], [T::Real; N])
+    fn freqz(&'a self, (): (), shift: bool) -> ([Complex<T::Real>; N], [T::Real; N])
     {
         let Sos { sos }: Sos<T, B, A, &'a [Tf<T, B, A>]> = self.into();
         let h = sos.iter()
-            .map(|s| s.freqz(()).0)
+            .map(|s| s.freqz((), shift).0)
             .reduce(|a, b| a.mul_each(b))
             .unwrap_or_else(|| [One::one(); N]);
         
         let nf = <T::Real as NumCast>::from(N).unwrap();
-        let w = ArrayOps::fill(|i| <T::Real as NumCast>::from(i).unwrap()/nf*T::Real::TAU());
+        let w = ArrayOps::fill(|i| <T::Real as NumCast>::from(i).unwrap()/nf*T::Real::TAU() - if shift {T::Real::PI()} else {T::Real::zero()});
         (h, w)
     }
 }
@@ -138,11 +145,11 @@ where
     &'a Self: Into<Sos<T, B, A, &'a [Tf<T, B, A>]>>,
     Tf<T, B, A>: FreqZ<'a, Vec<Complex<T::Real>>, Vec<T::Real>, ()> + System<Domain = T>
 {
-    fn freqz(&'a self, n: usize) -> (Vec<Complex<T::Real>>, Vec<T::Real>)
+    fn freqz(&'a self, n: usize, shift: bool) -> (Vec<Complex<T::Real>>, Vec<T::Real>)
     {
         let Sos { sos }: Sos<T, B, A, &'a [Tf<T, B, A>]> = self.into();
         let h = sos.iter()
-            .map(|s| s.freqz(()).0)
+            .map(|s| s.freqz((), shift).0)
             .reduce(|a, b| a.into_iter()
                 .zip(b)
                 .map(|(a, b)| a*b)
@@ -150,7 +157,7 @@ where
             ).unwrap_or_else(|| vec![One::one(); n]);
         
         let nf = <T::Real as NumCast>::from(n).unwrap();
-        let w = (0..n).map(|i| <T::Real as NumCast>::from(i).unwrap()/nf*T::Real::TAU()).collect();
+        let w = (0..n).map(|i| <T::Real as NumCast>::from(i).unwrap()/nf*T::Real::TAU() - if shift {T::Real::PI()} else {T::Real::zero()}).collect();
         (h, w)
     }
 }
@@ -169,10 +176,10 @@ where
     Zpk<T, Z::View<'a>, P::View<'a>, K>: ToSos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>, (), ()> + System<Domain = K>,
     Sos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>>: for<'b> FreqZ<'b, H, W, N> + System<Domain = K>
 {
-    fn freqz(&'a self, n: N) -> (H, W)
+    fn freqz(&'a self, n: N, shift: bool) -> (H, W)
     {
         self.as_view()
             .to_sos((), ())
-            .freqz(n)
+            .freqz(n, shift)
     }
 }

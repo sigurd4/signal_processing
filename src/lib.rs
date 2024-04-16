@@ -128,7 +128,7 @@ mod tests
         const N: usize = 1024;
 
         //let h: Sos<f64, _> = h.to_sos((), ());
-        let (h_f, w): ([_; N], [_; N]) = h.freqz(());
+        let (h_f, w): ([_; N], [_; N]) = h.freqz((), false);
 
         plot::plot_curves("H(e^jw)", "plots/h_z.png", [&w.zip(h_f.map(|h| h.norm())), &w.zip(h_f.map(|h| h.arg()))]).unwrap();
 
