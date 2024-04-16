@@ -48,7 +48,7 @@ where
         S: 'a,
         S::View<'a>: MaybeList<Tf<T, B, A>>;
 
-    pub fn as_view<'a>(&'a self) -> Self::View<'a>
+    pub fn as_view<'a>(&'a self) -> Sos<T, B, A, S::View<'a>>
     where
         S: 'a,
         S::View<'a>: MaybeList<Tf<T, B, A>>

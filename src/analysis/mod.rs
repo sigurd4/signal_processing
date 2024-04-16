@@ -11,6 +11,7 @@ moddef::moddef!(
         grpdelay,
         impz,
         isallpass,
+        islinphase,
         ismaxphase,
         isminphase,
         isstable,
