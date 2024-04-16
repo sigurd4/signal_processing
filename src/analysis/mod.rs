@@ -17,6 +17,7 @@ moddef::moddef!(
         isstable,
         movingrms,
         pwelch,
+        real_cohere,
         real_freqz,
         real_pwelch,
         real_specgram,

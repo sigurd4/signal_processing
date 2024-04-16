@@ -18,7 +18,8 @@ pub enum PWelchDetrend
     LongLinear,
     LongDetrend(usize)
 }
-pub trait PWelch<T, Y, YY, W, WW, WWW, WL, N, S>: Lists<T> + MaybeLenEq<YY, true>
+
+pub trait PWelch<T, Y, YY, W, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
 where
     T: ComplexFloat,
     W: ComplexFloat<Real = T::Real>,
@@ -59,7 +60,7 @@ where
 
 impl<T, L, Y, YY, R, const WL: usize> PWelch<T, Y, YY, R, [R; WL], (), (), (), ()> for L
 where
-    L: Lists<T> + MaybeLenEq<YY, true> + PWelch<T, Y, YY, R, [R; WL], [R; WL], (), (), ()>,
+    L: List<T> + MaybeLenEq<YY, true> + PWelch<T, Y, YY, R, [R; WL], [R; WL], (), (), ()>,
     T: ComplexFloat<Real = R>,
     Y: ComplexFloat<Real = T::Real>,
     YY: MaybeList<Y, MaybeSome: StaticMaybe<YY::Some, MaybeOr<Y, T> = Y>>,
@@ -99,7 +100,7 @@ where
 
 impl<T, L, Y, YY, R, WL, N, S> PWelch<T, Y, YY, R, Vec<R>, (), WL, N, S> for L
 where
-    L: Lists<T> + MaybeLenEq<YY, true> + PWelch<T, Y, YY, R, Vec<R>, Vec<R>, (), (), ()>,
+    L: List<T> + MaybeLenEq<YY, true> + PWelch<T, Y, YY, R, Vec<R>, Vec<R>, (), (), ()>,
     T: ComplexFloat<Real = R>,
     Y: ComplexFloat<Real = T::Real>,
     YY: MaybeList<Y, MaybeSome: StaticMaybe<YY::Some, MaybeOr<Y, T> = Y>>,

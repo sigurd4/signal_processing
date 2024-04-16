@@ -25,16 +25,16 @@ where
     {
         return Err(FilterBandError::EdgesNotNondecreasing)
     }
-    if passband_frequencies.iter()
+    /*if passband_frequencies.iter()
         .any(|f| *f < T::zero() || *f > T::one())
     {
         return Err(FilterBandError::EdgesOutOfRange)
-    }
-    if stopband_frequencies.iter()
+    }*/
+    /*if stopband_frequencies.iter()
         .any(|f| *f < T::zero() || *f > T::one())
     {
         return Err(FilterBandError::EdgesOutOfRange)
-    }
+    }*/
 
     Ok(())
 }

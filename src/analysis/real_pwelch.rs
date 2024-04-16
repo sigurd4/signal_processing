@@ -3,7 +3,6 @@ use option_trait::{Maybe, StaticMaybe};
 
 use crate::{List, Lists, MaybeLenEq, MaybeList, PWelch, PWelchDetrend, ListOrSingle};
 
-
 pub trait RealPWelch<T, YY, WW, WWW, WL, N, S>: Lists<T> + MaybeLenEq<YY, true>
 where
     T: Float + FloatConst,

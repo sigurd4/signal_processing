@@ -88,7 +88,7 @@ where
                     .map(|&sz| -sz)
                     .reduce(Mul::mul)
                 {
-                    sg /= prod.re()
+                    sg *= prod.re()
                 }
                 let b_mul = c*(fh - fl)/two;
                 let sp = {
