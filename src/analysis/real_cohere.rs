@@ -14,6 +14,7 @@ where
     S: Maybe<bool>,
     WW::Mapped<T>: List<T>
 {
+    #[doc(alias = "real_mscohere")]
     fn real_cohere<O, FS, CONF, DT, F>(
         self,
         y: YY,
