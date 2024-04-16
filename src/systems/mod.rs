@@ -8,3 +8,9 @@ moddef::moddef!(
         zpk
     }
 );
+
+pub enum IrType
+{
+    FIR,
+    IIR
+}
