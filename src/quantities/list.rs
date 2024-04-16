@@ -47,7 +47,7 @@ impl<T, const N: usize> List<T> for [T; N]
 {
     type ResizedList<const L: usize> = [T; L];
     
-    fn static_resize_list<const L: usize>(self, dyn_length: usize, mut fill: impl FnMut() -> T) -> Self::ResizedList<L>
+    fn static_resize_list<const L: usize>(self, _: usize, mut fill: impl FnMut() -> T) -> Self::ResizedList<L>
     where
         T: Clone,
         Self: Sized
@@ -73,7 +73,7 @@ impl<T, const N: usize> List<T> for &[T; N]
 {
     type ResizedList<const L: usize> = [T; L];
     
-    fn static_resize_list<const L: usize>(self, dyn_length: usize, mut fill: impl FnMut() -> T) -> Self::ResizedList<L>
+    fn static_resize_list<const L: usize>(self, _: usize, mut fill: impl FnMut() -> T) -> Self::ResizedList<L>
     where
         T: Clone,
         Self: Sized

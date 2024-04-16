@@ -619,7 +619,7 @@ mod test
     #[test]
     fn test()
     {
-        const N: usize = 319;
+        const N: usize = 2048;
 
         let n: [_; N] = core::array::from_fn(|i| i as f64);
 
