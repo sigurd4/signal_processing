@@ -1,6 +1,8 @@
 moddef::moddef!(
     flat(pub) mod {
         gauspuls,
-        gmonopuls
+        gmonopuls,
+        pulstran,
+        sigmoid_train
     }
 );
