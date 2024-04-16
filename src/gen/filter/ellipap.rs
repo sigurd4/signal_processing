@@ -11,6 +11,7 @@ where
     Self::Domain: Float,
     O: Maybe<usize>
 {
+    #[doc(alias = "ncauer")]
     fn ellipap(order: O, passband_ripple: Self::Domain, stopband_ripple: Self::Domain) -> Self;
 }
 

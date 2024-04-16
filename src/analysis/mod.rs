@@ -16,6 +16,8 @@ moddef::moddef!(
         isstable,
         movingrms,
         mscohere,
+        peak_to_peak,
+        peak_to_rms,
         pwelch,
         real_freqz,
         real_mscohere,
