@@ -5,7 +5,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast, Ze
 use option_trait::{Maybe, NotVoid, StaticMaybe};
 use array_math::SliceMath;
 
-use crate::{util, window::{Hamming, WindowGen, WindowRange}, List, Lists, MaybeLenEq, MaybeList};
+use crate::{util, window::{Hamming, WindowGen, WindowRange}, List, MaybeLenEq, MaybeList};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PWelchDetrend

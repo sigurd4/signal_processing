@@ -62,35 +62,33 @@ mod tests
     use linspace::LinspaceArray;
     use num::Complex;
 
-    use crate::{plot, BesselAP, BesselF, ButtAP, Butter, Cheb1AP, Cheb2AP, EllipAP, FilterGenType, FreqS, FreqZ, Tf, Zpk};
+    use crate::{plot, BesselAP, BesselF, ButtAP, Butter, Cheb1AP, Cheb2AP, EllipAP, FilterGenPlane, FilterGenType, FreqS, FreqZ, RealFreqZ, Tf, Zpk};
 
     #[test]
     fn testt()
     {
-        let b1 = [1.0, 3.0];
-        let a1 = [1.0, 0.5];
+        let fs = 1e3f64;
+        let f_p = 50.0;
+        let f_s = 10.0;
+        let dp = 3.0;
+        let ds = 80.0;
 
-        let h1 = Tf::new(b1, a1);
-        
-        let b2 = [3.0, 1.0];
-        let a2 = [1.0, 0.5];
-
-        let h2 = Tf::new(b2, a2);
+        let (n, wn, _, t) = crate::buttord([f_p], [f_s], dp, ds, FilterGenPlane::Z { sampling_frequency: Some(fs) })
+            .unwrap();
+        let ba = Tf::butter(n, wn, t, FilterGenPlane::Z { sampling_frequency: None })
+            .unwrap();
 
         const N: usize = 1024;
-        let (h1f, w): ([_; N], _) = h1.freqz(());
-        let (h2f, _) = h2.freqz(());
+        let (h, w): ([_; N], _) = ba.real_freqz(());
 
-        plot::plot_curves("|H(e^jw)|", "plots_temp/temp.png", [&w.zip(h1f.map(|h| h.norm())), &w.zip(h2f.map(|h| h.norm()))])
-            .unwrap();
-        plot::plot_curves("<H(e^jw)", "plots_temp/temp_phase.png", [&w.zip(h1f.map(|h| h.arg())), &w.zip(h2f.map(|h| h.arg()))])
-            .unwrap();
+        plot::plot_curves("H(e^jw)", "temp/butter_hf.png", [&w.zip(h.map(|h| 10.0*h.norm_sqr().log10()))])
+            .unwrap()
     }
 
     #[test]
     fn test_ap()
     {
-        let fs = 2.0;
+        let fs = 2.0f64;
         let o = 6;
         let h_bessel = Zpk::besselap(o);
         let h_butter = Zpk::buttap(o);
@@ -108,11 +106,11 @@ mod tests
 
         plot::plot_curves("H(jw)", "plots/h_s_ap.png",
             [
-                &w.zip(h_f_bessel.map(|h| h.norm())),
-                &w.zip(h_f_butter.map(|h| h.norm())),
-                &w.zip(h_f_cheb1.map(|h| h.norm())),
-                &w.zip(h_f_cheb2.map(|h| h.norm())),
-                &w.zip(h_f_ellip.map(|h| h.norm())),
+                &w.zip(h_f_bessel.map(|h| 10.0*h.norm_sqr().log10())),
+                &w.zip(h_f_butter.map(|h| 10.0*h.norm_sqr().log10())),
+                &w.zip(h_f_cheb1.map(|h| 10.0*h.norm_sqr().log10())),
+                &w.zip(h_f_cheb2.map(|h| 10.0*h.norm_sqr().log10())),
+                &w.zip(h_f_ellip.map(|h| 10.0*h.norm_sqr().log10())),
             ]
         ).unwrap();
     }

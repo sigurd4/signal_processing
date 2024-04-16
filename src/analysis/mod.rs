@@ -1,7 +1,6 @@
 moddef::moddef!(
     flat(pub) mod {
         cceps,
-        cohere,
         filternorm,
         filtic,
         filtord,
@@ -16,9 +15,10 @@ moddef::moddef!(
         isminphase,
         isstable,
         movingrms,
+        mscohere,
         pwelch,
-        real_cohere,
         real_freqz,
+        real_mscohere,
         real_pwelch,
         real_specgram,
         specgram,

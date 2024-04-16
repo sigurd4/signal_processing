@@ -3,7 +3,7 @@ use option_trait::{Maybe, NotVoid, StaticMaybe};
 
 use crate::{List, MaybeLenEq, PWelch, PWelchDetrend};
 
-pub trait Cohere<T, Y, YY, W, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
+pub trait MsCohere<T, Y, YY, W, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
 where
     T: ComplexFloat,
     W: ComplexFloat<Real = T::Real>,
@@ -15,8 +15,8 @@ where
     N: Maybe<usize>,
     S: Maybe<bool>
 {
-    #[doc(alias = "mscohere")]
-    fn cohere<O, FS, CONF, DT, F>(
+    #[doc(alias = "cohere")]
+    fn mscohere<O, FS, CONF, DT, F>(
         self,
         y: YY,
         window: WWW,
@@ -37,7 +37,7 @@ where
         F: StaticMaybe<WW::Mapped<T::Real>>;
 }
 
-impl<T, L, Y, YY, W, WW, WWW, WL, N, S> Cohere<T, Y, YY, W, WW, WWW, WL, N, S> for L
+impl<T, L, Y, YY, W, WW, WWW, WL, N, S> MsCohere<T, Y, YY, W, WW, WWW, WL, N, S> for L
 where
     L: List<T> + MaybeLenEq<YY, true>,
     T: ComplexFloat,
@@ -54,7 +54,7 @@ where
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<<T as ComplexFloat>::Real>>>: NotVoid,
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<<T as ComplexFloat>::Real>>: NotVoid
 {
-    fn cohere<O, FS, CONF, DT, F>(
+    fn mscohere<O, FS, CONF, DT, F>(
         self,
         y: YY,
         window: WWW,
@@ -85,7 +85,7 @@ mod test
     use array_math::ArrayOps;
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, Cheby1, Cheby2, Filter, FilterGenPlane, RealCohere, RealFreqZ, Tf};
+    use crate::{plot, Cheby1, Cheby2, Filter, FilterGenPlane, RealMsCohere, RealFreqZ, Tf};
 
     #[test]
     fn test()
@@ -104,10 +104,10 @@ mod test
         let dy = Tf::cheby1(n, rp, wp, t, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
 
-        let x = dx.filter(r.clone(), ());
+        let x = dx.filter(r.as_slice(), ());
         let y = dy.filter(r, ());
 
-        let (cxy, fc): (Vec<_>, Vec<_>) = x.real_cohere(y, (), 512, 500, 2048, (), (), (), (), false);
+        let (cxy, fc): (Vec<_>, Vec<_>) = x.real_mscohere(y, (), 512, 500, 2048, (), (), (), (), false);
 
         const M: usize = 1024;
         let (qx, f): ([_; M], _) = dx.real_freqz(());

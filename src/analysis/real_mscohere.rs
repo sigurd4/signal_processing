@@ -1,9 +1,9 @@
 use num::{traits::FloatConst, Float, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{Cohere, List, ListOrSingle, MaybeLenEq, PWelchDetrend};
+use crate::{MsCohere, List, ListOrSingle, MaybeLenEq, PWelchDetrend};
 
-pub trait RealCohere<T, YY, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
+pub trait RealMsCohere<T, YY, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
 where
     T: Float + FloatConst,
     YY: List<T>,
@@ -14,8 +14,8 @@ where
     S: Maybe<bool>,
     WW::Mapped<T>: List<T>
 {
-    #[doc(alias = "real_mscohere")]
-    fn real_cohere<O, FS, CONF, DT, F>(
+    #[doc(alias = "real_cohere")]
+    fn real_mscohere<O, FS, CONF, DT, F>(
         self,
         y: YY,
         window: WWW,
@@ -37,7 +37,7 @@ where
         F::Maybe<WW::Mapped<T>>: Sized;
 }
 
-impl<T, L, YY, WW, WWW, WL, N, S> RealCohere<T, YY, WW, WWW, WL, N, S> for L
+impl<T, L, YY, WW, WWW, WL, N, S> RealMsCohere<T, YY, WW, WWW, WL, N, S> for L
 where
     L: List<T> + MaybeLenEq<YY, true>,
     T: Float + FloatConst,
@@ -48,9 +48,9 @@ where
     N: Maybe<usize>,
     S: Maybe<bool>,
     WW::Mapped<T>: List<T>,
-    Self: Cohere<T, T, YY, T, WW, WWW, WL, N, S>
+    Self: MsCohere<T, T, YY, T, WW, WWW, WL, N, S>
 {
-    fn real_cohere<O, FS, CONF, DT, F>(
+    fn real_mscohere<O, FS, CONF, DT, F>(
         self,
         y: YY,
         window: WWW,
@@ -71,7 +71,7 @@ where
         F: StaticMaybe<<WW::Mapped<T> as List<T>>::ResizedList<{WW::WIDTH/2 + 1}>>,
         F::Maybe<WW::Mapped<T>>: Sized
     {
-        let (coher, f) = self.cohere::<_, _, _, _, F::Maybe<WW::Mapped<T>>>(
+        let (coher, f) = self.mscohere::<_, _, _, _, F::Maybe<WW::Mapped<T>>>(
             y, window, window_length, overlap, nfft, sampling_frequency, confidence, detrend, sloppy, shift
         );
 
