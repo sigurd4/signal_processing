@@ -5,7 +5,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast, Ze
 use option_trait::{Maybe, NotVoid, StaticMaybe};
 use array_math::SliceMath;
 
-use crate::{util, window::{Hamming, WindowGen, WindowRange}, Chain, Container, List, ListOrSingle, Lists, MaybeLenEq, MaybeList, OwnedList};
+use crate::{util, window::{Hamming, WindowGen, WindowRange}, Chain, List, Lists, MaybeLenEq, MaybeList};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PWelchDetrend
@@ -631,7 +631,7 @@ mod test
         let f: Vec<_> = f;
 
         plot::plot_curves("Pxx(e^jw)", "plots/pxx_z_pwelch.png", [
-                &f.into_iter().zip(pxx.into_iter().map(|p| 20.0*p.log10())).collect::<Vec<_>>()
+                &f.into_iter().zip(pxx.into_iter().map(|p| 10.0*p.log10())).collect::<Vec<_>>()
             ]).unwrap()
     }
 }
