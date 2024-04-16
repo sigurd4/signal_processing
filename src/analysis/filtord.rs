@@ -2,7 +2,7 @@ use array_math::SliceMath;
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{ListOrSingle, MaybeList, MaybeLists, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, Zpk};
+use crate::{ListOrSingle, MaybeList, MaybeOwnedList, MaybeLists, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, Zpk};
 
 pub trait FiltOrd: System
 {
@@ -36,8 +36,8 @@ where
 impl<T, B, A, S> FiltOrd for Sos<T, B, A, S>
 where
     T: ComplexFloat,
-    B: Maybe<[T; 3]> + MaybeList<T>,
-    A: Maybe<[T; 3]> + MaybeList<T>,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>>
 {
     type Output = usize;

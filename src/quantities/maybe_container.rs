@@ -37,6 +37,10 @@ pub trait MaybeContainer<T>
         T: Clone,
         Self: Sized,
         F: FnMut<(T,)>;
+    fn to_some_or<F>(self, or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1];
 }
 
 impl<T> MaybeContainer<T> for ()
@@ -85,6 +89,13 @@ impl<T> MaybeContainer<T> for ()
         F: FnMut<(T,)>
     {
 
+    }
+    fn to_some_or<F>(self, or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        or()
     }
 }
 
@@ -137,6 +148,13 @@ impl<T> MaybeContainer<T> for Vec<T>
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 impl<T> MaybeContainer<T> for [T]
 {
@@ -186,6 +204,13 @@ impl<T> MaybeContainer<T> for [T]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
     }
 }
 impl<T, const N: usize> MaybeContainer<T> for [T; N]
@@ -237,6 +262,13 @@ impl<T, const N: usize> MaybeContainer<T> for [T; N]
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 impl<T> MaybeContainer<T> for &[T]
 {
@@ -287,6 +319,13 @@ impl<T> MaybeContainer<T> for &[T]
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 impl<T, const N: usize> MaybeContainer<T> for &[T; N]
 {
@@ -336,6 +375,13 @@ impl<T, const N: usize> MaybeContainer<T> for &[T; N]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
     }
 }
 
@@ -390,6 +436,13 @@ impl<T> MaybeContainer<T> for Vec<Vec<T>>
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 impl<T, const M: usize> MaybeContainer<T> for [Vec<T>; M]
 {
@@ -441,6 +494,13 @@ impl<T, const M: usize> MaybeContainer<T> for [Vec<T>; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
     }
 }
 impl<T> MaybeContainer<T> for [Vec<T>]
@@ -494,6 +554,13 @@ impl<T> MaybeContainer<T> for [Vec<T>]
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 impl<T, const M: usize> MaybeContainer<T> for &[Vec<T>; M]
 {
@@ -544,6 +611,13 @@ impl<T, const M: usize> MaybeContainer<T> for &[Vec<T>; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
     }
 }
 impl<T> MaybeContainer<T> for &[Vec<T>]
@@ -597,6 +671,13 @@ impl<T> MaybeContainer<T> for &[Vec<T>]
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 
 impl<T, const N: usize> MaybeContainer<T> for Vec<[T; N]>
@@ -649,6 +730,13 @@ impl<T, const N: usize> MaybeContainer<T> for Vec<[T; N]>
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeContainer<T> for [[T; N]; M]
 {
@@ -699,6 +787,13 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for [[T; N]; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
     }
 }
 impl<T, const N: usize> MaybeContainer<T> for [[T; N]]
@@ -751,6 +846,13 @@ impl<T, const N: usize> MaybeContainer<T> for [[T; N]]
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[[T; N]; M]
 {
@@ -801,6 +903,13 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[[T; N]; M]
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 impl<T, const N: usize> MaybeContainer<T> for &[[T; N]]
 {
@@ -850,6 +959,13 @@ impl<T, const N: usize> MaybeContainer<T> for &[[T; N]]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
     }
 }
 
@@ -906,6 +1022,13 @@ impl<T> MaybeContainer<T> for Vec<&[T]>
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 impl<T, const M: usize> MaybeContainer<T> for [&[T]; M]
 {
@@ -955,6 +1078,13 @@ impl<T, const M: usize> MaybeContainer<T> for [&[T]; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
     }
 }
 impl<T> MaybeContainer<T> for [&[T]]
@@ -1010,6 +1140,13 @@ impl<T> MaybeContainer<T> for [&[T]]
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 impl<T, const M: usize> MaybeContainer<T> for &[&[T]; M]
 {
@@ -1059,6 +1196,13 @@ impl<T, const M: usize> MaybeContainer<T> for &[&[T]; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
     }
 }
 impl<T> MaybeContainer<T> for &[&[T]]
@@ -1113,6 +1257,13 @@ impl<T> MaybeContainer<T> for &[&[T]]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
     }
 }
 
@@ -1169,6 +1320,13 @@ impl<T, const N: usize> MaybeContainer<T> for Vec<&[T; N]>
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeContainer<T> for [&[T; N]; M]
 {
@@ -1218,6 +1376,13 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for [&[T; N]; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
     }
 }
 impl<T, const N: usize> MaybeContainer<T> for [&[T; N]]
@@ -1273,6 +1438,13 @@ impl<T, const N: usize> MaybeContainer<T> for [&[T; N]]
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[&[T; N]; M]
 {
@@ -1322,6 +1494,13 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[&[T; N]; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
     }
 }
 impl<T, const N: usize> MaybeContainer<T> for &[&[T; N]]
@@ -1376,6 +1555,13 @@ impl<T, const N: usize> MaybeContainer<T> for &[&[T; N]]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
     }
 }
 
@@ -1432,6 +1618,13 @@ where
     {
         self.map_into_owned(map)
     }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
+    }
 }
 
 impl<'b, T, D> MaybeContainer<T> for ArrayView<'b, T, D>
@@ -1486,5 +1679,12 @@ where
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn to_some_or<F>(self, _or: F) -> Self::Some
+    where
+        Self: Sized,
+        F: FnOnce() -> [T; 1]
+    {
+        self
     }
 }

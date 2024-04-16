@@ -2,7 +2,7 @@ use array_math::SliceOps;
 use num::{complex::ComplexFloat, Float};
 use option_trait::Maybe;
 
-use crate::{ListOrSingle, MaybeList, MaybeLists, Sos, System, Tf, ToTf, Zpk};
+use crate::{ListOrSingle, MaybeOwnedList, MaybeList, MaybeLists, Sos, System, Tf, ToTf, Zpk};
 
 pub trait IsLinPhase<'a>: System
 {
@@ -82,8 +82,8 @@ where
 impl<'a, T, B, A, S> IsLinPhase<'a> for Sos<T, B, A, S>
 where
     T: ComplexFloat,
-    B: Maybe<[T; 3]> + MaybeList<T>,
-    A: Maybe<[T; 3]> + MaybeList<T>,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>> + 'a,
     S::View<'a>: MaybeList<Tf<T, B, A>>,
     Sos<T, B, A, S::View<'a>>: ToTf<T, Vec<T>, Vec<T>, (), ()>

@@ -4,7 +4,7 @@ use array_math::{ArrayOps, SliceMath};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{List, Lists, MaybeList, MaybeLists, Sos, System, Tf, ToSos, Zpk};
+use crate::{List, Lists, MaybeOwnedList, MaybeList, MaybeLists, Sos, System, Tf, ToSos, Zpk};
 
 pub trait FreqZ<'a, H, W, N>: System
 where
@@ -115,8 +115,8 @@ where
 impl<'a, T, B, A, S, const N: usize> FreqZ<'a, [Complex<T::Real>; N], [T::Real; N], ()> for Sos<T, B, A, S>
 where
     T: ComplexFloat,
-    B: Maybe<[T; 3]> + MaybeList<T>,
-    A: Maybe<[T; 3]> + MaybeList<T>,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>>,
     Self: 'a,
     &'a Self: Into<Sos<T, B, A, &'a [Tf<T, B, A>]>>,
@@ -138,8 +138,8 @@ where
 impl<'a, T, B, A, S> FreqZ<'a, Vec<Complex<T::Real>>, Vec<T::Real>, usize> for Sos<T, B, A, S>
 where
     T: ComplexFloat,
-    B: Maybe<[T; 3]> + MaybeList<T>,
-    A: Maybe<[T; 3]> + MaybeList<T>,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>>,
     Self: 'a,
     &'a Self: Into<Sos<T, B, A, &'a [Tf<T, B, A>]>>,

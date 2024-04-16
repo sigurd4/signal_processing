@@ -3,13 +3,13 @@ use std::ops::Mul;
 use num::{complex::ComplexFloat, One};
 use option_trait::Maybe;
 
-use crate::{MaybeList, Sos, Tf, ToTf};
+use crate::{MaybeList, MaybeOwnedList, Sos, Tf, ToTf};
 
 impl<T, B, A, S> One for Sos<T, B, A, S>
 where
     T: ComplexFloat,
-    B: Maybe<[T; 3]> + MaybeList<T>,
-    A: Maybe<[T; 3]> + MaybeList<T>,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>>,
     Self: Mul<Output = Self> + Default + ToTf<T, Vec<T>, Vec<T>, (), ()> + Clone,
 {

@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, Complex, Float, One};
 use option_trait::Maybe;
 
-use crate::{ListOrSingle, MaybeList, MaybeLists, Polynomial, Sos, System, Tf, ToZpk, Zpk};
+use crate::{ListOrSingle, MaybeOwnedList, MaybeList, MaybeLists, Polynomial, Sos, System, Tf, ToZpk, Zpk};
 
 pub trait IsMaxPhase<'a>: System
 {
@@ -46,8 +46,8 @@ where
 impl<'a, T, B, A, S> IsMaxPhase<'a> for Sos<T, B, A, S>
 where
     T: ComplexFloat,
-    B: Maybe<[T; 3]> + MaybeList<T>,
-    A: Maybe<[T; 3]> + MaybeList<T>,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>> + 'a,
     S::View<'a>: MaybeList<Tf<T, B, A>>,
     Sos<T, B, A, S::View<'a>>: ToZpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T, (), ()>,

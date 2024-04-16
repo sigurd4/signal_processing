@@ -3,16 +3,16 @@ use core::ops::Neg;
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{MaybeList, Sos, Tf, ToSos, ToTf};
+use crate::{MaybeList, MaybeOwnedList, Sos, Tf, ToSos, ToTf};
 
 impl<T1, T2, B1, B2, A1, A2, S> Neg for Sos<T1, B1, A1, S>
 where
     T1: ComplexFloat,
     T2: ComplexFloat,
-    B1: Maybe<[T1; 3]> + MaybeList<T1>,
-    B2: Maybe<[T2; 3]> + MaybeList<T2>,
-    A1: Maybe<[T1; 3]> + MaybeList<T1>,
-    A2: Maybe<[T2; 3]> + MaybeList<T2>,
+    B1: Maybe<[T1; 3]> + MaybeOwnedList<T1>,
+    B2: Maybe<[T2; 3]> + MaybeOwnedList<T2>,
+    A1: Maybe<[T1; 3]> + MaybeOwnedList<T1>,
+    A2: Maybe<[T2; 3]> + MaybeOwnedList<T2>,
     S: MaybeList<Tf<T1, B1, A1>>,
     Tf<T1, B1, A1>: Neg<Output = Tf<T2, B2, A2>> + ToTf<T2, B2, A2, (), ()> + Default,
     Self: ToSos<T1, B1, A1, Vec<Tf<T1, B1, A1>>, (), ()>

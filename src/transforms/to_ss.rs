@@ -3,7 +3,7 @@ use num::complex::ComplexFloat;
 use option_trait::Maybe;
 use thiserror::Error;
 
-use crate::{MaybeList, MaybeLists, Normalize, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToTf, Zpk};
+use crate::{MaybeList, MaybeLists, MaybeOwnedList, Normalize, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToTf, Zpk};
 
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum ToSsError
@@ -157,8 +157,8 @@ impl<'a, T1, T2, B, A, S> ToSs<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2
 where
     T1: ComplexFloat,
     T2: ComplexFloat,
-    B: Maybe<[T1; 3]> + MaybeList<T1>,
-    A: Maybe<[T1; 3]> + MaybeList<T1>,
+    B: Maybe<[T1; 3]> + MaybeOwnedList<T1>,
+    A: Maybe<[T1; 3]> + MaybeOwnedList<T1>,
     S: MaybeList<Tf<T1, B, A>>,
     Self: ToTf<T2, Vec<T2>, Vec<T2>, (), ()>,
     Tf<T2, Vec<T2>, Vec<T2>>: ToSs<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>,

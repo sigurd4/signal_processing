@@ -4,7 +4,7 @@ use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex, One};
 use option_trait::Maybe;
 
-use crate::{Lists, MaybeList, Sos, System, Tf, ToSos, Zpk};
+use crate::{Lists, MaybeList, MaybeOwnedList, Sos, System, Tf, ToSos, Zpk};
 
 pub trait FreqS<'a, S, SS>: System
 where
@@ -45,8 +45,8 @@ where
 impl<'a, T, B, A, S, SS, SSS> FreqS<'a, SS, SSS> for Sos<T, B, A, S>
 where
     T: ComplexFloat,
-    B: Maybe<[T; 3]> + MaybeList<T>,
-    A: Maybe<[T; 3]> + MaybeList<T>,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>>,
     SS: ComplexFloat<Real = T::Real> + 'a,
     SSS: Lists<SS> + 'a,

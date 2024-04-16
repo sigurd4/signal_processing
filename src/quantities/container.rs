@@ -23,6 +23,8 @@ pub trait Container<T>: MaybeContainer<T> + NotVoid
     fn index_get(&self, i: Self::Index) -> Option<&T>;
 }
 
+impl<T> !Container<T> for () {}
+
 impl<T> Container<T> for Vec<T>
 {
     type Mapped<M> = Vec<M>;

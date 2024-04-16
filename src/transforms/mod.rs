@@ -16,6 +16,7 @@ moddef::moddef!(
         idwht,
         impinvar,
         sftrans,
+        stabilize,
         to_sos,
         to_ss,
         to_tf,

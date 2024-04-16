@@ -5,7 +5,7 @@ use ndarray::{Array1, Array2};
 use num::{complex::ComplexFloat, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{ComplexOp, Container, List, Lists, Matrix, MaybeLenEq, MaybeList, MaybeLists, Overlay, OwnedList, Rtf, RtfOrSystem, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf};
+use crate::{ComplexOp, Container, MaybeOwnedList, List, Lists, Matrix, MaybeLenEq, MaybeList, MaybeLists, Overlay, OwnedList, Rtf, RtfOrSystem, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf};
 
 pub trait FilterMut<X, XX>: RtfOrSystem
 where
@@ -88,8 +88,8 @@ where
 impl<'b, W, T, B, A, S, X, XX> FilterMut<X, XX> for Rtf<'b, W, Sos<T, B, A, S>>
 where
     T: ComplexFloat + Into<W>,
-    B: Maybe<[T; 3]> + MaybeList<T>,
-    A: Maybe<[T; 3]> + MaybeList<T>,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>>,
     W: ComplexFloat<Real = T::Real> + ComplexOp<X, Output = W> + SubAssign + AddAssign,
     X: ComplexFloat<Real = T::Real> + Into<W>,

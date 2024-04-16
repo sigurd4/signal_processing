@@ -1,13 +1,13 @@
-use num::{complex::ComplexFloat, Complex, Float, One};
+use num::{complex::ComplexFloat, Complex, Float, One, Zero};
 use option_trait::Maybe;
 
-use crate::{ListOrSingle, MaybeList, MaybeLists, Polynomial, Sos, System, Tf, ToZpk, Zpk};
+use crate::{ListOrSingle, MaybeList, MaybeLists, MaybeOwnedList, Plane, Polynomial, Sos, System, Tf, ToZpk, Zpk};
 
 pub trait IsStable<'a>: System
 {
     type Output: ListOrSingle<bool>;
 
-    fn is_stable<TOL>(&'a self, tol: TOL) -> Self::Output
+    fn is_stable<TOL>(&'a self, tol: TOL, plane: Plane) -> Self::Output
     where
         TOL: Maybe<<Self::Domain as ComplexFloat>::Real>;
 }
@@ -23,7 +23,7 @@ where
 {
     type Output = B::RowsMapped<bool>;
 
-    fn is_stable<TOL>(&'a self, tol: TOL) -> Self::Output
+    fn is_stable<TOL>(&'a self, tol: TOL, plane: Plane) -> Self::Output
     where
         TOL: Maybe<T::Real>
     {
@@ -38,7 +38,7 @@ where
             };
 
             tf.to_zpk((), ())
-                .is_stable(tol)
+                .is_stable(tol, plane)
         })
     }
 }
@@ -46,8 +46,8 @@ where
 impl<'a, T, B, A, S> IsStable<'a> for Sos<T, B, A, S>
 where
     T: ComplexFloat,
-    B: Maybe<[T; 3]> + MaybeList<T>,
-    A: Maybe<[T; 3]> + MaybeList<T>,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>> + 'a,
     S::View<'a>: MaybeList<Tf<T, B, A>>,
     Sos<T, B, A, S::View<'a>>: ToZpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T, (), ()>,
@@ -55,13 +55,13 @@ where
 {
     type Output = bool;
 
-    fn is_stable<TOL>(&'a self, tol: TOL) -> Self::Output
+    fn is_stable<TOL>(&'a self, tol: TOL, plane: Plane) -> Self::Output
     where
         TOL: Maybe<T::Real>
     {
         self.as_view()
             .to_zpk((), ())
-            .is_stable(tol)
+            .is_stable(tol, plane)
     }
 }
 
@@ -74,7 +74,7 @@ where
 {
     type Output = bool;
 
-    fn is_stable<TOL>(&'a self, tol: TOL) -> Self::Output
+    fn is_stable<TOL>(&'a self, tol: TOL, plane: Plane) -> Self::Output
     where
         TOL: Maybe<T::Real>
     {
@@ -85,9 +85,14 @@ where
         let p = self.p.to_vec_option()
             .unwrap_or_else(|| vec![]);
 
+        let zero = T::Real::zero();
         let one = T::Real::one();
 
         p.len() == 0 || p.into_iter()
-            .all(|p| p.abs() < one - tol)
+            .all(|p| match plane
+            {
+                Plane::S => p.re() < zero - tol,
+                Plane::Z => p.abs() < one - tol
+            })
     }
 }

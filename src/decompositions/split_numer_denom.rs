@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, One};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{MaybeContainer, MaybeList, MaybeLists, Polynomial, ProductSequence, Sos, System, Tf, Zpk};
+use crate::{MaybeContainer, MaybeList, MaybeOwnedList, MaybeLists, Polynomial, ProductSequence, Sos, System, Tf, Zpk};
 
 pub trait SplitNumerDenom: System
 {
@@ -67,8 +67,8 @@ where
 impl<T, B, A, S> SplitNumerDenom for Sos<T, B, A, S>
 where
     T: ComplexFloat,
-    B: Maybe<[T; 3]> + MaybeList<T>,
-    A: Maybe<[T; 3]> + MaybeList<T>,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>>,
     Tf<T, B, A>: Clone,
     S::MaybeMapped<Tf<T, B, ()>>: MaybeList<Tf<T, B, ()>, Some: Sized, MaybeSome: Sized>,

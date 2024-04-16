@@ -4,13 +4,13 @@ use array_math::ArrayMath;
 use num::{complex::ComplexFloat, Complex};
 use option_trait::{Maybe, MaybeOr, NotVoid, StaticMaybe};
 
-use crate::{MaybeList, MaybeLists, Polynomial, ProductSequence, Sos, System, Tf, ToTf, ToZpk, Zpk};
+use crate::{MaybeList, MaybeLists, MaybeOwnedList, Polynomial, ProductSequence, Sos, System, Tf, ToTf, ToZpk, Zpk};
 
 pub trait ToSos<T, B, A, S, I, O>: System
 where
     T: ComplexFloat,
-    B: Maybe<[T; 3]> + MaybeList<T>,
-    A: Maybe<[T; 3]> + MaybeList<T>,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>>,
     I: Maybe<usize>,
     O: Maybe<usize>
@@ -22,10 +22,10 @@ impl<T1, T2, B1, B2, A1, A2, S1, S2> ToSos<T2, B2, A2, S2, (), ()> for Sos<T1, B
 where
     T1: ComplexFloat,
     T2: ComplexFloat,
-    B1: Maybe<[T1; 3]> + MaybeList<T1> + Clone,
-    B2: Maybe<[T2; 3]> + MaybeList<T2>,
-    A1: Maybe<[T1; 3]> + MaybeList<T1> + Clone,
-    A2: Maybe<[T2; 3]> + MaybeList<T2>,
+    B1: Maybe<[T1; 3]> + MaybeOwnedList<T1> + Clone,
+    B2: Maybe<[T2; 3]> + MaybeOwnedList<T2>,
+    A1: Maybe<[T1; 3]> + MaybeOwnedList<T1> + Clone,
+    A2: Maybe<[T2; 3]> + MaybeOwnedList<T2>,
     S1: MaybeList<Tf<T1, B1, A1>>,
     S2: MaybeList<Tf<T2, B2, A2>>,
     Tf<T1, B1, A1>: ToTf<T2, B2, A2, (), ()>,
@@ -47,8 +47,8 @@ where
     K: ComplexFloat<Real = T1::Real> + Into<T2>,
     Z: MaybeList<T1, MaybeSome: StaticMaybe<Z::Some, Maybe<[T2; 3]>: MaybeOr<[T2; 3], B, Output = B>>>,
     P: MaybeList<T1, MaybeSome: StaticMaybe<P::Some, Maybe<[T2; 3]>: MaybeOr<[T2; 3], A, Output = A>>>,
-    B: StaticMaybe<[T2; 3]> + MaybeList<T2> + MaybeOr<[T2; 3], A, Output: StaticMaybe<[T2; 3], Maybe<Vec<Tf<T2, B, A>>>: MaybeOr<Vec<Tf<T2, B, A>>, S, Output = S>>>,
-    A: StaticMaybe<[T2; 3]> + MaybeList<T2>,
+    B: StaticMaybe<[T2; 3]> + MaybeOwnedList<T2> + MaybeOr<[T2; 3], A, Output: StaticMaybe<[T2; 3], Maybe<Vec<Tf<T2, B, A>>>: MaybeOr<Vec<Tf<T2, B, A>>, S, Output = S>>>,
+    A: StaticMaybe<[T2; 3]> + MaybeOwnedList<T2>,
     S: StaticMaybe<Vec<Tf<T2, B, A>>> + MaybeList<Tf<T2, B, A>>,
     Complex<T1::Real>: Into<Complex<T2::Real>>,
     Complex<T2::Real>: AddAssign,
@@ -119,8 +119,8 @@ where
     T2: ComplexFloat,
     B1: MaybeLists<T1, Some: NotVoid, MaybeSome: StaticMaybe<B1::Some, Maybe<[T2; 3]>: MaybeOr<[T2; 3], B2, Output = B2>> + StaticMaybe<B1::Some, Maybe<Vec<Complex<T1::Real>>> = Z>>,
     A1: MaybeList<T1, Some: NotVoid, MaybeSome: StaticMaybe<B1::Some, Maybe<[T2; 3]>: MaybeOr<[T2; 3], A2, Output = A2>> + StaticMaybe<A1::Some, Maybe<Vec<Complex<T1::Real>>> = P>>,
-    B2: StaticMaybe<[T2; 3]> + MaybeList<T2>,
-    A2: StaticMaybe<[T2; 3]> + MaybeList<T2>,
+    B2: StaticMaybe<[T2; 3]> + MaybeOwnedList<T2>,
+    A2: StaticMaybe<[T2; 3]> + MaybeOwnedList<T2>,
     O: Maybe<usize>,
     Z: MaybeList<Complex<T1::Real>>,
     P: MaybeList<Complex<T1::Real>>,
