@@ -9,6 +9,7 @@ moddef::moddef!(
         meyeraux,
 
         filter,
+        matrix,
         pulse,
         wavelet
     }

@@ -5,7 +5,7 @@ use array_math::SliceMath;
 
 use crate::{Lists, OwnedLists, DFT};
 
-pub trait DCT<T>: Lists<T>
+pub trait Dct<T>: Lists<T>
 where
     T: ComplexFloat
 {
@@ -15,7 +15,7 @@ where
     fn dct_iv(self) -> Self::Owned;
 }
 
-impl<T, L> DCT<T> for L
+impl<T, L> Dct<T> for L
 where
     L: Lists<T>,
     L::Owned: OwnedLists<T>,
@@ -74,7 +74,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, DCT};
+    use crate::{plot, Dct};
 
     #[test]
     fn test()
