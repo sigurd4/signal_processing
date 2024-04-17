@@ -97,7 +97,7 @@ mod test
     #[test]
     fn test()
     {
-        const N: usize = 64;
+        const N: usize = 32;
         const M: usize = 1024;
         const T: f64 = 5.0;
         const F: f64 = 1.0;
