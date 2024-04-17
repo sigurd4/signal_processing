@@ -21,6 +21,7 @@
 #![feature(lazy_cell)]
 #![feature(coerce_unsized)]
 #![feature(decl_macro)]
+#![feature(array_try_map)]
 
 #![allow(internal_features)]
 #![allow(incomplete_features)]

@@ -42,6 +42,16 @@ pub trait MaybeLists<T>: MaybeContainer<T>
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>;
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>;
+    fn try_map_rows_into_owned<F, O, E>(self, map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>;
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone,
@@ -103,6 +113,22 @@ impl<T> MaybeLists<T> for ()
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>
+    {
+        map(())
+    }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        map(())
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
     {
         map(())
     }
@@ -178,6 +204,22 @@ impl<T> MaybeLists<T> for Vec<T>
     {
         map(self)
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        map(self.as_view())
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        map(self)
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -246,6 +288,22 @@ impl<T> MaybeLists<T> for [T]
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>
+    {
+        map(self.to_vec())
+    }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        map(self.as_view())
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
     {
         map(self.to_vec())
     }
@@ -321,6 +379,22 @@ impl<T, const N: usize> MaybeLists<T> for [T; N]
     {
         map(self)
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        map(self.as_view())
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        map(self)
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -392,6 +466,22 @@ impl<T> MaybeLists<T> for &[T]
     {
         map(self.to_vec())
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        map(self.as_view())
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        map(self.to_vec())
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -460,6 +550,22 @@ impl<T, const N: usize> MaybeLists<T> for &[T; N]
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>
+    {
+        map(self.clone())
+    }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        map(self.as_view())
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
     {
         map(self.clone())
     }
@@ -539,6 +645,26 @@ impl<T> MaybeLists<T> for Vec<Vec<T>>
             .map(|r| map(r))
             .collect()
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.iter()
+            .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        self.into_iter()
+            .map(|r| map(r))
+            .collect()
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -611,6 +737,23 @@ impl<T, const M: usize> MaybeLists<T> for [Vec<T>; M]
     {
         self.map(|r| map(r))
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|r| map(r.as_view()))
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        self.try_map(|r| map(r))
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -682,6 +825,26 @@ impl<T> MaybeLists<T> for [Vec<T>]
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|r| map(r.clone()))
+            .collect()
+    }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.iter()
+            .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
     {
         self.iter()
             .map(|r| map(r.clone()))
@@ -763,6 +926,24 @@ impl<T, const M: usize> MaybeLists<T> for &[Vec<T>; M]
         self.each_ref()
             .map(|r| map(r.clone()))
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|r| map(r.as_view()))
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|r| map(r.clone()))
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -835,6 +1016,26 @@ impl<T> MaybeLists<T> for &[Vec<T>]
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|r| map(r.clone()))
+            .collect()
+    }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.iter()
+            .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
     {
         self.iter()
             .map(|r| map(r.clone()))
@@ -918,6 +1119,26 @@ impl<T, const N: usize> MaybeLists<T> for Vec<[T; N]>
             .map(|r| map(r))
             .collect()
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.iter()
+            .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        self.into_iter()
+            .map(|r| map(r))
+            .collect()
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -990,6 +1211,23 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [[T; N]; M]
     {
         self.map(|r| map(r))
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|r| map(r.as_view()))
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        self.try_map(|r| map(r))
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -1061,6 +1299,26 @@ impl<T, const N: usize> MaybeLists<T> for [[T; N]]
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|r| map(r.clone()))
+            .collect()
+    }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.iter()
+            .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
     {
         self.iter()
             .map(|r| map(r.clone()))
@@ -1142,6 +1400,24 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[[T; N]; M]
         self.each_ref()
             .map(|r| map(r.clone()))
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|r| map(r.as_view()))
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|r| map(r.clone()))
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -1214,6 +1490,26 @@ impl<T, const N: usize> MaybeLists<T> for &[[T; N]]
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|r| map(r.clone()))
+            .collect()
+    }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.iter()
+            .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
     {
         self.iter()
             .map(|r| map(r.clone()))
@@ -1297,6 +1593,26 @@ impl<T> MaybeLists<T> for Vec<&[T]>
             .map(|r| map(r.to_vec()))
             .collect()
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.iter()
+            .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        self.into_iter()
+            .map(|r| map(r.to_vec()))
+            .collect()
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -1371,6 +1687,23 @@ impl<T, const M: usize> MaybeLists<T> for [&[T]; M]
     {
         self.map(|r| map(r.to_vec()))
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|r| map(r.as_view()))
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        self.try_map(|r| map(r.to_vec()))
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -1443,6 +1776,26 @@ impl<T> MaybeLists<T> for [&[T]]
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|&r| map(r.to_vec()))
+            .collect()
+    }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.iter()
+            .map(|&r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
     {
         self.iter()
             .map(|&r| map(r.to_vec()))
@@ -1523,6 +1876,23 @@ impl<T, const M: usize> MaybeLists<T> for &[&[T]; M]
     {
         self.map(|r| map(r.to_vec()))
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|r| map(r.as_view()))
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        self.try_map(|r| map(r.to_vec()))
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -1595,6 +1965,26 @@ impl<T> MaybeLists<T> for &[&[T]]
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|&r| map(r.to_vec()))
+            .collect()
+    }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.iter()
+            .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
     {
         self.iter()
             .map(|&r| map(r.to_vec()))
@@ -1678,6 +2068,26 @@ impl<T, const N: usize> MaybeLists<T> for Vec<&[T; N]>
             .map(|r| map(r.clone()))
             .collect()
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.iter()
+            .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        self.into_iter()
+            .map(|r| map(r.clone()))
+            .collect()
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -1752,6 +2162,23 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [&[T; N]; M]
     {
         self.map(|r| map(r.clone()))
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|r| map(r.as_view()))
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        self.try_map(|r| map(r.clone()))
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -1824,6 +2251,26 @@ impl<T, const N: usize> MaybeLists<T> for [&[T; N]]
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|&r| map(r.clone()))
+            .collect()
+    }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.iter()
+            .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
     {
         self.iter()
             .map(|&r| map(r.clone()))
@@ -1904,6 +2351,23 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[&[T; N]; M]
     {
         self.map(|r| map(r.clone()))
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|r| map(r.as_view()))
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        self.try_map(|r| map(r.clone()))
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -1976,6 +2440,26 @@ impl<T, const N: usize> MaybeLists<T> for &[&[T; N]]
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>
+    {
+        self.iter()
+            .map(|&r| map(r.clone()))
+            .collect()
+    }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.iter()
+            .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
     {
         self.iter()
             .map(|&r| map(r.clone()))
@@ -2055,6 +2539,22 @@ impl<T> MaybeLists<T> for Array1<T>
     {
         map(self)
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        map(self.as_view())
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        map(self)
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -2123,6 +2623,22 @@ impl<'c, T> MaybeLists<T> for ArrayView1<'c, T>
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>
+    {
+        map(self.to_owned())
+    }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        map(self.reborrow())
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
     {
         map(self.to_owned())
     }
@@ -2204,6 +2720,28 @@ impl<T> MaybeLists<T> for Array2<T>
             .map(|r| map(r.to_owned()))
             .collect()
     }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.rows()
+            .into_iter()
+            .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
+    {
+        self.rows()
+            .into_iter()
+            .map(|r| map(r.to_owned()))
+            .collect()
+    }
     fn into_owned_rows(self) -> Vec<Self::RowOwned>
     where
         T: Clone
@@ -2278,6 +2816,28 @@ impl<'b, T> MaybeLists<T> for ArrayView2<'b, T>
         T: Clone,
         Self: Sized,
         F: FnMut<(Self::RowOwned,)>
+    {
+        self.rows()
+            .into_iter()
+            .map(|r| map(r.to_owned()))
+            .collect()
+    }
+    fn try_map_rows_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: 'a,
+        Self: 'a,
+        F: FnMut(Self::RowView<'a>) -> Result<O, E>
+    {
+        self.rows()
+            .into_iter()
+            .map(|r| map(r.as_view()))
+            .collect()
+    }
+    fn try_map_rows_into_owned<F, O, E>(self, mut map: F) -> Result<Self::RowsMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(Self::RowOwned) -> Result<O, E>
     {
         self.rows()
             .into_iter()

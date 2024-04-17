@@ -5,7 +5,7 @@ use array_math::SliceMath;
 use option_trait::{Maybe, StaticMaybe};
 use thiserror::Error;
 
-use crate::{List, TruncateIm};
+use crate::{List, ListOrSingle, Lists, TruncateIm};
 
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum CCepsError
@@ -14,93 +14,96 @@ pub enum CCepsError
     ZeroInFourier
 }
 
-pub trait CCeps<T, C, N>: List<T>
+pub trait CCeps<'a, T, C, N>: Lists<T>
 where
     T: ComplexFloat,
     N: Maybe<usize>
 {
-    fn cceps(&self, numtaps: N) -> Result<C, CCepsError>;
+    fn cceps(&'a self, numtaps: N) -> Result<Self::RowsMapped<C>, CCepsError>;
 }
 
-impl<T, C, L> CCeps<T, C, <C::Length as StaticMaybe<usize>>::Opposite> for L
+impl<'a, T, C, L> CCeps<'a, T, C, <C::Length as StaticMaybe<usize>>::Opposite> for L
 where
     T: ComplexFloat + AddAssign + SubAssign + Into<Complex<T::Real>> + 'static,
     Complex<T::Real>: MulAssign + AddAssign,
     T::Real: AddAssign + SubAssign + Sum + Into<Complex<T::Real>> + Into<T>,
-    L: List<T>,
+    L: Lists<T> + 'a,
     C: List<T>,
     Vec<T>: TryInto<C>,
-    <C::Length as StaticMaybe<usize>>::Opposite: Sized
+    <C::Length as StaticMaybe<usize>>::Opposite: Sized,
+    L::RowView<'a>: List<T>
 {
-    fn cceps(&self, n: <C::Length as StaticMaybe<usize>>::Opposite) -> Result<C, CCepsError>
+    fn cceps(&'a self, n: <C::Length as StaticMaybe<usize>>::Opposite) -> Result<Self::RowsMapped<C>, CCepsError>
     {
         let n = n.into_option()
             .unwrap_or(C::LENGTH);
 
-        let x = self.as_view_slice();
+        self.try_map_rows_to_owned(|x| {
+            let x = x.as_view_slice();
 
-        let mut f: Vec<Complex<T::Real>> = x.iter()
-            .map(|&x| x.into())
-            .collect();
+            let mut f: Vec<Complex<T::Real>> = x.iter()
+                .map(|&x| x.into())
+                .collect();
 
-        f.resize(n, Zero::zero());
+            f.resize(n, Zero::zero());
 
-        let zero = T::Real::zero();
-        let half = n/2;
-        if 2*half == n && f.dtft(T::Real::TAU()*<T::Real as NumCast>::from(half + 1).unwrap()/<T::Real as NumCast>::from(n).unwrap()).re < zero {
-            f.pop();
-        }
-
-        f.fft();
-        if f.iter().any(|f| f.is_zero())
-        {
-            return Err(CCepsError::ZeroInFourier)
-        }
-
-        let mut f_arg_prev = T::Real::zero();
-        f.rotate_right(n/2);
-        for f in f.iter_mut()
-        {
-            *f = f.ln();
-            while f.im < f_arg_prev - T::Real::PI()
-            {
-                f.im += T::Real::TAU()
+            let zero = T::Real::zero();
+            let half = n/2;
+            if 2*half == n && f.dtft(T::Real::TAU()*<T::Real as NumCast>::from(half + 1).unwrap()/<T::Real as NumCast>::from(n).unwrap()).re < zero {
+                f.pop();
             }
-            while f.im > f_arg_prev + T::Real::PI()
-            {
-                f.im -= T::Real::TAU()
-            }
-            f_arg_prev = f.im;
-        }
-        while f.iter()
-            .map(|c| c.im)
-            .sum::<T::Real>()/<T::Real as NumCast>::from(n).unwrap() > T::Real::PI()
-        {
-            for c in f.iter_mut()
-            {
-                c.im -= T::Real::TAU()
-            }
-        }
-        while f.iter()
-            .map(|c| c.im)
-            .sum::<T::Real>()/<T::Real as NumCast>::from(n).unwrap() < -T::Real::PI()
-        {
-            for c in f.iter_mut()
-            {
-                c.im += T::Real::TAU()
-            }
-        }
-        f.rotate_left(n/2);
-        f.ifft();
-        f.rotate_right(n/2);
 
-        let zero = T::zero();
-        let mut y: Vec<_> = f.into_iter()
-            .take(n)
-            .map(|y| y.truncate_im())
-            .collect();
-        y.resize(n, zero);
-        Ok(y.try_into().ok().unwrap())
+            f.fft();
+            if f.iter().any(|f| f.is_zero())
+            {
+                return Err(CCepsError::ZeroInFourier)
+            }
+
+            let mut f_arg_prev = T::Real::zero();
+            f.rotate_right(n/2);
+            for f in f.iter_mut()
+            {
+                *f = f.ln();
+                while f.im < f_arg_prev - T::Real::PI()
+                {
+                    f.im += T::Real::TAU()
+                }
+                while f.im > f_arg_prev + T::Real::PI()
+                {
+                    f.im -= T::Real::TAU()
+                }
+                f_arg_prev = f.im;
+            }
+            while f.iter()
+                .map(|c| c.im)
+                .sum::<T::Real>()/<T::Real as NumCast>::from(n).unwrap() > T::Real::PI()
+            {
+                for c in f.iter_mut()
+                {
+                    c.im -= T::Real::TAU()
+                }
+            }
+            while f.iter()
+                .map(|c| c.im)
+                .sum::<T::Real>()/<T::Real as NumCast>::from(n).unwrap() < -T::Real::PI()
+            {
+                for c in f.iter_mut()
+                {
+                    c.im += T::Real::TAU()
+                }
+            }
+            f.rotate_left(n/2);
+            f.ifft();
+            f.rotate_right(n/2);
+
+            let zero = T::zero();
+            let mut y: Vec<_> = f.into_iter()
+                .take(n)
+                .map(|y| y.truncate_im())
+                .collect();
+            y.resize(n, zero);
+            Ok(y.try_into().ok().unwrap())
+        })
     }
 }
 
