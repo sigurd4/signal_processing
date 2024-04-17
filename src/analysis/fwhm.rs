@@ -161,7 +161,7 @@ mod test
 
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
-    use crate::{window::{Barthann, BlackmanHarris, Boxcar, Hamming, Hann, Kaiser, Triangular, WindowGen, WindowRange}, FullWidthAt, DFT, FWHM};
+    use crate::{window::{Barthann, BlackmanHarris, Boxcar, Hamming, Hann, Kaiser, Triangular, WindowGen, WindowRange}, FullWidthAt, Dft, FWHM};
 
     #[test]
     fn test()

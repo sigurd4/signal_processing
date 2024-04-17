@@ -3,7 +3,7 @@
 
 use num::{complex::ComplexFloat, Complex};
 
-use crate::{Container, Lists, DFT};
+use crate::{Container, Lists, Dft};
 
 pub trait DHT<T>: Lists<T>
 where
@@ -16,7 +16,7 @@ impl<T, L> DHT<T> for L
 where
     T: ComplexFloat,
     L: Lists<T>,
-    Self: DFT<T>,
+    Self: Dft<T>,
     Self::Mapped<Complex<T::Real>>: Lists<Complex<T::Real>, Mapped<T::Real> = Self::Mapped<T::Real>>,
 {
     fn dht(self) -> Self::Mapped<T::Real>

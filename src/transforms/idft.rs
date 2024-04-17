@@ -38,7 +38,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, DFT, IDFT};
+    use crate::{plot, Dft, IDFT};
 
     #[test]
     fn test()

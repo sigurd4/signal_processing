@@ -3,7 +3,7 @@ use core::ops::{AddAssign, DivAssign, Mul, MulAssign};
 use num::{complex::ComplexFloat, Complex};
 use array_math::SliceMath;
 
-use crate::{Lists, OwnedLists, DFT};
+use crate::{Lists, OwnedLists, Dft};
 
 pub trait Dct<T>: Lists<T>
 where
@@ -22,7 +22,7 @@ where
     T: ComplexFloat + Into<Complex<T::Real>> + MulAssign<T::Real> + DivAssign<T::Real> + 'static,
     Complex<T::Real>: AddAssign + MulAssign + DivAssign<T::Real> + Mul<T, Output = Complex<T::Real>> + Mul<T::Real, Output = Complex<T::Real>>,
     T::Real: Into<T> + Into<Complex<T::Real>>,
-    Self: DFT<T>,
+    Self: Dft<T>,
 {
     fn dct_i(self) -> Self::Owned
     {
