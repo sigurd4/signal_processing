@@ -87,7 +87,7 @@ where
     }
     else if a >= T::from(21u8).unwrap()
     {
-        let am21 = a - T::from(21).unwrap();
+        let am21 = a - T::from(21u8).unwrap();
         T::from(0.5842).unwrap()*am21.powf(T::from(0.4).unwrap()) + T::from(0.07886).unwrap()*am21
     }
     else

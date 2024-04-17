@@ -23,6 +23,7 @@ moddef::moddef!(
         invfreqs,
         invfreqz,
         kaiserord,
-        pei_tseng_notch
+        pei_tseng_notch,
+        qp_kaiser
     }
 );
