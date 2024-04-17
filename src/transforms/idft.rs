@@ -5,14 +5,14 @@ use num::{complex::ComplexFloat, Complex};
 
 use crate::{Lists, OwnedLists};
 
-pub trait IDFT<T>: Lists<T>
+pub trait Idft<T>: Lists<T>
 where
     T: ComplexFloat
 {
     fn idft(self) -> Self::Mapped<Complex<T::Real>>;
 }
 
-impl<T, L> IDFT<T> for L
+impl<T, L> Idft<T> for L
 where
     T: ComplexFloat + Into<Complex<T::Real>>,
     L: Lists<T>,
@@ -38,7 +38,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, Dft, IDFT};
+    use crate::{plot, Dft, Idft};
 
     #[test]
     fn test()

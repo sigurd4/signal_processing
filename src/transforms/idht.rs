@@ -3,20 +3,20 @@
 
 use num::{complex::ComplexFloat, Complex};
 
-use crate::{Container, Lists, IDFT};
+use crate::{Container, Lists, Idft};
 
-pub trait IDHT<T>: Lists<T>
+pub trait Idht<T>: Lists<T>
 where
     T: ComplexFloat
 {
     fn idht(self) -> Self::Mapped<T::Real>;
 }
 
-impl<T, L> IDHT<T> for L
+impl<T, L> Idht<T> for L
 where
     T: ComplexFloat,
     L: Lists<T>,
-    Self: IDFT<T>,
+    Self: Idft<T>,
     Self::Mapped<Complex<T::Real>>: Lists<Complex<T::Real>, Mapped<T::Real> = Self::Mapped<T::Real>>,
 {
     fn idht(self) -> Self::Mapped<T::Real>
@@ -34,7 +34,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, DHT, IDHT};
+    use crate::{plot, Dht, Idht};
 
     #[test]
     fn test()

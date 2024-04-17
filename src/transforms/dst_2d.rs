@@ -5,7 +5,7 @@ use num::{complex::ComplexFloat, Complex};
 
 use crate::{Matrix, OwnedMatrix, OwnedLists};
 
-pub trait DST2D<T>: Matrix<T>
+pub trait Dst2d<T>: Matrix<T>
 where
     T: ComplexFloat,
     Self::Owned: Matrix<T>
@@ -16,7 +16,7 @@ where
     fn dst_iv_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
 }
 
-impl<T, M> DST2D<T> for M
+impl<T, M> Dst2d<T> for M
 where
     M: Matrix<T>,
     M::Owned: OwnedMatrix<T>,

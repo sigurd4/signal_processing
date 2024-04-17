@@ -5,7 +5,7 @@ use num::{complex::ComplexFloat, Complex};
 
 use crate::{Matrix, OwnedMatrix, OwnedLists};
 
-pub trait IDFT2D<T>: Matrix<T>
+pub trait Idft2d<T>: Matrix<T>
 where
     T: ComplexFloat,
     Self::Mapped<Complex<T::Real>>: Matrix<Complex<T::Real>>
@@ -13,7 +13,7 @@ where
     fn idft_2d(self) -> <<Self::Mapped<Complex<T::Real>> as Matrix<Complex<T::Real>>>::Transpose as Matrix<Complex<T::Real>>>::Transpose;
 }
 
-impl<T, M> IDFT2D<T> for M
+impl<T, M> Idft2d<T> for M
 where
     T: ComplexFloat + Into<Complex<T::Real>>,
     M: Matrix<T>,

@@ -5,7 +5,7 @@ use num::{complex::ComplexFloat, Complex};
 
 use crate::{Matrix, OwnedMatrix, OwnedLists};
 
-pub trait DCT2D<T>: Matrix<T>
+pub trait Dct2d<T>: Matrix<T>
 where
     T: ComplexFloat,
     Self::Owned: Matrix<T>
@@ -16,7 +16,7 @@ where
     fn dct_iv_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
 }
 
-impl<T, M> DCT2D<T> for M
+impl<T, M> Dct2d<T> for M
 where
     M: Matrix<T>,
     M::Owned: OwnedMatrix<T>,
@@ -87,7 +87,7 @@ mod test
     use image::{GenericImage, GenericImageView, Rgba};
     use ndarray::Array2;
 
-    use crate::DCT2D;
+    use crate::Dct2d;
 
     #[test]
     fn test() -> Result<(), std::io::Error>

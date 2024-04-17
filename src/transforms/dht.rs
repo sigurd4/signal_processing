@@ -5,14 +5,14 @@ use num::{complex::ComplexFloat, Complex};
 
 use crate::{Container, Lists, Dft};
 
-pub trait DHT<T>: Lists<T>
+pub trait Dht<T>: Lists<T>
 where
     T: ComplexFloat
 {
     fn dht(self) -> Self::Mapped<T::Real>;
 }
 
-impl<T, L> DHT<T> for L
+impl<T, L> Dht<T> for L
 where
     T: ComplexFloat,
     L: Lists<T>,
@@ -34,7 +34,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, DHT};
+    use crate::{plot, Dht};
 
     #[test]
     fn test()
