@@ -28,6 +28,7 @@ moddef::moddef!(
         real_pwelch,
         real_specgram,
         rms,
+        rssq,
         specgram
     }
 );
