@@ -27,6 +27,7 @@ moddef::moddef!(
         real_phasez,
         real_pwelch,
         real_specgram,
+        rms,
         specgram
     }
 );
