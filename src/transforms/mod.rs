@@ -15,6 +15,7 @@ moddef::moddef!(
         idht,
         idwht,
         impinvar,
+        sampled_to_continuous,
         sftrans,
         stabilize,
         to_sos,

@@ -1,12 +1,9 @@
-use core::ops::{Range, RangeInclusive};
-
-use array_math::ArrayOps;
 use num::{traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 
-use crate::{List, NotRange};
+use crate::{IntoList, List};
 
-pub trait CMorWavF<T, L, N>
+pub trait CMorWavF<T, L, N>: IntoList<T, L, N>
 where
     T: Float,
     L: List<T>,
@@ -15,80 +12,22 @@ where
     fn cmorwavf(self, numtaps: N, fb: T, fc: T) -> (L::Mapped<Complex<T>>, L);
 }
 
-impl<T, L> CMorWavF<T, L, ()> for L
+impl<T, L, R, N> CMorWavF<T, L, N> for R
 where
     T: Float + FloatConst,
-    L: List<T> + NotRange
+    R: IntoList<T, L, N>,
+    N: Maybe<usize>,
+    L: List<T>
 {
-    fn cmorwavf(self, (): (), fb: T, fc: T) -> (L::Mapped<Complex<T>>, L)
+    fn cmorwavf(self, n: N, fb: T, fc: T) -> (L::Mapped<Complex<T>>, L)
     {
-        let psi = self.map_to_owned(|&x| {
+        let t = self.into_list(n);
+
+        let psi = t.map_to_owned(|&x| {
             Complex::from(T::PI()*fb).inv().sqrt()*Complex::cis(T::TAU()*fc*x)*(-x*x/fb).exp()
         });
 
-        (psi, self)
-    }
-}
-
-impl<T, const N: usize> CMorWavF<T, [T; N], ()> for Range<T>
-where
-    T: Float + FloatConst,
-    [T; N]: NotRange
-{
-    fn cmorwavf(self, (): (), fb: T, fc: T) -> ([Complex<T>; N], [T; N])
-    {
-        let x: [_; N] = ArrayOps::fill(|i| {
-            let p = T::from(i).unwrap()/T::from(N).unwrap();
-            self.start + (self.end - self.start)*p
-        });
-        
-        x.cmorwavf((), fb, fc)
-    }
-}
-impl<T> CMorWavF<T, Vec<T>, usize> for Range<T>
-where
-    T: Float + FloatConst,
-    Vec<T>: NotRange
-{
-    fn cmorwavf(self, n: usize, fb: T, fc: T) -> (Vec<Complex<T>>, Vec<T>)
-    {
-        let x: Vec<_> = (0..n).map(|i| {
-                let p = T::from(i).unwrap()/T::from(n).unwrap();
-                self.start + (self.end - self.start)*p
-            }).collect();
-
-        x.cmorwavf((), fb, fc)
-    }
-}
-
-impl<T, const N: usize> CMorWavF<T, [T; N], ()> for RangeInclusive<T>
-where
-    T: Float + FloatConst,
-    [T; N]: NotRange
-{
-    fn cmorwavf(self, (): (), fb: T, fc: T) -> ([Complex<T>; N], [T; N])
-    {
-        let x: [_; N] = ArrayOps::fill(|i| {
-            let p = T::from(i).unwrap()/T::from(N - 1).unwrap();
-            *self.start() + (*self.end() - *self.start())*p
-        });
-        
-        x.cmorwavf((), fb, fc)
-    }
-}
-impl<T> CMorWavF<T, Vec<T>, usize> for RangeInclusive<T>
-where
-    T: Float + FloatConst,
-    Vec<T>: NotRange
-{
-    fn cmorwavf(self, n: usize, fb: T, fc: T) -> (Vec<Complex<T>>, Vec<T>)
-    {
-        let x: Vec<_> = (0..n).map(|i| {
-                let p = T::from(i).unwrap()/T::from(n - 1).unwrap();
-                *self.start() + (*self.end() - *self.start())*p
-            }).collect();
-
-        x.cmorwavf((), fb, fc)
+        (psi, t)
     }
 }
 

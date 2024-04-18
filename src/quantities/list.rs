@@ -4,9 +4,9 @@ use array_math::ArrayOps;
 use ndarray::{Array1, ArrayView1};
 
 
-use crate::{ListOrSingle, Matrix, MaybeList, OwnedList};
+use crate::{IntoList, ListOrSingle, Matrix, MaybeList, OwnedList};
 
-pub trait List<T>: MaybeList<T> + Matrix<T> + ListOrSingle<T>
+pub trait List<T>: MaybeList<T> + Matrix<T> + ListOrSingle<T> + IntoList<T, Self, ()>
 {
     type ResizedList<const L: usize>: OwnedList<T>;
 

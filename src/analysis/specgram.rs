@@ -191,7 +191,6 @@ where
 mod test
 {
     use array_math::ArrayOps;
-    use linspace::LinspaceArray;
 
     use crate::{plot, Chirp, ChirpCurve, SpecGram};
 
@@ -201,8 +200,8 @@ mod test
         const FS: f64 = 1000.0;
         const T: f64 = 2.0;
         const N: usize = (T*FS) as usize;
-        let t: [_; N] = (0.0..T).linspace_array();
-        let x = t.chirp(10.0..150.0, 0.0..2.0, ChirpCurve::Logarithmic, 0.0);
+        let t = 0.0..T;
+        let (x, _): (_, [_; N]) = t.chirp((), 10.0..150.0, 0.0..2.0, ChirpCurve::Logarithmic, 0.0);
         const W: usize = ((0.1*FS) as usize).next_power_of_two();
         const O: usize = W/2;
         const L: usize = (N - W)/(W - O);

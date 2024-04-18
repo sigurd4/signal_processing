@@ -1,12 +1,11 @@
-use core::ops::{Range, RangeInclusive};
+use core::ops::Range;
 
-use array_math::ArrayOps;
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{List, ListOrSingle, NotRange};
+use crate::{IntoList, List, ListOrSingle};
 
-pub trait SigmoidTrain<T, L, N>
+pub trait SigmoidTrain<T, L, N>: IntoList<T, L, N>
 where
     T: Float,
     L: List<T>,
@@ -18,20 +17,24 @@ where
         TR::Mapped<L::Mapped<T>>: List<L::Mapped<T>>;
 }
 
-impl<T, L> SigmoidTrain<T, L, ()> for L
+impl<T, L, R, N> SigmoidTrain<T, L, N> for R
 where
     T: Float + FloatConst,
-    L: List<T> + NotRange,
+    L: List<T>,
+    R: IntoList<T, L, N>,
+    N: Maybe<usize>,
     L::Mapped<T>: List<T>
 {
-    fn sigmoid_train<TR>(self, (): (), train: TR) -> (TR::Mapped<L::Mapped<T>>, L::Mapped<T>, L)
+    fn sigmoid_train<TR>(self, n: N, train: TR) -> (TR::Mapped<L::Mapped<T>>, L::Mapped<T>, L)
     where
         TR: List<(Range<T>, T, T)>,
         TR::Mapped<L::Mapped<T>>: List<L::Mapped<T>>
     {
+        let t = self.into_list(n);
+
         let one = T::one();
 
-        let s = train.map_into_owned(|(t0t1, rt, ft)| self.map_to_owned(|&t| {
+        let s = train.map_into_owned(|(t0t1, rt, ft)| t.map_to_owned(|&t| {
             let t0 = t0t1.start;
             let t1 = t0t1.end;
 
@@ -44,7 +47,7 @@ where
         let ss = s.as_view_slice();
 
         let mut i = 0;
-        let y = self.map_to_owned(|_| {
+        let y = t.map_to_owned(|_| {
             let y = ss.iter()
                 .map(|s| s.as_view_slice()[i])
                 .reduce(Float::max)
@@ -53,83 +56,7 @@ where
             y
         });
 
-        (s, y, self)
-    }
-}
-
-impl<T, const N: usize> SigmoidTrain<T, [T; N], ()> for Range<T>
-where
-    T: Float + FloatConst,
-    [T; N]: NotRange
-{
-    fn sigmoid_train<TR>(self, (): (), train: TR) -> (TR::Mapped<[T; N]>, [T; N], [T; N])
-    where
-        TR: List<(Range<T>, T, T)>,
-        TR::Mapped<[T; N]>: List<[T; N]>
-    {
-        let x: [_; N] = ArrayOps::fill(|i| {
-            let p = T::from(i).unwrap()/T::from(N).unwrap();
-            self.start + (self.end - self.start)*p
-        });
-        
-        x.sigmoid_train((), train)
-    }
-}
-
-impl<T> SigmoidTrain<T, Vec<T>, usize> for Range<T>
-where
-    T: Float + FloatConst,
-    Vec<T>: NotRange
-{
-    fn sigmoid_train<TR>(self, n: usize, train: TR) -> (TR::Mapped<Vec<T>>, Vec<T>, Vec<T>)
-    where
-        TR: List<(Range<T>, T, T)>,
-        TR::Mapped<Vec<T>>: List<Vec<T>>
-    {
-        let x: Vec<_> = (0..n).map(|i| {
-                let p = T::from(i).unwrap()/T::from(n).unwrap();
-                self.start + (self.end - self.start)*p
-            }).collect();
-
-        x.sigmoid_train((), train)
-    }
-}
-
-impl<T, const N: usize> SigmoidTrain<T, [T; N], ()> for RangeInclusive<T>
-where
-    T: Float + FloatConst,
-    [T; N]: NotRange
-{
-    fn sigmoid_train<TR>(self, (): (), train: TR) -> (TR::Mapped<[T; N]>, [T; N], [T; N])
-    where
-        TR: List<(Range<T>, T, T)>,
-        TR::Mapped<[T; N]>: List<[T; N]>
-    {
-        let x: [_; N] = ArrayOps::fill(|i| {
-            let p = T::from(i).unwrap()/T::from(N - 1).unwrap();
-            *self.start() + (*self.end() - *self.start())*p
-        });
-        
-        x.sigmoid_train((), train)
-    }
-}
-
-impl<T> SigmoidTrain<T, Vec<T>, usize> for RangeInclusive<T>
-where
-    T: Float + FloatConst,
-    Vec<T>: NotRange
-{
-    fn sigmoid_train<TR>(self, n: usize, train: TR) -> (TR::Mapped<Vec<T>>, Vec<T>, Vec<T>)
-    where
-        TR: List<(Range<T>, T, T)>,
-        TR::Mapped<Vec<T>>: List<Vec<T>>
-    {
-        let x: Vec<_> = (0..n).map(|i| {
-                let p = T::from(i).unwrap()/T::from(n - 1).unwrap();
-                *self.start() + (*self.end() - *self.start())*p
-            }).collect();
-
-        x.sigmoid_train((), train)
+        (s, y, t)
     }
 }
 

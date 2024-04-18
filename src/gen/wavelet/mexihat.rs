@@ -1,12 +1,9 @@
-use core::ops::{Range, RangeInclusive};
-
-use array_math::ArrayOps;
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{List, NotRange};
+use crate::{IntoList, List};
 
-pub trait Mexihat<T, L, N>
+pub trait Mexihat<T, L, N>: IntoList<T, L, N>
 where
     T: Float,
     L: List<T>,
@@ -15,85 +12,27 @@ where
     fn mexihat(self, numtaps: N) -> (L::Mapped<T>, L);
 }
 
-impl<T, L> Mexihat<T, L, ()> for L
+impl<T, L, R, N> Mexihat<T, L, N> for R
 where
     T: Float + FloatConst,
-    L: List<T> + NotRange
+    L: List<T>,
+    R: IntoList<T, L, N>,
+    N: Maybe<usize>
 {
-    fn mexihat(self, (): ()) -> (L::Mapped<T>, L)
+    fn mexihat(self, n: N) -> (L::Mapped<T>, L)
     {
+        let t = self.into_list(n);
+
         let one = T::one();
         let two = one + one;
 
         let a = two/(T::from(3u8).unwrap()*T::PI().sqrt()).sqrt();
 
-        let psi = self.map_to_owned(|&x| {
+        let psi = t.map_to_owned(|&x| {
             (one - x*x)*a*(-x*x/two).exp()
         });
 
-        (psi, self)
-    }
-}
-
-impl<T, const N: usize> Mexihat<T, [T; N], ()> for Range<T>
-where
-    T: Float + FloatConst,
-    [T; N]: NotRange
-{
-    fn mexihat(self, (): ()) -> ([T; N], [T; N])
-    {
-        let x: [_; N] = ArrayOps::fill(|i| {
-            let p = T::from(i).unwrap()/T::from(N).unwrap();
-            self.start + (self.end - self.start)*p
-        });
-        
-        x.mexihat(())
-    }
-}
-impl<T> Mexihat<T, Vec<T>, usize> for Range<T>
-where
-    T: Float + FloatConst,
-    Vec<T>: NotRange
-{
-    fn mexihat(self, n: usize) -> (Vec<T>, Vec<T>)
-    {
-        let x: Vec<_> = (0..n).map(|i| {
-                let p = T::from(i).unwrap()/T::from(n).unwrap();
-                self.start + (self.end - self.start)*p
-            }).collect();
-
-        x.mexihat(())
-    }
-}
-
-impl<T, const N: usize> Mexihat<T, [T; N], ()> for RangeInclusive<T>
-where
-    T: Float + FloatConst,
-    [T; N]: NotRange
-{
-    fn mexihat(self, (): ()) -> ([T; N], [T; N])
-    {
-        let x: [_; N] = ArrayOps::fill(|i| {
-            let p = T::from(i).unwrap()/T::from(N - 1).unwrap();
-            *self.start() + (*self.end() - *self.start())*p
-        });
-        
-        x.mexihat(())
-    }
-}
-impl<T> Mexihat<T, Vec<T>, usize> for RangeInclusive<T>
-where
-    T: Float + FloatConst,
-    Vec<T>: NotRange
-{
-    fn mexihat(self, n: usize) -> (Vec<T>, Vec<T>)
-    {
-        let x: Vec<_> = (0..n).map(|i| {
-                let p = T::from(i).unwrap()/T::from(n - 1).unwrap();
-                *self.start() + (*self.end() - *self.start())*p
-            }).collect();
-
-        x.mexihat(())
+        (psi, t)
     }
 }
 
