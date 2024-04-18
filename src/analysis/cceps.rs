@@ -8,7 +8,7 @@ use thiserror::Error;
 use crate::{List, ListOrSingle, Lists, TruncateIm};
 
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
-pub enum CCepsError
+pub enum CepsError
 {
     #[error("Sequence has one or more zero-valued fourier coefficient.")]
     ZeroInFourier
@@ -17,9 +17,10 @@ pub enum CCepsError
 pub trait CCeps<'a, T, C, N>: Lists<T>
 where
     T: ComplexFloat,
-    N: Maybe<usize>
+    C: List<T>,
+    N: Maybe<usize>,
 {
-    fn cceps(&'a self, numtaps: N) -> Result<Self::RowsMapped<C>, CCepsError>;
+    fn cceps(&'a self, numtaps: N) -> Result<Self::RowsMapped<C>, CepsError>;
 }
 
 impl<'a, T, C, L> CCeps<'a, T, C, <C::Length as StaticMaybe<usize>>::Opposite> for L
@@ -33,7 +34,7 @@ where
     <C::Length as StaticMaybe<usize>>::Opposite: Sized,
     L::RowView<'a>: List<T>
 {
-    fn cceps(&'a self, n: <C::Length as StaticMaybe<usize>>::Opposite) -> Result<Self::RowsMapped<C>, CCepsError>
+    fn cceps(&'a self, n: <C::Length as StaticMaybe<usize>>::Opposite) -> Result<Self::RowsMapped<C>, CepsError>
     {
         let n = n.into_option()
             .unwrap_or(C::LENGTH);
@@ -56,7 +57,7 @@ where
             f.fft();
             if f.iter().any(|f| f.is_zero())
             {
-                return Err(CCepsError::ZeroInFourier)
+                return Err(CepsError::ZeroInFourier)
             }
 
             let mut f_arg_prev = T::Real::zero();
@@ -94,7 +95,6 @@ where
             }
             f.rotate_left(n/2);
             f.ifft();
-            f.rotate_right(n/2);
 
             let zero = T::zero();
             let mut y: Vec<_> = f.into_iter()
@@ -114,7 +114,6 @@ mod test
 
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
-    use num::Complex;
 
     use crate::{plot, CCeps};
 
@@ -125,12 +124,12 @@ mod test
         const N: usize = (T/0.01) as usize;
         let t: [_; N] = (0.0..T).linspace_array();
 
-        let d = (N as f64*0.2/T) as usize;
+        let d = (N as f64*0.3/T) as usize;
         let s1 = t.map(|t| (TAU*45.0*t).sin());
         let s2 = s1.add_each(ArrayOps::fill(|i| if i >= d {0.5*s1[i - d]} else {0.0}));
 
-        let c: [_; _] = s2.map(|s| Complex::from(s)).cceps(()).unwrap();
+        let c: [_; _] = s2.cceps(()).unwrap();
 
-        plot::plot_curves("x̂(t)", "plots/x_hat_cceps.png", [&t.zip(c.map(|c| c.re))]).unwrap()
+        plot::plot_curves("x̂(t)", "plots/x_hat_cceps.png", [&t.zip(c)]).unwrap()
     }
 }

@@ -21,11 +21,12 @@ moddef::moddef!(
         peak_to_rms,
         phasez,
         pwelch,
+        rceps,
         real_freqz,
         real_mscohere,
         real_phasez,
         real_pwelch,
         real_specgram,
-        specgram,
+        specgram
     }
 );
