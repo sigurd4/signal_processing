@@ -1,3 +1,7 @@
+use core::ops::Mul;
+
+use ndarray::{prelude::Axis, Array2, Slice};
+use ndarray_linalg::{Lapack, SVDInto};
 use num::{traits::FloatConst, Float, Integer, NumCast, ToPrimitive, Unsigned};
 
 moddef::moddef!(
@@ -11,6 +15,46 @@ moddef::moddef!(
         truncate_im
     }
 );
+
+pub(crate) fn pinv<T>(m: Array2<T>) -> Array2<T>
+where
+    T: Lapack<Real: Into<T>> + Mul<T::Real, Output = T>
+{
+    let mdim = m.dim();
+    let (u, s, v_h) = m.svd_into(true, true).unwrap();
+    let u = u.unwrap();
+    let v_h = v_h.unwrap();
+
+    let threshold = T::Real::epsilon()*NumCast::from(mdim.0.max(mdim.1)).unwrap();
+
+    // Determine how many singular values to keep and compute the
+    // values of `V Σ⁺` (up to `num_keep` columns).
+    let (num_keep, v_s_inv) = {
+        let mut v_h_t = v_h.reversed_axes();
+        let mut num_keep = 0;
+        for (&sing_val, mut v_h_t_col) in s.iter().zip(v_h_t.columns_mut()) {
+            if sing_val > threshold {
+                let sing_val_recip = sing_val.recip();
+                v_h_t_col.map_inplace(|v_h_t| *v_h_t = T::from_real(sing_val_recip) * v_h_t.conj());
+                num_keep += 1;
+            } else {
+                break;
+            }
+        }
+        v_h_t.slice_axis_inplace(Axis(1), Slice::from(..num_keep));
+        (num_keep, v_h_t)
+    };
+
+    // Compute `U^H` (up to `num_keep` rows).
+    let u_h = {
+        let mut u_t = u.reversed_axes();
+        u_t.slice_axis_inplace(Axis(0), Slice::from(..num_keep));
+        u_t.map_inplace(|x| *x = x.conj());
+        u_t
+    };
+
+    v_s_inv.dot(&u_h)
+}
 
 pub(crate) fn i0<T>(x: T) -> T
 where

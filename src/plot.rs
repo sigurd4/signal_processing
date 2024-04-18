@@ -48,19 +48,29 @@ pub fn plot_curves<const M: usize>(
         .set_all_tick_mark_size(0.1)
         .draw()?;
     
-    for (mut i, (x, y)) in x.zip(y).enumerate()
+
+    let mut j = 0;
+    for (i, (x, y)) in x.zip(y).enumerate()
     {
-        if i >= 2
-        {
-            i += 1
-        }
-        let color = Palette99::pick(i);
+        let color = {
+            loop {
+                let color = Palette99::pick(j);
+                let (r, g, b) = color.rgb();
+                if (r as u16 + g as u16 + b as u16) < ((255.0*3.0*0.6) as u16)
+                {
+                    break color;
+                }
+                j += 1;
+            }
+        };
         chart.draw_series(LineSeries::new(
                 x.zip(y),
                 &color
             ))?
-        .label(format!("{}", i))
-        .legend(move |(x, y)| Rectangle::new([(x + 5, y - 5), (x + 15, y + 5)], color.mix(0.5).filled()));
+            .label(format!("{}", i))
+            .legend(move |(x, y)| Rectangle::new([(x + 5, y - 5), (x + 15, y + 5)], color.mix(0.5).filled()));
+
+        j += 1;
     }
     
     chart.configure_series_labels()
