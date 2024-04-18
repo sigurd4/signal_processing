@@ -1,7 +1,13 @@
 #![allow(unused)]
 
+use core::f64::consts::TAU;
+use std::collections::HashMap;
+
 use array_math::{ArrayOps, ArrayNdOps};
-use plotters::{prelude::*, element::PointCollection, coord::ranged3d::{ProjectionMatrixBuilder, ProjectionMatrix}};
+use num::Complex;
+use plotters::{coord::ranged3d::{ProjectionMatrix, ProjectionMatrixBuilder}, element::PointCollection, prelude::*, style::{full_palette::GREY, text_anchor::{HPos, Pos, VPos}}};
+
+use crate::Plane;
 
 type T = f64;
 
@@ -17,6 +23,211 @@ fn isometric(mut pb: ProjectionMatrixBuilder) -> ProjectionMatrix
     pb.pitch = core::f64::consts::FRAC_PI_4;
     pb.scale = 0.7;
     pb.into_matrix()
+}
+
+pub fn plot_pz(
+    plot_title: &str, plot_path: &str,
+    p: &[Complex<T>],
+    z: &[Complex<T>],
+    plane: Plane
+) -> Result<(), Box<dyn std::error::Error>>
+{
+    const PAD: T = 0.3;
+
+    let mut w_min = z.iter()
+        .chain(p.iter())
+        .filter(|x| x.is_finite())
+        .map(|x| x.im)
+        .reduce(T::min)
+        .unwrap()
+        .min(-1.0) - PAD;
+    let mut w_max = z.iter()
+        .chain(p.iter())
+        .filter(|x| x.is_finite())
+        .map(|x| x.im)
+        .reduce(T::max)
+        .unwrap()
+        .max(1.0) + PAD;
+    
+    let mut o_min = z.iter()
+        .chain(p.iter())
+        .filter(|x| x.is_finite())
+        .map(|x| x.re)
+        .reduce(T::min)
+        .unwrap()
+        .min(-1.0) - PAD;
+    let mut o_max = z.iter()
+        .chain(p.iter())
+        .filter(|x| x.is_finite())
+        .map(|x| x.re)
+        .reduce(T::max)
+        .unwrap()
+        .max(1.0) + PAD;
+    (o_min, w_min, o_max, w_max) = (
+        (o_min + o_max - (o_max - o_min).max((w_max - w_min)*PLOT_RES.0 as T/PLOT_RES.1 as T))/2.0,
+        (w_min + w_max - (w_max - w_min).max((o_max - o_min)*PLOT_RES.1 as T/PLOT_RES.0 as T))/2.0,
+        (o_min + o_max + (o_max - o_min).max((w_max - w_min)*PLOT_RES.0 as T/PLOT_RES.1 as T))/2.0,
+        (w_min + w_max + (w_max - w_min).max((o_max - o_min)*PLOT_RES.1 as T/PLOT_RES.0 as T))/2.0,
+    );
+    
+    let area = BitMapBackend::new(plot_path, PLOT_RES).into_drawing_area();
+
+    area.fill(&WHITE)?;
+
+    let r = Complex::new((o_max - o_min)/PLOT_RES.0 as T, (w_max - w_min)/PLOT_RES.1 as T)*15.0;
+
+    let mut chart = ChartBuilder::on(&area)
+        .caption(plot_title, PLOT_CAPTION_FONT.into_font())
+        .margin(PLOT_MARGIN)
+        .x_label_area_size(PLOT_LABEL_AREA_SIZE)
+        .y_label_area_size(PLOT_LABEL_AREA_SIZE)
+        .build_cartesian_2d(o_min - r.re..o_max + r.re, w_min - r.im..w_max + r.im)?;
+
+    chart.configure_mesh()
+        .set_all_tick_mark_size(0.1)
+        .draw()?;
+
+    const N: usize = 128;
+    
+
+    match plane
+    {
+        Plane::S => {
+            chart.draw_series(LineSeries::new(
+                [(o_min - r.re, 0.0), (o_max + r.re, 0.0)],
+                &GREY
+            ))?;
+            chart.draw_series(LineSeries::new(
+                [(0.0, w_min - r.im), (0.0, w_max + r.im)],
+                &BLACK
+            ))?;
+        },
+        Plane::Z => {
+            chart.draw_series(LineSeries::new(
+                [(o_min - r.re, 0.0), (o_max + r.re, 0.0)],
+                &GREY
+            ))?;
+            chart.draw_series(LineSeries::new(
+                [(0.0, w_min - r.im), (0.0, w_max + r.im)],
+                &GREY
+            ))?;
+            chart.draw_series(LineSeries::new(
+                (0..=N).map(|i| {
+                    let (s, c) = (i as T/N as T*TAU).sin_cos();
+                    (c, s)
+                }),
+                &BLACK
+            ))?;
+        }
+    }
+
+    const TEXT_OFFSET: (f64, f64) = (1.0, 1.0);
+    
+    let font = FontDesc::new(FontFamily::Monospace, 20.0, FontStyle::Normal);
+
+    let tol = ((o_max - o_min)/PLOT_RES.0 as T).min((w_max - w_min)/PLOT_RES.1 as T)*2.0;
+    
+    let mut pp = vec![];
+    'lp:
+    for p in p
+    {
+        for (pp, n) in pp.iter_mut()
+        {
+            let dp: Complex<T> = *p - *pp;
+            if dp.norm() <= tol
+            {
+                *n += 1;
+                continue 'lp
+            }
+        }
+        pp.push((*p, 1));
+    }
+    
+    let mut first = true;
+    for (p, n) in pp
+    {
+        if n == 0
+        {
+            continue
+        }
+        chart.draw_series(LineSeries::new(
+                [(p.re - r.re, p.im + r.im), (p.re + r.re, p.im - r.im)],
+                &RED
+            ))?;
+        let s = chart.draw_series(LineSeries::new(
+                [(p.re - r.re, p.im - r.im), (p.re + r.re, p.im + r.im)],
+                &RED
+            ))?;
+        if first
+        {
+            s.label(format!("Poles"))
+                .legend(move |(x, y)| Rectangle::new([(x + 5, y - 5), (x + 15, y + 5)], RED.mix(0.5).filled()));
+            first = false;
+        }
+        if n > 1
+        {
+            chart.draw_series(core::iter::once(Text::new(format!("{}", n), (p.re + r.re*TEXT_OFFSET.0, p.im - r.im*TEXT_OFFSET.1), TextStyle {
+                font: font.clone(),
+                color: RED.to_backend_color(),
+                pos: Pos::new(HPos::Left, VPos::Top)
+            })))?;
+        }
+    }
+
+    let mut zz = vec![];
+    'lp:
+    for z in z
+    {
+        for (zz, n) in zz.iter_mut()
+        {
+            let dz: Complex<T> = *z - *zz;
+            if dz.norm() <= tol
+            {
+                *n += 1;
+                continue 'lp
+            }
+        }
+        zz.push((*z, 1));
+    }
+    
+    let mut first = true;
+    for (z, n) in zz
+    {
+        if n == 0
+        {
+            continue
+        }
+        let s = chart.draw_series(LineSeries::new(
+                (0..=N).map(|i| {
+                    let (s, c) = (i as T/N as T*TAU).sin_cos();
+                    (c*r.re + z.re, s*r.im + z.im)
+                }),
+                &BLUE
+            ))?;
+        if first
+        {
+            s.label(format!("Zeros"))
+                .legend(move |(x, y)| Rectangle::new([(x + 5, y - 5), (x + 15, y + 5)], BLUE.mix(0.5).filled()));
+            first = false;
+        }
+        if n > 1
+        {
+            chart.draw_series(core::iter::once(Text::new(format!("{}", n), (z.re + r.re*TEXT_OFFSET.0, z.im - r.im*TEXT_OFFSET.1), TextStyle {
+                font: font.clone(),
+                color: BLUE.to_backend_color(),
+                pos: Pos::new(HPos::Left, VPos::Top)
+            })))?;
+        }
+    }
+    
+    chart.configure_series_labels()
+        .border_style(BLACK)
+        .draw()?;
+        
+    // To avoid the IO failure being ignored silently, we manually call the present function
+    area.present().expect("Unable to write result to file");
+
+    Ok(())
 }
 
 pub fn plot_curves<const M: usize>(
@@ -48,7 +259,6 @@ pub fn plot_curves<const M: usize>(
         .set_all_tick_mark_size(0.1)
         .draw()?;
     
-
     let mut j = 0;
     for (i, (x, y)) in x.zip(y).enumerate()
     {

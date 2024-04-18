@@ -1,4 +1,4 @@
-use core::{ops::{AddAssign, Mul, MulAssign}};
+use core::ops::{AddAssign, Mul, MulAssign};
 
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, One, Zero};
 use option_trait::Maybe;
@@ -207,7 +207,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Fir1, Fir1Type, RealFreqZ, Tf};
+    use crate::{plot, Fir1, Fir1Type, Plane, RealFreqZ, Tf, ToZpk, Zpk};
 
     #[test]
     fn test()
@@ -215,13 +215,16 @@ mod test
         const N: usize = 49;
         let h: Tf<f64, [_; N]> = Tf::fir1((), [0.35, 0.65], Fir1Type::BandPass, (), true, ())
             .unwrap();
-        /*let h: Tf<_, [_; N]> = Tf::fir2((), [0.0, 0.35, 0.35, 0.65, 0.65, 1.0], [0.0, 0.0, 1.0, 1.0, 0.0, 0.0], (), (), (), ())
-            .unwrap();*/
 
         const M: usize = 1024;
         let (h_f, w): ([_; M], _) = h.real_freqz(());
 
         plot::plot_curves("H(e^jw)", "plots/h_z_fir1.png", [&w.zip(h_f.map(|h_f| h_f.norm()))])
-            .unwrap()
+            .unwrap();
+
+        let h: Zpk<_, Vec<_>, Vec<_>, _> = h.to_zpk((), ());
+
+        plot::plot_pz("H(z)", "plots/pz_z_fir1.png", &h.p, &h.z, Plane::Z)
+            .unwrap();
     }
 }

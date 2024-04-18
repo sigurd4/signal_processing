@@ -118,7 +118,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, window::{Kaiser, WindowGen, WindowRange}, Fir1, RealFreqZ, Tf};
+    use crate::{plot, window::{Kaiser, WindowGen, WindowRange}, Fir1, Plane, RealFreqZ, Tf, ToZpk, Zpk};
 
     #[test]
     fn test()
@@ -136,6 +136,11 @@ mod test
         let (h_f, w): ([_; N], _) = h.real_freqz(());
 
         plot::plot_curves("H(e^jw)", "plots/h_z_kaiserord.png", [&w.zip(h_f.map(|h_f| h_f.norm()))])
-            .unwrap()
+            .unwrap();
+
+        let h: Zpk<_, Vec<_>, Vec<_>, _> = h.to_zpk((), ());
+
+        plot::plot_pz("H(z)", "plots/pz_z_kaiserord.png", &h.p, &h.z, Plane::Z)
+            .unwrap();
     }
 }

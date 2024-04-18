@@ -85,7 +85,7 @@ mod test
     use linspace::LinspaceArray;
     use num::Complex;
 
-    use crate::{plot, BesselAP, Bilinear, FreqS, RealFreqZ, Zpk};
+    use crate::{plot, BesselAP, Bilinear, FreqS, Plane, RealFreqZ, Zpk};
 
     #[test]
     fn test()
@@ -93,16 +93,25 @@ mod test
         let fs = 2.0;
         let h = Zpk::besselap(6);
 
+        plot::plot_pz("H(s)", "plots/pz_s_besselap.png", h.poles(), h.zeros(), Plane::S)
+            .unwrap();
+
         const N: usize = 1024;
         let w: [_; N] = (0.0..fs).linspace_array();
         let h_f = h.freqs(w.map(|w| Complex::new(0.0, w)));
 
-        plot::plot_curves("H(jw)", "plots/h_s_besselap.png", [&w.zip(h_f.map(|h| h.norm())), &w.zip(h_f.map(|h| h.arg()))]).unwrap();
+        plot::plot_curves("H(jw)", "plots/h_s_besselap.png", [&w.zip(h_f.map(|h| h.norm())), &w.zip(h_f.map(|h| h.arg()))])
+            .unwrap();
         
-        let (h_f, w): ([_; N], _) = h.bilinear(fs)
-            .unwrap()
-            .real_freqz(());
+        let h = h.bilinear(fs)
+            .unwrap();
 
-        plot::plot_curves("H(e^jw)", "plots/h_z_besselap.png", [&w.zip(h_f.map(|h| h.norm())), &w.zip(h_f.map(|h| h.arg()))]).unwrap();
+        plot::plot_pz("H(z)", "plots/pz_z_besselap.png", h.poles(), h.zeros(), Plane::Z)
+            .unwrap();
+        
+        let (h_f, w): ([_; N], _) = h.real_freqz(());
+
+        plot::plot_curves("H(e^jw)", "plots/h_z_besselap.png", [&w.zip(h_f.map(|h| h.norm())), &w.zip(h_f.map(|h| h.arg()))])
+            .unwrap();
     }
 }

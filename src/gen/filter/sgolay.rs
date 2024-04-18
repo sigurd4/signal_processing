@@ -143,7 +143,7 @@ mod test
         let h_fw: [(Vec<_>, _); N] = h.map(|h| h.real_freqz(M));
 
         plot::plot_curves("H(e^jw)", "plots/h_z_sgolay.png",
-            h_fw.map(|(h_f, w)| w.into_iter().zip(h_f.into_iter().map(|h| h.norm())).collect::<Vec<_>>()).each_ref().map(|wh| wh.as_slice())
-        ).unwrap();
+                h_fw.map(|(h_f, w)| w.into_iter().zip(h_f.into_iter().map(|h| h.norm())).collect::<Vec<_>>()).each_ref().map(|wh| wh.as_slice())
+            ).unwrap();
     }
 }

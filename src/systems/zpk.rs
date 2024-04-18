@@ -136,6 +136,17 @@ where
         self.k.is_zero()
     }
 
+    pub fn poles(&self) -> &[T]
+    {
+        self.p.as_view_slice_option()
+            .unwrap_or(&[])
+    }
+    pub fn zeros(&self) -> &[T]
+    {
+        self.z.as_view_slice_option()
+            .unwrap_or(&[])
+    }
+
     pub fn complex_real<Tol>(self, tolerance: Tol) -> Result<(Vec<[Complex<T::Real>; 2]>, Vec<[Complex<T::Real>; 2]>, Vec<T::Real>, Vec<T::Real>, K), ComplexRealError>
     where
         Tol: Maybe<T::Real>,

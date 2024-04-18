@@ -130,7 +130,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, QpKaiser, RealFreqZ, Tf};
+    use crate::{plot, Plane, QpKaiser, RealFreqZ, Tf, ToZpk, Zpk};
 
     #[test]
     fn test()
@@ -140,6 +140,12 @@ mod test
         const N: usize = 1024;
         let (h_f, w): ([_; N], _) = h.real_freqz(());
 
-        plot::plot_curves("H(e^jw)", "plots/h_z_qp_kaiser.png", [&w.zip(h_f.map(|h| h.norm()))]).unwrap();
+        plot::plot_curves("H(e^jw)", "plots/h_z_qp_kaiser.png", [&w.zip(h_f.map(|h| h.norm()))])
+            .unwrap();
+
+        let h: Zpk<_, Vec<_>, Vec<_>, _> = h.to_zpk((), ());
+
+        plot::plot_pz("H(z)", "plots/pz_z_qp_kaiser.png", &h.p, &h.z, Plane::Z)
+            .unwrap();
     }
 }

@@ -126,7 +126,7 @@ where
 
         let sampling_frequency = sampling_frequency.into_option();
     
-        for _ in 0..64
+        for _ in 0..128
         {
             let h_ = mmfir::mmfir::<T, RES, B2, R, W>(
                 order + 1,
@@ -310,7 +310,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, FirPm, FirPmType, RealFreqZ, Tf};
+    use crate::{plot, FirPm, FirPmType, Plane, RealFreqZ, Tf, ToZpk, Zpk};
 
     #[test]
     fn test()
@@ -335,6 +335,12 @@ mod test
         const N: usize = 1024;
         let (h_f, w): ([_; N], _) = h.real_freqz(());
 
-        plot::plot_curves("H(e^jw)", "plots/h_z_firpm.png", [&w.zip(h_f.map(|h| h.norm())), &w.zip(h_f.map(|h| h.arg()))]).unwrap();
+        plot::plot_curves("H(e^jw)", "plots/h_z_firpm.png", [&w.zip(h_f.map(|h| h.norm())), &w.zip(h_f.map(|h| h.arg()))])
+            .unwrap();
+
+        let h: Zpk<_, Vec<_>, Vec<_>, _> = h.to_zpk((), ());
+
+        plot::plot_pz("H(z)", "plots/pz_z_firpm.png", &h.p, &h.z, Plane::Z)
+            .unwrap();
     }
 }

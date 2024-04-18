@@ -1,7 +1,7 @@
-use core::{ops::{Div, Mul, MulAssign, Sub}};
+use core::ops::{Div, Mul, MulAssign, Sub};
 
 use array_math::{ArrayOps, SliceMath};
-use ndarray::{Array2};
+use ndarray::Array2;
 use ndarray_linalg::{solve::Solve, Lapack, least_squares::LeastSquaresSvd};
 use num::{complex::ComplexFloat, traits::FloatConst, Float, NumCast, One, Zero};
 use option_trait::Maybe;
@@ -201,7 +201,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, FirLS, RealFreqZ, Tf};
+    use crate::{plot, FirLS, Plane, RealFreqZ, Tf, ToZpk, Zpk};
 
     #[test]
     fn test()
@@ -215,6 +215,11 @@ mod test
         let (h_f, w): ([_; M], _) = h.real_freqz(());
 
         plot::plot_curves("H(e^jw)", "plots/h_z_firls.png", [&w.zip(h_f.map(|h_f| h_f.norm()))])
-            .unwrap()
+            .unwrap();
+
+        let h: Zpk<_, Vec<_>, Vec<_>, _> = h.to_zpk((), ());
+
+        plot::plot_pz("H(z)", "plots/pz_z_firls.png", &h.p, &h.z, Plane::Z)
+            .unwrap();
     }
 }

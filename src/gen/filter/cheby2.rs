@@ -233,7 +233,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Cheby2, FilterGenPlane, RealFreqZ, Tf};
+    use crate::{plot, Cheby2, FilterGenPlane, Plane, RealFreqZ, Tf, ToZpk, Zpk};
 
     #[test]
     fn test()
@@ -254,6 +254,12 @@ mod test
         const N: usize = 1024;
         let (h_f, w): ([_; N], _) = h.real_freqz(());
 
-        plot::plot_curves("H(e^jw)", "plots/h_z_cheby2.png", [&w.zip(h_f.map(|h| h.norm())), &w.zip(h_f.map(|h| h.arg()))]).unwrap();
+        plot::plot_curves("H(e^jw)", "plots/h_z_cheby2.png", [&w.zip(h_f.map(|h| h.norm())), &w.zip(h_f.map(|h| h.arg()))])
+            .unwrap();
+
+        let h: Zpk<_, Vec<_>, Vec<_>, _> = h.to_zpk((), ());
+
+        plot::plot_pz("H(z)", "plots/pz_z_cheby2.png", &h.p, &h.z, Plane::Z)
+            .unwrap();
     }
 }

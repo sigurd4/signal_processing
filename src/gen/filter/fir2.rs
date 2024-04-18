@@ -1,4 +1,4 @@
-use core::{ops::{AddAssign, Div, Mul, MulAssign, SubAssign}};
+use core::ops::{AddAssign, Div, Mul, MulAssign, SubAssign};
 
 use array_math::{SliceOps, SliceMath};
 use num::{complex::ComplexFloat, traits::float::TotalOrder, Complex, Float, NumCast, One, Zero};
@@ -314,7 +314,7 @@ mod test
     
     
 
-    use crate::{plot, Fir2, FreqZ, Tf};
+    use crate::{plot, Fir2, FreqZ, Plane, Tf, ToZpk, Zpk};
 
     #[test]
     fn test()
@@ -339,6 +339,11 @@ mod test
         let g = [m[0]].chain(m).chain(m_rev).chain([m[0]]);
 
         plot::plot_curves("H(e^jw)", "plots/h_z_fir2.png", [&w.zip(h_f.map(|h_f| h_f.norm())), &wg.zip(g)])
-            .unwrap()
+            .unwrap();
+
+        let h: Zpk<_, Vec<_>, Vec<_>, _> = h.to_zpk((), ());
+
+        plot::plot_pz("H(z)", "plots/pz_z_fir2.png", &h.p, &h.z, Plane::Z)
+            .unwrap();
     }
 }
