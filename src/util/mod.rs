@@ -12,6 +12,7 @@ moddef::moddef!(
         maybe_len_eq,
         not_range,
         overlay,
+        result_or_ok,
         truncate_im
     }
 );

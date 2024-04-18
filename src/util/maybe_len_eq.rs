@@ -1,6 +1,8 @@
 use ndarray::{Array1, ArrayView1};
 
-pub trait MaybeLenEq<Rhs, const MAYBE_EQ: bool> {}
+pub trait MaybeLenEq<Rhs, const MAYBE_EQ: bool>
+where
+    Rhs: ?Sized {}
 
 impl<T1, const N1: usize> MaybeLenEq<(), true> for [T1; N1] {}
 impl<T1, T2, const N1: usize, const N2: usize> MaybeLenEq<[T2; N2], {N1 == N2}> for [T1; N1] {}

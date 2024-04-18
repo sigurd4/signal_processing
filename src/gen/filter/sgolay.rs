@@ -24,29 +24,38 @@ where
     L: ListOrSingle<Self> + Sized,
     N: Maybe<usize>
 {
-    fn sgolay<TS>(order: usize, numtaps: N, derivative: usize, scale: TS) -> Result<L, SGolayError>
+    fn sgolay<TS, M>(order: usize, numtaps: N, derivative: M, scale: TS) -> Result<L, SGolayError>
     where
-        TS: Maybe<Self::Domain>;
+        TS: Maybe<Self::Domain>,
+        M: Maybe<usize>;
 }
 
-impl<L, T, B, N> SGolay<L, N> for Tf<T, B>
+impl<L, T, B, N, NN> SGolay<L, N> for Tf<T, B>
 where
     T: ComplexFloat<Real: Lapack<Real = <T as ComplexFloat>::Real> + Into<T>> + Mul<<T as ComplexFloat>::Real, Output = T> + MulAssign,
     Vec<T>: TryInto<B>,
     Vec<Tf<T, B>>: TryInto<L>,
     L: OwnedList<Tf<T, B>> + MaybeLenEq<B, true>,
     B: OwnedList<T>,
-    <L::Length as StaticMaybe<usize>>::Opposite: MaybeAnd<usize, <B::Length as StaticMaybe<usize>>::Opposite, Output = N>,
-    N: Maybe<usize>,
+    <L::Length as StaticMaybe<usize>>::Opposite: MaybeAnd<usize, <B::Length as StaticMaybe<usize>>::Opposite, Output = NN>,
+    NN: MaybeAnd<usize, N, Output = N, Opposite: Sized>,
+    N: StaticMaybe<usize>,
     [(); (L::LENGTH % 2) - 1]:,
     [(); (B::LENGTH % 2) - 1]:
 {
-    fn sgolay<TS>(order: usize, numtaps: N, derivative: usize, scale: TS) -> Result<L, SGolayError>
+    fn sgolay<TS, M>(order: usize, numtaps: N, derivative: M, scale: TS) -> Result<L, SGolayError>
     where
-        TS: Maybe<T>
+        TS: Maybe<T>,
+        M: Maybe<usize>
     {
         let n = numtaps.into_option()
-            .unwrap_or_else(|| L::LENGTH.min(B::LENGTH));
+            .unwrap_or_else(|| {
+                NN::Opposite::maybe_from_fn(|| L::LENGTH.min(B::LENGTH))
+                    .into_option()
+                    .unwrap_or_else(|| order + 3 - order % 2)
+            });
+        let m = derivative.into_option()
+            .unwrap_or(0);
 
         if n % 2 != 1
         {
@@ -56,7 +65,7 @@ where
         {
             return Err(SGolayError::OrderOutOfRange)
         }
-        if derivative >= n
+        if m >= n
         {
             return Err(SGolayError::DerivativeOutOfRange)
         }
@@ -83,12 +92,12 @@ where
                 .b
                 .as_mut_slice()
                 .iter_mut()
-                .zip(a.row(derivative).into_iter())
+                .zip(a.row(m).into_iter())
             {
                 *b = a.into()
             }
         }
-        let s = <T::Real as NumCast>::from(1 - (derivative % 2) as i8*2).unwrap();
+        let s = <T::Real as NumCast>::from(1 - (m % 2) as i8*2).unwrap();
         for row in k + 1..n
         {
             let f: &mut [Tf<T, B>] = f.as_mut_slice();
@@ -111,7 +120,7 @@ where
             }
         }
 
-        let scale = util::factorial::<<T as ComplexFloat>::Real, _>(derivative).into()/scale.powi(derivative as i32);
+        let scale = util::factorial::<<T as ComplexFloat>::Real, _>(m).into()/scale.powi(m as i32);
 
         for f in f.as_mut_slice()
             .iter_mut()
@@ -136,7 +145,7 @@ mod test
     fn test()
     {
         const N: usize = 21;
-        let h: [Tf::<_, [_; N]>; N] = Tf::sgolay(4, (), 0, 1.0)
+        let h: [Tf::<_, Vec<_>>; N] = Tf::sgolay(4, (), (), ())
             .unwrap();
 
         const M: usize = 1024;
