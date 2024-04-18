@@ -3,6 +3,7 @@ moddef::moddef!(
         maxphase,
         minphase,
         residue,
+        residued,
         residuez,
         split_numer_denom
     }

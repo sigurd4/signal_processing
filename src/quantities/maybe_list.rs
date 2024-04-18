@@ -15,9 +15,7 @@ pub trait MaybeList<T>: MaybeLists<T>
         Self: Sized;
 }
 
-impl<'a, T> MaybeList<T> for Vec<T>
-where
-    Self: 'a
+impl<T> MaybeList<T> for Vec<T>
 {
     fn as_view_slice_option(&self) -> Option<&'_ [T]>
     {
@@ -37,9 +35,7 @@ where
         Some(self.into_vec())
     }
 }
-impl<'a, T> MaybeList<T> for [T]
-where
-    Self: 'a
+impl<T> MaybeList<T> for [T]
 {
     fn as_view_slice_option(&self) -> Option<&'_ [T]>
     {
@@ -59,9 +55,7 @@ where
         Some(self.into_vec())
     }
 }
-impl<'a, T, const N: usize> MaybeList<T> for [T; N]
-where
-    Self: 'a
+impl<T, const N: usize> MaybeList<T> for [T; N]
 {
     fn as_view_slice_option(&self) -> Option<&'_ [T]>
     {
@@ -81,9 +75,7 @@ where
         Some(self.into_vec())
     }
 }
-impl<'a, T> MaybeList<T> for &[T]
-where
-    Self: 'a
+impl<'a, T> MaybeList<T> for &'a [T]
 {
     fn as_view_slice_option(&self) -> Option<&'_ [T]>
     {
@@ -103,9 +95,7 @@ where
         Some(self.into_vec())
     }
 }
-impl<'a, T, const N: usize> MaybeList<T> for &[T; N]
-where
-    Self: 'a
+impl<'a, T, const N: usize> MaybeList<T> for &'a [T; N]
 {
     fn as_view_slice_option(&self) -> Option<&'_ [T]>
     {
@@ -146,9 +136,7 @@ impl<T> MaybeList<T> for ()
     }
 }
 
-impl<'a, T> MaybeList<T> for Array1<T>
-where
-    Self: 'a
+impl<T> MaybeList<T> for Array1<T>
 {
     fn as_view_slice_option(&self) -> Option<&'_ [T]>
     {
@@ -169,8 +157,6 @@ where
     }
 }
 impl<'a, T> MaybeList<T> for ArrayView1<'a, T>
-where
-    Self: 'a
 {
     fn as_view_slice_option(&self) -> Option<&'_ [T]>
     {
