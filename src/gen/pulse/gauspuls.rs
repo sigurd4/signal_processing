@@ -6,7 +6,6 @@ use option_trait::Maybe;
 
 use crate::{List, NotRange};
 
-
 pub trait GausPuls<T, L, N>
 where
     T: Float,

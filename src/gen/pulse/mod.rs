@@ -3,6 +3,7 @@ moddef::moddef!(
         gauspuls,
         gmonopuls,
         pulstran,
+        rectpuls,
         sigmoid_train
     }
 );
