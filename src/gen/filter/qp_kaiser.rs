@@ -67,7 +67,7 @@ where
             }
             else
             {
-                (x*nb_recip).sin()/x
+                (x*nb_recip*T::PI()).sin()/(x*T::PI())
             })*w).into()
         }).collect();
 
