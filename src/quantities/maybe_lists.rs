@@ -12,6 +12,7 @@ pub trait MaybeLists<T>: MaybeContainer<T>
     type Width: StaticMaybe<usize>;
     const HEIGHT: usize;
     const WIDTH: usize;
+    const IS_FLATTENED: bool;
 
     type RowsMapped<M>: ListOrSingle<M>;
     type RowView<'a>: MaybeList<T> + 'a
@@ -71,6 +72,7 @@ impl<T> MaybeLists<T> for ()
     type Width = usize;
     const HEIGHT: usize = 1;
     const WIDTH: usize = 1;
+    const IS_FLATTENED: bool = true;
 
     type RowsMapped<M> = M;
     type RowView<'a> = ()
@@ -159,6 +161,7 @@ impl<T> MaybeLists<T> for Vec<T>
     type Width = ();
     const HEIGHT: usize = 1;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = true;
 
     type RowsMapped<M> = M;
     type RowView<'a> = &'a [T]
@@ -246,6 +249,7 @@ impl<T> MaybeLists<T> for [T]
     type Width = ();
     const HEIGHT: usize = 1;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = true;
 
     type RowsMapped<M> = M;
     type RowView<'a> = &'a [T]
@@ -334,6 +338,7 @@ impl<T, const N: usize> MaybeLists<T> for [T; N]
     type Width = usize;
     const HEIGHT: usize = 1;
     const WIDTH: usize = N;
+    const IS_FLATTENED: bool = true;
 
     type RowsMapped<M> = M;
     type RowView<'a> = &'a [T; N]
@@ -421,6 +426,7 @@ impl<T> MaybeLists<T> for &[T]
     type Width = ();
     const HEIGHT: usize = 1;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = true;
 
     type RowsMapped<M> = M;
     type RowView<'a> = &'a [T]
@@ -508,6 +514,7 @@ impl<T, const N: usize> MaybeLists<T> for &[T; N]
     type Width = usize;
     const HEIGHT: usize = 1;
     const WIDTH: usize = N;
+    const IS_FLATTENED: bool = true;
 
     type RowsMapped<M> = M;
     type RowView<'a> = &'a [T; N]
@@ -596,6 +603,7 @@ impl<T> MaybeLists<T> for Vec<Vec<T>>
     type Width = ();
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T]
@@ -691,6 +699,7 @@ impl<T, const M: usize> MaybeLists<T> for [Vec<T>; M]
     type Width = ();
     const HEIGHT: usize = M;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T]
@@ -781,6 +790,7 @@ impl<T> MaybeLists<T> for [Vec<T>]
     type Width = ();
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T]
@@ -879,6 +889,7 @@ impl<T, const M: usize> MaybeLists<T> for &[Vec<T>; M]
     type Width = ();
     const HEIGHT: usize = M;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T]
@@ -972,6 +983,7 @@ impl<T> MaybeLists<T> for &[Vec<T>]
     type Width = ();
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T]
@@ -1070,6 +1082,7 @@ impl<T, const N: usize> MaybeLists<T> for Vec<[T; N]>
     type Width = usize;
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = N;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T; N]
@@ -1165,6 +1178,7 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [[T; N]; M]
     type Width = usize;
     const HEIGHT: usize = M;
     const WIDTH: usize = N;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T; N]
@@ -1255,6 +1269,7 @@ impl<T, const N: usize> MaybeLists<T> for [[T; N]]
     type Width = usize;
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = N;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T; N]
@@ -1353,6 +1368,7 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[[T; N]; M]
     type Width = usize;
     const HEIGHT: usize = M;
     const WIDTH: usize = N;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T; N]
@@ -1446,6 +1462,7 @@ impl<T, const N: usize> MaybeLists<T> for &[[T; N]]
     type Width = usize;
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = N;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T; N]
@@ -1544,6 +1561,7 @@ impl<T> MaybeLists<T> for Vec<&[T]>
     type Width = ();
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T]
@@ -1641,6 +1659,7 @@ impl<T, const M: usize> MaybeLists<T> for [&[T]; M]
     type Width = ();
     const HEIGHT: usize = M;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T]
@@ -1732,6 +1751,7 @@ impl<T> MaybeLists<T> for [&[T]]
     type Width = ();
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T]
@@ -1830,6 +1850,7 @@ impl<T, const M: usize> MaybeLists<T> for &[&[T]; M]
     type Width = ();
     const HEIGHT: usize = M;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T]
@@ -1921,6 +1942,7 @@ impl<T> MaybeLists<T> for &[&[T]]
     type Width = ();
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T]
@@ -2019,6 +2041,7 @@ impl<T, const N: usize> MaybeLists<T> for Vec<&[T; N]>
     type Width = usize;
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = N;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T; N]
@@ -2116,6 +2139,7 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [&[T; N]; M]
     type Width = usize;
     const HEIGHT: usize = M;
     const WIDTH: usize = N;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T; N]
@@ -2207,6 +2231,7 @@ impl<T, const N: usize> MaybeLists<T> for [&[T; N]]
     type Width = usize;
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = N;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T; N]
@@ -2305,6 +2330,7 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[&[T; N]; M]
     type Width = usize;
     const HEIGHT: usize = M;
     const WIDTH: usize = N;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = [MM; M];
     type RowView<'a> = &'a [T; N]
@@ -2396,6 +2422,7 @@ impl<T, const N: usize> MaybeLists<T> for &[&[T; N]]
     type Width = usize;
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = N;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<MM> = Vec<MM>;
     type RowView<'a> = &'a [T; N]
@@ -2494,6 +2521,7 @@ impl<T> MaybeLists<T> for Array1<T>
     type Width = ();
     const HEIGHT: usize = 1;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = true;
 
     type RowsMapped<M> = M;
     type RowView<'a> = ArrayView1<'a, T>
@@ -2581,6 +2609,7 @@ impl<'c, T> MaybeLists<T> for ArrayView1<'c, T>
     type Width = ();
     const HEIGHT: usize = 1;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = true;
 
     type RowsMapped<M> = M;
     type RowView<'a> = ArrayView1<'a, T>
@@ -2669,6 +2698,7 @@ impl<T> MaybeLists<T> for Array2<T>
     type Width = ();
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = false;
 
     type RowsMapped<M> = Vec<M>;
     type RowView<'a> = ArrayView1<'a, T>
@@ -2771,6 +2801,7 @@ impl<'b, T> MaybeLists<T> for ArrayView2<'b, T>
     type Width = ();
     const HEIGHT: usize = usize::MAX;
     const WIDTH: usize = usize::MAX;
+    const IS_FLATTENED: bool = false;
     
     type RowsMapped<M> = Vec<M>;
     type RowView<'a> = ArrayView1<'a, T>

@@ -2,10 +2,16 @@ use array_math::max_len;
 use ndarray::{Array1, ArrayView1};
 
 pub trait Overlay<T, Rhs>
+where
+    T: ?Sized,
+    Rhs: ?Sized
 {
     type Output;
 
-    fn overlay(self, rhs: Rhs) -> Self::Output;
+    fn overlay(self, rhs: Rhs) -> Self::Output
+    where
+        Self: Sized,
+        Rhs: Sized;
 }
 
 impl<T, const N1: usize, const N2: usize> Overlay<T, [T; N1]> for [T; N2]

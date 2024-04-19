@@ -3,7 +3,7 @@ use option_trait::{Maybe, StaticMaybe};
 
 use crate::{List, MaybeLenEq, PWelch, PWelchDetrend};
 
-pub trait Tfestimate<X, Y, YY, W, WW, WWW, WL, N, S>: List<X> + MaybeLenEq<YY, true>
+pub trait TfEstimate<X, Y, YY, W, WW, WWW, WL, N, S>: List<X> + MaybeLenEq<YY, true>
 where
     X: ComplexFloat,
     Y: ComplexFloat<Real = X::Real>,
@@ -37,7 +37,7 @@ where
         F: StaticMaybe<WW::Mapped<X::Real>>;
 }
 
-impl<T, X, XX, Y, YY, W, WW, WWW, WL, N, S> Tfestimate<X, Y, YY, W, WW, WWW, WL, N, S> for XX
+impl<T, X, XX, Y, YY, W, WW, WWW, WL, N, S> TfEstimate<X, Y, YY, W, WW, WWW, WL, N, S> for XX
 where
     T: FloatConst + Float,
     X: ComplexFloat<Real = T>,
@@ -98,7 +98,7 @@ mod test
     use array_math::ArrayOps;
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, window::{Boxcar, WindowGen, WindowRange}, Filter, Fir1, Fir1Type, FreqZ, Tf, Tfestimate};
+    use crate::{plot, window::{Boxcar, WindowGen, WindowRange}, Filter, Fir1, Fir1Type, FreqZ, Tf, TfEstimate};
 
     #[test]
     fn test()
@@ -115,7 +115,7 @@ mod test
 
         const M: usize = 1024;
         let fs = 500.0;
-        let (he, f): ([_; M], [_; M]) = Tfestimate::<_, _, _, f64, [_; _], (), (), (), ()>::
+        let (he, f): ([_; M], [_; M]) = TfEstimate::<_, _, _, f64, [_; _], (), (), (), ()>::
             tfestimate(x, y, (), (), (), (), fs, (), (), (), true);
 
         plot::plot_curves("H(e^jw)", "plots/h_z_tfestimate.png", [

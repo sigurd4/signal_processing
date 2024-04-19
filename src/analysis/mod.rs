@@ -31,6 +31,7 @@ moddef::moddef!(
         rssq,
         specgram,
         statelevels,
-        tfestimate
+        tfestimate,
+        xcorr
     }
 );
