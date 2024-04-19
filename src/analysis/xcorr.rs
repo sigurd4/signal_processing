@@ -1,10 +1,10 @@
-use core::{any::Any, iter::Sum, ops::{AddAssign, DivAssign, MulAssign, RangeInclusive}};
+use core::{iter::Sum, ops::{AddAssign, DivAssign, MulAssign, RangeInclusive}};
 
-use array_math::{max_len, SliceMath, SliceOps};
+use array_math::{SliceMath, SliceOps};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{ComplexOp, List, ListOrSingle, Lists, MaybeContainer, MaybeLenEq, MaybeList, Overlay, PWelch, PWelchDetrend, TruncateIm};
+use crate::{ComplexOp, Lists, MaybeList, TruncateIm};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum XCorrScale
@@ -275,10 +275,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use rand::distributions::uniform::SampleRange;
-
-    use crate::{plot, window::{Boxcar, WindowGen, WindowRange}, Filter, Fir1, Fir1Type, FreqZ, Tf, TfEstimate, XCorr};
+    use crate::{plot, XCorr};
 
     #[test]
     fn test()
