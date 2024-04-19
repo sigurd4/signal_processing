@@ -30,6 +30,7 @@ moddef::moddef!(
         rms,
         rssq,
         specgram,
-        statelevels
+        statelevels,
+        tfestimate
     }
 );

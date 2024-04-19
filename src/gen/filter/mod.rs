@@ -22,8 +22,6 @@ moddef::moddef!(
         firls,
         firpm,
         firpmord,
-        invfreqs,
-        invfreqz,
         kaiserord,
         pei_tseng_notch,
         qp_kaiser,

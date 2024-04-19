@@ -38,6 +38,7 @@ moddef::moddef!(
         decompositions,
         error,
         gen,
+        identification,
         operations,
         quantities,
         systems,
