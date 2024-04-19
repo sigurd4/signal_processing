@@ -1,10 +1,11 @@
 
 
-use array_math::{ArrayOps};
+use array_math::ArrayOps;
 use num::{traits::FloatConst, Float};
 
 use super::{WindowGen, WindowRange};
 
+#[doc(alias = "Bartlett")]
 pub struct Triangular;
 
 impl<T, const N: usize> WindowGen<T, [T; N], ()> for Triangular
