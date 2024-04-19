@@ -34,11 +34,11 @@ impl<T, L, const N: usize> Downsample<T, (), [T; N]> for L
 where
     L: Lists<T, RowOwned: List<T>, Width = usize>,
     T: Clone,
-    [(); 0 - N % max_len(L::WIDTH, 1)]:
+    [(); 0 - L::WIDTH % max_len(N, 1)]:
 {
     fn downsample(self, (): (), mut phase: usize) -> Self::RowsMapped<[T; N]>
     {
-        let n = N / L::WIDTH.max(1);
+        let n = L::WIDTH/max_len(N, 1);
         phase %= n;
 
         self.map_rows_into_owned(|x| {
