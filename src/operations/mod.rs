@@ -14,6 +14,7 @@ moddef::moddef!(
         normalize,
         resample,
         sgolayfilt,
+        upsample,
         window
     }
 );
