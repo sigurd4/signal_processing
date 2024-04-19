@@ -4,6 +4,7 @@ moddef::moddef!(
         gmonopuls,
         pulstran,
         rectpuls,
-        sigmoid_train
+        sigmoid_train,
+        tripuls
     }
 );
