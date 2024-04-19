@@ -29,6 +29,7 @@ moddef::moddef!(
         real_specgram,
         rms,
         rssq,
-        specgram
+        specgram,
+        statelevels
     }
 );

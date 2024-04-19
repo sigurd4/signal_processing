@@ -13,7 +13,8 @@ moddef::moddef!(
         not_range,
         overlay,
         result_or_ok,
-        truncate_im
+        truncate_im,
+        two_sided_range
     }
 );
 
