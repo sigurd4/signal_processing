@@ -6,6 +6,8 @@ use thiserror::Error;
 
 use crate::{ComplexOp, Container, Filter, List, ListOrSingle, Lists, MaybeLenEq, OwnedList, System, Tf};
 
+//FIXME: Discontinuous at len - k.
+
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum SGolayFiltError
 {
