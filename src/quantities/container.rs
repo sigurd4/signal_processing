@@ -203,8 +203,7 @@ impl<T> Container<T> for Vec<Vec<T>>
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<T, const M: usize> Container<T> for [Vec<T>; M]
@@ -238,8 +237,7 @@ impl<T, const M: usize> Container<T> for [Vec<T>; M]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<T> Container<T> for [Vec<T>]
@@ -274,8 +272,7 @@ impl<T> Container<T> for [Vec<T>]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<'b, T, const M: usize> Container<T> for &'b [Vec<T>; M]
@@ -310,8 +307,7 @@ impl<'b, T, const M: usize> Container<T> for &'b [Vec<T>; M]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<'b, T> Container<T> for &'b [Vec<T>]
@@ -346,8 +342,7 @@ impl<'b, T> Container<T> for &'b [Vec<T>]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 
@@ -381,8 +376,7 @@ impl<T, const N: usize> Container<T> for Vec<[T; N]>
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<T, const N: usize, const M: usize> Container<T> for [[T; N]; M]
@@ -412,8 +406,7 @@ impl<T, const N: usize, const M: usize> Container<T> for [[T; N]; M]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<T, const N: usize> Container<T> for [[T; N]]
@@ -446,8 +439,7 @@ impl<T, const N: usize> Container<T> for [[T; N]]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<'b, T, const N: usize, const M: usize> Container<T> for &'b [[T; N]; M]
@@ -480,8 +472,7 @@ impl<'b, T, const N: usize, const M: usize> Container<T> for &'b [[T; N]; M]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<'b, T, const N: usize> Container<T> for &'b [[T; N]]
@@ -514,8 +505,7 @@ impl<'b, T, const N: usize> Container<T> for &'b [[T; N]]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 
@@ -551,8 +541,7 @@ impl<'b, T> Container<T> for Vec<&'b [T]>
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<'b, T, const M: usize> Container<T> for [&'b [T]; M]
@@ -586,8 +575,7 @@ impl<'b, T, const M: usize> Container<T> for [&'b [T]; M]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<'b, T> Container<T> for [&'b [T]]
@@ -622,8 +610,7 @@ impl<'b, T> Container<T> for [&'b [T]]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<'b, 'c, T, const M: usize> Container<T> for &'b [&'c [T]; M]
@@ -658,8 +645,7 @@ impl<'b, 'c, T, const M: usize> Container<T> for &'b [&'c [T]; M]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<'b, 'c, T> Container<T> for &'b [&'c [T]]
@@ -694,8 +680,7 @@ impl<'b, 'c, T> Container<T> for &'b [&'c [T]]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 
@@ -729,8 +714,7 @@ impl<'b, T, const N: usize> Container<T> for Vec<&'b [T; N]>
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<'b, T, const N: usize, const M: usize> Container<T> for [&'b [T; N]; M]
@@ -762,8 +746,7 @@ impl<'b, T, const N: usize, const M: usize> Container<T> for [&'b [T; N]; M]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<'b, T, const N: usize> Container<T> for [&'b [T; N]]
@@ -796,8 +779,7 @@ impl<'b, T, const N: usize> Container<T> for [&'b [T; N]]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<'b, 'c, T, const N: usize, const M: usize> Container<T> for &'b [&'c [T; N]; M]
@@ -829,8 +811,7 @@ impl<'b, 'c, T, const N: usize, const M: usize> Container<T> for &'b [&'c [T; N]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 impl<'b, 'c, T, const N: usize> Container<T> for &'b [&'c [T; N]]
@@ -863,8 +844,7 @@ impl<'b, 'c, T, const N: usize> Container<T> for &'b [&'c [T; N]]
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
         self.get(i.0)
-            .map(|r| r.get(i.1))
-            .unwrap()
+            .and_then(|r| r.get(i.1))
     }
 }
 

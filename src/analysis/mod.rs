@@ -32,6 +32,7 @@ moddef::moddef!(
         specgram,
         statelevels,
         tfestimate,
+        xcorr_2d,
         xcorr
     }
 );

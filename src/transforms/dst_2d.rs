@@ -22,7 +22,7 @@ where
     M::Owned: OwnedMatrix<T>,
     T: ComplexFloat<Real: Into<T>> + Into<Complex<T::Real>> + 'static,
     Complex<T::Real>: AddAssign + MulAssign + MulAssign<T::Real> + DivAssign<T::Real> + Mul<T::Real, Output = Complex<T::Real>> + Mul<T, Output = Complex<T::Real>>,
-    <Self::Owned as MaybeMatrix<T>>::Transpose: OwnedMatrix<T, Transpose = Self::Owned>
+    <Self::Owned as MaybeMatrix<T>>::Transpose: OwnedMatrix<T, Transpose: Into<M::Owned>>
 {
     fn dst_i_2d(self) -> Self::Owned
     {
@@ -37,6 +37,7 @@ where
             ht.dst_i();
         }
         ht.matrix_transpose()
+            .into()
     }
     fn dst_ii_2d(self) -> Self::Owned
     {
@@ -51,6 +52,7 @@ where
             ht.dst_ii();
         }
         ht.matrix_transpose()
+            .into()
     }
     fn dst_iii_2d(self) -> Self::Owned
     {
@@ -65,6 +67,7 @@ where
             ht.dst_iii();
         }
         ht.matrix_transpose()
+            .into()
     }
     fn dst_iv_2d(self) -> Self::Owned
     {
@@ -79,5 +82,6 @@ where
             ht.dst_iv();
         }
         ht.matrix_transpose()
+            .into()
     }
 }

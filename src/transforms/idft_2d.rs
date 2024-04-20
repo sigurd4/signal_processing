@@ -19,7 +19,7 @@ where
     M: Matrix<T>,
     M::Mapped<Complex<T::Real>>: OwnedMatrix<Complex<T::Real>> + 'static,
     Complex<T::Real>: ComplexFloat<Real = T::Real> + MulAssign + AddAssign + MulAssign<T::Real>,
-    <Self::Mapped<Complex<T::Real>> as MaybeMatrix<Complex<T::Real>>>::Transpose: OwnedMatrix<Complex<T::Real>, Transpose = Self::Mapped<Complex<T::Real>>>
+    <Self::Mapped<Complex<T::Real>> as MaybeMatrix<Complex<T::Real>>>::Transpose: OwnedMatrix<Complex<T::Real>, Transpose: Into<M::Mapped<Complex<T::Real>>>>
 {
     fn idft_2d(self) -> Self::Mapped<Complex<T::Real>>
     {
@@ -34,5 +34,6 @@ where
             ht.ifft();
         }
         ht.matrix_transpose()
+            .into()
     }
 }
