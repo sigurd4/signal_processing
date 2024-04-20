@@ -29,7 +29,7 @@ where
     XX: Lists<X, Mapped<Complex<T::Real>>: Clone + Lists<Complex<T::Real>, RowOwned = XXX, RowsMapped<XXX::Mapped<Y>>: Into<XX::Mapped<Y>>>>,
     XXX: List<Complex<T::Real>>,
     Y: ComplexFloat<Real = T::Real> + 'static,
-    Complex<T::Real>: Clone + AddAssign + MulAssign + DivAssign
+    Complex<T::Real>: Clone + AddAssign + MulAssign + DivAssign + MulAssign<T::Real>
 {
     type Output = B::RowsMapped<XX::Mapped<Y>>;
 

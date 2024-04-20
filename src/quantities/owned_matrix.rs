@@ -1,8 +1,8 @@
 use ndarray::{Array1, Array2};
 
-use crate::{Matrix, OwnedLists};
+use crate::{Matrix, MaybeOwnedMatrix, OwnedLists};
 
-pub trait OwnedMatrix<T>: Matrix<T> + OwnedLists<T>
+pub trait OwnedMatrix<T>: Matrix<T> + OwnedLists<T> + MaybeOwnedMatrix<T>
 {
     
 }

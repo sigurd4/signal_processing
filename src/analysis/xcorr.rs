@@ -41,7 +41,7 @@ where
     Y: ComplexFloat<Real = T> + Into<Complex<T>> + Into<Z>,
     YY: MaybeList<Y, MaybeSome: StaticMaybe<YY::Some, MaybeOr<XX::RowOwned, XX::Owned> = XX::Owned>>,
     Z: ComplexFloat<Real = T> + DivAssign + DivAssign<T> + 'static,
-    Complex<T>: AddAssign + MulAssign
+    Complex<T>: AddAssign + MulAssign + MulAssign<T>
 {
     fn xcorr<SC, ML>(
         self,

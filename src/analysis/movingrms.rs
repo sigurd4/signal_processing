@@ -23,7 +23,7 @@ where
     <L::RowOwned as Container<T>>::Mapped<T::Real>: OwnedList<T::Real, Mapped<T::Real> = <L::RowOwned as Container<T>>::Mapped<T::Real>> + SigmoidTrain<T::Real, <L::RowOwned as Container<T>>::Mapped<T::Real>, ()>,
     <L::RowOwned as Container<T>>::Mapped<Complex<T::Real>>: OwnedList<Complex<T::Real>, Mapped<T::Real> = <L::RowOwned as Container<T>>::Mapped<T::Real>>,
     <<L::RowOwned as Container<T>>::Mapped<T::Real> as Container<T::Real>>::Mapped<Complex<T::Real>>: OwnedList<Complex<T::Real>>,
-    Complex<T::Real>: AddAssign + MulAssign
+    Complex<T::Real>: AddAssign + MulAssign + MulAssign<T::Real>
 {
     fn moving_rms<FS>(self, width: T::Real, time_constant: T::Real, sampling_frequency: FS) -> L::RowsMapped<(<L::RowOwned as Container<T>>::Mapped<T::Real>, <L::RowOwned as Container<T>>::Mapped<T::Real>)>
     where

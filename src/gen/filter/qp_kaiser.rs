@@ -14,7 +14,7 @@ impl<T> QpKaiser for Tf<T, Vec<T>>
 where
     T: Float + FloatConst + MulAssign + DivAssign + Sum + Into<Complex<T>> + 'static,
     Vec<T>: Conv<T, T, Vec<T>, Output = Vec<T>>,
-    Complex<T>: AddAssign + MulAssign
+    Complex<T>: AddAssign + MulAssign + MulAssign<T>
 {
     fn qp_kaiser(num_bands: usize, mut attenuation: T, linear: bool) -> Self
     {

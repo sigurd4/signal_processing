@@ -19,7 +19,7 @@ impl<T, L> Dst<T> for L
 where
     L: Lists<T, Owned: OwnedLists<T>>,
     T: ComplexFloat + Into<Complex<T::Real>> + MulAssign<T::Real> + DivAssign<T::Real> + 'static,
-    Complex<T::Real>: AddAssign + MulAssign + DivAssign<T::Real> + Mul<T, Output = Complex<T::Real>> + Mul<T::Real, Output = Complex<T::Real>>,
+    Complex<T::Real>: AddAssign + MulAssign + MulAssign<T::Real> + DivAssign<T::Real> + Mul<T, Output = Complex<T::Real>> + Mul<T::Real, Output = Complex<T::Real>>,
     T::Real: Into<T> + Into<Complex<T::Real>>
 {
     fn dst_i(self) -> Self::Owned

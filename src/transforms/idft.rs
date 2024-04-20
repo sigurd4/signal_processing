@@ -17,7 +17,7 @@ where
     T: ComplexFloat + Into<Complex<T::Real>>,
     L: Lists<T>,
     L::Mapped<Complex<T::Real>>: OwnedLists<Complex<T::Real>>,
-    Complex<T::Real>: ComplexFloat<Real = T::Real> + MulAssign + AddAssign
+    Complex<T::Real>: ComplexFloat<Real = T::Real> + MulAssign + AddAssign + MulAssign<T::Real>
 {
     fn idft(self) -> Self::Mapped<Complex<T::Real>>
     {

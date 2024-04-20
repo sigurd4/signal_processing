@@ -16,7 +16,7 @@ impl<T, L> Hilbert<T> for L
 where
     T: ComplexFloat + Into<Complex<T::Real>> + 'static,
     T::Real: Into<T> + Into<Complex<T::Real>>,
-    Complex<T::Real>: AddAssign + MulAssign,
+    Complex<T::Real>: AddAssign + MulAssign + MulAssign<T::Real>,
     L: Lists<T>,
     L::Owned: OwnedLists<T>
 {

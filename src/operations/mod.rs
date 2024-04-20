@@ -2,6 +2,7 @@ moddef::moddef!(
     flat(pub) mod {
         cconv,
         conv,
+        conv_2d,
         decimate,
         decode,
         downsample,

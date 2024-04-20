@@ -3,17 +3,17 @@ use core::ops::{AddAssign, DivAssign, Mul, MulAssign};
 use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex};
 
-use crate::{Matrix, OwnedMatrix, OwnedLists};
+use crate::{Matrix, MaybeMatrix, OwnedLists, OwnedMatrix};
 
 pub trait Dct2d<T>: Matrix<T>
 where
     T: ComplexFloat,
     Self::Owned: Matrix<T>
 {
-    fn dct_i_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
-    fn dct_ii_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
-    fn dct_iii_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
-    fn dct_iv_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose;
+    fn dct_i_2d(self) -> Self::Owned;
+    fn dct_ii_2d(self) -> Self::Owned;
+    fn dct_iii_2d(self) -> Self::Owned;
+    fn dct_iv_2d(self) -> Self::Owned;
 }
 
 impl<T, M> Dct2d<T> for M
@@ -21,9 +21,10 @@ where
     M: Matrix<T>,
     M::Owned: OwnedMatrix<T>,
     T: ComplexFloat<Real: Into<T>> + Into<Complex<T::Real>> + DivAssign<T::Real> + 'static,
-    Complex<T::Real>: AddAssign + MulAssign + Mul<T, Output = Complex<T::Real>> + Mul<T::Real, Output = Complex<T::Real>> + DivAssign<T::Real>
+    Complex<T::Real>: AddAssign + MulAssign + Mul<T, Output = Complex<T::Real>> + Mul<T::Real, Output = Complex<T::Real>> + DivAssign<T::Real>,
+    <Self::Owned as MaybeMatrix<T>>::Transpose: OwnedMatrix<T, Transpose = M::Owned>,
 {
-    fn dct_i_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
+    fn dct_i_2d(self) -> Self::Owned
     {
         let mut h = self.into_owned();
         for h in h.as_mut_slices()
@@ -37,7 +38,7 @@ where
         }
         ht.matrix_transpose()
     }
-    fn dct_ii_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
+    fn dct_ii_2d(self) -> Self::Owned
     {
         let mut h = self.into_owned();
         for h in h.as_mut_slices()
@@ -51,7 +52,7 @@ where
         }
         ht.matrix_transpose()
     }
-    fn dct_iii_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
+    fn dct_iii_2d(self) -> Self::Owned
     {
         let mut h = self.into_owned();
         for h in h.as_mut_slices()
@@ -65,7 +66,7 @@ where
         }
         ht.matrix_transpose()
     }
-    fn dct_iv_2d(self) -> <<Self::Owned as Matrix<T>>::Transpose as Matrix<T>>::Transpose
+    fn dct_iv_2d(self) -> Self::Owned
     {
         let mut h = self.into_owned();
         for h in h.as_mut_slices()

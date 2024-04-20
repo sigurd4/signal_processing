@@ -5,7 +5,7 @@ use ndarray::{Array1, Array2};
 use num::{complex::ComplexFloat, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{ComplexOp, Container, MaybeOwnedList, List, Lists, Matrix, MaybeLenEq, MaybeList, MaybeLists, Overlay, OwnedList, Rtf, RtfOrSystem, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf};
+use crate::{ComplexOp, Container, List, Lists, Matrix, MaybeLenEq, MaybeList, MaybeLists, MaybeMatrix, MaybeOwnedList, Overlay, OwnedList, Rtf, RtfOrSystem, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf};
 
 pub trait FilterMut<X, XX>: RtfOrSystem
 where
@@ -150,7 +150,7 @@ where
     A: SsAMatrix<T, B, C, D, Mapped<W>: Matrix<W>>,
     B: SsBMatrix<T, A, C, D, Mapped<W>: Matrix<W>>,
     C: SsCMatrix<T, A, B, D, Mapped<W>: Matrix<W>> + Matrix<T, Mapped<()>: Matrix<()>>,
-    D: SsDMatrix<T, A, B, C, Mapped<W>: Matrix<W>> + Matrix<T, Mapped<()>: Matrix<(), Transpose: Matrix<(), RowOwned: Overlay<(), <<C::Mapped<()> as Matrix<()>>::Transpose as MaybeLists<()>>::RowOwned, Output = DD>>>>,
+    D: SsDMatrix<T, A, B, C, Mapped<W>: Matrix<W>> + Matrix<T, Mapped<()>: Matrix<(), Transpose: Matrix<(), RowOwned: Overlay<(), <<C::Mapped<()> as MaybeMatrix<()>>::Transpose as MaybeLists<()>>::RowOwned, Output = DD>>>>,
     W: ComplexFloat<Real = T::Real> + ComplexOp<X, Output = W> + SubAssign + AddAssign + 'static,
     X: ComplexFloat<Real = T::Real> + Into<W>,
     XX: Matrix<X, Mapped<W>: Matrix<W>> + Matrix<X, Mapped<()>: Matrix<(), Owned: Matrix<(), RowOwned: List<(), Mapped<W> = XW>>, Width: StaticMaybe<usize, Opposite: Sized>, Height: StaticMaybe<usize, Opposite: Sized>>>,

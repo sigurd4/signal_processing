@@ -26,7 +26,7 @@ where
 impl<'a, T, C, L> CCeps<'a, T, C, <C::Length as StaticMaybe<usize>>::Opposite> for L
 where
     T: ComplexFloat + AddAssign + SubAssign + Into<Complex<T::Real>> + 'static,
-    Complex<T::Real>: MulAssign + AddAssign,
+    Complex<T::Real>: MulAssign + AddAssign + MulAssign<T::Real>,
     T::Real: AddAssign + SubAssign + Sum + Into<Complex<T::Real>> + Into<T>,
     L: Lists<T> + 'a,
     C: List<T>,

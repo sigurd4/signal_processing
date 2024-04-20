@@ -32,7 +32,7 @@ where
 impl<T, F, M, W, WW>  Fir2<(), F, M, W, WW, true> for Tf<T, WW::Mapped<T>, ()>
 where
     T: ComplexFloat<Real: TotalOrder + MulAssign + AddAssign + SubAssign> + Div<T::Real, Output = T> + Mul<T::Real, Output = T> + Into<Complex<T::Real>> + 'static,
-    Complex<T::Real>: AddAssign + MulAssign,
+    Complex<T::Real>: AddAssign + MulAssign + MulAssign<T::Real>,
     T::Real: Into<T>,
     F: List<T::Real>,
     M: List<T, Length = F::Length>,

@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 thiserror = "1.0.58"
 moddef = "0.2.2"
-array_math = {version = "0.2.39", features = ["ndarray"]}
+array_math = {version = "0.2.40", features = ["ndarray"]}
 num = "0.4.1"
 option_trait = "0.1.15"
 rand = "0.8.5"

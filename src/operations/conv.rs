@@ -54,7 +54,7 @@ macro_rules! impl_conv {
         where
             T1: ComplexFloat + Mul<T2, Output: ComplexFloat + From<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + 'static>,
             T2: ComplexFloat,
-            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
+            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign,
             [(); ($n + $m - 1).next_power_of_two() - $n]:,
             [(); ($n + $m - 1).next_power_of_two() - $m]:,
@@ -74,7 +74,7 @@ macro_rules! impl_conv {
         where
             T1: ComplexFloat + Mul<T2, Output: ComplexFloat + From<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + 'static>,
             T2: ComplexFloat,
-            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
+            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign
         {
             type OutputT = <T1 as Mul<T2>>::Output;
@@ -92,7 +92,7 @@ macro_rules! impl_conv {
         where
             T1: ComplexFloat + Mul<T2, Output: ComplexFloat + From<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + 'static>,
             T2: ComplexFloat,
-            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
+            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign,
             [(); ($n + $m - 1).next_power_of_two() - $n]:,
             [(); ($n + $m - 1).next_power_of_two() - $m]:,
@@ -115,7 +115,7 @@ macro_rules! impl_conv {
         where
             T1: ComplexFloat + Mul<T2, Output: ComplexFloat + From<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + 'static>,
             T2: ComplexFloat,
-            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
+            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign,
             [(); ($n + $m - 1).next_power_of_two() - $n]:,
             [(); ($n + $m - 1).next_power_of_two() - $m]:,
@@ -138,7 +138,7 @@ macro_rules! impl_conv {
         where
             T1: ComplexFloat + Mul<T2, Output: ComplexFloat + From<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + 'static>,
             T2: ComplexFloat,
-            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
+            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign,
             [(); ($n + $m - 1).next_power_of_two() - $n]:,
             [(); ($n + $m - 1).next_power_of_two() - $m]:,
@@ -162,7 +162,7 @@ macro_rules! impl_conv {
         where
             T1: ComplexFloat + Mul<T2, Output: ComplexFloat + From<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + 'static>,
             T2: ComplexFloat,
-            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
+            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign,
             [(); ($n + $m - 1).next_power_of_two() - $n]:,
             [(); ($n + $m - 1).next_power_of_two() - $m]:,
@@ -186,7 +186,7 @@ macro_rules! impl_conv {
         where
             T1: ComplexFloat + Mul<T2, Output: ComplexFloat + From<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + 'static>,
             T2: ComplexFloat,
-            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
+            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign
             $($($w)*)?
         {
@@ -206,7 +206,7 @@ macro_rules! impl_conv {
         where
             T1: ComplexFloat + Mul<T2, Output: ComplexFloat + From<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + 'static>,
             T2: ComplexFloat,
-            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
+            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign
             $($($w)*)?
         {
@@ -226,7 +226,7 @@ macro_rules! impl_conv {
         where
             T1: ComplexFloat + Mul<T2, Output: ComplexFloat + From<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + 'static>,
             T2: ComplexFloat,
-            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
+            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign
             $($($w)*)?
         {
@@ -247,7 +247,7 @@ macro_rules! impl_conv {
         where
             T1: ComplexFloat + Mul<T2, Output: ComplexFloat + From<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + 'static>,
             T2: ComplexFloat,
-            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
+            Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign
             $($($w)*)?
         {
