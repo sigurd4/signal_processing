@@ -3,7 +3,7 @@ use core::ops::Mul;
 use ndarray::{Array1, Array2, ArrayView1, ArrayView2};
 use num::{complex::ComplexFloat, Complex, Zero};
 
-use crate::{Dft2d, Idft2d, Matrix, MaybeContainer, MaybeLists, MaybeMatrix, TruncateIm, Container, Conv};
+use crate::{Dft2d, Idft2d, Matrix, MaybeMatrix, TruncateIm, Container, Conv};
 
 pub trait Conv2d<T1, T2, Rhs>: MaybeMatrix<T1>
 where
