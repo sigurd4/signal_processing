@@ -34,6 +34,7 @@ moddef::moddef!(
         tfestimate,
         xcorr_2d,
         xcorr,
-        xcov
+        xcov,
+        zero_crossing
     }
 );
