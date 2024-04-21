@@ -33,6 +33,7 @@ moddef::moddef!(
         statelevels,
         tfestimate,
         xcorr_2d,
-        xcorr
+        xcorr,
+        xcov
     }
 );
