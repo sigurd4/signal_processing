@@ -57,15 +57,19 @@ where
 
                 let y = x.map_to_owned(|&x: &X| {
                     let mut w0: W = x.into();
-                    let mut a = a.iter();
-                    let a0: T = a.next().copied()
+                    let mut a = a.trim_zeros_front()
+                        .iter();
+                    let a0: T = a.next()
+                        .copied()
                         .unwrap_or_else(Zero::zero);
                     for (&a, &w) in a.zip(w.iter())
                     {
                         w0 -= w*(a/a0).into()
                     }
-                    let mut b = b.iter();
-                    let b0 = b.next().copied()
+                    let mut b = b.trim_zeros_front()
+                        .iter();
+                    let b0 = b.next()
+                        .copied()
                         .unwrap_or_else(Zero::zero);
                     let mut y: W = w0*b0.into();
                     for (&b, &w) in b.zip(w.iter())
@@ -117,14 +121,16 @@ where
 
             y = y.map_into_owned(|x| {
                 let mut w0: W = x.into();
-                let mut a = sos.a.iter();
+                let mut a = sos.a.trim_zeros_front()
+                    .iter();
                 let a0: T = a.next().copied()
                     .unwrap_or_else(Zero::zero);
                 for (&a, &w) in a.zip(w.iter())
                 {
                     w0 -= w*(a/a0).into()
                 }
-                let mut b = sos.b.iter();
+                let mut b = sos.b.trim_zeros_front()
+                    .iter();
                 let b0 = b.next().copied()
                     .unwrap_or_else(Zero::zero);
                 let mut y: W = w0*b0.into();
