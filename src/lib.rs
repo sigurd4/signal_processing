@@ -64,7 +64,7 @@ mod tests
     use linspace::LinspaceArray;
     use num::Complex;
 
-    use crate::{plot, Conv2d, BesselAP, BesselF, ButtAP, Butter, Cheb1AP, Cheb2AP, EllipAP, FilterGenPlane, FilterGenType, FreqS, FreqZ, RealFreqZ, Tf, Zpk};
+    use crate::{plot, BesselAP, BesselF, ButtAP, Butter, Cheb1AP, Cheb2AP, EllipAP, FilterGenPlane, FilterGenType, FreqS, FreqZ, RealFreqZ, Tf, Zpk};
 
     #[test]
     fn testt()

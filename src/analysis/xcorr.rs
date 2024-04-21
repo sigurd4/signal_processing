@@ -15,6 +15,14 @@ pub enum XCorrScale
     Coeff
 }
 
+impl Default for XCorrScale
+{
+    fn default() -> Self
+    {
+        Self::None
+    }
+}
+
 pub trait XCorr<X, Y, YY, Z>: Lists<X>
 where
     X: ComplexFloat + ComplexOp<Y, Output = Z>,
@@ -68,7 +76,7 @@ where
         let mut max_lag = max_lag.into_option()
             .unwrap_or(nm1);
         let scale = scale.into_option()
-            .unwrap_or(XCorrScale::None);
+            .unwrap_or_default();
 
         let pad_result = if max_lag > nm1
         {
