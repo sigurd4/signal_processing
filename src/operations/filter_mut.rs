@@ -1,6 +1,6 @@
 use core::ops::{AddAssign, SubAssign};
 
-use array_math::SliceOps;
+use array_math::{SliceOps, SliceMath};
 use ndarray::{Array1, Array2};
 use num::{complex::ComplexFloat, Zero};
 use option_trait::{Maybe, StaticMaybe};
