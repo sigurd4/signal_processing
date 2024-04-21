@@ -72,7 +72,9 @@ where
             }
         }
 
-        let kl0 = (ten.powf(passband_ripple/ten) - one)/(ten.powf(stopband_ripple/ten) - one);
+        let kl0 = ((ten.powf(passband_ripple/ten) - one)/(ten.powf(stopband_ripple/ten) - one))
+            .min(one - eps)
+            .max(eps);
         let k0 = one - kl0;
         let ([ql0, q0], _) = [kl0, k0].ellipke(None)
             .unwrap();
