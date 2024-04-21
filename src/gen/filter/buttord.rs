@@ -114,7 +114,9 @@ where
     let qs = (ten.powf(stopband_attenuation/ten) - one).ln();
     let qp = (ten.powf(passband_ripple/ten) - one).ln();
     let nm = half*(qs - qp);
-    let nf = (nm/(ws/wp).ln()).ceil();
+    let nf = (nm/(ws/wp).ln()).ceil()
+        .max(T::zero())
+        .min(T::from(usize::MAX).unwrap());
     let n = <usize as NumCast>::from(nf).unwrap();
 
     let wcw_p;

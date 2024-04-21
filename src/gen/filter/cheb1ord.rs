@@ -114,7 +114,9 @@ where
     let ten = T::from(10u8).unwrap();
     let stop_atten = ten.powf(stopband_attenuation.abs()/ten);
     let pass_atten = ten.powf(passband_ripple.abs()/ten);
-    let nf = (((stop_atten - one)/(pass_atten - one)).sqrt().acosh()/wa.acosh()).ceil();
+    let nf = (((stop_atten - one)/(pass_atten - one)).sqrt().acosh()/wa.acosh()).ceil()
+        .max(T::zero())
+        .min(T::from(usize::MAX).unwrap());
     let n = <usize as NumCast>::from(nf).unwrap();
 
     let epsilon = (stop_atten - one).sqrt().recip();

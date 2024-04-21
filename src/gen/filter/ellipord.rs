@@ -122,7 +122,9 @@ where
     let q = q0*(one + q0_p4*(two + q0_p4*(fifteen + q0_p4*one_hundred_and_fifty)));
     let d = (ten.powf(stopband_attenuation/ten) - one)/(ten.powf(passband_ripple/ten) - one);
     
-    let nf = ((sixteen*d).log10()/q.recip().log10()).ceil();
+    let nf = ((sixteen*d).log10()/q.recip().log10()).ceil()
+        .max(T::zero())
+        .min(T::from(usize::MAX).unwrap());
     let n = NumCast::from(nf).unwrap();
 
     if let Some(t) = t
