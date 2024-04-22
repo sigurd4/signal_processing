@@ -29,7 +29,9 @@ where
     WWW: Maybe<WW>,
     WL: Maybe<usize>,
     N: Maybe<usize>,
-    S: Maybe<bool>
+    S: Maybe<bool>,
+    WW::Mapped<Complex<T::Real>>: StaticMaybe<WW::Mapped<Complex<T::Real>>>,
+    WW::Mapped<T::Real>: StaticMaybe<WW::Mapped<T::Real>>
 {
     fn pwelch<O, FS, CONF, DT, XPOW, CROSS, TRANS, COHER, YPOW, CONFF, F>(
         self,
@@ -164,6 +166,8 @@ where
     WW: List<W>,
     R: Float + FloatConst + Sum + AddAssign + SubAssign,
     Complex<R>: AddAssign + MulAssign,
+    WW::Mapped<Complex<R>>: StaticMaybe<WW::Mapped<Complex<R>>>,
+    WW::Mapped<R>: StaticMaybe<WW::Mapped<R>>,
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<R>>>: Sized,
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<R>>: Sized
 {

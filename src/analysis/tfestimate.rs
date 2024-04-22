@@ -51,9 +51,12 @@ where
     N: Maybe<usize>,
     S: Maybe<bool>,
     XX: PWelch<X, Y, YY, W, WW, WWW, WL, N, S>,
+    WW::Mapped<T>: StaticMaybe<WW::Mapped<T>>,
+    WW::Mapped<Complex<T>>: StaticMaybe<WW::Mapped<Complex<T>>>,
     (): StaticMaybe<YY::Maybe<WW::Mapped<Complex<T>>>>,
     (): StaticMaybe<YY::Maybe<WW::Mapped<T>>>,
-    WW::Mapped<Complex<T>>: StaticMaybe<YY::Maybe<WW::Mapped<Complex<T>>>>
+    WW::Mapped<Complex<T>>: StaticMaybe<YY::Maybe<WW::Mapped<Complex<T>>>>,
+    (): StaticMaybe<WW::Mapped<T>>
 {
     fn tfestimate<O, FS, CONF, DT, F>(
         self,

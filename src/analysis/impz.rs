@@ -13,7 +13,9 @@ where
     T: List<<Self::Domain as ComplexFloat>::Real>,
     N: Maybe<usize>
 {
-    fn impz(&'a self, numtaps: N, sampling_frequency: Option<<Self::Domain as ComplexFloat>::Real>) -> (B, T);
+    fn impz<FS>(&'a self, numtaps: N, sampling_frequency: FS) -> (B, T)
+    where
+        FS: Maybe<<Self::Domain as ComplexFloat>::Real>;
 }
 
 impl<'a, T, B, A> ImpZ<'a, B::RowsMapped<Vec<T>>, Vec<T::Real>, usize> for Tf<T, B, A>
@@ -28,7 +30,9 @@ where
     T::Real: Into<T>,
     (): Maybe<Vec<T>>
 {
-    fn impz(&'a self, n: usize, sampling_frequency: Option<<T as ComplexFloat>::Real>) -> (B::RowsMapped<Vec<T>>, Vec<T::Real>)
+    fn impz<FS>(&'a self, n: usize, sampling_frequency: FS) -> (B::RowsMapped<Vec<T>>, Vec<T::Real>)
+    where
+        FS: Maybe<<T as ComplexFloat>::Real>
     {
         if n == 0
         {
@@ -37,7 +41,8 @@ where
 
         let Tf {b, a}: Tf<T, B::RowsMapped<Vec<T>>, Vec<T>> = self.into();
 
-        let fs = sampling_frequency.unwrap_or_else(One::one);
+        let fs = sampling_frequency.into_option()
+            .unwrap_or_else(One::one);
         let t: Vec<_> = (0..n).map(|n| <T::Real as NumCast>::from(n).unwrap()/fs)
             .collect();
 
@@ -81,7 +86,9 @@ where
     B::RowsMapped<[T; N]>: Lists<T>,
     Self: ImpZ<'a, B::RowsMapped<Vec<T>>, Vec<T::Real>, usize> + System<Domain = T> + 'a
 {
-    fn impz(&'a self, (): (), sampling_frequency: Option<<T as ComplexFloat>::Real>) -> (B::RowsMapped<[T; N]>, [T::Real; N])
+    fn impz<FS>(&'a self, (): (), sampling_frequency: FS) -> (B::RowsMapped<[T; N]>, [T::Real; N])
+    where
+        FS: Maybe<<T as ComplexFloat>::Real>
     {
         let (h, t) = self.impz(N, sampling_frequency);
         (
@@ -108,7 +115,9 @@ where
     B::RowsMapped<Vec<T>>: Lists<T>,
     Self: ImpZ<'a, B::RowsMapped<Vec<T>>, Vec<<T as ComplexFloat>::Real>, usize> + System<Domain = T>
 {
-    fn impz(&'a self, (): (), sampling_frequency: Option<<T as ComplexFloat>::Real>) -> (B::RowsMapped<Vec<T>>, Vec<<T as ComplexFloat>::Real>)
+    fn impz<FS>(&'a self, (): (), sampling_frequency: FS) -> (B::RowsMapped<Vec<T>>, Vec<<T as ComplexFloat>::Real>)
+    where
+        FS: Maybe<<T as ComplexFloat>::Real>
     {        
         let oneref = &[T::one()];
         let b: Vec<&[T]> = self.b.as_view_slices_option()

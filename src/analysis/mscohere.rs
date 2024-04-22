@@ -50,9 +50,11 @@ where
     N: Maybe<usize>,
     S: Maybe<bool>,
     Self: PWelch<T, Y, YY, W, WW, WWW, WL, N, S>,
-    WW::Mapped<T::Real>: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<T::Real>>>,
-    <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<<T as ComplexFloat>::Real>>>: NotVoid,
-    <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<<T as ComplexFloat>::Real>>: NotVoid
+    WW::Mapped<T::Real>: StaticMaybe<WW::Mapped<T::Real>> + StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<T::Real>>>,
+    WW::Mapped<Complex<T::Real>>: StaticMaybe<WW::Mapped<Complex<T::Real>>>,
+    <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<T::Real>>>: NotVoid,
+    <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<T::Real>>: NotVoid,
+    (): StaticMaybe<WW::Mapped<T::Real>>
 {
     fn mscohere<O, FS, CONF, DT, F>(
         self,

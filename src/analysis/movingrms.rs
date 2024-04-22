@@ -4,13 +4,13 @@ use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex, Float, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{Container, ListOrSingle, Lists, OwnedList, SigmoidTrain};
+use crate::{Container, ContainerOrSingle, ListOrSingle, Lists, OwnedList, SigmoidTrain};
 
 pub trait MovingRms<T>: Lists<T, RowOwned: Container<T>>
 where
     T: ComplexFloat
 {
-    fn moving_rms<FS>(self, width: T::Real, time_constant: T::Real, sampling_frequency: FS) -> Self::RowsMapped<(<Self::RowOwned as Container<T>>::Mapped<T::Real>, <Self::RowOwned as Container<T>>::Mapped<T::Real>)>
+    fn moving_rms<FS>(self, width: T::Real, time_constant: T::Real, sampling_frequency: FS) -> Self::RowsMapped<(<Self::RowOwned as ContainerOrSingle<T>>::Mapped<T::Real>, <Self::RowOwned as ContainerOrSingle<T>>::Mapped<T::Real>)>
     where
         FS: Maybe<T::Real>;
 }
@@ -20,12 +20,12 @@ where
     T: ComplexFloat + Into<Complex<T::Real>>,
     L: Lists<T>,
     L::RowOwned: OwnedList<T>,
-    <L::RowOwned as Container<T>>::Mapped<T::Real>: OwnedList<T::Real, Mapped<T::Real> = <L::RowOwned as Container<T>>::Mapped<T::Real>> + SigmoidTrain<T::Real, <L::RowOwned as Container<T>>::Mapped<T::Real>, ()>,
-    <L::RowOwned as Container<T>>::Mapped<Complex<T::Real>>: OwnedList<Complex<T::Real>, Mapped<T::Real> = <L::RowOwned as Container<T>>::Mapped<T::Real>>,
-    <<L::RowOwned as Container<T>>::Mapped<T::Real> as Container<T::Real>>::Mapped<Complex<T::Real>>: OwnedList<Complex<T::Real>>,
+    <L::RowOwned as ContainerOrSingle<T>>::Mapped<T::Real>: OwnedList<T::Real, Mapped<T::Real> = <L::RowOwned as ContainerOrSingle<T>>::Mapped<T::Real>> + SigmoidTrain<T::Real, <L::RowOwned as ContainerOrSingle<T>>::Mapped<T::Real>, ()>,
+    <L::RowOwned as ContainerOrSingle<T>>::Mapped<Complex<T::Real>>: OwnedList<Complex<T::Real>, Mapped<T::Real> = <L::RowOwned as ContainerOrSingle<T>>::Mapped<T::Real>>,
+    <<L::RowOwned as ContainerOrSingle<T>>::Mapped<T::Real> as ContainerOrSingle<T::Real>>::Mapped<Complex<T::Real>>: OwnedList<Complex<T::Real>>,
     Complex<T::Real>: AddAssign + MulAssign + MulAssign<T::Real>
 {
-    fn moving_rms<FS>(self, width: T::Real, time_constant: T::Real, sampling_frequency: FS) -> L::RowsMapped<(<L::RowOwned as Container<T>>::Mapped<T::Real>, <L::RowOwned as Container<T>>::Mapped<T::Real>)>
+    fn moving_rms<FS>(self, width: T::Real, time_constant: T::Real, sampling_frequency: FS) -> L::RowsMapped<(<L::RowOwned as ContainerOrSingle<T>>::Mapped<T::Real>, <L::RowOwned as ContainerOrSingle<T>>::Mapped<T::Real>)>
     where
         FS: Maybe<T::Real>
     {

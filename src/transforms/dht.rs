@@ -3,7 +3,7 @@
 
 use num::{complex::ComplexFloat, Complex};
 
-use crate::{Container, Lists, Dft};
+use crate::{Lists, Dft, ContainerOrSingle};
 
 pub trait Dht<T>: Lists<T>
 where

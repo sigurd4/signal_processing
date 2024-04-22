@@ -5,7 +5,7 @@ use ndarray::{Array1, Array2};
 use num::{complex::ComplexFloat, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{ComplexOp, Container, List, Lists, Matrix, MaybeLenEq, MaybeList, MaybeLists, MaybeMatrix, MaybeOwnedList, Overlay, OwnedList, Rtf, RtfOrSystem, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf};
+use crate::{ComplexOp, ContainerOrSingle, List, Lists, Matrix, MaybeLenEq, MaybeList, MaybeLists, MaybeMatrix, MaybeOwnedList, Overlay, OwnedList, Rtf, RtfOrSystem, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf};
 
 pub trait FilterMut<X, XX>: RtfOrSystem
 where

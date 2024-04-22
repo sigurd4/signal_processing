@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::DivAssign};
 use num::{complex::ComplexFloat, traits::FloatConst, Float};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{ComplexOp, Container, Conv2d, Matrix, MaybeMatrix, OwnedMatrix, XCorrScale, OwnedLists, Lists};
+use crate::{ComplexOp, ContainerOrSingle, Conv2d, Lists, Matrix, MaybeMatrix, OwnedLists, OwnedMatrix, XCorrScale};
 
 pub trait XCorr2d<X, Y, YY, Z>: Matrix<X>
 where
@@ -11,14 +11,14 @@ where
     Y: ComplexFloat<Real = X::Real> + Into<Z>,
     YY: MaybeMatrix<Y>,
     Z: ComplexFloat<Real = X::Real>,
-    <YY::MaybeSome as StaticMaybe<YY::Some>>::MaybeOr<<YY::Some as Container<Y>>::Mapped<Z>, Self::Mapped<Z>>: Matrix<Z> + Sized,
-    Self::Mapped<Z>: Conv2d<Z, Z, <YY::MaybeSome as StaticMaybe<YY::Some>>::MaybeOr<<YY::Some as Container<Y>>::Mapped<Z>, Self::Mapped<Z>>>
+    <YY::MaybeSome as StaticMaybe<YY::Some>>::MaybeOr<<YY::Some as ContainerOrSingle<Y>>::Mapped<Z>, Self::Mapped<Z>>: Matrix<Z> + Sized,
+    Self::Mapped<Z>: Conv2d<Z, Z, <YY::MaybeSome as StaticMaybe<YY::Some>>::MaybeOr<<YY::Some as ContainerOrSingle<Y>>::Mapped<Z>, Self::Mapped<Z>>>
 {
     fn xcorr_2d<SC>(
         self,
         y: YY,
         scale: SC
-    ) -> <Self::Mapped<Z> as Conv2d<Z, Z, <YY::MaybeSome as StaticMaybe<YY::Some>>::MaybeOr<<YY::Some as Container<Y>>::Mapped<Z>, Self::Mapped<Z>>>>::Output
+    ) -> <Self::Mapped<Z> as Conv2d<Z, Z, <YY::MaybeSome as StaticMaybe<YY::Some>>::MaybeOr<<YY::Some as ContainerOrSingle<Y>>::Mapped<Z>, Self::Mapped<Z>>>>::Output
     where
         SC: Maybe<XCorrScale>,;
 }
@@ -33,7 +33,7 @@ where
     Z: ComplexFloat<Real = T> + DivAssign<T>,
     XX::Mapped<T>: OwnedMatrix<T> + Conv2d<T, T, YYY::Mapped<T>, Output: OwnedMatrix<T>>,
     YY::Some: Sized,
-    YY::MaybeSome: Sized + StaticMaybe<YY::Some, MaybeOr<<YY::Some as Container<Y>>::Mapped<Z>, Self::Mapped<Z>> = YYY>,
+    YY::MaybeSome: Sized + StaticMaybe<YY::Some, MaybeOr<<YY::Some as ContainerOrSingle<Y>>::Mapped<Z>, Self::Mapped<Z>> = YYY>,
     YYY: OwnedMatrix<Z, Transpose: OwnedMatrix<Y, Transpose: Into<YYY>>> + Sized,
     YYY::Mapped<T>: OwnedMatrix<T>,
     Self::Mapped<Z>: Conv2d<Z, Z, YYY, Output = ZZ>,

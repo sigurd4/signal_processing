@@ -20,6 +20,7 @@ moddef::moddef!(
         peak_to_peak,
         peak_to_rms,
         phasez,
+        psd,
         pwelch,
         rceps,
         real_freqz,

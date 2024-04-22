@@ -4,7 +4,7 @@ use ndarray::{Array1, Array2};
 use num::complex::ComplexFloat;
 use thiserror::Error;
 
-use crate::{ComplexOp, Container, Filter, List, ListOrSingle, Lists, MaybeLenEq, OwnedList, System, Tf};
+use crate::{ComplexOp, ContainerOrSingle, Filter, List, ListOrSingle, Lists, MaybeLenEq, OwnedList, System, Tf};
 
 //FIXME: Discontinuous at len - k.
 
@@ -33,11 +33,11 @@ where
     X: ComplexFloat + Into<Y>,
     T: ComplexFloat<Real = X::Real> + ComplexOp<X, Output = Y>,
     B: List<T, Owned: OwnedList<T>> + MaybeLenEq<Self, true> + Clone,
-    Tf<T, B::Owned>: for<'a> Filter<'a, X, XX::RowOwned, Output = <XX::RowOwned as Container<X>>::Mapped<Y>> + System<Domain = T>,
+    Tf<T, B::Owned>: for<'a> Filter<'a, X, XX::RowOwned, Output = <XX::RowOwned as ContainerOrSingle<X>>::Mapped<Y>> + System<Domain = T>,
     XX: Lists<X, RowOwned: OwnedList<X>>,
-    <XX::RowOwned as Container<X>>::Mapped<Y>: OwnedList<Y>,
+    <XX::RowOwned as ContainerOrSingle<X>>::Mapped<Y>: OwnedList<Y>,
     Y: ComplexFloat + Clone + 'static,
-    XX::RowsMapped<<XX::RowOwned as Container<X>>::Mapped<Y>>: Into<XX::Mapped<Y>>
+    XX::RowsMapped<<XX::RowOwned as ContainerOrSingle<X>>::Mapped<Y>>: Into<XX::Mapped<Y>>
 {
     fn sgolayfilt(self, x: XX) -> Result<XX::Mapped<Y>, SGolayFiltError>
     {

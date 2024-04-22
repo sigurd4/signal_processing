@@ -1,5 +1,6 @@
 moddef::moddef!(
     flat(pub) mod {
+        container_or_single,
         container,
         into_list,
         list_or_single,

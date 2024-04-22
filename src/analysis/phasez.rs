@@ -3,9 +3,9 @@ use core::{iter::Sum, ops::{AddAssign, SubAssign}};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast, Zero};
 use option_trait::Maybe;
 
-use crate::{Container, FreqZ, List, ListOrSingle, Lists, MaybeLists, OwnedList, System};
+use crate::{ContainerOrSingle, FreqZ, List, ListOrSingle, Lists, MaybeLists, OwnedList, System};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PhaseUnwrapReference
 {
     Zero,
@@ -27,7 +27,7 @@ where
     T: ComplexFloat<Real: Sum + AddAssign + SubAssign>,
     S: FreqZ<'a, H::Mapped<Complex<T::Real>>, W, N> + System<Domain = T>,
     H: Lists<T::Real>,
-    H::Mapped<Complex<T::Real>>: Lists<Complex<T::Real>, RowOwned: OwnedList<Complex<T::Real>, Mapped<T::Real>: OwnedList<T::Real>>, RowsMapped<<<H::Mapped<Complex<T::Real>> as MaybeLists<Complex<T::Real>>>::RowOwned as Container<Complex<T::Real>>>::Mapped<T::Real>>: Into<H>>,
+    H::Mapped<Complex<T::Real>>: Lists<Complex<T::Real>, RowOwned: OwnedList<Complex<T::Real>, Mapped<T::Real>: OwnedList<T::Real>>, RowsMapped<<<H::Mapped<Complex<T::Real>> as MaybeLists<Complex<T::Real>>>::RowOwned as ContainerOrSingle<Complex<T::Real>>>::Mapped<T::Real>>: Into<H>>,
     W: List<T::Real>,
     N: Maybe<usize>,
 {

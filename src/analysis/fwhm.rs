@@ -2,7 +2,7 @@ use core::ops::SubAssign;
 
 use num::{Float, Zero};
 
-use crate::{List, Matrix, MaybeList, Container};
+use crate::{List, Matrix, MaybeList, ContainerOrSingle};
 
 pub enum FullWidthAt<T>
 where

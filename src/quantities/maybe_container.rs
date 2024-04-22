@@ -4,7 +4,7 @@
 use ndarray::{ArrayBase, ArrayView, Dimension, NdIndex, OwnedRepr};
 use option_trait::{NotVoid, StaticMaybe};
 
-use crate::Container;
+use crate::{Container, ContainerOrSingle};
 
 pub trait MaybeContainer<T>
 {
@@ -109,7 +109,7 @@ impl<T> MaybeContainer<T> for Vec<T>
     type Owned = Vec<T>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -167,7 +167,7 @@ impl<T> MaybeContainer<T> for [T]
     type Owned = Vec<T>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -225,7 +225,7 @@ impl<T, const N: usize> MaybeContainer<T> for [T; N]
     type Owned = [T; N];
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -283,7 +283,7 @@ impl<T> MaybeContainer<T> for &[T]
     type Owned = Vec<T>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -341,7 +341,7 @@ impl<T, const N: usize> MaybeContainer<T> for &[T; N]
     type Owned = [T; N];
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -400,7 +400,7 @@ impl<T> MaybeContainer<T> for Vec<Vec<T>>
     type Owned = Vec<Vec<T>>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -460,7 +460,7 @@ impl<T, const M: usize> MaybeContainer<T> for [Vec<T>; M]
     type Owned = [Vec<T>; M];
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -520,7 +520,7 @@ impl<T> MaybeContainer<T> for [Vec<T>]
     type Owned = Vec<Vec<T>>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -580,7 +580,7 @@ impl<T, const M: usize> MaybeContainer<T> for &[Vec<T>; M]
     type Owned = [Vec<T>; M];
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -639,7 +639,7 @@ impl<T> MaybeContainer<T> for &[Vec<T>]
     type Owned = Vec<Vec<T>>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -700,7 +700,7 @@ impl<T, const N: usize> MaybeContainer<T> for Vec<[T; N]>
     type Owned = Vec<[T; N]>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -759,7 +759,7 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for [[T; N]; M]
     type Owned = [[T; N]; M];
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -818,7 +818,7 @@ impl<T, const N: usize> MaybeContainer<T> for [[T; N]]
     type Owned = Vec<[T; N]>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -877,7 +877,7 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[[T; N]; M]
     type Owned = [[T; N]; M];
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -935,7 +935,7 @@ impl<T, const N: usize> MaybeContainer<T> for &[[T; N]]
     type Owned = Vec<[T; N]>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -994,7 +994,7 @@ impl<T> MaybeContainer<T> for Vec<&[T]>
     type Owned = Vec<Vec<T>>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -1056,7 +1056,7 @@ impl<T, const M: usize> MaybeContainer<T> for [&[T]; M]
     type Owned = [Vec<T>; M];
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -1114,7 +1114,7 @@ impl<T> MaybeContainer<T> for [&[T]]
     type Owned = Vec<Vec<T>>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -1176,7 +1176,7 @@ impl<T, const M: usize> MaybeContainer<T> for &[&[T]; M]
     type Owned = [Vec<T>; M];
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -1234,7 +1234,7 @@ impl<T> MaybeContainer<T> for &[&[T]]
     type Owned = Vec<Vec<T>>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -1297,7 +1297,7 @@ impl<T, const N: usize> MaybeContainer<T> for Vec<&[T; N]>
     type Owned = Vec<[T; N]>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -1359,7 +1359,7 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for [&[T; N]; M]
     type Owned = [[T; N]; M];
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -1417,7 +1417,7 @@ impl<T, const N: usize> MaybeContainer<T> for [&[T; N]]
     type Owned = Vec<[T; N]>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -1479,7 +1479,7 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[&[T; N]; M]
     type Owned = [[T; N]; M];
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -1537,7 +1537,7 @@ impl<T, const N: usize> MaybeContainer<T> for &[&[T; N]]
     type Owned = Vec<[T; N]>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -1604,7 +1604,7 @@ where
     type Owned = ArrayBase<OwnedRepr<T>, D>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>
@@ -1667,7 +1667,7 @@ where
     type Owned = ArrayBase<OwnedRepr<T>, D>;
     type Some = Self;
     type MaybeSome = Self;
-    type MaybeMapped<MM> = <Self as Container<T>>::Mapped<MM>;
+    type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;
     const IS_SOME_CONTAINER: bool = true;
 
     fn as_view(&self) -> Self::View<'_>

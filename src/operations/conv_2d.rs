@@ -3,7 +3,7 @@ use core::ops::Mul;
 use ndarray::{Array1, Array2, ArrayView1, ArrayView2};
 use num::{complex::ComplexFloat, Complex, Zero};
 
-use crate::{Dft2d, Idft2d, Matrix, MaybeMatrix, TruncateIm, Container, Conv};
+use crate::{Dft2d, Idft2d, Matrix, MaybeMatrix, TruncateIm, ContainerOrSingle, Conv};
 
 pub trait Conv2d<T1, T2, Rhs>: MaybeMatrix<T1>
 where
@@ -119,9 +119,9 @@ macro_rules! impl_conv_2d {
                 let dim = ((m1 + m2).saturating_sub(1), (n1 + n2).saturating_sub(1));
                 let dim_fft = (dim.0.next_power_of_two(), dim.1.next_power_of_two());
         
-                let x: Array2<Complex<T1::Real>> = Array2::from_shape_fn(dim_fft, |(i, j)| Container::<T1>::index_get(&self, (i, j)).map(|&x| Into::<Complex<T1::Real>>::into(x)).unwrap_or_else(Zero::zero))
+                let x: Array2<Complex<T1::Real>> = Array2::from_shape_fn(dim_fft, |(i, j)| ContainerOrSingle::<T1>::index_get(&self, (i, j)).map(|&x| Into::<Complex<T1::Real>>::into(x)).unwrap_or_else(Zero::zero))
                     .dft_2d();
-                let h: Array2<Complex<T2::Real>> = Array2::from_shape_fn(dim_fft, |(i, j)| Container::<T2>::index_get(&rhs, (i, j)).map(|&h| Into::<Complex<T2::Real>>::into(h)).unwrap_or_else(Zero::zero))
+                let h: Array2<Complex<T2::Real>> = Array2::from_shape_fn(dim_fft, |(i, j)| ContainerOrSingle::<T2>::index_get(&rhs, (i, j)).map(|&h| Into::<Complex<T2::Real>>::into(h)).unwrap_or_else(Zero::zero))
                     .dft_2d();
         
                 let y: Array2<Complex<T3::Real>> = x*h;
@@ -155,9 +155,9 @@ macro_rules! impl_conv_2d {
                 let dim = ((m1 + m2).saturating_sub(1), (n1 + n2).saturating_sub(1));
                 let dim_fft = (dim.0.next_power_of_two(), dim.1.next_power_of_two());
         
-                let x: Array2<Complex<T1::Real>> = Array2::from_shape_fn(dim_fft, |(i, j)| Container::<T1>::index_get(&self, (i, j)).map(|&x| Into::<Complex<T1::Real>>::into(x)).unwrap_or_else(Zero::zero))
+                let x: Array2<Complex<T1::Real>> = Array2::from_shape_fn(dim_fft, |(i, j)| ContainerOrSingle::<T1>::index_get(&self, (i, j)).map(|&x| Into::<Complex<T1::Real>>::into(x)).unwrap_or_else(Zero::zero))
                     .dft_2d();
-                let h: Array2<Complex<T2::Real>> = Array2::from_shape_fn(dim_fft, |(i, j)| Container::<T2>::index_get(&rhs, (i, j)).map(|&h| Into::<Complex<T2::Real>>::into(h)).unwrap_or_else(Zero::zero))
+                let h: Array2<Complex<T2::Real>> = Array2::from_shape_fn(dim_fft, |(i, j)| ContainerOrSingle::<T2>::index_get(&rhs, (i, j)).map(|&h| Into::<Complex<T2::Real>>::into(h)).unwrap_or_else(Zero::zero))
                     .dft_2d();
         
                 let y: Array2<Complex<T3::Real>> = x*h;
@@ -191,9 +191,9 @@ macro_rules! impl_conv_2d {
                 let dim = ((m1 + m2).saturating_sub(1), (n1 + n2).saturating_sub(1));
                 let dim_fft = (dim.0.next_power_of_two(), dim.1.next_power_of_two());
         
-                let x: Array2<Complex<T1::Real>> = Array2::from_shape_fn(dim_fft, |(i, j)| Container::<T1>::index_get(&self, (i, j)).map(|&x| Into::<Complex<T1::Real>>::into(x)).unwrap_or_else(Zero::zero))
+                let x: Array2<Complex<T1::Real>> = Array2::from_shape_fn(dim_fft, |(i, j)| ContainerOrSingle::<T1>::index_get(&self, (i, j)).map(|&x| Into::<Complex<T1::Real>>::into(x)).unwrap_or_else(Zero::zero))
                     .dft_2d();
-                let h: Array2<Complex<T2::Real>> = Array2::from_shape_fn(dim_fft, |(i, j)| Container::<T2>::index_get(&rhs, (i, j)).map(|&h| Into::<Complex<T2::Real>>::into(h)).unwrap_or_else(Zero::zero))
+                let h: Array2<Complex<T2::Real>> = Array2::from_shape_fn(dim_fft, |(i, j)| ContainerOrSingle::<T2>::index_get(&rhs, (i, j)).map(|&h| Into::<Complex<T2::Real>>::into(h)).unwrap_or_else(Zero::zero))
                     .dft_2d();
         
                 let y: Array2<Complex<T3::Real>> = x*h;

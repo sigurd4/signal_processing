@@ -3,9 +3,9 @@
 use ndarray::{Array1, ArrayView1};
 use option_trait::StaticMaybe;
 
-use crate::OwnedList;
+use crate::{ContainerOrSingle, OwnedList};
 
-pub trait ListOrSingle<T>
+pub trait ListOrSingle<T>: ContainerOrSingle<T>
 {
     type Length: StaticMaybe<usize>;
     const LENGTH: usize;

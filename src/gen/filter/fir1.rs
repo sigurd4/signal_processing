@@ -4,7 +4,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, One, Zero};
 use option_trait::Maybe;
 use array_math::SliceMath;
 
-use crate::{window::{Hamming, WindowGen, WindowRange}, Container, FilterGenError, Fir2, List, ListOrSingle, MaybeList, Polynomial, System, Tf};
+use crate::{window::{Hamming, WindowGen, WindowRange}, ContainerOrSingle, FilterGenError, Fir2, List, ListOrSingle, MaybeList, Polynomial, System, Tf};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Fir1Type
