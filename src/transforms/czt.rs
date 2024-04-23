@@ -2,7 +2,7 @@ use core::ops::{AddAssign, MulAssign};
 
 use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, NumCast, One, Zero};
 use array_math::SliceMath;
-use option_trait::{Maybe, MaybeOr, StaticMaybe};
+use option_trait::Maybe;
 
 use crate::{ContainerOrSingle, List, ListOrSingle, Lists, OwnedList};
 

@@ -11,6 +11,7 @@ moddef::moddef!(
         dst,
         dwht,
         hilbert,
+        iczt,
         idft_2d,
         idft,
         idht,
