@@ -15,6 +15,7 @@ where
     WW::Mapped<Complex<T>>: List<Complex<T>>,
     WW::Mapped<T>: List<T>
 {
+    #[doc(alias = "real_csd")]
     fn real_cpsd<O, FS, CONF, DT, F>(
         self,
         y: YY,

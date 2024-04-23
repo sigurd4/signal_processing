@@ -15,6 +15,7 @@ where
     N: Maybe<usize>,
     S: Maybe<bool>
 {
+    #[doc(alias = "csd")]
     fn cpsd<O, FS, CONF, DT, F>(
         self,
         y: YY,
