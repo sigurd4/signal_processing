@@ -63,7 +63,7 @@ impl<T, A, AV> System for Ar<T, A, AV>
 where
     T: ComplexFloat,
     A: MaybeList<T>,
-    AV: ListOrSingle<(A, T)>
+    AV: ListOrSingle<(A, T::Real)>
 {
 
 }

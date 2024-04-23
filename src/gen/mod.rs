@@ -5,6 +5,7 @@ moddef::moddef!(
         diric,
         meyeraux,
 
+        ar,
         filter,
         matrix,
         pulse,
