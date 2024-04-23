@@ -1,31 +1,36 @@
 use core::ops::{AddAssign, MulAssign, SubAssign};
 
-use num::{complex::ComplexFloat, traits::FloatConst, Complex, NumCast, One};
+use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, NumCast, One, Zero};
 
-use crate::OwnedList;
+use crate::{List, OwnedList};
 
-pub trait SlidingDft<T, X>: OwnedList<Complex<T::Real>>
+pub trait Swdft<T, X, W>: OwnedList<Complex<T::Real>>
 where
     T: ComplexFloat,
-    X: OwnedList<T>
+    X: OwnedList<T>,
+    W: List<Complex<T::Real>>
 {
-    fn sliding_dft(&mut self, x: &mut X, buffer: &mut Vec<T>);
+    #[doc(alias = "sliding_windowed_dft")]
+    fn swdft(&mut self, x: &mut X, buffer: &mut Vec<T>, window_kernel: W);
 }
 
-impl<T, X, Z> SlidingDft<T, X> for Z
+impl<T, X, W, Z> Swdft<T, X, W> for Z
 where
     T: ComplexFloat,
     X: OwnedList<T>,
     Z: OwnedList<Complex<T::Real>>,
+    W: List<Complex<T::Real>>,
     Complex<T::Real>: AddAssign<T> + SubAssign<T> + MulAssign
 {
-    fn sliding_dft(&mut self, xx: &mut X, buffer: &mut Vec<T>)
+    fn swdft(&mut self, xx: &mut X, buffer: &mut Vec<T>, window_kernel: W)
     {
         let n = self.length();
         buffer.truncate(n);
         let nf = <T::Real as NumCast>::from(n).unwrap();
         let w = Complex::cis(T::Real::TAU()/nf);
         let cone = Complex::one();
+
+        let kn = window_kernel.length();
 
         let xn = xx.length();
         if xn == 0
@@ -40,12 +45,23 @@ where
             .iter_mut()
         {
             let mut wn = cone;
-            for z in self.as_mut_slice()
+            for (z, k) in self.as_mut_slice()[..kn]
                 .iter_mut()
+                .zip(window_kernel.as_view_slice()
+                    .iter()
+                )
             {
                 *z += *x;
-                *z *= wn;
+                *z *= wn*k;
                 wn *= w;
+            }
+            if kn < n
+            {
+                for z in self.as_mut_slice()[kn..]
+                    .iter_mut()
+                {
+                    *z = Complex::zero()
+                }
             }
             let mut y = T::zero();
             core::mem::swap(x, &mut y);
@@ -70,13 +86,24 @@ where
                 )
             {
                 let mut wn = cone;
-                for z in self.as_mut_slice()
+                for (z, k) in self.as_mut_slice()[..kn]
                     .iter_mut()
+                    .zip(window_kernel.as_view_slice()
+                        .iter()
+                    )
                 {
                     *z += *x;
                     *z -= *y;
-                    *z *= wn;
+                    *z *= wn*k;
                     wn *= w;
+                }
+                if kn < n
+                {
+                    for z in self.as_mut_slice()[kn..]
+                        .iter_mut()
+                    {
+                        *z = Complex::zero()
+                    }
                 }
                 std::mem::swap(x, y);
             }
@@ -86,25 +113,3 @@ where
     }
 }
 
-#[cfg(test)]
-mod test
-{
-    use num::Complex;
-
-    use crate::SlidingDft;
-
-    #[test]
-    fn test()
-    {
-        let mut b = vec![-1.0];
-
-        let mut x = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
-        let mut z = [0.0, 0.0, 0.0, 0.0].map(|z| Complex::from(z));
-
-        z.sliding_dft(&mut x, &mut b);
-
-        println!("x = {:?}", x);
-        println!("b = {:?}", b);
-        println!("z = {:?}", z);
-    }
-}
