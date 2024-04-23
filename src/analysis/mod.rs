@@ -23,6 +23,7 @@ moddef::moddef!(
         phasez,
         psd,
         pwelch,
+        pyulear,
         rceps,
         real_freqz,
         real_mscohere,
