@@ -1,7 +1,7 @@
 use core::{iter::Sum, ops::{AddAssign, Div, Mul}};
 
 use num::{complex::ComplexFloat, NumCast, One};
-use option_trait::{Maybe, StaticMaybe};
+use option_trait::Maybe;
 
 use crate::{Ar, ContainerOrSingle, List, ListOrSingle, Lists, System};
 
@@ -18,7 +18,7 @@ pub enum ArBurgCriterion
 pub trait ArBurg<X, O, C, K>: System + Sized
 where
     X: Lists<Self::Domain>,
-    O: StaticMaybe<usize>,
+    O: Maybe<usize>,
     C: Maybe<ArBurgCriterion>,
     K: Lists<Self::Domain>
 {

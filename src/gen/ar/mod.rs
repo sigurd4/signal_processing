@@ -1,5 +1,7 @@
 moddef::moddef!(
     flat(pub) mod {
-        arburg
+        arburg,
+        aryule,
+        levinson
     }
 );
