@@ -1,6 +1,7 @@
 moddef::moddef!(
     flat(pub) mod {
         cceps,
+        cpsd,
         filternorm,
         filtic,
         filtord,
@@ -25,6 +26,7 @@ moddef::moddef!(
         pwelch,
         pyulear,
         rceps,
+        real_cpsd,
         real_freqz,
         real_mscohere,
         real_phasez,

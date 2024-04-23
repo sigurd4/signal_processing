@@ -3,7 +3,7 @@ use option_trait::{Maybe, NotVoid, StaticMaybe};
 
 use crate::{List, MaybeLenEq, PWelch, PWelchDetrend};
 
-pub trait MsCohere<T, Y, YY, W, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
+pub trait CPsd<T, Y, YY, W, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
 where
     T: ComplexFloat,
     W: ComplexFloat<Real = T::Real>,
@@ -15,8 +15,7 @@ where
     N: Maybe<usize>,
     S: Maybe<bool>
 {
-    #[doc(alias = "cohere")]
-    fn mscohere<O, FS, CONF, DT, F>(
+    fn cpsd<O, FS, CONF, DT, F>(
         self,
         y: YY,
         window: WWW,
@@ -28,7 +27,7 @@ where
         detrend: DT,
         sloppy: S,
         shift: bool
-    ) -> (WW::Mapped<T::Real>, F)
+    ) -> (WW::Mapped<Complex<<T as ComplexFloat>::Real>>, F)
     where
         O: Maybe<usize>,
         FS: Maybe<T::Real>,
@@ -37,7 +36,7 @@ where
         F: StaticMaybe<WW::Mapped<T::Real>>;
 }
 
-impl<T, L, Y, YY, W, WW, WWW, WL, N, S> MsCohere<T, Y, YY, W, WW, WWW, WL, N, S> for L
+impl<T, L, Y, YY, W, WW, WWW, WL, N, S> CPsd<T, Y, YY, W, WW, WWW, WL, N, S> for L
 where
     L: List<T> + MaybeLenEq<YY, true>,
     T: ComplexFloat,
@@ -50,13 +49,13 @@ where
     N: Maybe<usize>,
     S: Maybe<bool>,
     Self: PWelch<T, Y, YY, W, WW, WWW, WL, N, S>,
-    WW::Mapped<T::Real>: StaticMaybe<WW::Mapped<T::Real>> + StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<T::Real>>>,
-    WW::Mapped<Complex<T::Real>>: StaticMaybe<WW::Mapped<Complex<T::Real>>>,
+    WW::Mapped<T::Real>: StaticMaybe<WW::Mapped<T::Real>>,
+    WW::Mapped<Complex<T::Real>>: StaticMaybe<WW::Mapped<Complex<T::Real>>> + StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<T::Real>>>>,
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<T::Real>>>: NotVoid,
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<T::Real>>: NotVoid,
-    (): StaticMaybe<WW::Mapped<T::Real>>
+    (): StaticMaybe<WW::Mapped<T::Real>>,
 {
-    fn mscohere<O, FS, CONF, DT, F>(
+    fn cpsd<O, FS, CONF, DT, F>(
         self,
         y: YY,
         window: WWW,
@@ -68,7 +67,7 @@ where
         detrend: DT,
         sloppy: S,
         shift: bool
-    ) -> (<WW>::Mapped<<T as ComplexFloat>::Real>, F)
+    ) -> (<WW>::Mapped<Complex<<T as ComplexFloat>::Real>>, F)
     where
         O: Maybe<usize>,
         FS: Maybe<<T as ComplexFloat>::Real>,
@@ -76,8 +75,8 @@ where
         DT: Maybe<PWelchDetrend>,
         F: StaticMaybe<<WW>::Mapped<<T as ComplexFloat>::Real>>
     {
-        let ((), (), (), coher, (), (), f) = self.pwelch(y, window, window_length, overlap, nfft, sampling_frequency, confidence, detrend, sloppy, shift);
-        (coher, f)
+        let ((), cross, (), (), (), (), f) = self.pwelch(y, window, window_length, overlap, nfft, sampling_frequency, confidence, detrend, sloppy, shift);
+        (cross, f)
     }
 }
 
@@ -87,7 +86,7 @@ mod test
     use array_math::ArrayOps;
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, Cheby1, Cheby2, Filter, FilterGenPlane, RealMsCohere, RealFreqZ, Tf};
+    use crate::{plot, window::{Boxcar, Triangular, WindowGen, WindowRange}, Filter, Fir1, Fir1Type, RealCPsd, Tf};
 
     #[test]
     fn test()
@@ -96,29 +95,23 @@ mod test
         let mut rng = rand::thread_rng();
         let r: Vec<_> = (0..N).map(|_| (-1.0..1.0).sample_single(&mut rng)).collect();
 
-        let (n, wp, _ws, rs, t) = crate::cheb2ord([0.2, 0.4], [0.15, 0.45], 0.1, 60.0, FilterGenPlane::Z { sampling_frequency: None })
+        const B: usize = 31;
+        let w: [f64; B] = Boxcar.window_gen((), WindowRange::Symmetric);
+        let hx = Tf::<f64, [_; B]>::fir1((), [0.2], Fir1Type::LowPass, w, true, ())
             .unwrap();
-        let dx = Tf::cheby2(n, rs, wp, t, FilterGenPlane::Z { sampling_frequency: None })
-            .unwrap();
-        
-        let (n, wp, _ws, rp, t) = crate::cheb1ord([0.6, 0.8], [0.65, 0.75], 0.1, 60.0, FilterGenPlane::Z { sampling_frequency: None })
-            .unwrap();
-        let dy = Tf::cheby1(n, rp, wp, t, FilterGenPlane::Z { sampling_frequency: None })
-            .unwrap();
+        let x = hx.filter(r.as_slice(), ());
 
-        let x = dx.filter(r.as_slice(), ());
-        let y = dy.filter(r, ());
+        let hy = Tf::new([1.0; 10], ());
+        let y = hy.filter(r, ());
 
-        let (cxy, fc): (Vec<_>, Vec<_>) = x.real_mscohere(y, (), 512, 500, 2048, (), (), (), ());
+        const M: usize = 500;
+        let w: [_; M] = Triangular.window_gen((), WindowRange::Symmetric);
+        let nov = 250;
 
-        const M: usize = 1024;
-        let (qx, f): ([_; M], _) = dx.real_freqz(());
-        let (qy, _): ([_; M], _) = dy.real_freqz(());
+        let (pxy, f): (_, [_; M/2 + 1]) = x.real_cpsd(y, w, (), nov, (), (), (), (), ());
 
-        plot::plot_curves("C_xy(e^jw)", "plots/cxy_z_cohere.png", [
-            &fc.into_iter().zip(cxy).collect::<Vec<_>>(),
-            &f.zip(qx.map(|qx| qx.norm())),
-            &f.zip(qy.map(|qy| qy.norm()))
+        plot::plot_curves("P_xy(e^jw)", "plots/pxy_z_cpsd.png", [
+            &f.zip(pxy.map(|p| 10.0*p.norm().log10()))
         ]).unwrap()
     }
 }
