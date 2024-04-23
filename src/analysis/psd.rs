@@ -21,7 +21,7 @@ pub enum PsdRange
     Half
 }
 
-pub trait Psd<'a, P, F, N, FF, M, R>: System
+pub trait Psd<'a, P, F, N, FF, R, M>: System
 where
     P: Lists<<Self::Domain as ComplexFloat>::Real>,
     F: List<<Self::Domain as ComplexFloat>::Real>,
@@ -30,12 +30,12 @@ where
     M: Maybe<PsdMethod>,
     R: Maybe<PsdRange>
 {
-    fn psd<FS>(&'a self, numtaps: N, frequencies: FF, sampling_frequency: FS, method: M, range: R) -> (P, F)
+    fn psd<FS>(&'a self, numtaps: N, frequencies: FF, sampling_frequency: FS, range: R, method: M) -> (P, F)
     where
         FS: Maybe<<Self::Domain as ComplexFloat>::Real>;
 }
 
-impl<'a, T, A, AV, N, M, R> Psd<'a, AV::Mapped<Vec<T::Real>>, Vec<T::Real>, N, (), M, R> for Ar<T, A, AV>
+impl<'a, T, A, AV, N, M, R> Psd<'a, AV::Mapped<Vec<T::Real>>, Vec<T::Real>, N, (), R, M> for Ar<T, A, AV>
 where
     T: ComplexFloat<Real: SubAssign + AddAssign> + Into<Complex<T::Real>>,
     A: MaybeList<T>,
@@ -46,7 +46,7 @@ where
     R: Maybe<PsdRange>,
     Complex<T::Real>: MulAssign + AddAssign
 {
-    fn psd<FS>(&'a self, numtaps: N, (): (), sampling_frequency: FS, method: M, range: R) -> (AV::Mapped<Vec<T::Real>>, Vec<T::Real>)
+    fn psd<FS>(&'a self, numtaps: N, (): (), sampling_frequency: FS, range: R, method: M) -> (AV::Mapped<Vec<T::Real>>, Vec<T::Real>)
     where
         FS: Maybe<<Self::Domain as ComplexFloat>::Real>
     {
@@ -127,7 +127,7 @@ where
     }
 }
 
-impl<'a, T, A, AV, M, R, const N: usize> Psd<'a, AV::Mapped<[T::Real; N]>, [T::Real; N], (), (), M, R> for Ar<T, A, AV>
+impl<'a, T, A, AV, M, R, const N: usize> Psd<'a, AV::Mapped<[T::Real; N]>, [T::Real; N], (), (), R, M> for Ar<T, A, AV>
 where
     T: ComplexFloat,
     A: MaybeList<T>,
@@ -135,10 +135,10 @@ where
     AV::Mapped<[T::Real; N]>: Lists<T::Real>,
     M: Maybe<PsdMethod>,
     R: Maybe<PsdRange>,
-    Self: Psd<'a, AV::Mapped<Vec<T::Real>>, Vec<T::Real>, usize, (), M, PsdRange> + System<Domain = T>,
+    Self: Psd<'a, AV::Mapped<Vec<T::Real>>, Vec<T::Real>, usize, (), PsdRange, M> + System<Domain = T>,
     AV::Mapped<Vec<T::Real>>: Lists<T::Real> + ListOrSingle<Vec<T::Real>, Mapped<[T::Real; N]> = AV::Mapped<[T::Real; N]>>
 {
-    fn psd<FS>(&'a self, (): (), (): (), sampling_frequency: FS, method: M, range: R) -> (AV::Mapped<[T::Real; N]>, [T::Real; N])
+    fn psd<FS>(&'a self, (): (), (): (), sampling_frequency: FS, range: R, method: M) -> (AV::Mapped<[T::Real; N]>, [T::Real; N])
     where
         FS: Maybe<<Self::Domain as ComplexFloat>::Real>
     {
@@ -159,7 +159,7 @@ where
             N
         };
 
-        let (psd, f) = self.psd(numtaps, (), sampling_frequency, method, range);
+        let (psd, f) = self.psd(numtaps, (), sampling_frequency, range, method);
 
         (
             psd.map_into_owned(|psd: Vec<T::Real>| TryInto::<[T::Real; N]>::try_into(psd).ok().unwrap()),

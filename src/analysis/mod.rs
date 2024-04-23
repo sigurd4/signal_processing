@@ -17,6 +17,7 @@ moddef::moddef!(
         isstable,
         movingrms,
         mscohere,
+        pburg,
         peak_to_peak,
         peak_to_rms,
         phasez,
