@@ -19,6 +19,7 @@ moddef::moddef!(
         impinvar,
         sampled_to_continuous,
         sftrans,
+        sliding_dft,
         stabilize,
         to_sos,
         to_ss,

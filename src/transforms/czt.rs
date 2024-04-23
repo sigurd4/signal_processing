@@ -84,6 +84,7 @@ where
             let mut y = gg.into_iter()
                 .zip(w2)
                 .skip(n.saturating_sub(1))
+                .take(n)
                 .map(|(g, w)| g*w);
 
             y_void.map_to_owned(|_| y.next().unwrap())

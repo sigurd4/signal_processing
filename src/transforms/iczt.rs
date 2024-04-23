@@ -93,7 +93,8 @@ where
                 .map(|(h, m)| h*m)
                 .collect();
             x.ifft();
-            let mut x = x.into_iter();
+            let mut x = x.into_iter()
+                .take(n);
 
             x_void.map_to_owned(|_| x.next().unwrap())
                 .into()
