@@ -4,17 +4,16 @@ use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, NumCast, On
 
 use crate::{List, OwnedList};
 
-pub trait Swdft<T, X, W>: OwnedList<Complex<T::Real>>
+pub trait SdftKw<T, X, W>: OwnedList<Complex<T::Real>>
 where
     T: ComplexFloat,
     X: OwnedList<T>,
     W: List<Complex<T::Real>>
 {
-    #[doc(alias = "sliding_windowed_dft")]
-    fn swdft(&mut self, x: &mut X, buffer: &mut Vec<T>, window_kernel: W);
+    fn sdft_kw(&mut self, x: &mut X, buffer: &mut Vec<T>, window_kernel: W);
 }
 
-impl<T, X, W, Z> Swdft<T, X, W> for Z
+impl<T, X, W, Z> SdftKw<T, X, W> for Z
 where
     T: ComplexFloat,
     X: OwnedList<T>,
@@ -22,7 +21,7 @@ where
     W: List<Complex<T::Real>>,
     Complex<T::Real>: AddAssign<T> + SubAssign<T> + MulAssign
 {
-    fn swdft(&mut self, xx: &mut X, buffer: &mut Vec<T>, window_kernel: W)
+    fn sdft_kw(&mut self, xx: &mut X, buffer: &mut Vec<T>, window_kernel: W)
     {
         let n = self.length();
         buffer.truncate(n);
