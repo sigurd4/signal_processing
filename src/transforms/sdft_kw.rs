@@ -4,6 +4,8 @@ use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, NumCast, On
 
 use crate::{Matrix, OwnedList};
 
+// FIXME: Results with sdft_kw are not satisfactory somehow
+
 pub trait SdftKw<T, X, W>: OwnedList<Complex<T::Real>>
 where
     T: ComplexFloat,

@@ -13,6 +13,7 @@ moddef::moddef!(
         filtfilt,
         interp,
         normalize,
+        qmf,
         resample,
         sgolayfilt,
         upsample,
