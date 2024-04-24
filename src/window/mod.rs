@@ -1,4 +1,4 @@
-use num::{complex::ComplexFloat, Complex};
+use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
 use crate::List;

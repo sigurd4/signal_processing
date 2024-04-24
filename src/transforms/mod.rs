@@ -22,6 +22,7 @@ moddef::moddef!(
         sdft_kw,
         sdft,
         stabilize,
+        swift,
         to_kw,
         to_sos,
         to_ss,

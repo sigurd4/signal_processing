@@ -139,7 +139,7 @@ mod test
     use linspace::LinspaceArray;
     use num::{Complex, Zero};
 
-    use crate::{plot, window::{Hann, Sine, WindowGen, WindowRange}, Chirp, ChirpCurve, MaybeContainer, Sdft, SdftKw, ToKw};
+    use crate::{plot, window::{Sine, WindowGen, WindowRange}, Chirp, ChirpCurve, SdftKw, ToKw};
 
     #[test]
     fn test()
