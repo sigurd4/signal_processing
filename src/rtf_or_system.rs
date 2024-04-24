@@ -8,6 +8,8 @@ pub trait RtfOrSystem: MaybeRtfOrSystem<Self::Domain>
     type Domain: ComplexFloat;
 }
 
+impl !RtfOrSystem for () {}
+
 impl<'a, W, S> RtfOrSystem for Rtf<'a, W, S>
 where
     W: ComplexFloat<Real = <S::Domain as ComplexFloat>::Real>,

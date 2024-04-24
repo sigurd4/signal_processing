@@ -122,7 +122,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Cheby1, FilterGenPlane, FilterGenType, Qmf, RealFreqZ, Sos, Tf, Zpk};
+    use crate::{plot, Cheby1, FilterGenPlane, FilterGenType, Qmf, RealFreqZ, Sos};
 
     #[test]
     fn test()
