@@ -129,9 +129,6 @@ mod test
     {
         let h = Sos::cheby1(10, 7.0, [0.5], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
-
-        /*let hq = Tf::butter(3, [0.5], FilterGenType::HighPass, FilterGenPlane::Z { sampling_frequency: None })
-            .unwrap();*/
         let hq = h.as_view()
             .qmf();
 
