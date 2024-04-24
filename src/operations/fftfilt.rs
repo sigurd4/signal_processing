@@ -4,7 +4,7 @@ use num::{complex::ComplexFloat, Complex, Zero};
 use option_trait::Maybe;
 use array_math::SliceMath;
 
-use crate::{ComplexOp, List, ListOrSingle, Lists, MaybeContainer, MaybeList, MaybeLists, System, Tf, TruncateIm};
+use crate::{ComplexOp, List, ContainerOrSingle, ListOrSingle, Lists, MaybeContainer, MaybeList, MaybeLists, MaybeOwnedList, Sos, System, Tf, TruncateIm};
 
 
 pub trait FftFilt<'a, X, XX>: System
@@ -88,6 +88,91 @@ where
                     x.map_to_owned(|_| y.next().unwrap().truncate_im::<Y>())
                 }).into()
             })
+    }
+}
+
+impl<'a, T, B, A, S, X, Y, XX, XXX> FftFilt<'a, X, XX> for Sos<T, B, A, S>
+where
+    T: ComplexFloat + ComplexOp<X, Output = Y> + Into<Complex<T::Real>>,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T, MaybeMapped<Complex<T::Real>>: List<Complex<T::Real>> + Clone>,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T, MaybeMapped<Complex<T::Real>>: List<Complex<T::Real>> + Clone>,
+    S: MaybeList<Tf<T, B, A>>,
+    X: Into<Y> + ComplexFloat<Real = T::Real> + Into<Complex<T::Real>>,
+    Y: ComplexFloat<Real = T::Real> + 'static,
+    XX: Lists<X, RowOwned = XXX, RowsMapped<XXX::Mapped<Y>>: Into<XX::Mapped<Y>>>,
+    XXX: List<X, Mapped<()>: List<(), Mapped<Y> = XXX::Mapped<Y>>>,
+    Complex<T::Real>: MulAssign + AddAssign + DivAssign + MulAssign<T::Real>,
+    T::Real: Into<Y> + 'static
+{
+    type Output = XX::Mapped<Y>;
+
+    fn fftfilt<N>(&'a self, x: XX, n: N) -> Self::Output
+    where
+        N: Maybe<usize>
+    {
+        if let Some(sos) = self.sos.deref()
+            .as_view_slice_option()
+        {
+            x.map_rows_into_owned(|x| {
+                let x_void = x.map_to_owned(|_| ());
+                let mut y: Vec<Complex<_>> = x.into_vec()
+                    .into_iter()
+                    .map(|x| x.into())
+                    .collect();
+                
+                let m = y.len();
+                let n_min = (m + 2).next_power_of_two();
+                let (_overlap_add, n) = n.as_option()
+                    .map(|&n| (true, n.max(n_min)))
+                    .unwrap_or((false, n_min));
+                
+                y.resize(n, Zero::zero());
+                y.fft();
+
+                for sos in sos.iter()
+                {
+                    let b = sos.b.deref()
+                        .maybe_map_to_owned(|&b| b.into())
+                        .into_vec_option();
+                    if let Some(mut b) = b
+                    {
+                        b.resize(n, Zero::zero());
+                        b.fft();
+                        
+                        for (y, b) in y.iter_mut()
+                            .zip(b)
+                        {
+                            *y *= b;
+                        }
+                    }
+                    let a = sos.a.deref()
+                        .maybe_map_to_owned(|&a| a.into())
+                        .into_vec_option();
+                    if let Some(mut a) = a
+                    {
+                        a.resize(n, Zero::zero());
+                        a.fft();
+                        
+                        for (y, a) in y.iter_mut()
+                            .zip(a)
+                        {
+                            *y /= a;
+                        }
+                    }
+                }
+
+                y.ifft();
+                
+                y.truncate(m);
+
+                let mut y = y.into_iter();
+                x_void.map_into_owned(|()| y.next().unwrap().truncate_im::<Y>())
+            }).into()
+        }
+        else
+        {
+            x.map_into_owned(|x| x.into())
+        }
     }
 }
 
