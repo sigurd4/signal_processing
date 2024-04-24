@@ -31,6 +31,11 @@ where
         let cone = Complex::one();
 
         let k = window_kernel.as_view_slices();
+        let kn = k.len();
+        if kn < n
+        {
+            zbuffer[kn..].fill(Complex::zero())
+        }
 
         let xn = xx.length();
         if xn == 0
@@ -128,3 +133,44 @@ where
     }
 }
 
+#[cfg(test)]
+mod test
+{
+    use linspace::LinspaceArray;
+    use num::{Complex, Zero};
+
+    use crate::{plot, window::{Hann, Sine, WindowGen, WindowRange}, Chirp, ChirpCurve, MaybeContainer, Sdft, SdftKw, ToKw};
+
+    #[test]
+    fn test()
+    {
+        const T: f64 = 1.0;
+        const N: usize = 256;
+        const M: usize = 10;
+        const FS: f64 = N as f64/T;
+        let f: [_; M] = (0.0..FS).linspace_array();
+        let (x, t): ([_; N], _) = (0.0..T).chirp((), M as f64/T..FS/4.0, 0.0..1.0, ChirpCurve::Logarithmic, 0.0);
+
+        const W: usize = 128;
+        let w: [f64; W] = Sine.window_gen((), WindowRange::Symmetric);
+        let kw: [_; M] = w.to_kw(());
+        //let kw_avg = kw.norm();
+
+        //println!("{:?}", kw_avg);
+
+        let mut z = [Complex::zero(); M];
+        let mut xb = vec![];
+        let mut zb: Vec<Complex<f64>> = vec![];
+
+        let s: Vec<_> = x.into_iter()
+            .map(|x| {
+                z.sdft_kw(&mut [x], &mut xb, &mut zb, &kw);
+                z.clone()
+            }).collect();
+        plot::plot_parametric_curve_2d("|X(e^jw)|(t)", "plots/x_z_sdft_kw.svg",
+            core::array::from_fn::<_, {M/2 + 1}, _>(|i| i as f64),
+            core::array::from_fn::<_, N, _>(|i| i as f64),
+            |i, j| [f[i as usize], t[j as usize], s[j as usize][i as usize].norm().log10()*20.0]
+        ).unwrap()
+    }
+}

@@ -90,22 +90,33 @@ where
 #[cfg(test)]
 mod test
 {
-    use num::Complex;
+    use linspace::LinspaceArray;
+    use num::{Complex, Zero};
 
-    use crate::Sdft;
+    use crate::{plot, Chirp, ChirpCurve, Sdft};
 
     #[test]
     fn test()
     {
-        let mut b = vec![-1.0];
+        const T: f64 = 1.0;
+        const N: usize = 256;
+        const M: usize = 16;
+        const FS: f64 = N as f64/T;
+        let f: [_; M] = (0.0..FS).linspace_array();
+        let (x, t): ([_; N], _) = (0.0..T).chirp((), M as f64/T..FS/4.0, 0.0..1.0, ChirpCurve::Logarithmic, 0.0);
 
-        let mut x = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
-        let mut z = [0.0, 0.0, 0.0, 0.0].map(|z| Complex::from(z));
+        let mut z = [Complex::zero(); M];
+        let mut xb = vec![];
 
-        z.sdft(&mut x, &mut b);
-
-        println!("x = {:?}", x);
-        println!("b = {:?}", b);
-        println!("z = {:?}", z);
+        let s: Vec<_> = x.into_iter()
+            .map(|x| {
+                z.sdft(&mut [x], &mut xb);
+                z.clone()
+            }).collect();
+        plot::plot_parametric_curve_2d("|X(e^jw)|(t)", "plots/x_z_sdft.svg",
+            core::array::from_fn::<_, {M/2 + 1}, _>(|i| i as f64),
+            core::array::from_fn::<_, N, _>(|i| i as f64),
+            |i, j| [f[i as usize], t[j as usize], s[j as usize][i as usize].norm().log10()*20.0]
+        ).unwrap()
     }
 }

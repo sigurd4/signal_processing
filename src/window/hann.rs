@@ -5,6 +5,7 @@ use num::{traits::FloatConst, Float};
 
 use super::{WindowGen, WindowRange};
 
+#[doc(alias = "Hanning")]
 pub struct Hann;
 
 impl<T, const N: usize> WindowGen<T, [T; N], ()> for Hann
