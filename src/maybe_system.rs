@@ -1,14 +1,23 @@
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{Ar, ListOrSingle, MaybeList, MaybeLists, MaybeOwnedList, MaybeSystem, Rpk, RtfOrSystem, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk};
+use crate::{Ar, ListOrSingle, MaybeList, MaybeLists, MaybeOwnedList, MaybeRtfOrSystem, Rpk, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk};
 
-pub trait System: RtfOrSystem + MaybeSystem<Self::Domain>
+pub trait MaybeSystem<D>: MaybeRtfOrSystem<D>
+where
+    D: ComplexFloat
 {
     
 }
 
-impl<T, B, A> System for Tf<T, B, A>
+impl<D> MaybeSystem<D> for ()
+where   
+    D: ComplexFloat
+{
+
+}
+
+impl<T, B, A> MaybeSystem<T> for Tf<T, B, A>
 where
     T: ComplexFloat,
     B: MaybeLists<T>,
@@ -17,7 +26,7 @@ where
 
 }
 
-impl<T, Z, P, K, R> System for Zpk<T, Z, P, K>
+impl<T, Z, P, K, R> MaybeSystem<K> for Zpk<T, Z, P, K>
 where
     T: ComplexFloat<Real = R>,
     K: ComplexFloat<Real = R>,
@@ -27,7 +36,7 @@ where
     
 }
 
-impl<T, A, B, C, D> System for Ss<T, A, B, C, D>
+impl<T, A, B, C, D> MaybeSystem<T> for Ss<T, A, B, C, D>
 where
     T: ComplexFloat,
     A: SsAMatrix<T, B, C, D>,
@@ -38,7 +47,7 @@ where
     
 }
 
-impl<T, B, A, S> System for Sos<T, B, A, S>
+impl<T, B, A, S> MaybeSystem<T> for Sos<T, B, A, S>
 where
     T: ComplexFloat,
     B: Maybe<[T; 3]> + MaybeOwnedList<T>,
@@ -48,7 +57,7 @@ where
     
 }
 
-impl<T, R, P, RP, K> System for Rpk<T, R, P, RP, K>
+impl<T, R, P, RP, K> MaybeSystem<T> for Rpk<T, R, P, RP, K>
 where
     T: ComplexFloat,
     R: ComplexFloat<Real = T::Real>,
@@ -59,7 +68,7 @@ where
 
 }
 
-impl<T, A, AV> System for Ar<T, A, AV>
+impl<T, A, AV> MaybeSystem<T> for Ar<T, A, AV>
 where
     T: ComplexFloat,
     A: MaybeList<T>,

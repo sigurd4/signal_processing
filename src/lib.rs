@@ -45,6 +45,8 @@ moddef::moddef!(
         transforms,
         util,
 
+        maybe_rtf_or_system,
+        maybe_system,
         rtf_or_system,
         system,
         validate_filter_bands
