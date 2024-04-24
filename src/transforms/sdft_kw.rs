@@ -1,16 +1,16 @@
-use core::ops::{AddAssign, MulAssign, SubAssign};
+use core::{iter::Sum, ops::{AddAssign, MulAssign, SubAssign}};
 
 use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, NumCast, One, Zero};
 
-use crate::{List, OwnedList};
+use crate::{Matrix, OwnedList};
 
 pub trait SdftKw<T, X, W>: OwnedList<Complex<T::Real>>
 where
     T: ComplexFloat,
     X: OwnedList<T>,
-    W: List<Complex<T::Real>>
+    W: Matrix<Complex<T::Real>>
 {
-    fn sdft_kw(&mut self, x: &mut X, buffer: &mut Vec<T>, window_kernel: W);
+    fn sdft_kw(&mut self, x: &mut X, xbuffer: &mut Vec<T>, zbuffer: &mut Vec<Complex<T::Real>>, window_kernel: W);
 }
 
 impl<T, X, W, Z> SdftKw<T, X, W> for Z
@@ -18,25 +18,26 @@ where
     T: ComplexFloat,
     X: OwnedList<T>,
     Z: OwnedList<Complex<T::Real>>,
-    W: List<Complex<T::Real>>,
-    Complex<T::Real>: AddAssign<T> + SubAssign<T> + MulAssign
+    W: Matrix<Complex<T::Real>>,
+    Complex<T::Real>: AddAssign<T> + SubAssign<T> + MulAssign + Sum
 {
-    fn sdft_kw(&mut self, xx: &mut X, buffer: &mut Vec<T>, window_kernel: W)
+    fn sdft_kw(&mut self, xx: &mut X, xbuffer: &mut Vec<T>, zbuffer: &mut Vec<Complex<T::Real>>, window_kernel: W)
     {
         let n = self.length();
-        buffer.truncate(n);
+        xbuffer.truncate(n);
+        zbuffer.resize(n, Complex::zero());
         let nf = <T::Real as NumCast>::from(n).unwrap();
         let w = Complex::cis(T::Real::TAU()/nf);
         let cone = Complex::one();
 
-        let kn = window_kernel.length();
+        let k = window_kernel.as_view_slices();
 
         let xn = xx.length();
         if xn == 0
         {
             return;
         }
-        let bn = buffer.len();
+        let bn = xbuffer.len();
 
         let xbn = (bn.min(n) + xn).saturating_sub(n);
 
@@ -44,33 +45,41 @@ where
             .iter_mut()
         {
             let mut wn = cone;
-            for (z, k) in self.as_mut_slice()[..kn]
+            for z in self.as_mut_slice()
                 .iter_mut()
-                .zip(window_kernel.as_view_slice()
+            {
+                *z += *x;
+                *z *= wn;
+                wn *= w;
+            }
+            for (zb, k) in zbuffer.as_mut_slice()
+                .iter_mut()
+                .zip(k.iter())
+            {
+                *zb = self.as_mut_slice()
+                    .iter()
+                    .zip(k.iter())
+                    .map(|(&z, &k)| z*k)
+                    .sum();
+            }
+            for (z, zb) in self.as_mut_slice()
+                .iter_mut()
+                .zip(zbuffer.as_mut_slice()
                     .iter()
                 )
             {
-                *z += *x;
-                *z *= wn*k;
-                wn *= w;
+                *z = *zb;
             }
-            if kn < n
-            {
-                for z in self.as_mut_slice()[kn..]
-                    .iter_mut()
-                {
-                    *z = Complex::zero()
-                }
-            }
+
             let mut y = T::zero();
             core::mem::swap(x, &mut y);
-            buffer.push(y);
+            xbuffer.push(y);
         }
         let bnn = bn + xn - xbn;
         if bnn > 0
         {
-            buffer.rotate_right((xn - xbn) % bnn);
-            buffer[..xn - xbn].reverse();
+            xbuffer.rotate_right((xn - xbn) % bnn);
+            xbuffer[..xn - xbn].reverse();
         }
         let mut i = xn - xbn;
         while i < xn
@@ -78,35 +87,42 @@ where
             let j = (i + n).min(xn);
             for (x, y) in xx.as_mut_slice()[i..j]
                 .iter_mut()
-                .zip(buffer.as_mut_slice()  
+                .zip(xbuffer.as_mut_slice()  
                     .iter_mut()
                     .rev()
                     .take(j - i)
                 )
             {
                 let mut wn = cone;
-                for (z, k) in self.as_mut_slice()[..kn]
+                for z in self.as_mut_slice()
                     .iter_mut()
-                    .zip(window_kernel.as_view_slice()
-                        .iter()
-                    )
                 {
                     *z += *x;
                     *z -= *y;
-                    *z *= wn*k;
+                    *z *= wn;
                     wn *= w;
                 }
-                if kn < n
+                for (zb, k) in zbuffer.as_mut_slice()
+                    .iter_mut()
+                    .zip(k.iter())
                 {
-                    for z in self.as_mut_slice()[kn..]
-                        .iter_mut()
-                    {
-                        *z = Complex::zero()
-                    }
+                    *zb = self.as_mut_slice()
+                        .iter()
+                        .zip(k.iter())
+                        .map(|(&z, &k)| z*k)
+                        .sum();
+                }
+                for (z, zb) in self.as_mut_slice()
+                    .iter_mut()
+                    .zip(zbuffer.as_mut_slice()
+                        .iter()
+                    )
+                {
+                    *z = *zb;
                 }
                 std::mem::swap(x, y);
             }
-            buffer.rotate_right(j - i);
+            xbuffer.rotate_right(j - i);
             i = j;
         }
     }
