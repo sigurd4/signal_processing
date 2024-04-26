@@ -102,12 +102,12 @@ mod test
     #[test]
     fn test()
     {
-        let psi = crate::dbaux(38, 1.0);
+        let phi = crate::dbaux(38, 1.0);
 
-        plot::plot_curves("ψ[n]", "plots/psi_n_dbaux.png", [
-                &(0.0..psi.len() as f64).linspace(psi.len())
+        plot::plot_curves("ϕ[n]", "plots/phi_n_dbaux.png", [
+                &(0.0..phi.len() as f64).linspace(phi.len())
                     .into_iter()
-                    .zip(psi)
+                    .zip(phi)
                     .collect::<Vec<_>>()
             ]).unwrap()
     }
