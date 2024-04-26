@@ -62,7 +62,7 @@ moddef::moddef!(
 #[cfg(test)]
 mod tests
 {
-    use array_math::ArrayOps;
+    use array_math::{ArrayMath, ArrayOps};
     use linspace::LinspaceArray;
     use num::Complex;
 
