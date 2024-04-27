@@ -1,12 +1,12 @@
 use num::{traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 
-use crate::{IntoList, List};
+use crate::{IntoList, ListOrSingle};
 
 pub trait ShanWavF<T, L, N>: IntoList<T, L, N>
 where
     T: Float,
-    L: List<T>,
+    L: ListOrSingle<T>,
     N: Maybe<usize>
 {
     fn shanwavf(self, numtaps: N, fb: T, fc: T) -> (L::Mapped<Complex<T>>, L);
@@ -17,7 +17,7 @@ where
     T: Float + FloatConst,
     R: IntoList<T, L, N>,
     N: Maybe<usize>,
-    L: List<T>
+    L: ListOrSingle<T>
 {
     fn shanwavf(self, n: N, fb: T, fc: T) -> (L::Mapped<Complex<T>>, L)
     {

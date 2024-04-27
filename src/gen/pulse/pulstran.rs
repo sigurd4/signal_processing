@@ -3,21 +3,21 @@ use core::ops::Mul;
 use num::{Float, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{IntoList, List, ListOrSingle};
+use crate::{IntoList, ListOrSingle};
 
 pub trait PulseTrain<T, L, N>: IntoList<T, L, N>
 where
     T: Float,
-    L: List<T>,
+    L: ListOrSingle<T>,
     N: Maybe<usize>
 {
     fn pulse_train<D, G, GG, P, R, O>(self, numtaps: N, train: D, pulse: P, fold: R) -> (D::Mapped<L::Mapped<O>>, L::Mapped<O>, L)
     where
-        D: List<(T, GG)>,
+        D: ListOrSingle<(T, GG)>,
         GG: StaticMaybe<G, MaybeOr<G, T> = G> + Clone,
         G: Clone,
-        D::Mapped<L::Mapped<O>>: List<L::Mapped<O>>,
-        L::Mapped<O>: List<O>,
+        D::Mapped<L::Mapped<O>>: ListOrSingle<L::Mapped<O>>,
+        L::Mapped<O>: ListOrSingle<O>,
         P: FnMut<(T,)>,
         R: Fn(O, O) -> O,
         O: Zero + Clone,
@@ -27,17 +27,17 @@ where
 impl<T, L, RR, N> PulseTrain<T, L, N> for RR
 where
     T: Float,
-    L: List<T>,
+    L: ListOrSingle<T>,
     RR: IntoList<T, L, N>,
     N: Maybe<usize>
 {
     fn pulse_train<D, G, GG, P, R, O>(self, n: N, train: D, mut pulse: P, fold: R) -> (D::Mapped<L::Mapped<O>>, L::Mapped<O>, L)
     where
-        D: List<(T, GG)>,
+        D: ListOrSingle<(T, GG)>,
         GG: StaticMaybe<G, MaybeOr<G, T> = G> + Clone,
         G: Clone,
-        D::Mapped<L::Mapped<O>>: List<L::Mapped<O>>,
-        L::Mapped<O>: List<O>,
+        D::Mapped<L::Mapped<O>>: ListOrSingle<L::Mapped<O>>,
+        L::Mapped<O>: ListOrSingle<O>,
         P: FnMut<(T,)>,
         R: Fn(O, O) -> O,
         O: Zero + Clone,

@@ -4,11 +4,11 @@ use ndarray::{Array1, ArrayView1};
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::List;
+use crate::ListOrSingle;
 
 pub trait IntoList<T, L, N>
 where
-    L: List<T> + ?Sized,
+    L: ListOrSingle<T> + ?Sized,
     N: Maybe<usize>
 {
     fn into_list(self, n: N) -> L
@@ -16,6 +16,18 @@ where
         T: Clone,
         L: Sized,
         Self: Sized;
+}
+
+impl<T> IntoList<T, T, ()> for T
+{
+    fn into_list(self, (): ()) -> T
+    where
+        T: Clone,
+        T: Sized,
+        Self: Sized
+    {
+        self
+    }
 }
 
 impl<T, const N: usize> IntoList<T, [T; N], ()> for Range<T>

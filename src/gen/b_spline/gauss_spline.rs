@@ -3,32 +3,33 @@ use option_trait::Maybe;
 
 use crate::{IntoList, ListOrSingle};
 
-pub trait Morlet<T, L, N>: IntoList<T, L, N>
+pub trait GaussSpline<T, L, N>: IntoList<T, L, N>
 where
     T: Float,
     L: ListOrSingle<T>,
     N: Maybe<usize>
 {
-    fn morlet(self, numtaps: N) -> (L::Mapped<T>, L);
+    fn gauss_spline(self, numtaps: N, order: usize) -> (L::Mapped<T>, L);
 }
 
-impl<T, L, R, N> Morlet<T, L, N> for R
+impl<T, L, R, N> GaussSpline<T, L, N> for R
 where
     T: Float + FloatConst,
     L: ListOrSingle<T>,
     R: IntoList<T, L, N>,
     N: Maybe<usize>
 {
-    fn morlet(self, n: N) -> (L::Mapped<T>, L)
+    fn gauss_spline(self, n: N, order: usize) -> (L::Mapped<T>, L)
     {
         let t = self.into_list(n);
 
         let one = T::one();
         let two = one + one;
-        let five = T::from(5u8).unwrap();
+
+        let sigma = T::from(order + 1).unwrap()/T::from(12u8).unwrap();
 
         let psi = t.map_to_owned(|&x| {
-            (five*x).cos()*(-x*x/two).exp()
+            (T::TAU()*sigma).sqrt().recip()*(-x*x/two/sigma).exp()
         });
 
         (psi, t)
@@ -40,15 +41,15 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Morlet};
+    use crate::{plot, GaussSpline};
 
     #[test]
     fn test()
     {
         const N: usize = 1024;
-        let (psi, t): (_, [_; N]) = (-8.0..=8.0).morlet(());
+        let (b, t): (_, [_; N]) = (-1.0..=1.0).gauss_spline((), 3);
 
-        plot::plot_curves("ψ(t)", "plots/psi_t_morlet.png", [&t.zip(psi)])
+        plot::plot_curves("B(t)", "plots/b_t_gauss_spline.png", [&t.zip(b)])
             .unwrap()
     }
 }

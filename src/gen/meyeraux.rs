@@ -1,12 +1,12 @@
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{IntoList, List};
+use crate::{IntoList, ListOrSingle};
 
 pub trait Meyeraux<T, L, N>: IntoList<T, L, N>
 where
     T: Float,
-    L: List<T>,
+    L: ListOrSingle<T>,
     N: Maybe<usize>
 {
     fn meyeraux(self, numtaps: N) -> (L::Mapped<T>, L);
@@ -15,7 +15,7 @@ where
 impl<T, L, R, N> Meyeraux<T, L, N> for R
 where
     T: Float + FloatConst,
-    L: List<T>,
+    L: ListOrSingle<T>,
     R: IntoList<T, L, N>,
     N: Maybe<usize>
 {
@@ -43,7 +43,7 @@ mod test
     fn test()
     {
         const N: usize = 1024;
-        let (y, t): ([_; N], _) = (0.0..=1.0).meyeraux(());
+        let (y, t): (_, [_; N]) = (0.0..=1.0).meyeraux(());
 
         plot::plot_curves("y(t)", "plots/y_t_meyeraux.png", [&t.zip(y)])
             .unwrap()

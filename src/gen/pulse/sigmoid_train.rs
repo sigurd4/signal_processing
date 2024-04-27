@@ -3,32 +3,32 @@ use core::ops::Range;
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{IntoList, List, ListOrSingle};
+use crate::{IntoList, ListOrSingle};
 
 pub trait SigmoidTrain<T, L, N>: IntoList<T, L, N>
 where
     T: Float,
-    L: List<T>,
+    L: ListOrSingle<T>,
     N: Maybe<usize>
 {
     fn sigmoid_train<TR>(self, numtaps: N, train: TR) -> (TR::Mapped<L::Mapped<T>>, L::Mapped<T>, L)
     where
-        TR: List<(Range<T>, T, T)>,
-        TR::Mapped<L::Mapped<T>>: List<L::Mapped<T>>;
+        TR: ListOrSingle<(Range<T>, T, T)>,
+        TR::Mapped<L::Mapped<T>>: ListOrSingle<L::Mapped<T>>;
 }
 
 impl<T, L, R, N> SigmoidTrain<T, L, N> for R
 where
     T: Float + FloatConst,
-    L: List<T>,
+    L: ListOrSingle<T>,
     R: IntoList<T, L, N>,
     N: Maybe<usize>,
-    L::Mapped<T>: List<T>
+    L::Mapped<T>: ListOrSingle<T>
 {
     fn sigmoid_train<TR>(self, n: N, train: TR) -> (TR::Mapped<L::Mapped<T>>, L::Mapped<T>, L)
     where
-        TR: List<(Range<T>, T, T)>,
-        TR::Mapped<L::Mapped<T>>: List<L::Mapped<T>>
+        TR: ListOrSingle<(Range<T>, T, T)>,
+        TR::Mapped<L::Mapped<T>>: ListOrSingle<L::Mapped<T>>
     {
         let t = self.into_list(n);
 

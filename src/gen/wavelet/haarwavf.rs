@@ -1,12 +1,12 @@
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{IntoList, List};
+use crate::{IntoList, ListOrSingle};
 
 pub trait HaarWavF<T, L, N>: IntoList<T, L, N>
 where
     T: Float,
-    L: List<T>,
+    L: ListOrSingle<T>,
     N: Maybe<usize>
 {
     fn haarwavf(self, numtaps: N) -> (L::Mapped<T>, L);
@@ -15,7 +15,7 @@ where
 impl<T, L, R, N> HaarWavF<T, L, N> for R
 where
     T: Float + FloatConst,
-    L: List<T>,
+    L: ListOrSingle<T>,
     R: IntoList<T, L, N>,
     N: Maybe<usize>
 {
@@ -58,7 +58,7 @@ mod test
     fn test()
     {
         const N: usize = 1024;
-        let (psi, t): ([_; N], _) = (-0.5..=1.5).haarwavf(());
+        let (psi, t): (_, [_; N]) = (-0.5..=1.5).haarwavf(());
 
         plot::plot_curves("ψ(t)", "plots/psi_t_haarwavf.png", [&t.zip(psi)])
             .unwrap()

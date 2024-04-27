@@ -1,12 +1,12 @@
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{IntoList, List};
+use crate::{IntoList, ListOrSingle};
 
 pub trait Diric<T, L, N>: IntoList<T, L, N>
 where
     T: Float,
-    L: List<T>,
+    L: ListOrSingle<T>,
     N: Maybe<usize>
 {
     fn diric(self, numtaps: N, order: usize) -> (L::Mapped<T>, L);
@@ -15,7 +15,7 @@ where
 impl<T, L, R, N> Diric<T, L, N> for R
 where
     T: Float + FloatConst,
-    L: List<T>,
+    L: ListOrSingle<T>,
     R: IntoList<T, L, N>,
     N: Maybe<usize>
 {
@@ -57,7 +57,7 @@ mod test
     fn test()
     {
         const N: usize = 1024;
-        let (y, t): ([_; N], _) = (-8.0..=8.0).diric((), 6);
+        let (y, t): (_, [_; N]) = (-8.0..=8.0).diric((), 6);
 
         plot::plot_curves("y(t)", "plots/y_t_diric.png", [&t.zip(y)])
             .unwrap()

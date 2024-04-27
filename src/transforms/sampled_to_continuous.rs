@@ -3,12 +3,12 @@ use core::{iter::Sum, ops::Mul};
 use num::{complex::ComplexFloat, traits::FloatConst, Float, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{IntoList, List};
+use crate::{IntoList, List, ListOrSingle};
 
 pub trait SampledToContinuous<T, L, R, N>: List<T>
 where
     T: ComplexFloat,
-    L: List<T::Real>,
+    L: ListOrSingle<T::Real>,
     R: IntoList<T::Real, L, N>,
     N: Maybe<usize>
 {
@@ -19,7 +19,7 @@ impl<T, LL, L, R, N> SampledToContinuous<T, L, R, N> for LL
 where
     LL: List<T>,
     T: ComplexFloat + Mul<T::Real, Output = T> + Sum,
-    L: List<T::Real>,
+    L: ListOrSingle<T::Real>,
     R: IntoList<T::Real, L, N>,
     N: Maybe<usize>
 {

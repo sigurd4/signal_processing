@@ -1,12 +1,12 @@
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{IntoList, List};
+use crate::{IntoList, ListOrSingle};
 
 pub trait TriPuls<T, L, N>: IntoList<T, L, N>
 where
     T: Float,
-    L: List<T>,
+    L: ListOrSingle<T>,
     N: Maybe<usize>
 {
     fn tripuls<SK>(self, numtaps: N, bandwidth: T, skew: SK) -> (L::Mapped<T>, L)
@@ -17,7 +17,7 @@ where
 impl<T, L, R, N> TriPuls<T, L, N> for R
 where
     T: Float + FloatConst,
-    L: List<T>,
+    L: ListOrSingle<T>,
     R: IntoList<T, L, N>,
     N: Maybe<usize>
 {

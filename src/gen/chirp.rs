@@ -3,7 +3,7 @@ use core::ops::Range;
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{IntoList, List};
+use crate::{IntoList, ListOrSingle};
 
 pub enum ChirpCurve
 {
@@ -15,7 +15,7 @@ pub enum ChirpCurve
 pub trait Chirp<T, L, N>: IntoList<T, L, N>
 where
     T: Float,
-    L: List<T>,
+    L: ListOrSingle<T>,
     N: Maybe<usize>
 {
     fn chirp(self, numtaps: N, frequencies: Range<T>, times: Range<T>, curve: ChirpCurve, phase: T) -> (L::Mapped<T>, L);
@@ -24,7 +24,7 @@ where
 impl<T, L, R, N> Chirp<T, L, N> for R
 where
     T: Float + FloatConst,
-    L: List<T>,
+    L: ListOrSingle<T>,
     R: IntoList<T, L, N>,
     N: Maybe<usize>
 {
