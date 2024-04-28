@@ -3,7 +3,7 @@ use option_trait::Maybe;
 
 use crate::{ComplexOp, FilterMut, Lists, Rtf, RtfOrSystem, System};
 
-pub trait Filter<'a, X, XX>: System
+pub trait Filter<X, XX>: System
 where
     Self::Domain: ComplexOp<X>,
     X: Into<<Self::Domain as ComplexOp<X>>::Output> + ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>,
@@ -11,23 +11,22 @@ where
 {
     type Output: Lists<<Self::Domain as ComplexOp<X>>::Output>;
 
-    fn filter<W: Maybe<Vec<<Self::Domain as ComplexOp<X>>::Output>>>(&'a self, x: XX, w: W) -> Self::Output;
+    fn filter<W: Maybe<Vec<<Self::Domain as ComplexOp<X>>::Output>>>(self, x: XX, w: W) -> Self::Output;
 }
 
-impl<'a, W, S, X, XX, O> Filter<'a, X, XX> for S
+impl<W, S, X, XX, O> Filter<X, XX> for S
 where
     S: System,
     S::Domain: ComplexOp<X, Output = W>,
     X: Into<W> + ComplexFloat<Real = W::Real>,
     XX: Lists<X>,
-    W: ComplexOp<X, Output = W> + ComplexFloat<Real = <S::Domain as ComplexFloat>::Real> + 'a,
-    S: 'a,
-    Rtf<'a, W, S>: FilterMut<X, XX, Output = O> + RtfOrSystem<Domain = W>,
+    W: ComplexOp<X, Output = W> + ComplexFloat<Real = <S::Domain as ComplexFloat>::Real>,
+    Rtf<W, S>: FilterMut<X, XX, Output = O> + RtfOrSystem<Domain = W>,
     O: Lists<W>
 {
     type Output = O;
 
-    fn filter<WW: Maybe<Vec<W>>>(&'a self, x: XX, w: WW) -> Self::Output
+    fn filter<WW: Maybe<Vec<W>>>(self, x: XX, w: WW) -> Self::Output
     {
         Rtf::<W, S>::new(self, w)
             .filter_mut(x)
@@ -53,7 +52,7 @@ mod test
         let mut rng = rand::thread_rng();
         let x: [f64; N] = ArrayOps::fill(|_| (-1.0..1.0).sample_single(&mut rng));
 
-        let y = Filter::<f64, [_; _]>::filter(&h, x, ());
+        let y = Filter::<f64, [_; _]>::filter(h, x, ());
 
         let t: [_; N] = (0.0..N as f64).linspace_array();
 

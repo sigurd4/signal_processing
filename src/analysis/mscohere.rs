@@ -106,8 +106,8 @@ mod test
         let dy = Tf::cheby1(n, rp, wp, t, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
 
-        let x = dx.filter(r.as_slice(), ());
-        let y = dy.filter(r, ());
+        let x = dx.as_view().filter(r.as_slice(), ());
+        let y = dy.as_view().filter(r, ());
 
         let (cxy, fc): (Vec<_>, Vec<_>) = x.real_mscohere(y, (), 512, 500, 2048, (), (), (), ());
 

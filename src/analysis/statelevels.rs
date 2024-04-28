@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::RangeInclusive};
 use num::{traits::FloatConst, Float, NumCast};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{IntoList, List, ListOrSingle, OwnedList};
+use crate::{IntoList, List, ListOrSingle, OwnedList, OwnedListOrSingle};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StateLevelsMethod

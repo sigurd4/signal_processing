@@ -4,7 +4,7 @@ use array_math::{SliceMath, SliceOps};
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{Lists, Matrix, OwnedList, WhtOrdering};
+use crate::{Lists, OwnedListOrSingle, Matrix, OwnedList, WhtOrdering};
 
 pub trait Idwht<T, O, OO, const OOO: bool>: Lists<T>
 where

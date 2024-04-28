@@ -4,7 +4,7 @@ use array_math::{SliceMath, SliceOps};
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{Lists, Matrix, OwnedList};
+use crate::{Lists, OwnedListOrSingle, Matrix, OwnedList};
 
 pub enum WhtOrdering
 {

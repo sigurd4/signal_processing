@@ -2,7 +2,7 @@ use core::{iter::Sum, ops::DivAssign};
 
 use num::{complex::ComplexFloat, Zero};
 
-use crate::{ComplexOp, ContainerOrSingle, Downsample, FftFilt, List, ListOrSingle, Lists, MaybeList, MaybeSystem, OwnedList, Qmf, System, Tf};
+use crate::{ComplexOp, ContainerOrSingle, OwnedListOrSingle, Downsample, FftFilt, List, ListOrSingle, Lists, MaybeList, MaybeSystem, OwnedList, Qmf, System, Tf};
 
 pub trait Dwt<T, W, WW, L, H>: Lists<T, RowOwned: List<T>>
 where

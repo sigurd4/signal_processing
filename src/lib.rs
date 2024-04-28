@@ -22,6 +22,7 @@
 #![feature(coerce_unsized)]
 #![feature(decl_macro)]
 #![feature(array_try_map)]
+#![feature(inline_const)]
 
 #![allow(internal_features)]
 #![allow(incomplete_features)]

@@ -17,7 +17,7 @@ where
 
 }
 
-impl<'a, W, S> MaybeRtfOrSystem<W> for Rtf<'a, W, S>
+impl<W, S> MaybeRtfOrSystem<W> for Rtf<W, S>
 where
     W: ComplexFloat<Real = <S::Domain as ComplexFloat>::Real>,
     S::Domain: Into<W>,

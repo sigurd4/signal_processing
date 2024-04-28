@@ -2,7 +2,7 @@ use ndarray::Array2;
 use num::{traits::FloatConst, Float, Zero};
 use option_trait::Maybe;
 
-use crate::{List, Matrix, OwnedList};
+use crate::{List, Matrix, OwnedList, OwnedListOrSingle};
 
 pub trait ConvMatrix<T, M, N>: List<T>
 where

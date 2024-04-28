@@ -1,4 +1,4 @@
-use core::ops::{AddAssign, SubAssign};
+use core::ops::{AddAssign, Deref, SubAssign};
 
 use array_math::{SliceOps, SliceMath};
 use ndarray::{Array1, Array2};
@@ -19,7 +19,7 @@ where
     fn filter_mut(&mut self, x: XX) -> Self::Output;
 }
 
-impl<'b, W, T, B, A, X, XX> FilterMut<X, XX> for Rtf<'b, W, Tf<T, B, A>>
+impl<W, T, B, A, X, XX> FilterMut<X, XX> for Rtf<W, Tf<T, B, A>>
 where
     W: ComplexFloat<Real = T::Real>,
     T: ComplexFloat + ComplexOp<X>,
@@ -27,7 +27,6 @@ where
     A: MaybeList<T>,
     X: ComplexFloat<Real = T::Real>,
     XX: List<X>,
-    &'b Tf<T, B, A>: Into<Tf<T, Vec<Vec<T>>, Vec<T>>>,
     T: ComplexOp<X, Output = W>,
     W: ComplexOp<X, Output = W> + AddAssign + SubAssign,
     X: Into<W>,
@@ -37,7 +36,12 @@ where
 
     fn filter_mut(&mut self, x: XX) -> Self::Output
     {
-        let Tf {b, a}: Tf<_, Vec<Vec<_>>, Vec<_>> = self.sys.into();
+        let Tf {b, a} = Tf::new(
+            self.sys.b.to_vecs_option()
+                .unwrap_or_else(|| vec![vec![T::one()]]),
+            self.sys.a.to_vec_option()
+                .unwrap_or_else(|| vec![T::one()])
+        );
 
         let na = a.len();
         let nb: Vec<_> = b.iter()
@@ -89,7 +93,7 @@ where
     }
 }
 
-impl<'b, W, T, B, A, S, X, XX> FilterMut<X, XX> for Rtf<'b, W, Sos<T, B, A, S>>
+impl<W, T, B, A, S, X, XX> FilterMut<X, XX> for Rtf<W, Sos<T, B, A, S>>
 where
     T: ComplexFloat + Into<W>,
     B: Maybe<[T; 3]> + MaybeOwnedList<T>,
@@ -98,14 +102,31 @@ where
     W: ComplexFloat<Real = T::Real> + ComplexOp<X, Output = W> + SubAssign + AddAssign,
     X: ComplexFloat<Real = T::Real> + Into<W>,
     XX: List<X>,
-    XX::Mapped<W>: List<W, Mapped<W> = XX::Mapped<W>>,
-    &'b Sos<T, B, A, S>: Into<Sos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>>>
+    XX::Mapped<W>: List<W, Mapped<W> = XX::Mapped<W>>
 {
     type Output = XX::Mapped<W>;
 
     fn filter_mut(&mut self, x: XX) -> Self::Output
     {
-        let Sos {sos}: Sos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>>  = self.sys.into();
+        let one = T::one();
+        let zero = T::zero();
+
+        let Sos {sos} = Sos::new(
+            self.sys.sos.deref()
+                .as_view_slice_option()
+                .map(|sos| sos.iter()
+                    .map(|sos| Tf::new(
+                        sos.b.deref()
+                            .as_option()
+                            .copied()
+                            .unwrap_or_else(|| [zero, zero, one]),
+                        sos.a.deref()
+                            .as_option()
+                            .copied()
+                            .unwrap_or_else(|| [zero, zero, one])
+                    )).collect()
+                ).unwrap_or_else(|| vec![])
+        );
 
         let nw = 2*sos.len();
         self.w.resize(nw, W::zero());
@@ -150,7 +171,7 @@ where
     }
 }
 
-impl<'b, W, T, A, B, C, D, DD, X, XX, XW> FilterMut<X, XX> for Rtf<'b, W, Ss<T, A, B, C, D>>
+impl<W, T, A, B, C, D, DD, X, XX, XW> FilterMut<X, XX> for Rtf<W, Ss<T, A, B, C, D>>
 where
     T: ComplexFloat + Into<W>,
     A: SsAMatrix<T, B, C, D, Mapped<W>: Matrix<W>>,

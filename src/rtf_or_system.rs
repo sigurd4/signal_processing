@@ -10,7 +10,7 @@ pub trait RtfOrSystem: MaybeRtfOrSystem<Self::Domain>
 
 impl !RtfOrSystem for () {}
 
-impl<'a, W, S> RtfOrSystem for Rtf<'a, W, S>
+impl<W, S> RtfOrSystem for Rtf<W, S>
 where
     W: ComplexFloat<Real = <S::Domain as ComplexFloat>::Real>,
     S::Domain: Into<W>,

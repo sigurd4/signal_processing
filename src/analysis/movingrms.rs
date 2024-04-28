@@ -4,7 +4,7 @@ use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex, Float, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{Container, ContainerOrSingle, ListOrSingle, Lists, OwnedList, SigmoidTrain};
+use crate::{Container, ContainerOrSingle, ListOrSingle, Lists, OwnedList, SigmoidTrain, OwnedListOrSingle};
 
 pub trait MovingRms<T>: Lists<T, RowOwned: Container<T>>
 where

@@ -6,7 +6,7 @@ moddef::moddef!(
         meyeraux,
 
         ar,
-        b_spline,
+        bspline,
         filter,
         matrix,
         pulse,

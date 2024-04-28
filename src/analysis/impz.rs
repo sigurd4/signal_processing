@@ -24,7 +24,10 @@ where
     B: MaybeLists<T>,
     A: MaybeList<T>,
     B::RowsMapped<Vec<T>>: for<'b> Lists<T, RowsMapped<Vec<T>> = B::RowsMapped<Vec<T>>, RowView<'b>: List<T, Mapped<T::Real> = Vec<T::Real>>> + 'a,
-    Self: 'a + Filter<'a, T, Vec<T>, Output = B::RowsMapped<Vec<T>>> + System<Domain = T>,
+    Self: 'a,
+    B::View<'a>: MaybeLists<T>,
+    A::View<'a>: MaybeList<T>,
+    Tf<T, B::View<'a>, A::View<'a>>: Filter<T, Vec<T>, Output = B::RowsMapped<Vec<T>>> + System<Domain = T>,
     &'a Self: Into<Tf<T, B::RowsMapped<Vec<T>>, Vec<T>>>,
     Vec<T>: for<'b> Conv<T, T, &'b [T], Output = Vec<T>>,
     T::Real: Into<T>,
@@ -71,7 +74,8 @@ where
         }
         else
         {
-            self.filter(x, ())
+            self.as_view()
+                .filter(x, ())
         };
         (y, t)
     }
@@ -165,8 +169,7 @@ where
 
                     *n = 30;
 
-                    let r_periodic: Vec<_> = r.iter()
-                        .filter(|&r| r.abs() >= one - precision && Float::abs(r.arg()) > zero)
+                    let r_periodic: Vec<_> = core::iter::Iterator::filter(r.iter(), |&r| r.abs() >= one - precision && Float::abs(r.arg()) > zero)
                         .collect();
                     if !r_periodic.is_empty()
                     {
@@ -180,8 +183,7 @@ where
                         *n = (*n).max(n_periodic);
                     }
                     
-                    let r_damped: Vec<_> = r.iter()
-                        .filter(|&r| r.abs() < one - precision)
+                    let r_damped: Vec<_> = core::iter::Iterator::filter(r.iter(), |&r| r.abs() < one - precision)
                         .collect();
                     if !r_damped.is_empty()
                     {

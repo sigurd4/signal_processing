@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::{AddAssign, SubAssign}};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast, Zero};
 use option_trait::Maybe;
 
-use crate::{ContainerOrSingle, FreqZ, List, ListOrSingle, Lists, MaybeLists, OwnedList, System};
+use crate::{ContainerOrSingle, FreqZ, List, ListOrSingle, Lists, MaybeLists, OwnedList, System, OwnedListOrSingle};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PhaseUnwrapReference

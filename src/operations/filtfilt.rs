@@ -26,7 +26,7 @@ where
     Self: 'a,
     &'a Self: Into<Tf<T, Vec<Vec<T>>, Vec<T>>>,
     for<'b> Tf<T, &'b [T], &'b [T]>: System<Domain = T>,
-    for<'b> Rtf<'b, <T as ComplexOp<X>>::Output, Tf<T, &'b [T], &'b [T]>>: FilterMut<X, Vec<X>, Output = Vec<<T as ComplexOp<X>>::Output>> + FilterMut<<T as ComplexOp<X>>::Output, Vec<<T as ComplexOp<X>>::Output>, Output = Vec<<T as ComplexOp<X>>::Output>> + RtfOrSystem<Domain = <T as ComplexOp<X>>::Output>
+    for<'b> Rtf<<T as ComplexOp<X>>::Output, Tf<T, &'b [T], &'b [T]>>: FilterMut<X, Vec<X>, Output = Vec<<T as ComplexOp<X>>::Output>> + FilterMut<<T as ComplexOp<X>>::Output, Vec<<T as ComplexOp<X>>::Output>, Output = Vec<<T as ComplexOp<X>>::Output>> + RtfOrSystem<Domain = <T as ComplexOp<X>>::Output>
 {
     type Output = B::RowsMapped<XX::Mapped<<Self::Domain as ComplexOp<X>>::Output>>;
 
@@ -104,14 +104,14 @@ where
                     b: Polynomial::new(b.as_slice()),
                     a: Polynomial::new(a.as_slice())
                 };
-                let mut rtf = Rtf::new(&sys, Some(si.iter()
+                let mut rtf = Rtf::new(sys.clone(), Some(si.iter()
                     .map(|&si| Into::<<T as ComplexOp<X>>::Output>::into(si)*v[0].into())
                     .collect()
                 ));
                 let mut v: Vec<_> = rtf.filter_mut(v);
                 v.reverse();
                 
-                let mut rtf = Rtf::new(&sys, Some(si.iter()
+                let mut rtf = Rtf::new(sys, Some(si.iter()
                     .map(|&si| Into::<<T as ComplexOp<X>>::Output>::into(si)*v[v.len() - 1])
                     .collect()
                 ));

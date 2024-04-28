@@ -4,7 +4,7 @@ use num::{complex::ComplexFloat, One, Zero};
 
 use crate::{ComplexOp, List, ListOrSingle, Lists, MaybeList, MaybeLists, System, Tf};
 
-pub trait FiltIC<'a, X, XX, Y>: System
+pub trait FiltIC<X, XX, Y>: System
 where
     Self::Domain: ComplexOp<X>,
     X: ComplexFloat + Into<<Self::Domain as ComplexOp<X>>::Output>,
@@ -12,10 +12,10 @@ where
     XX::Mapped<<Self::Domain as ComplexOp<X>>::Output>: List<<Self::Domain as ComplexOp<X>>::Output>,
     Y: ListOrSingle<XX::Mapped<<Self::Domain as ComplexOp<X>>::Output>>
 {
-    fn filtic(&'a self, y: Y, x: XX) -> Vec<<Self::Domain as ComplexOp<X>>::Output>;
+    fn filtic(self, y: Y, x: XX) -> Vec<<Self::Domain as ComplexOp<X>>::Output>;
 }
 
-impl<'a, T, B, A, X, XX, Y> FiltIC<'a, X, XX, B::RowsMapped<XX::Mapped<Y>>> for Tf<T, B, A>
+impl<'a, T, B, A, X, XX, Y> FiltIC<X, XX, B::RowsMapped<XX::Mapped<Y>>> for Tf<T, B, A>
 where
     T: ComplexOp<X, Output = Y>,
     B: MaybeLists<T>,
@@ -24,13 +24,18 @@ where
     Y: ComplexFloat + DivAssign,
     XX: List<X>,
     XX::Mapped<Y>: List<Y>,
-    B::RowsMapped<XX::Mapped<Y>>: Lists<Y>,
-    Self: 'a,
-    &'a Self: Into<Tf<T, Vec<Vec<T>>, Vec<T>>>
+    B::RowsMapped<XX::Mapped<Y>>: Lists<Y>
 {
-    fn filtic(&'a self, y: B::RowsMapped<XX::Mapped<Y>>, x: XX) -> Vec<Y>
+    fn filtic(self, y: B::RowsMapped<XX::Mapped<Y>>, x: XX) -> Vec<Y>
     {
-        let Tf {b, mut a}: Tf<_, Vec<Vec<_>>, Vec<_>> = self.into();
+        let Tf {b, mut a} = Tf::new(
+            self.b.into_inner()
+                .into_vecs_option()
+                .unwrap_or_else(|| vec![vec![T::one()]]),
+            self.a.into_inner()
+                .into_vec_option()
+                .unwrap_or_else(|| vec![T::one()])
+        );
 
         let na = a.len();
 
@@ -89,7 +94,7 @@ mod test
         const N: usize = 16;
         let x = [0.0; N];
 
-        let y = h.filter(x, w1.clone());
+        let y = h.as_view().filter(x, w1.clone());
         let w2 = h.filtic(y, x);
 
         println!("w1 = {:?}", w1);

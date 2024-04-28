@@ -4,7 +4,7 @@ use ndarray::{Array1, Array2};
 use num::complex::ComplexFloat;
 use thiserror::Error;
 
-use crate::{ComplexOp, ContainerOrSingle, Filter, List, ListOrSingle, Lists, MaybeLenEq, OwnedList, System, Tf};
+use crate::{ComplexOp, OwnedListOrSingle, ContainerOrSingle, Filter, List, ListOrSingle, Lists, MaybeContainer, MaybeLenEq, OwnedList, System, Tf};
 
 //FIXME: Discontinuous at len - k.
 
@@ -33,11 +33,12 @@ where
     X: ComplexFloat + Into<Y>,
     T: ComplexFloat<Real = X::Real> + ComplexOp<X, Output = Y>,
     B: List<T, Owned: OwnedList<T>> + MaybeLenEq<Self, true> + Clone,
-    Tf<T, B::Owned>: for<'a> Filter<'a, X, XX::RowOwned, Output = <XX::RowOwned as ContainerOrSingle<X>>::Mapped<Y>> + System<Domain = T>,
     XX: Lists<X, RowOwned: OwnedList<X>>,
     <XX::RowOwned as ContainerOrSingle<X>>::Mapped<Y>: OwnedList<Y>,
     Y: ComplexFloat + Clone + 'static,
-    XX::RowsMapped<<XX::RowOwned as ContainerOrSingle<X>>::Mapped<Y>>: Into<XX::Mapped<Y>>
+    XX::RowsMapped<<XX::RowOwned as ContainerOrSingle<X>>::Mapped<Y>>: Into<XX::Mapped<Y>>,
+    for<'a> <B::Owned as MaybeContainer<T>>::View<'a>: List<T>,
+    for<'a> Tf<T, <B::Owned as MaybeContainer<T>>::View<'a>>: Filter<X, XX::RowOwned, Output = <XX::RowOwned as ContainerOrSingle<X>>::Mapped<Y>> + System<Domain = T>
 {
     fn sgolayfilt(self, x: XX) -> Result<XX::Mapped<Y>, SGolayFiltError>
     {
@@ -70,7 +71,8 @@ where
             let x1 = Array1::<Y>::from_shape_fn(n, |i| x.as_view_slice()[i].into());
             let x2 = Array1::<Y>::from_shape_fn(n, |i| x.as_view_slice()[len + i - n].into());
 
-            let mut y = h[k].filter(x, ());
+            let mut y = h[k].as_view()
+                .filter(x, ());
 
             y.as_mut_slice()
                 .rotate_left(n - k);
@@ -123,7 +125,7 @@ mod test
         let mut rng = rand::thread_rng();
         let x = t.map(|t| (TAU*F*t).cos() + (-1.0..1.0).sample_single(&mut rng));
 
-        let y = h.sgolayfilt(x)
+        let y = SGolayFilt::sgolayfilt(h, x)
             .unwrap();
 
         plot::plot_curves("x(t), y(t)", "plots/xy_t_sgolayfilt.png", [&t.zip(x), &t.zip(y)])

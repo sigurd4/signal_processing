@@ -19,7 +19,7 @@ where
     B: MaybeList<T, Owned: MaybeOwnedList<T>>,
     A: MaybeList<T> + for<'a> Conv<T, T, &'a [T], Output = Vec<T>, OutputT = T> + Clone,
     Tf<T, B::Owned, A>: ResidueZ<Output = Rpk<T, R, P, RP, K>> + System<Domain = T>,
-    for<'b> Tf<T, Vec<T>, A>: Filter<'b, TR, Vec<TR>, Output = Vec<T>> + System<Domain = T>,
+    Tf<T, Vec<T>, A>: Filter<TR, Vec<TR>, Output = Vec<T>> + System<Domain = T>,
     R: ComplexFloat<Real = TR>,
     P: ComplexFloat<Real = TR>,
     RP: MaybeList<(R, P)>,
