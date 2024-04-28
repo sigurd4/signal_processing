@@ -1,13 +1,13 @@
-use core::{iter::Sum, ops::MulAssign};
+use core::{iter::Sum, ops::{AddAssign, DivAssign, MulAssign, SubAssign}};
 
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{ContainerOrSingle, FiltIC, Filter, ListOrSingle, Lists, OwnedList, Sos, System, Tf, OwnedListOrSingle};
+use crate::{ContainerOrSingle, FiltIC, Filter, ListOrSingle, Lists, OwnedList, Sos, Tf, OwnedListOrSingle};
 
 pub trait CSpline1d<T>: Lists<T>
 where
-    T: Float + FloatConst
+    T: Float
 {
     fn cspline_1d<L>(self, lambda: L) -> Self::Mapped<T>
     where
@@ -16,16 +16,9 @@ where
 
 impl<T, X> CSpline1d<T> for X
 where
+    T: Float + FloatConst + Sum + MulAssign + AddAssign + SubAssign + DivAssign,
     X: Lists<T>,
     X::RowOwned: OwnedList<T>,
-    T: Float + FloatConst + Sum + MulAssign,
-    Tf<T, [T; 1], [T; 3]>: FiltIC<T, [T; 2], [T; 2]> + System<Domain = T>,
-    for<'a> Tf<T, &'a [T; 1], &'a [T; 3]>: FiltIC<T, [T; 2], [T; 2]> + System<Domain = T>,
-    for<'b, 'a> Sos<T, [T; 3], [T; 3], &'b [Tf<T, [T; 3], [T; 3]>; 1]>: Filter<T, &'a [T], Output = Vec<T>> + System<Domain = T>,
-    Sos<T, [T; 3], [T; 3], [Tf<T, [T; 3], [T; 3]>; 1]>: Filter<T, Vec<T>, Output = Vec<T>> + System<Domain = T>,
-    for<'b, 'a> Tf<T, (), &'a [T; 2]>: FiltIC<T, [T; 1], [T; 1]> + Filter<T, &'b [T], Output = Vec<T>> + System<Domain = T>,
-    for<'a> Tf<T, &'a [T; 1], &'a [T; 2]>: FiltIC<T, [T; 1], [T; 1]> + System<Domain = T>,
-    Tf<T, [T; 1], [T; 2]>: Filter<T, Vec<T>, Output = Vec<T>> + System<Domain = T>,
     X::RowsMapped<<X::RowOwned as ContainerOrSingle<T>>::Mapped<T>>: Into<X::Mapped<T>>
 {
     fn cspline_1d<L>(self, lambda: L) -> X::Mapped<T>
@@ -125,8 +118,9 @@ where
             let zi = T::from(3u8).unwrap().sqrt() - two;
 
             self.map_rows_into_owned(|mut x| {
-                let mut zik = one;
                 let k = x.length();
+
+                let mut zik = one;
                 let powers: Vec<_> = (0..k).map(|_| {
                     let zikk = zik;
                     zik *= zi;

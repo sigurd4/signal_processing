@@ -3,6 +3,7 @@ moddef::moddef!(
         bspline_eval,
         cspline_1d_eval,
         cspline_1d,
-        gauss_spline
+        gauss_spline,
+        qspline_1d
     }
 );
