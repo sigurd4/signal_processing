@@ -5,17 +5,17 @@ use option_trait::Maybe;
 
 use crate::{IntoList, List, ListOrSingle, OwnedListOrSingle, BSplineEval};
 
-pub trait CSpline1dEval<T, X, N, C>: IntoList<T, X, N>
+pub trait QSpline1dEval<T, X, N, C>: IntoList<T, X, N>
 where
     T: Float,
     X: ListOrSingle<T>,
     N: Maybe<usize>,
     C: List<T>
 {
-    fn cspline_1d_eval(self, numtaps: N, c: C) -> (X::Mapped<T>, X);
+    fn qspline_1d_eval(self, numtaps: N, c: C) -> (X::Mapped<T>, X);
 }
 
-impl<T, C, X, XX, N> CSpline1dEval<T, X, N, C> for XX
+impl<T, C, X, XX, N> QSpline1dEval<T, X, N, C> for XX
 where
     T: Float + AddAssign,
     XX: IntoList<T, X, N>,
@@ -24,7 +24,7 @@ where
     N: Maybe<usize>,
     C: List<T>
 {
-    fn cspline_1d_eval(self, numtaps: N, c: C) -> (X::Mapped<T>, X)
+    fn qspline_1d_eval(self, numtaps: N, c: C) -> (X::Mapped<T>, X)
     {
         let x = self.into_list(numtaps);
         let mut res = x.map_to_owned(|_| T::zero());
@@ -69,7 +69,7 @@ where
             let x: Vec<_> = cond1.iter()
                 .map(|&i| -xx[i])
                 .collect();
-            let (y, _) = x.cspline_1d_eval((), c.as_slice());
+            let (y, _) = x.qspline_1d_eval((), c.as_slice());
             for (i, y) in cond1.into_iter()
                 .zip(y)
             {
@@ -81,7 +81,7 @@ where
             let x: Vec<_> = cond2.iter()
                 .map(|&i| two*nm1 - xx[i])
                 .collect();
-            let (y, _) = x.cspline_1d_eval((), c.as_slice());
+            let (y, _) = x.qspline_1d_eval((), c.as_slice());
             for (i, y) in cond2.into_iter()
                 .zip(y)
             {
@@ -90,12 +90,12 @@ where
         }
         if cond3.len() > 0
         {
-            let cubic = |x: T| {
-                if x.abs() > two
+            let quadratic = |x: T| {
+                if x.abs() > T::from(1.5).unwrap()
                 {
                     return zero
                 }
-                const TT: [f64; 5] = [-2.0, -1.0, 0.0, 1.0, 2.0];
+                const TT: [f64; 4] = [-1.5, -0.5, 0.5, 1.5];
                 const CC: [f64; TT.len()*3 - 4] = const {
                     let mut c = [0.0; TT.len()*3 - 4];
                     c[TT.len() - 2] = 1.0;
@@ -108,9 +108,9 @@ where
                 .map(|&i| xx[i])
                 .collect();
             let jlower: Vec<_> = x.iter()
-                .map(|&x| <isize as NumCast>::from((x - two).floor() + one).unwrap())
+                .map(|&x| <isize as NumCast>::from((x - T::from(1.5).unwrap()).floor() + one).unwrap())
                 .collect();
-            for i in 0..4
+            for i in 0..3
             {
                 for ((r, &x), &j) in cond3.iter()
                     .copied()
@@ -119,7 +119,7 @@ where
                 {
                     let thisj: isize = j + i;
                     let indj = (thisj.max(0) as usize).min(n - 1);
-                    rr[r] += c[indj]*cubic(x - T::from(thisj).unwrap())
+                    rr[r] += c[indj]*quadratic(x - T::from(thisj).unwrap())
                 }
             }
         }

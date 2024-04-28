@@ -70,3 +70,31 @@ where
         }).into()
     }
 }
+
+#[cfg(test)]
+mod test
+{
+    use array_math::ArrayOps;
+    use linspace::LinspaceArray;
+    use rand::distributions::uniform::SampleRange;
+
+    use crate::{plot, QSpline1d, QSpline1dEval};
+
+    #[test]
+    fn test()
+    {
+        const N: usize = 300;
+        let mut rng = rand::thread_rng();
+        let x: [_; N] = [0.0; N/3].chain([1.0; N/3])
+            .chain([0.0; N/3])
+            .add_each(core::array::from_fn(|_| (-0.05..0.05).sample_single(&mut rng)));
+        let t: [_; N] = (0.0..x.len() as f64).linspace_array();
+
+        let (y, t): (_, [_; N]) = t.qspline_1d_eval((), x.qspline_1d());
+
+        plot::plot_curves("x[n]", "plots/x_n_qspline_1d.png", [
+            &t.zip(x),
+            &t.zip(y)
+        ]).unwrap();
+    }
+}
