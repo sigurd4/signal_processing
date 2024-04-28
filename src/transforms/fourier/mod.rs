@@ -1,0 +1,23 @@
+moddef::moddef!(
+    flat(pub) mod {
+        czt,
+        dct_2d,
+        dct,
+        dft_2d,
+        dft,
+        dht,
+        dst_2d,
+        dst,
+        dwht,
+        dwt,
+        hilbert,
+        iczt,
+        idft_2d,
+        idft,
+        idht,
+        idwht,
+        sdft_kw,
+        sdft,
+        swift
+    }
+);
