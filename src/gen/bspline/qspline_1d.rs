@@ -66,7 +66,7 @@ where
             y.push(out_last);
 
             let mut y = y.into_iter();
-            x.map_to_owned(|_| y.next().unwrap()*T::from(6u8).unwrap())
+            x.map_to_owned(|_| y.next().unwrap()*T::from(8u8).unwrap())
         }).into()
     }
 }
