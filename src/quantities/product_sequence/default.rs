@@ -1,4 +1,4 @@
-use crate::{MaybeList, ProductSequence};
+use crate::quantities::{MaybeList, ProductSequence};
 
 impl<T, S> Default for ProductSequence<T, S>
 where

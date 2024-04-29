@@ -4,7 +4,7 @@ use array_math::{ArrayOps, SliceMath};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{List, Lists, MaybeList, MaybeOwnedList, Sos, System, Tf, ToSos, Zpk};
+use crate::{quantities::{List, Lists, MaybeList, MaybeOwnedList}, systems::{Sos, Tf, Zpk}, System, transforms::system::ToSos};
 
 pub trait RealFreqZ<'a, H, W, N>: System
 where

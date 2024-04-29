@@ -2,7 +2,7 @@ use core::iter::Product;
 
 use num::One;
 
-use crate::{MaybeList, ProductSequence};
+use crate::quantities::{MaybeList, ProductSequence};
 
 impl<T, S1, S2> Product<ProductSequence<T, S1>> for ProductSequence<T, S2>
 where

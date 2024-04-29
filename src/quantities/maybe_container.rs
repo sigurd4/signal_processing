@@ -4,7 +4,7 @@
 use ndarray::{ArrayBase, ArrayView, Dimension, NdIndex, OwnedRepr};
 use option_trait::{NotVoid, StaticMaybe};
 
-use crate::{Container, ContainerOrSingle};
+use crate::quantities::{Container, ContainerOrSingle};
 
 pub trait MaybeContainer<T>
 {

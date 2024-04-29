@@ -5,7 +5,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, One};
 use option_trait::{Maybe, StaticMaybe};
 use ndarray_linalg::{qr::QRInto, Lapack, svd::{SVDInto, SVD}, solve::Solve};
 
-use crate::{List, MaybeList, System, Tf, TruncateIm};
+use crate::{quantities::{List, MaybeList}, System, systems::Tf, util::TruncateIm};
 
 // FIXME: implement Steiglitz-McBride iterations
 // FIXME: improve numerical stability for high order filters (matlab is a bit better)
@@ -291,7 +291,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Butter, FilterGenPlane, FilterGenType, InvFreqMethod, InvFreqZ, RealFreqZ, Tf};
+    use crate::{plot, gen::filter::{Butter, FilterGenPlane, FilterGenType}, identification::{InvFreqMethod, InvFreqZ}, analysis::RealFreqZ, systems::Tf};
 
     #[test]
     fn test()

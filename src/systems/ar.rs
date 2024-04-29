@@ -2,7 +2,7 @@ use core::marker::PhantomData;
 
 use num::complex::ComplexFloat;
 
-use crate::{ListOrSingle, MaybeList};
+use crate::quantities::{ListOrSingle, MaybeList};
 
 moddef::moddef!(
     mod {

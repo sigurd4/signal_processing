@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::{AddAssign, Div, Mul, MulAssign}};
 use num::{complex::ComplexFloat, One};
 use option_trait::Maybe;
 
-use crate::{Ar, ContainerOrSingle, List, ListOrSingle, Lists, System};
+use crate::{systems::Ar, quantities::{ContainerOrSingle, List, ListOrSingle, Lists}, System};
 
 pub trait Levinson<C, O, K>: System + Sized
 where

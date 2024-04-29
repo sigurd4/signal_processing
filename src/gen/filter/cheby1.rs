@@ -4,8 +4,7 @@ use ndarray::Array2;
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 
-
-use crate::{Bilinear, Cheb1AP, FilterGenError, FilterGenPlane, FilterGenType, SfTrans, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToSos, ToSs, ToTf, Zpk};
+use crate::{gen::filter::{Cheb1AP, FilterGenError, FilterGenPlane, FilterGenType}, transforms::{domain::Bilinear, filter::SfTrans, system::{ToSos, ToSs, ToTf}}, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, System};
 
 pub trait Cheby1<O>: System + Sized
 where
@@ -233,16 +232,14 @@ mod test
 {
     use array_math::ArrayOps;
     
-    
-
-    use crate::{plot, Cheby1, FilterGenPlane, Plane, RealFreqZ, Tf, ToZpk, Zpk};
+    use crate::{plot, gen::filter::{Cheby1, FilterGenPlane}, Plane, analysis::RealFreqZ, systems::Tf, transforms::system::ToZpk, systems::Zpk};
 
     #[test]
     fn test()
     {
         let fs = 1000.0;
 
-        let (n, wp, _ws, rp, t) = crate::cheb1ord(
+        let (n, wp, _ws, rp, t) = crate::gen::filter::cheb1ord(
             [40.0],
             [150.0],
             3.0,

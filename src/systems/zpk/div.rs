@@ -3,7 +3,7 @@ use std::ops::Mul;
 
 use num::complex::ComplexFloat;
 
-use crate::{ComplexOp, MaybeList, Normalize, ProductSequence, Zpk};
+use crate::{util::ComplexOp, quantities::{MaybeList, ProductSequence}, operations::Simplify, systems::Zpk};
 
 impl<T1, T2, T3, Z1, Z2, Z3, P1, P2, P3, K1, K2, K3> Div<Zpk<T2, Z2, P2, K2>> for Zpk<T1, Z1, P1, K1>
 where
@@ -25,9 +25,9 @@ where
     P2::MaybeMapped<T3>: MaybeList<T3>,
     ProductSequence<T3, Z1::MaybeMapped<T3>>: Mul<ProductSequence<T3, P2::MaybeMapped<T3>>, Output = ProductSequence<T3, Z3>>,
     ProductSequence<T3, P1::MaybeMapped<T3>>: Mul<ProductSequence<T3, Z2::MaybeMapped<T3>>, Output = ProductSequence<T3, P3>>,
-    Zpk<T3, Z3, P3, K3>: Normalize
+    Zpk<T3, Z3, P3, K3>: Simplify
 {
-    type Output = <Zpk<T3, Z3, P3, K3> as Normalize>::Output;
+    type Output = <Zpk<T3, Z3, P3, K3> as Simplify>::Output;
 
     fn div(self, rhs: Zpk<T2, Z2, P2, K2>) -> Self::Output
     {
@@ -37,6 +37,6 @@ where
             p: ProductSequence::new(self.p.into_inner().maybe_map_into_owned(|p| p.into()))
                 *ProductSequence::new(rhs.z.into_inner().maybe_map_into_owned(|z| z.into())),
             k: self.k.into()/rhs.k.into()
-        }.normalize()
+        }.simplify()
     }
 }

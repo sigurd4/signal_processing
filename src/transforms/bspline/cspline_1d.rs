@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::{AddAssign, DivAssign, MulAssign, SubAssign}};
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{ContainerOrSingle, FiltIC, Filter, ListOrSingle, Lists, OwnedList, Sos, Tf, OwnedListOrSingle};
+use crate::{quantities::{ContainerOrSingle, ListOrSingle, Lists, OwnedList, OwnedListOrSingle}, analysis::FiltIC, operations::filtering::Filter, systems::{Sos, Tf}};
 
 pub trait CSpline1d<T>: Lists<T>
 where
@@ -171,7 +171,7 @@ mod test
     use linspace::LinspaceArray;
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, CSpline1d, CSpline1dEval};
+    use crate::{plot, transforms::bspline::{CSpline1d, CSpline1dEval}};
 
     #[test]
     fn test()

@@ -1,6 +1,6 @@
 use num::complex::ComplexFloat;
 
-use crate::{MaybeList, MaybeLists, Polynomial, Tf};
+use crate::{quantities::{MaybeList, MaybeLists, Polynomial}, systems::Tf};
 
 impl<T, B, A> Default for Tf<T, B, A>
 where

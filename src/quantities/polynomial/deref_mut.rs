@@ -1,6 +1,6 @@
 use core::ops::DerefMut;
 
-use crate::{MaybeLists, Polynomial};
+use crate::quantities::{MaybeLists, Polynomial};
 
 impl<T, C> DerefMut for Polynomial<T, C>
 where

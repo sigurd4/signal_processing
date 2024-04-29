@@ -1,6 +1,6 @@
 use num::{traits::FloatConst, Float};
 
-use crate::{List, ListOrSingle, Lists};
+use crate::quantities::{List, ListOrSingle, Lists};
 
 pub trait PeakToRms<'a, T>: Lists<T>
 where

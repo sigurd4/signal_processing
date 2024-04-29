@@ -3,7 +3,7 @@ use core::ops::DivAssign;
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 
-use crate::{ProductSequence, System, Zpk};
+use crate::{quantities::ProductSequence, System, systems::Zpk};
 
 pub trait Cheb1AP<O>: System + Sized
 where
@@ -81,7 +81,7 @@ mod test
     use linspace::LinspaceArray;
     use num::Complex;
 
-    use crate::{plot, Bilinear, Cheb1AP, FreqS, Plane, RealFreqZ, Zpk};
+    use crate::{plot, gen::filter::Cheb1AP, transforms::domain::Bilinear, analysis::{FreqS, RealFreqZ}, systems::Zpk, Plane};
 
     #[test]
     fn test()

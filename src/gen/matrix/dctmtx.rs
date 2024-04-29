@@ -2,7 +2,7 @@ use ndarray::Array2;
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::Matrix;
+use crate::quantities::Matrix;
 
 pub trait DctMatrix<T, N>: Matrix<T>
 where
@@ -231,7 +231,7 @@ mod test
 {
     use array_math::{ArrayOps, CollumnArrayOps, MatrixMath};
 
-    use crate::{Dct, DctMatrix};
+    use crate::{transforms::fourier::Dct, gen::matrix::DctMatrix};
 
     #[test]
     fn test()

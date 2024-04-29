@@ -1,6 +1,6 @@
 use core::ops::Deref;
 
-use crate::{MaybeList, ProductSequence};
+use crate::quantities::{MaybeList, ProductSequence};
 
 impl<T, S> Deref for ProductSequence<T, S>
 where

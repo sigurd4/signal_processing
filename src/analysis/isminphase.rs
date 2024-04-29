@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, Complex, Float, One};
 use option_trait::Maybe;
 
-use crate::{ListOrSingle, MaybeList, MaybeOwnedList, MaybeLists, Polynomial, Sos, System, Tf, ToZpk, Zpk};
+use crate::{quantities::{ListOrSingle, MaybeOwnedList, MaybeList, MaybeLists, Polynomial}, System, systems::{Sos, Tf, Zpk}, transforms::system::ToZpk};
 
 pub trait IsMaxPhase<'a>: System
 {

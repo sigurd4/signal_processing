@@ -1,6 +1,6 @@
 use core::array::TryFromSliceError;
 
-use crate::ProductSequence;
+use crate::quantities::ProductSequence;
 
 impl<T1, T2, const M: usize> TryFrom<ProductSequence<T1, Vec<T1>>> for ProductSequence<T2, [T2; M]>
 where

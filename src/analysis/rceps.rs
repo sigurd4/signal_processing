@@ -4,7 +4,7 @@ use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, NumCast, On
 use option_trait::{Maybe, StaticMaybe};
 use array_math::SliceMath;
 
-use crate::{CepsError, List, ListOrSingle, Lists, TruncateIm, MaybeLists};
+use crate::{analysis::CepsError, quantities::{List, ListOrSingle, Lists, MaybeLists}, util::TruncateIm};
 
 pub trait RCeps<'a, T, C, N>: Lists<T>
 where
@@ -128,7 +128,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, RCeps};
+    use crate::{plot, analysis::RCeps};
 
     #[test]
     fn test()

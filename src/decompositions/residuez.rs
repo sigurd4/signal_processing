@@ -4,7 +4,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Float};
 use option_trait::Maybe;
 use array_math::SliceMath;
 
-use crate::{MaybeList, MaybeOwnedList, Normalize, Residue, Rpk, System, Tf};
+use crate::{quantities::{MaybeList, MaybeOwnedList}, operations::Simplify, decompositions::Residue, systems::{Rpk, Tf}, System};
 
 pub trait ResidueZ: System
 {
@@ -23,7 +23,7 @@ where
     B2: MaybeOwnedList<T>,
     A2: MaybeOwnedList<T>,
     TR: Float + FloatConst,
-    Self: Normalize<Output = Tf<T, B2, A2>> + System<Domain = T>,
+    Self: Simplify<Output = Tf<T, B2, A2>> + System<Domain = T>,
     Tf<T, B2, A2>: Residue<Output = Rpk<T, R, P, RP, K>> + System<Domain = T>,
     RP: MaybeOwnedList<(R, P)>,
     K: MaybeOwnedList<T>,
@@ -36,7 +36,7 @@ where
     where
         TOL: Maybe<TR>
     {
-        let mut tf = self.normalize();
+        let mut tf = self.simplify();
 
         if let Some(b) = tf.b.as_mut_slice_option()
         {
@@ -93,9 +93,9 @@ where
     Rpk<T, R, P, RP::Owned, K::Owned>: Residue<Output = Tf<T, B, A>> + System<Domain = T>,
     B: MaybeOwnedList<T>,
     A: MaybeOwnedList<T>,
-    Tf<T, B, A>: Normalize + System<Domain = T>
+    Tf<T, B, A>: Simplify + System<Domain = T>
 {
-    type Output = <Tf<T, B, A> as Normalize>::Output;
+    type Output = <Tf<T, B, A> as Simplify>::Output;
 
     fn residuez<TOL>(self, tol: TOL) -> Self::Output
     where
@@ -142,14 +142,14 @@ where
             a.conj_assign_all();
         }
 
-        tf.normalize()
+        tf.simplify()
     }
 }
 
 #[cfg(test)]
 mod test
 {
-    use crate::{ResidueZ, Tf};
+    use crate::{decompositions::ResidueZ, systems::Tf};
 
     #[test]
     fn test()

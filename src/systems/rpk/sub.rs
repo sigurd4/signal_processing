@@ -2,7 +2,7 @@ use core::ops::{Add, Neg, Sub};
 
 use num::complex::ComplexFloat;
 
-use crate::{MaybeList, Rpk};
+use crate::{quantities::MaybeList, systems::Rpk};
 
 impl<T1, T2, R1, R2, P1, P2, RP1, RP2, K1, K2> Sub<Rpk<T2, R2, P2, RP2, K2>> for Rpk<T1, R1, P1, RP1, K1>
 where

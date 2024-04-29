@@ -5,7 +5,13 @@ use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex, Float, NumCast, One, Zero, traits::FloatConst};
 use option_trait::Maybe;
 
-use crate::{ComplexOp, Conv, Filter, List, ListOrSingle, Lists, MaybeList, MaybeLists, System, Tf};
+use crate::{
+    util::ComplexOp,
+    operations::{convolution::Conv, filtering::Filter},
+    quantities::{List, ListOrSingle, Lists, MaybeList, MaybeLists},
+    System,
+    systems::Tf
+};
 
 pub trait ImpZ<'a, B, T, N>: System
 where
@@ -222,7 +228,7 @@ mod test
     use array_math::ArrayOps;
     use num::complex::ComplexFloat;
 
-    use crate::{plot, Butter, FilterGenPlane, FilterGenType, FreqZ, ImpZ, Polynomial, Tf};
+    use crate::{plot, gen::filter::{Butter, FilterGenPlane, FilterGenType}, analysis::{FreqZ, ImpZ}, systems::Tf};
 
     #[test]
     fn test()
@@ -241,10 +247,7 @@ mod test
         plot::plot_curves("h(t)", "plots/h_t_impz.png", [&th_i])
             .unwrap();
 
-        let h2 = Tf {
-            b: Polynomial::new(h_i),
-            a: Polynomial::new(())
-        };
+        let h2 = Tf::new(h_i, ());
 
         const N: usize = 1024;
 

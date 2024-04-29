@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::{AddAssign, SubAssign}};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast, Zero};
 use option_trait::Maybe;
 
-use crate::{ContainerOrSingle, FreqZ, List, ListOrSingle, Lists, MaybeLists, OwnedList, System, OwnedListOrSingle};
+use crate::{quantities::{ContainerOrSingle, List, ListOrSingle, Lists, MaybeLists, OwnedList, OwnedListOrSingle}, System, analysis::FreqZ};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PhaseUnwrapReference
@@ -98,14 +98,14 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Butter, FilterGenPlane, FreqZ, PhaseUnwrapReference, PhaseZ, Tf};
+    use crate::{plot, gen::filter::{Butter, FilterGenPlane}, analysis::{FreqZ, PhaseUnwrapReference, PhaseZ}, systems::Tf};
 
     #[test]
     fn test()
     {
         let fs = 1000.0;
 
-        let (n, wp, _ws, t) = crate::buttord(
+        let (n, wp, _ws, t) = crate::gen::filter::buttord(
             [40.0],
             [150.0],
             3.0,

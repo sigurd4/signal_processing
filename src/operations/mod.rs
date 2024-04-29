@@ -1,23 +1,13 @@
 moddef::moddef!(
+    pub mod {
+        convolution,
+        filtering,
+        resampling
+    },
     flat(pub) mod {
-        cconv,
-        conv,
-        conv_2d,
-        decimate,
         decode,
-        downsample,
         encode,
-        fftfilt,
-        filter_mut,
-        filter,
-        filtfilt,
-        interp,
-        normalize,
-        qmf,
-        resample,
-        sgolayfilt,
-        upsample,
-        upsample_fill,
+        simplify,
         window
     }
 );

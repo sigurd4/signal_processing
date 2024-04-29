@@ -1,6 +1,6 @@
 use num::complex::ComplexFloat;
 
-use crate::{ComplexOp, ImpZ, List, Lists, MaybeList, MaybeLists, Polynomial, System, Tf};
+use crate::{util::ComplexOp, analysis::ImpZ, quantities::{List, Lists, MaybeList, MaybeLists, Polynomial}, System, systems::Tf};
 
 pub trait Window<W, WW, O>: System
 where
@@ -47,7 +47,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, window::{self, WindowGen, WindowRange}, Butter, FilterGenPlane, FilterGenType, RealFreqZ, Tf, Window};
+    use crate::{plot, windows, gen::{window::{WindowGen, WindowRange}, filter::{Butter, FilterGenPlane, FilterGenType}}, analysis::RealFreqZ, systems::Tf, operations::Window};
 
     #[test]
     fn test()
@@ -56,9 +56,9 @@ mod test
             .unwrap();
 
         const N: usize = 10;
-        let w1: [f64; 2*N] = window::Boxcar.window_gen((), WindowRange::Symmetric);
-        let w2: [f64; 2*N] = window::BlackmanHarris.window_gen((), WindowRange::Symmetric);
-        let w3: [f64; 2*N] = window::Barthann.window_gen((), WindowRange::Symmetric);
+        let w1: [f64; 2*N] = windows::Boxcar.window_gen((), WindowRange::Symmetric);
+        let w2: [f64; 2*N] = windows::BlackmanHarris.window_gen((), WindowRange::Symmetric);
+        let w3: [f64; 2*N] = windows::Barthann.window_gen((), WindowRange::Symmetric);
 
         let h2: Tf<_, _, ()> = h1.window(w1.rsplit_array_ref2::<N>().1);
         let h3: Tf<_, _, ()> = h1.window(w2.rsplit_array_ref2::<N>().1);

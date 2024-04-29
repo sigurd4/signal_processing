@@ -3,7 +3,7 @@ use core::ops::DivAssign;
 use num::{traits::FloatConst, Float, NumCast};
 use option_trait::Maybe;
 
-use crate::{FilterBandError, Fir1Type, ListOrSingle};
+use crate::{gen::filter::{FilterBandError, Fir1Type}, quantities::ListOrSingle};
 
 pub fn kaiserord<T, FS, const F: usize, const D: usize>(
     frequencies: [T; F],
@@ -118,12 +118,12 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, window::{Kaiser, WindowGen, WindowRange}, Fir1, Plane, RealFreqZ, Tf, ToZpk, Zpk};
+    use crate::{plot, windows::Kaiser, gen::{window::{WindowGen, WindowRange}, filter::Fir1}, Plane, analysis::RealFreqZ, systems::{Tf, Zpk}, transforms::system::ToZpk};
 
     #[test]
     fn test()
     {
-        let (n, f, beta, t) = crate::kaiserord([1000.0, 1500.0], [true, false], [0.05, 0.01], 8000.0)
+        let (n, f, beta, t) = crate::gen::filter::kaiserord([1000.0, 1500.0], [true, false], [0.05, 0.01], 8000.0)
             .unwrap();
 
         let w: Vec<_> = Kaiser {beta}

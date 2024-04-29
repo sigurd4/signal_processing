@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, traits::Inv};
 use option_trait::Maybe;
 
-use crate::{MaybeList, MaybeOwnedList, Sos, Tf};
+use crate::{quantities::{MaybeList, MaybeOwnedList}, systems::{Sos, Tf}};
 
 impl<T1, T2, B1, B2, A1, A2, S1, S2> Inv for Sos<T1, B1, A1, S1>
 where

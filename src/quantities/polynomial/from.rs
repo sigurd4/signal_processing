@@ -1,7 +1,7 @@
 use array_math::{ArrayOps, SliceMath};
 use num::{One, Zero};
 
-use crate::{MaybeLists, Polynomial};
+use crate::quantities::{MaybeLists, Polynomial};
 
 impl<T1, T2, const N: usize> From<Polynomial<T1, ()>> for Polynomial<T2, [T2; N]>
 where

@@ -1,7 +1,7 @@
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{Ar, Levinson, List, ListOrSingle, Lists, System, XCorr, XCorrScale};
+use crate::{systems::Ar, gen::ar::Levinson, quantities::{List, ListOrSingle, Lists}, System, analysis::{XCorr, XCorrScale}};
 
 pub trait Lpc<X, O>: System + Sized
 where

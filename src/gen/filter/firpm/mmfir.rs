@@ -6,7 +6,7 @@ use option_trait::StaticMaybe;
 use rand::{distributions::uniform::SampleUniform, rngs::ThreadRng, Rng};
 use array_math::{SliceMath, ArrayOps};
 
-use crate::{FirPmError, FirPmReport, FirPmType, Polynomial, Tf};
+use crate::{gen::filter::{FirPmError, FirPmReport, FirPmType}, quantities::Polynomial, systems::Tf};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum FirType

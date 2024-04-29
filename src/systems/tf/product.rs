@@ -2,7 +2,7 @@ use std::{iter::Product, ops::Mul};
 
 use num::{complex::ComplexFloat, One};
 
-use crate::{MaybeList, MaybeLists, Tf, ToTf};
+use crate::{quantities::{MaybeList, MaybeLists}, systems::Tf, transforms::system::ToTf};
 
 impl<T1, B1, A1, T2, B2, A2> Product<Tf<T1, B1, A1>> for Tf<T2, B2, A2>
 where

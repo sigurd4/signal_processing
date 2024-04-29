@@ -6,7 +6,7 @@ use option_trait::Maybe;
 
 use array_math::SliceMath;
 
-use crate::{Chain, Polynomial, ProductSequence, System, Zpk};
+use crate::{util::Chain, quantities::{Polynomial, ProductSequence}, System, systems::Zpk};
 
 pub trait BesselAP<O>: System + Sized
 where
@@ -85,7 +85,7 @@ mod test
     use linspace::LinspaceArray;
     use num::Complex;
 
-    use crate::{plot, BesselAP, Bilinear, FreqS, Plane, RealFreqZ, Zpk};
+    use crate::{plot, gen::filter::BesselAP, transforms::domain::Bilinear, analysis::{FreqS, RealFreqZ}, systems::Zpk, Plane};
 
     #[test]
     fn test()

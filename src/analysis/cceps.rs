@@ -5,7 +5,7 @@ use array_math::SliceMath;
 use option_trait::{Maybe, StaticMaybe};
 use thiserror::Error;
 
-use crate::{List, ListOrSingle, Lists, TruncateIm};
+use crate::{quantities::{List, ListOrSingle, Lists}, util::TruncateIm};
 
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum CepsError
@@ -115,7 +115,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, CCeps};
+    use crate::{plot, analysis::CCeps};
 
     #[test]
     fn test()

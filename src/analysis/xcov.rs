@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::{RangeInclusive, SubAssign}};
 use num::complex::ComplexFloat;
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{ComplexOp, Lists, MaybeContainer, MaybeList, MaybeOwnedList, OwnedLists, XCorr, XCorrScale};
+use crate::{util::ComplexOp, quantities::{Lists, MaybeContainer, MaybeList, MaybeOwnedList, OwnedLists}, analysis::{XCorr, XCorrScale}};
 
 pub trait XCov<X, Y, YY, Z>: Lists<X>
 where

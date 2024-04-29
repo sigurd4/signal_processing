@@ -5,7 +5,7 @@ use ndarray_linalg::Lapack;
 use num::{complex::ComplexFloat, Complex, One, Zero};
 use option_trait::Maybe;
 
-use crate::{MaybeList, MaybeLists, MaybeOwnedList, Plane, Polynomial, Sos, System, Tf, TruncateIm, Zpk};
+use crate::{quantities::{MaybeList, MaybeLists, MaybeOwnedList, Polynomial}, Plane, systems::{Sos, Tf, Zpk}, System, util::TruncateIm};
 
 pub trait Stabilize: System
 {
@@ -151,7 +151,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{IsStable, Plane, Stabilize, Tf};
+    use crate::{analysis::IsStable, Plane, transforms::filter::Stabilize, systems::Tf};
 
     #[test]
     fn test()

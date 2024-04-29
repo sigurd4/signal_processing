@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::RangeInclusive};
 use num::{traits::FloatConst, Float, NumCast};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{IntoList, List, ListOrSingle, OwnedList, OwnedListOrSingle};
+use crate::quantities::{IntoList, List, ListOrSingle, OwnedList, OwnedListOrSingle};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum StateLevelsMethod
@@ -187,7 +187,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, StateLevels};
+    use crate::{plot, analysis::StateLevels};
 
     #[test]
     fn test()

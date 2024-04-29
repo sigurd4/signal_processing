@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 
-use crate::{MaybeList, SumSequence};
+use crate::quantities::{MaybeList, SumSequence};
 
 impl<T, S> Debug for SumSequence<T, S>
 where

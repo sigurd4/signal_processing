@@ -2,7 +2,7 @@ use core::ops::{Add, Div, Mul, Neg, Sub};
 
 use num::{complex::ComplexFloat, traits::Inv};
 
-use crate::{MaybeList, MaybeLists, Polynomial};
+use crate::quantities::{MaybeList, MaybeLists, Polynomial};
 
 moddef::moddef!(
     mod {

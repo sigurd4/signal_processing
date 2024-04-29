@@ -2,8 +2,9 @@ use core::ops::{Div, Mul, Neg};
 
 use num::{complex::ComplexFloat, traits::Inv, Complex, Float, NumCast, One, Zero};
 use option_trait::Maybe;
+use thiserror::Error;
 
-use crate::{ComplexRealError, ListOrSingle, MaybeList, ProductSequence, ToZpk};
+use crate::{quantities::{ListOrSingle, MaybeList, ProductSequence}, transforms::system::ToZpk};
 
 moddef::moddef!(
     mod {
@@ -17,9 +18,19 @@ moddef::moddef!(
         one,
         pow,
         product,
-        sub
+        sub,
+        zero
     }
 );
+
+#[derive(Debug, Clone, Copy, PartialEq, Error)]
+pub enum ComplexRealError
+{
+    #[error("Tolerance must be a number in the range [0.0, 1.0].")]
+    TolaranceOutOfRange,
+    #[error("Complex roots and/or poles did not come in conjugate pairs. Something is wrong with this system.")]
+    OddNumberComplex
+}
 
 #[derive(Debug, Clone, Copy)]
 pub struct Zpk<T: ComplexFloat, Z: MaybeList<T> = (), P: MaybeList<T> = (), K: ComplexFloat<Real = T::Real> = T>
@@ -546,7 +557,7 @@ pub macro zpk {
 #[cfg(test)]
 mod test
 {
-    use crate::zpk;
+    use crate::systems::zpk;
 
     #[test]
     fn test()

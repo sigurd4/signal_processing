@@ -1,7 +1,7 @@
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{Ar, Levinson, List, ListOrSingle, Lists, MaybeList, MaybeLists, System, XCorr, XCorrScale};
+use crate::{systems::Ar, gen::ar::Levinson, quantities::{List, ListOrSingle, Lists, MaybeList, MaybeLists}, System, analysis::{XCorr, XCorrScale}};
 
 pub trait ArYule<X, O, K>: System + Sized
 where
@@ -49,7 +49,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{Ar, ArYule};
+    use crate::{systems::Ar, gen::ar::ArYule};
 
     #[test]
     fn test()

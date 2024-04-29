@@ -1,7 +1,7 @@
 use core::fmt::Debug;
 use num::complex::ComplexFloat;
 
-use crate::{Ar, ListOrSingle, MaybeList};
+use crate::{systems::Ar, quantities::{ListOrSingle, MaybeList}};
 
 impl<T, A, AV> Debug for Ar<T, A, AV>
 where

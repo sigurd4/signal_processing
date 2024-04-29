@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, Complex};
 use option_trait::{Maybe, NotVoid, StaticMaybe};
 
-use crate::{List, MaybeLenEq, PWelch, PWelchDetrend};
+use crate::{quantities::List, util::MaybeLenEq, analysis::{PWelch, PWelchDetrend}};
 
 pub trait MsCohere<T, Y, YY, W, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
 where
@@ -87,7 +87,7 @@ mod test
     use array_math::ArrayOps;
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, Cheby1, Cheby2, Filter, FilterGenPlane, RealMsCohere, RealFreqZ, Tf};
+    use crate::{plot, gen::filter::{Cheby1, Cheby2, FilterGenPlane}, operations::filtering::Filter, analysis::{RealMsCohere, RealFreqZ}, systems::Tf};
 
     #[test]
     fn test()
@@ -96,12 +96,12 @@ mod test
         let mut rng = rand::thread_rng();
         let r: Vec<_> = (0..N).map(|_| (-1.0..1.0).sample_single(&mut rng)).collect();
 
-        let (n, wp, _ws, rs, t) = crate::cheb2ord([0.2, 0.4], [0.15, 0.45], 0.1, 60.0, FilterGenPlane::Z { sampling_frequency: None })
+        let (n, wp, _ws, rs, t) = crate::gen::filter::cheb2ord([0.2, 0.4], [0.15, 0.45], 0.1, 60.0, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
         let dx = Tf::cheby2(n, rs, wp, t, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
         
-        let (n, wp, _ws, rp, t) = crate::cheb1ord([0.6, 0.8], [0.65, 0.75], 0.1, 60.0, FilterGenPlane::Z { sampling_frequency: None })
+        let (n, wp, _ws, rp, t) = crate::gen::filter::cheb1ord([0.6, 0.8], [0.65, 0.75], 0.1, 60.0, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
         let dy = Tf::cheby1(n, rp, wp, t, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();

@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 
-use crate::{MaybeLists, Polynomial};
+use crate::quantities::{MaybeLists, Polynomial};
 
 impl<T, C> Debug for Polynomial<T, C>
 where

@@ -4,7 +4,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, One, Zero};
 use option_trait::Maybe;
 use array_math::SliceMath;
 
-use crate::{window::{Hamming, WindowGen, WindowRange}, ContainerOrSingle, FilterGenError, Fir2, List, ListOrSingle, MaybeList, Polynomial, System, Tf};
+use crate::{windows::Hamming, gen::{window::{WindowGen, WindowRange}, filter::{Fir2, FilterGenError}}, quantities::{ContainerOrSingle, List, ListOrSingle, MaybeList, Polynomial}, System, systems::Tf};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Fir1Type
@@ -207,7 +207,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Fir1, Fir1Type, Plane, RealFreqZ, Tf, ToZpk, Zpk};
+    use crate::{plot, gen::filter::{Fir1, Fir1Type}, Plane, analysis::RealFreqZ, systems::{Tf, Zpk}, transforms::system::ToZpk};
 
     #[test]
     fn test()

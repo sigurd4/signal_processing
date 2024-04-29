@@ -4,7 +4,7 @@ use array_math::{SliceMath, SliceOps};
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{Lists, OwnedListOrSingle, Matrix, OwnedList};
+use crate::quantities::{Lists, OwnedListOrSingle, Matrix, OwnedList};
 
 pub enum WhtOrdering
 {
@@ -87,7 +87,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{WhtOrdering, Dwht};
+    use crate::transforms::fourier::{WhtOrdering, Dwht};
 
     #[test]
     fn test()

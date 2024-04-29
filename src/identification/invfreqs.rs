@@ -5,7 +5,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, One};
 use option_trait::{Maybe, StaticMaybe};
 use ndarray::{Array1, Array2};
 
-use crate::{InvFreqMethod, List, MaybeList, System, Tf, TruncateIm};
+use crate::{identification::InvFreqMethod, quantities::{List, MaybeList}, System, systems::Tf, util::TruncateIm};
 
 pub trait InvFreqS<H, S, W, HFW, NB, NA>: System + Sized
 where
@@ -323,7 +323,7 @@ mod test
     use array_math::ArrayOps;
     use num::Complex;
 
-    use crate::{plot, Butter, FilterGenPlane, FilterGenType, FreqS, InvFreqMethod, InvFreqS, Tf};
+    use crate::{plot, gen::filter::{Butter, FilterGenPlane, FilterGenType}, analysis::FreqS, identification::{InvFreqMethod, InvFreqS}, systems::Tf};
 
     #[test]
     fn test()

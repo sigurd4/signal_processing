@@ -1,6 +1,6 @@
 use core::borrow::Borrow;
 
-use crate::{MaybeList, ProductSequence};
+use crate::quantities::{MaybeList, ProductSequence};
 
 impl<T, S> Borrow<S> for ProductSequence<T, S>
 where

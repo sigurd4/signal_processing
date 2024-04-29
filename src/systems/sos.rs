@@ -3,7 +3,7 @@ use core::ops::{Add, Div, Mul, Neg, Sub};
 use num::{complex::ComplexFloat, traits::Inv};
 use option_trait::Maybe;
 
-use crate::{MaybeList, MaybeOwnedList, Polynomial, ProductSequence, Tf, ToTf};
+use crate::{quantities::{MaybeList, MaybeOwnedList, Polynomial, ProductSequence}, systems::Tf, transforms::system::ToTf};
 
 moddef::moddef!(
     mod {

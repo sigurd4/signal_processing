@@ -3,7 +3,7 @@ use core::ops::{AddAssign, DivAssign, Mul, MulAssign};
 use num::{complex::ComplexFloat, Complex};
 use array_math::SliceMath;
 
-use crate::{Lists, OwnedLists};
+use crate::quantities::{Lists, OwnedLists};
 
 pub trait Dst<T>: Lists<T>
 where
@@ -72,7 +72,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, Dst};
+    use crate::{plot, transforms::fourier::Dst};
 
     #[test]
     fn test()

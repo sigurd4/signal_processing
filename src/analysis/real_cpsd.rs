@@ -1,7 +1,7 @@
 use num::{traits::FloatConst, Complex, Float, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{CPsd, List, ListOrSingle, MaybeLenEq, PWelchDetrend};
+use crate::{analysis::{CPsd, PWelchDetrend}, quantities::{List, ListOrSingle}, util::MaybeLenEq};
 
 pub trait RealCPsd<T, YY, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
 where

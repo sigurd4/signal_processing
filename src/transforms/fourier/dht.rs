@@ -1,9 +1,6 @@
-
-
-
 use num::{complex::ComplexFloat, Complex};
 
-use crate::{Lists, Dft, ContainerOrSingle};
+use crate::{quantities::{Lists, ContainerOrSingle}, transforms::fourier::Dft};
 
 pub trait Dht<T>: Lists<T>
 where
@@ -34,7 +31,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, Dht};
+    use crate::{plot, transforms::fourier::Dht};
 
     #[test]
     fn test()

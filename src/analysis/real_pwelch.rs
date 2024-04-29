@@ -1,7 +1,7 @@
 use num::{traits::FloatConst, Complex, Float, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{List, Lists, MaybeLenEq, MaybeList, PWelch, PWelchDetrend, ListOrSingle};
+use crate::{quantities::{List, Lists, MaybeList, ListOrSingle}, util::MaybeLenEq, analysis::{PWelch, PWelchDetrend}};
 
 pub trait RealPWelch<T, YY, WW, WWW, WL, N, S>: Lists<T> + MaybeLenEq<YY, true>
 where

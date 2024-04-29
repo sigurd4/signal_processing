@@ -1,7 +1,12 @@
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{Ar, ListOrSingle, MaybeList, MaybeLists, MaybeOwnedList, MaybeRtfOrSystem, Rpk, Rtf, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, Zpk};
+use crate::{
+    quantities::{ListOrSingle, MaybeList, MaybeLists, MaybeOwnedList},
+    systems::{Ar, Rpk, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk, Rtf},
+    MaybeRtfOrSystem,
+    System
+};
 
 pub trait RtfOrSystem: MaybeRtfOrSystem<Self::Domain>
 {

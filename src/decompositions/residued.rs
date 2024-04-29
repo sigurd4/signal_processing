@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{ComplexOp, Conv, Filter, MaybeList, MaybeOwnedList, Polynomial, ResidueZ, Rpk, System, Tf};
+use crate::{util::ComplexOp, operations::{convolution::Conv, filtering::Filter}, quantities::{MaybeList, MaybeOwnedList, Polynomial}, decompositions::ResidueZ, systems::{Rpk, Tf}, System};
 
 pub trait ResidueD: System
 {
@@ -31,56 +31,54 @@ where
     where
         TOL: Maybe<<Self::Domain as ComplexFloat>::Real>
     {
-        (|| {
-            let mut tf = Tf {
-                b: self.b.to_owned(),
-                a: self.a
-            };
+        let mut tf = Tf {
+            b: self.b.to_owned(),
+            a: self.a
+        };
 
-            let na = tf.a.as_view_slice_option().map(|a| a.len()).unwrap_or(1);
+        let na = tf.a.as_view_slice_option().map(|a| a.len()).unwrap_or(1);
 
-            let k = if let Some(b) = tf.b.as_mut_slice_option()
+        let k = if let Some(b) = tf.b.as_mut_slice_option()
+        {
+            let nb = b.len();
+            if nb >= na
             {
-                let nb = b.len();
-                if nb >= na
+                let mut delta = vec![TR::zero(); nb - na + 1];
+                delta[0] = TR::one();
+                let ba = Tf::new(b.to_vec(), tf.a.clone().into_inner());
+                let f = ba.filter(delta, ());
+                let fa = tf.a.clone().into_inner().conv(&f);
+                for i in 0..nb
                 {
-                    let mut delta = vec![TR::zero(); nb - na + 1];
-                    delta[0] = TR::one();
-                    let ba = Tf::new(b.to_vec(), tf.a.clone().into_inner());
-                    let f = ba.filter(delta, ());
-                    let fa = tf.a.clone().into_inner().conv(&f);
-                    for i in 0..nb
-                    {
-                        b[i] = b.get(i + nb - na + 1).map(|&b| b).unwrap_or_else(T::zero)
-                            - fa.get(i + nb - na + 1).map(|&f| f).unwrap_or_else(T::zero)
-                    }
+                    b[i] = b.get(i + nb - na + 1).map(|&b| b).unwrap_or_else(T::zero)
+                        - fa.get(i + nb - na + 1).map(|&f| f).unwrap_or_else(T::zero)
+                }
 
-                    f
-                }
-                else
-                {
-                    vec![]
-                }
+                f
             }
             else
             {
                 vec![]
-            };
-
-            let rpk = tf.residuez(tol);
-
-            Rpk {
-                rp: rpk.rp,
-                k: Polynomial::new(k)
             }
-        })()
+        }
+        else
+        {
+            vec![]
+        };
+
+        let rpk = tf.residuez(tol);
+
+        Rpk {
+            rp: rpk.rp,
+            k: Polynomial::new(k)
+        }
     }
 }
 
 #[cfg(test)]
 mod test
 {
-    use crate::{ResidueD, Tf};
+    use crate::{decompositions::ResidueD, systems::Tf};
 
     #[test]
     fn test()

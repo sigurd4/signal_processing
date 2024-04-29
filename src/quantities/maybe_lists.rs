@@ -3,8 +3,7 @@
 use ndarray::{prelude::Array1, Array2, ArrayView1, ArrayView2};
 use option_trait::StaticMaybe;
 
-
-use crate::{ListOrSingle, Lists, MaybeContainer, MaybeList};
+use crate::quantities::{ListOrSingle, Lists, MaybeContainer, MaybeList};
 
 pub trait MaybeLists<T>: MaybeContainer<T>
 {

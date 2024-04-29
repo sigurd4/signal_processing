@@ -2,7 +2,7 @@ use core::ops::{AddAssign, MulAssign, SubAssign};
 
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, NumCast, One};
 
-use crate::OwnedList;
+use crate::quantities::OwnedList;
 
 pub trait Sdft<T, X>: OwnedList<Complex<T::Real>>
 where
@@ -93,7 +93,7 @@ mod test
     use linspace::LinspaceArray;
     use num::{Complex, Zero};
 
-    use crate::{plot, Chirp, ChirpCurve, Sdft};
+    use crate::{plot, gen::{Chirp, ChirpCurve}, transforms::fourier::Sdft};
 
     #[test]
     fn test()

@@ -4,7 +4,7 @@ use num::{traits::Euclid, Zero};
 
 use array_math::SliceMath;
 
-use crate::{MaybeList, Polynomial, Lists, NotPolynomial};
+use crate::quantities::{MaybeList, Polynomial, Lists, NotPolynomial};
 
 impl<T, C1, C2> Div<Polynomial<T, C2>> for Polynomial<T, C1>
 where

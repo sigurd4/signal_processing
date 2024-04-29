@@ -5,7 +5,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, NumCast, Zero};
 use option_trait::Maybe;
 use array_math::{Array2dOps, ArrayOps, SliceMath};
 
-use crate::{window::{Hamming, WindowGen, WindowRange}, List, Matrix, MaybeList};
+use crate::{windows::Hamming, gen::window::{WindowGen, WindowRange}, quantities::{List, Matrix, MaybeList}};
 
 pub trait RealSpecGram<T, S, N, O, W, WW, const WWW: bool>: List<T>
 where
@@ -197,7 +197,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Chirp, ChirpCurve, RealSpecGram};
+    use crate::{plot, gen::{Chirp, ChirpCurve}, analysis::RealSpecGram};
 
     #[test]
     fn test()

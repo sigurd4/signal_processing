@@ -2,7 +2,7 @@ use core::ops::{Add, AddAssign};
 
 use num::{complex::ComplexFloat, traits::float::TotalOrder, Zero};
 
-use crate::{ComplexOp, MaybeList, Polynomial, Rpk, SumSequence};
+use crate::{util::ComplexOp, quantities::{MaybeList, Polynomial, SumSequence}, systems::Rpk};
 
 impl<T1, T2, T3, R1, R2, R3, P1, P2, P3, RP1, RP2, K1, K2, K3> Add<Rpk<T2, R2, P2, RP2, K2>> for Rpk<T1, R1, P1, RP1, K1>
 where

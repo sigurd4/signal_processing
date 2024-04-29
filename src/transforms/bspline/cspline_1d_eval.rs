@@ -3,7 +3,7 @@ use core::ops::AddAssign;
 use num::{Float, NumCast};
 use option_trait::Maybe;
 
-use crate::{IntoList, List, ListOrSingle, OwnedListOrSingle, BSplineEval};
+use crate::{quantities::{IntoList, List, ListOrSingle, OwnedListOrSingle}, transforms::bspline::BSplineEval};
 
 pub trait CSpline1dEval<T, X, N, C>: IntoList<T, X, N>
 where

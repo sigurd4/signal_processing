@@ -3,7 +3,7 @@ use core::ops::MulAssign;
 use num::{complex::ComplexFloat, Complex, One};
 use option_trait::Maybe;
 
-use crate::{MaybeList, MaybeLists, MaybeOwnedList, Sos, System, Tf, ToSos, ToTf, ToZpk, Zpk};
+use crate::{quantities::{MaybeList, MaybeLists, MaybeOwnedList}, systems::{Sos, Tf, Zpk}, System, transforms::system::{ToSos, ToTf, ToZpk}};
 
 pub trait MaxPhase: System
 {
@@ -102,7 +102,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{tf, MaxPhase};
+    use crate::{systems::tf, decompositions::MaxPhase};
 
     #[test]
     fn test()

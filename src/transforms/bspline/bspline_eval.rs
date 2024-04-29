@@ -3,7 +3,7 @@ use core::ops::AddAssign;
 use num::Float;
 use option_trait::Maybe;
 
-use crate::{IntoList, List, ListOrSingle, OwnedListOrSingle};
+use crate::quantities::{IntoList, List, ListOrSingle, OwnedListOrSingle};
 
 pub trait BSplineEval<T, X, N>: IntoList<T, X, N>
 where
@@ -92,7 +92,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{plot, BSplineEval};
+    use crate::{plot, transforms::bspline::BSplineEval};
 
     #[test]
     fn test()

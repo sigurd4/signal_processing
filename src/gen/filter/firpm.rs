@@ -6,7 +6,7 @@ use option_trait::{Maybe, StaticMaybe};
 use rand::distributions::uniform::SampleUniform;
 use thiserror::Error;
 
-use crate::{Polynomial, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToSs, ToZpk, Zpk};
+use crate::{systems::{Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, transforms::system::{ToSs, ToZpk}, System};
 
 moddef::moddef!(
     mod {
@@ -208,10 +208,10 @@ where
             }
         }
     
-        h.map(|(h, m, r)| (Tf {
-            b: Polynomial::new(h.b.into_inner().into_iter().map(Into::into).collect()),
-            a: Polynomial::new(())
-        }, m, r))
+        h.map(|(h, m, r)| (Tf::new(
+            h.b.into_inner().into_iter().map(Into::into).collect(),
+            ()
+        ), m, r))
     }
 }
 
@@ -310,13 +310,13 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, FirPm, FirPmType, Plane, RealFreqZ, Tf, ToZpk, Zpk};
+    use crate::{plot, gen::filter::{FirPm, FirPmType}, Plane, analysis::RealFreqZ, transforms::system::ToZpk, systems::{Tf, Zpk}};
 
     #[test]
     fn test()
     {
         let fs: f64 = 8000.0;
-        let (n, f, a, w) = crate::firpmord([1900.0, 2000.0], [1.0, 0.0], [0.0001, 0.0001], fs)
+        let (n, f, a, w) = crate::gen::filter::firpmord([1900.0, 2000.0], [1.0, 0.0], [0.0001, 0.0001], fs)
             .unwrap();
         println!("{}", n);
         let (h, _, ()) = Tf::firpm(

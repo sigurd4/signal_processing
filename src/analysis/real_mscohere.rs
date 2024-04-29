@@ -1,7 +1,7 @@
 use num::{traits::FloatConst, Float, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{MsCohere, List, ListOrSingle, MaybeLenEq, PWelchDetrend};
+use crate::{analysis::{MsCohere, PWelchDetrend}, quantities::{List, ListOrSingle}, util::MaybeLenEq};
 
 pub trait RealMsCohere<T, YY, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
 where

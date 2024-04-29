@@ -1,7 +1,7 @@
 use array_math::{Array2dOps, ArrayOps};
 use ndarray::{Array1, Array2, ArrayView1, ArrayView2};
 
-use crate::{ListOrSingle, Matrix, MaybeLists, MaybeOwnedMatrix};
+use crate::quantities::{ListOrSingle, Matrix, MaybeLists, MaybeOwnedMatrix};
 
 pub trait MaybeMatrix<T>: MaybeLists<T>
 {

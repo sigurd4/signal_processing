@@ -1,7 +1,7 @@
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{IntoList, ListOrSingle};
+use crate::quantities::{IntoList, ListOrSingle};
 
 pub trait TriPuls<T, L, N>: IntoList<T, L, N>
 where

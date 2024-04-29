@@ -4,7 +4,7 @@ use option_trait::NotVoid;
 
 use core::ops::{AddAssign, Mul};
 
-use crate::{Polynomial, ListOrSingle, MaybeContainer, Lists, NotPolynomial};
+use crate::quantities::{Polynomial, ListOrSingle, MaybeContainer, Lists, NotPolynomial};
 
 macro_rules! impl_mul {
     (($(<$($a:lifetime),* $(,)? $($c:ident),* >)?) (), $rhs:ty $(where $($w:tt)*)?) => {

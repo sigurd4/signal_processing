@@ -4,7 +4,7 @@ use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, NumCast, On
 use array_math::SliceMath;
 use option_trait::Maybe;
 
-use crate::{ContainerOrSingle, List, ListOrSingle, Lists, OwnedList};
+use crate::quantities::{ContainerOrSingle, List, ListOrSingle, Lists, OwnedList};
 
 pub trait Czt<T>: Lists<T>
 where
@@ -96,7 +96,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::Czt;
+    use crate::transforms::fourier::Czt;
 
     #[test]
     fn test()

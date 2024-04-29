@@ -2,7 +2,7 @@ use core::{iter::Sum, ops::{AddAssign, MulAssign, SubAssign}};
 
 use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, NumCast, One, Zero};
 
-use crate::{Matrix, OwnedList};
+use crate::quantities::{Matrix, OwnedList};
 
 // FIXME: Results with sdft_kw are not satisfactory somehow
 
@@ -141,7 +141,7 @@ mod test
     use linspace::LinspaceArray;
     use num::{Complex, Zero};
 
-    use crate::{plot, window::{Sine, WindowGen, WindowRange}, Chirp, ChirpCurve, SdftKw, ToKw};
+    use crate::{plot, windows::Sine, gen::{window::{WindowGen, WindowRange}, Chirp, ChirpCurve}, transforms::{fourier::SdftKw, window::ToKw}};
 
     #[test]
     fn test()

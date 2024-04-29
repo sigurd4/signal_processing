@@ -2,7 +2,7 @@ use core::ops::{BitAnd, Shr};
 
 use num::{complex::ComplexFloat, pow::Pow, traits::Inv, Integer, One};
 
-use crate::{ComplexOp, MaybeList, ToZpk, Zpk};
+use crate::{util::ComplexOp, quantities::MaybeList, transforms::system::ToZpk, systems::Zpk};
 
 
 impl<T, Z, P, K, I> Pow<I> for Zpk<T, Z, P, K>

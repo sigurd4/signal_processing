@@ -4,7 +4,7 @@ use std::ops::Mul;
 use num::{complex::ComplexFloat, Complex, Float, One, Zero};
 use thiserror::Error;
 
-use crate::{MaybeList, ProductSequence, System, ToZpk, Zpk};
+use crate::{quantities::{MaybeList, ProductSequence}, System, transforms::system::ToZpk, systems::Zpk};
 
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum SfTransError
@@ -249,7 +249,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, Bilinear, Butter, FilterGenPlane, FilterGenType, RealFreqZ, SfTrans, Zpk};
+    use crate::{plot, transforms::{domain::Bilinear, filter::SfTrans}, gen::filter::{Butter, FilterGenPlane, FilterGenType}, analysis::RealFreqZ, systems::Zpk};
 
     #[test]
     fn test()

@@ -3,7 +3,7 @@ use core::ops::{AddAssign, DivAssign, Mul, MulAssign};
 use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex};
 
-use crate::{Matrix, MaybeMatrix, OwnedLists, OwnedMatrix};
+use crate::quantities::{Matrix, MaybeMatrix, OwnedLists, OwnedMatrix};
 
 pub trait Dct2d<T>: Matrix<T>
 where
@@ -92,7 +92,7 @@ mod test
     use image::{GenericImage, GenericImageView, Rgba};
     use ndarray::Array2;
 
-    use crate::Dct2d;
+    use crate::transforms::fourier::Dct2d;
 
     #[test]
     fn test() -> Result<(), std::io::Error>

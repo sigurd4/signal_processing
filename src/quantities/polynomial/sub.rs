@@ -3,7 +3,7 @@ use core::ops::Sub;
 use array_math::{max_len, ArrayOps};
 use num::{Zero};
 
-use crate::Polynomial;
+use crate::quantities::Polynomial;
 
 macro_rules! impl_sub {
     (($(<$($a:lifetime),* $(,)? $($c:ident),* >)?) $lhs:ty, $rhs:ty [$n:tt, $m:tt] $(where $($w:tt)*)?) => {

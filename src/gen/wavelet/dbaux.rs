@@ -102,7 +102,7 @@ mod test
     #[test]
     fn test()
     {
-        let phi = crate::dbaux(38, 1.0);
+        let phi = crate::gen::wavelet::dbaux(38, 1.0);
 
         plot::plot_curves("ϕ[n]", "plots/phi_n_dbaux.png", [
                 &(0.0..phi.len() as f64).linspace(phi.len())

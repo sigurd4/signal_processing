@@ -6,7 +6,7 @@ use ndarray_linalg::{Lapack};
 use num::{Float, NumCast};
 use option_trait::{Maybe, MaybeCell};
 
-use crate::List;
+use crate::quantities::List;
 
 pub trait FindPeaks<T>: List<T>
 where
@@ -212,7 +212,13 @@ mod test
     use array_math::ArrayOps;
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, Butter, FiltFilt, FilterGenPlane, FilterGenType, FindPeaks, Tf};
+    use crate::{
+        plot,
+        gen::filter::{Butter, FilterGenPlane, FilterGenType},
+        operations::filtering::FiltFilt,
+        analysis::FindPeaks,
+        systems::Tf
+    };
 
     #[test]
     fn test()

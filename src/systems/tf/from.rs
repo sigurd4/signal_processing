@@ -1,7 +1,7 @@
 
 use num::complex::ComplexFloat;
 
-use crate::{MaybeList, MaybeLists, Polynomial, Tf};
+use crate::{quantities::{MaybeList, MaybeLists, Polynomial}, systems::Tf};
 
 impl<'a, T1, B1, A1, T2, B2, A2> From<&'a Tf<T1, B1, A1>> for Tf<T2, B2, A2>
 where

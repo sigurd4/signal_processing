@@ -1,6 +1,6 @@
 use core::borrow::BorrowMut;
 
-use crate::{MaybeLists, Polynomial};
+use crate::quantities::{MaybeLists, Polynomial};
 
 impl<T, C> BorrowMut<C> for Polynomial<T, C>
 where

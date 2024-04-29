@@ -1,7 +1,7 @@
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{IntoList, ListOrSingle};
+use crate::quantities::{IntoList, ListOrSingle};
 
 pub trait Morlet<T, L, N>: IntoList<T, L, N>
 where
@@ -40,7 +40,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Morlet};
+    use crate::{plot, gen::wavelet::Morlet};
 
     #[test]
     fn test()

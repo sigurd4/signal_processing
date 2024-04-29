@@ -1,7 +1,7 @@
 use array_math::SliceMath;
 use num::Zero;
 
-use crate::{MaybeLists, Polynomial};
+use crate::quantities::{MaybeLists, Polynomial};
 
 impl<T, C1, C2> PartialEq<Polynomial<T, C2>> for Polynomial<T, C1>
 where

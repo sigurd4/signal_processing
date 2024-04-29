@@ -2,7 +2,7 @@ use ndarray::Array2;
 use num::{traits::FloatConst, Float, Zero};
 use option_trait::Maybe;
 
-use crate::{List, Matrix, OwnedList, OwnedListOrSingle};
+use crate::quantities::{List, Matrix, OwnedList, OwnedListOrSingle};
 
 pub trait ConvMatrix<T, M, N>: List<T>
 where
@@ -51,7 +51,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::ConvMatrix;
+    use crate::gen::matrix::ConvMatrix;
 
     #[test]
     fn test()

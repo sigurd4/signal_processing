@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::{AddAssign, DivAssign, MulAssign}};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast, Zero};
 use array_math::SliceMath;
 
-use crate::{window::{Kaiser, WindowGen, WindowRange}, Conv, Idft, System, Tf, Hilbert};
+use crate::{windows::Kaiser, gen::window::{WindowGen, WindowRange}, operations::convolution::Conv, transforms::fourier::{Idft, Hilbert}, System, systems::Tf};
 
 pub trait QpKaiser: System
 {
@@ -130,7 +130,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Plane, QpKaiser, RealFreqZ, Tf, ToZpk, Zpk};
+    use crate::{plot, Plane, gen::filter::QpKaiser, analysis::RealFreqZ, systems::{Tf, Zpk}, transforms::system::ToZpk};
 
     #[test]
     fn test()

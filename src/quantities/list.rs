@@ -4,7 +4,7 @@ use array_math::ArrayOps;
 use ndarray::{Array1, ArrayView1};
 
 
-use crate::{IntoList, ListOrSingle, Matrix, MaybeList, OwnedList};
+use crate::quantities::{IntoList, ListOrSingle, Matrix, MaybeList, OwnedList};
 
 pub trait List<T>: MaybeList<T> + Matrix<T> + ListOrSingle<T> + IntoList<T, Self, ()>
 {

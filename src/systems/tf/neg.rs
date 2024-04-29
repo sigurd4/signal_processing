@@ -2,7 +2,7 @@ use core::ops::Neg;
 
 use num::complex::ComplexFloat;
 
-use crate::{MaybeList, MaybeLists, Polynomial, Tf};
+use crate::{quantities::{MaybeList, MaybeLists, Polynomial}, systems::Tf};
 
 impl<T, B1, B2, A> Neg for Tf<T, B1, A>
 where

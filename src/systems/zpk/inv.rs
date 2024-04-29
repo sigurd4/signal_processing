@@ -1,6 +1,6 @@
 use num::{complex::ComplexFloat, traits::Inv};
 
-use crate::{MaybeList, Zpk};
+use crate::{quantities::MaybeList, systems::Zpk};
 
 impl<T, Z, P, K> Inv for Zpk<T, Z, P, K>
 where

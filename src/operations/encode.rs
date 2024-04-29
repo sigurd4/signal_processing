@@ -3,7 +3,7 @@ use core::ops::{RangeInclusive, RemAssign, SubAssign};
 use num::{Bounded, Float, Integer, NumCast};
 use option_trait::Maybe;
 
-use crate::Lists;
+use crate::quantities::Lists;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum EncodeOverflow

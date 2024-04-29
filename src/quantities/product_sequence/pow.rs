@@ -2,7 +2,7 @@ use core::ops::{BitAnd, Shr};
 
 use num::{pow::Pow, Integer, Unsigned};
 
-use crate::{MaybeList, ProductSequence};
+use crate::quantities::{MaybeList, ProductSequence};
 
 impl<T, S, I> Pow<I> for ProductSequence<T, S>
 where

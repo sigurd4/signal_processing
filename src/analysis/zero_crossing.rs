@@ -1,6 +1,6 @@
 use num::{traits::{float::TotalOrder, FloatConst}, Float};
 
-use crate::{List, MaybeLenEq};
+use crate::{quantities::List, util::MaybeLenEq};
 
 pub trait ZeroCrossing<T, YY>: List<T> + MaybeLenEq<YY, true>
 where

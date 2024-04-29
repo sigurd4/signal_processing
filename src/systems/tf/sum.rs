@@ -2,7 +2,7 @@ use core::{iter::Sum, ops::Mul};
 
 use num::{complex::ComplexFloat, Zero};
 
-use crate::{MaybeList, MaybeLists, Tf};
+use crate::{quantities::{MaybeList, MaybeLists}, systems::Tf};
 
 impl<T1, B1, A1, T2, B2, A2> Sum<Tf<T1, B1, A1>> for Tf<T2, B2, A2>
 where

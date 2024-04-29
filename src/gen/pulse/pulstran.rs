@@ -3,7 +3,7 @@ use core::ops::Mul;
 use num::{Float, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{IntoList, ListOrSingle};
+use crate::quantities::{IntoList, ListOrSingle};
 
 pub trait PulseTrain<T, L, N>: IntoList<T, L, N>
 where
@@ -76,7 +76,7 @@ mod test
 
     use array_math::ArrayOps;
 
-    use crate::{plot, GausPuls, PulseTrain};
+    use crate::{plot, gen::pulse::{GausPuls, PulseTrain}};
 
     #[test]
     fn test()

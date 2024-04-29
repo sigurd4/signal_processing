@@ -1,6 +1,6 @@
 use core::ops::Deref;
 
-use crate::{MaybeList, SumSequence};
+use crate::quantities::{MaybeList, SumSequence};
 
 impl<T, S> Deref for SumSequence<T, S>
 where

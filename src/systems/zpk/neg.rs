@@ -2,7 +2,7 @@ use core::ops::Neg;
 
 use num::complex::ComplexFloat;
 
-use crate::{MaybeList, Zpk};
+use crate::{quantities::MaybeList, systems::Zpk};
 
 impl<T, Z, P, K> Neg for Zpk<T, Z, P, K>
 where

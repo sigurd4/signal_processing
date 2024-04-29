@@ -3,7 +3,7 @@ use core::ops::{AddAssign, DivAssign, Mul, MulAssign};
 use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex};
 
-use crate::{Matrix, MaybeMatrix, OwnedLists, OwnedMatrix};
+use crate::quantities::{Matrix, MaybeMatrix, OwnedLists, OwnedMatrix};
 
 pub trait Dst2d<T>: Matrix<T>
 where

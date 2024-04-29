@@ -1,22 +1,17 @@
 moddef::moddef!(
-    flat(pub) mod {
-        cheb,
-        chirp,
-        diric,
-        meyeraux,
-
+    pub mod {
         ar,
         bspline,
         filter,
         matrix,
         pulse,
-        wavelet
+        wavelet,
+        window,
+    },
+    flat(pub) mod {
+        cheb,
+        chirp,
+        diric,
+        meyeraux
     }
 );
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Plane
-{
-    S,
-    Z
-}

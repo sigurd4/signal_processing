@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::{AddAssign, SubAssign}};
 use num::{traits::FloatConst, Complex, Float, NumCast};
 use option_trait::Maybe;
 
-use crate::{ContainerOrSingle, List, ListOrSingle, Lists, MaybeLists, OwnedList, OwnedListOrSingle, PhaseUnwrapReference, RealFreqZ, System};
+use crate::{quantities::{ContainerOrSingle, List, ListOrSingle, Lists, MaybeLists, OwnedList, OwnedListOrSingle}, analysis::{PhaseUnwrapReference, RealFreqZ}, System};
 
 pub trait RealPhaseZ<'a, H, W, N>: System<Domain: Float + FloatConst>
 where

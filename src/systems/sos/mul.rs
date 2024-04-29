@@ -3,7 +3,7 @@ use core::ops::Mul;
 use num::complex::ComplexFloat;
 use option_trait::{Maybe, MaybeOr, StaticMaybe};
 
-use crate::{ComplexOp, MaybeList, MaybeOwnedList, ProductSequence, Sos, Tf, ToTf};
+use crate::{util::ComplexOp, quantities::{MaybeList, MaybeOwnedList, ProductSequence}, systems::{Sos, Tf}, transforms::system::ToTf};
 
 impl<T1, T2, T3, B1, B2, B3, A1, A2, A3, S1, S2, S3> Mul<Sos<T2, B2, A2, S2>> for Sos<T1, B1, A1, S1>
 where

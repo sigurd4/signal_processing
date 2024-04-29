@@ -6,7 +6,7 @@ use num::{complex::ComplexFloat, traits::{float::TotalOrder, Euclid, FloatConst}
 use array_math::SliceMath;
 use option_trait::Maybe;
 
-use crate::{MaybeContainer, MaybeList, Normalize, Polynomial, Rpk, SumSequence, System, Tf, ToTf};
+use crate::{quantities::{MaybeContainer, MaybeList, Polynomial, SumSequence}, operations::Simplify, System, systems::{Rpk, Tf}, transforms::system::ToTf};
 
 pub trait Residue: System
 {
@@ -23,7 +23,7 @@ where
     R: Float + FloatConst + TotalOrder + Into<T>,
     B: MaybeList<T>,
     A: MaybeList<T>,
-    Self: Normalize<Output: ToTf<T, Vec<T>, Vec<T>, (), ()>> + System<Domain = T>,
+    Self: Simplify<Output: ToTf<T, Vec<T>, Vec<T>, (), ()>> + System<Domain = T>,
     Complex<R>: AddAssign + SubAssign + MulAssign + DivAssign + From<T> + DivAssign<R> + Div<T, Output = Complex<R>>,
     Polynomial<T, Vec<T>>: Euclid
 {
@@ -33,7 +33,7 @@ where
     where
         TOL: Maybe<R>
     {
-        let Tf {mut b, a} = self.normalize()
+        let Tf {mut b, a} = self.simplify()
             .to_tf((), ());
 
         if a.is_zero()
@@ -209,9 +209,9 @@ where
     K: MaybeList<T, MaybeMapped<Complex<T::Real>>: MaybeList<Complex<T::Real>>>,
     Polynomial<Complex<T::Real>, <K as MaybeContainer<T>>::MaybeMapped<Complex<T::Real>>>: Mul<Polynomial<Complex<T::Real>, Vec<Complex<T::Real>>>, Output = Polynomial<Complex<T::Real>, Vec<Complex<T::Real>>>>,
     Complex<T::Real>: AddAssign,
-    Tf<T, Vec<T>, Vec<T>>: Normalize + System<Domain = T>
+    Tf<T, Vec<T>, Vec<T>>: Simplify + System<Domain = T>
 {
-    type Output = <Tf<T, Vec<T>, Vec<T>> as Normalize>::Output;
+    type Output = <Tf<T, Vec<T>, Vec<T>> as Simplify>::Output;
 
     fn residue<TOL>(self, tol: TOL) -> Self::Output
     where
@@ -246,14 +246,14 @@ where
         Tf {
             b: numer.truncate_im(),
             a: denom.truncate_im()
-        }.normalize()
+        }.simplify()
     }
 }
 
 #[cfg(test)]
 mod test
 {
-    use crate::{Residue, Tf};
+    use crate::{decompositions::Residue, systems::Tf};
 
     #[test]
     fn test()

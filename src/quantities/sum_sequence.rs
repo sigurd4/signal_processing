@@ -3,7 +3,7 @@ use core::{iter::Sum, marker::PhantomData};
 use num::Zero;
 use option_trait::NotVoid;
 
-use crate::MaybeList;
+use crate::quantities::MaybeList;
 
 moddef::moddef!(
     mod {

@@ -3,7 +3,7 @@ use core::ops::{Sub, Mul};
 use num::{complex::ComplexFloat, Complex};
 use option_trait::{MaybeOr, StaticMaybe};
 
-use crate::{MaybeList, SplitNumerDenom, Tf, ToTf, ToZpk, Zpk};
+use crate::{quantities::MaybeList, decompositions::SplitNumerDenom, systems::{Tf, Zpk}, transforms::system::{ToTf, ToZpk}};
 
 impl<T1, T2, T3, T4, Z1, Z2, Z3, Z4, P1, P2, P3, P4, K1, K2, K3, K4, K5, B1, B2, B3> Sub<Zpk<T2, Z2, P2, K2>> for Zpk<T1, Z1, P1, K1>
 where

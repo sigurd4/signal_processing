@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, One};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{MaybeContainer, MaybeList, MaybeOwnedList, MaybeLists, Polynomial, ProductSequence, Sos, System, Tf, Zpk};
+use crate::{quantities::{MaybeContainer, MaybeList, MaybeOwnedList, MaybeLists, Polynomial, ProductSequence}, systems::{Sos, Tf, Zpk}, System};
 
 pub trait SplitNumerDenom: System
 {

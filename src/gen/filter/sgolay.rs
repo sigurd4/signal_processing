@@ -6,7 +6,7 @@ use num::{complex::ComplexFloat, Float, NumCast};
 use option_trait::{Maybe, MaybeAnd, StaticMaybe};
 use thiserror::Error;
 
-use crate::{util, ListOrSingle, MaybeLenEq, OwnedList, System, Tf};
+use crate::{util, quantities::{ListOrSingle, OwnedList}, util::MaybeLenEq, System, systems::Tf};
 
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum SGolayError
@@ -139,7 +139,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{plot, RealFreqZ, SGolay, Tf};
+    use crate::{plot, analysis::RealFreqZ, gen::filter::SGolay, systems::Tf};
 
     #[test]
     fn test()

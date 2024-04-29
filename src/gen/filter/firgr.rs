@@ -6,7 +6,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 use thiserror::Error;
 
-use crate::{FilterClassType, Polynomial, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToSs, ToZpk, Zpk};
+use crate::{gen::filter::FilterClassType, systems::{Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, System, transforms::system::{ToSs, ToZpk}};
 
 moddef::moddef!(
     mod {
@@ -92,10 +92,7 @@ where
             max_iter.into_option().unwrap_or(40),
             grid_density.into_option().unwrap_or(16),
             T::infinity()
-        ).map(|(h, _)| Tf {
-            b: Polynomial::new(h.into_iter().map(Into::into).collect()),
-            a: Polynomial::new(())
-        })
+        ).map(|(h, _)| Tf::new(h.into_iter().map(Into::into).collect(), ()))
     }
 }
 
@@ -128,16 +125,15 @@ where
             max_iter.into_option().unwrap_or(40),
             grid_density.into_option().unwrap_or(16),
             T::infinity()
-        ).map(|(h, _)| Tf {
-            b: Polynomial::new(h.into_iter()
+        ).map(|(h, _)| Tf::new(
+            h.into_iter()
                 .map(Into::into)
                 .collect::<Vec<_>>()
                 .try_into()
                 .ok()
-                .unwrap()
-            ),
-            a: Polynomial::new(())
-        })
+                .unwrap(),
+            ()
+        ))
     }
 }
 
@@ -217,7 +213,7 @@ where
 mod test
 {
     use array_math::ArrayOps;
-    use crate::{plot, FilterClassType, FirGr, Plane, RealFreqZ, Tf, ToZpk, Zpk};
+    use crate::{plot, gen::filter::{FilterClassType, FirGr}, Plane, analysis::RealFreqZ, systems::{Tf, Zpk}, transforms::system::ToZpk};
 
     #[test]
     fn test()

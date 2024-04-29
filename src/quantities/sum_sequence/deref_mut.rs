@@ -1,6 +1,6 @@
 use core::ops::DerefMut;
 
-use crate::{MaybeList, SumSequence};
+use crate::quantities::{MaybeList, SumSequence};
 
 impl<T, S> DerefMut for SumSequence<T, S>
 where

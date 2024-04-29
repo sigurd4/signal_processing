@@ -1,6 +1,6 @@
 use ndarray::Array1;
 
-use crate::{List, MaybeOwnedList, OwnedListOrSingle};
+use crate::quantities::{List, MaybeOwnedList, OwnedListOrSingle};
 
 pub trait OwnedList<T>: List<T> + OwnedListOrSingle<T> + MaybeOwnedList<T>
 {

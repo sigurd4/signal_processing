@@ -1,7 +1,7 @@
 use num::{traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 
-use crate::{IntoList, ListOrSingle};
+use crate::quantities::{IntoList, ListOrSingle};
 
 pub trait ShanWavF<T, L, N>: IntoList<T, L, N>
 where
@@ -45,7 +45,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, ShanWavF};
+    use crate::{plot, gen::wavelet::ShanWavF};
 
     #[test]
     fn test()

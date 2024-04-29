@@ -3,7 +3,7 @@ use std::iter::Product;
 
 use num::{complex::ComplexFloat, One};
 
-use crate::{List, Zpk};
+use crate::{quantities::List, systems::Zpk};
 
 impl<'a, T1, T2, Z1, Z2, P1, P2, K1, K2> Product<&'a Zpk<T1, Z1, P1, K1>> for Zpk<T2, Z2, P2, K2>
 where

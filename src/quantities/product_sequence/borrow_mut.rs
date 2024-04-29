@@ -1,6 +1,6 @@
 use core::borrow::BorrowMut;
 
-use crate::{MaybeList, ProductSequence};
+use crate::quantities::{MaybeList, ProductSequence};
 
 impl<T, S> BorrowMut<S> for ProductSequence<T, S>
 where

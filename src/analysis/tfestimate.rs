@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{List, MaybeLenEq, PWelch, PWelchDetrend};
+use crate::{quantities::List, util::MaybeLenEq, analysis::{PWelch, PWelchDetrend}};
 
 pub trait TfEstimate<X, Y, YY, W, WW, WWW, WL, N, S>: List<X> + MaybeLenEq<YY, true>
 where
@@ -101,7 +101,7 @@ mod test
     use array_math::ArrayOps;
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, window::{Boxcar, WindowGen, WindowRange}, Filter, Fir1, Fir1Type, FreqZ, Tf, TfEstimate};
+    use crate::{plot, windows::Boxcar, operations::filtering::Filter, gen::{window::{WindowGen, WindowRange}, filter::{Fir1, Fir1Type}}, analysis::{TfEstimate, FreqZ}, systems::Tf};
 
     #[test]
     fn test()

@@ -3,7 +3,7 @@ use core::ops::Range;
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{IntoList, ListOrSingle};
+use crate::quantities::{IntoList, ListOrSingle};
 
 pub enum ChirpCurve
 {
@@ -78,7 +78,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Chirp, ChirpCurve};
+    use crate::{plot, gen::{Chirp, ChirpCurve}};
 
     #[test]
     fn test()

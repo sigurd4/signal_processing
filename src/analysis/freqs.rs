@@ -4,7 +4,7 @@ use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex, One};
 use option_trait::Maybe;
 
-use crate::{Lists, MaybeList, MaybeOwnedList, Sos, System, Tf, ToSos, Zpk};
+use crate::{quantities::{Lists, MaybeList, MaybeOwnedList}, systems::{Sos, Tf, Zpk}, System, transforms::system::ToSos};
 
 pub trait FreqS<'a, S, SS>: System
 where

@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::Mul};
 use num::{complex::ComplexFloat, traits::FloatConst, Float, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{IntoList, List, ListOrSingle};
+use crate::quantities::{IntoList, List, ListOrSingle};
 
 pub trait SampledToContinuous<T, L, R, N>: List<T>
 where
@@ -55,7 +55,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, SampledToContinuous};
+    use crate::{plot, transforms::SampledToContinuous};
 
     #[test]
     fn test()

@@ -3,7 +3,7 @@ use core::ops::{DivAssign, MulAssign};
 use array_math::{ArrayMath, ArrayOps};
 use num::{traits::FloatConst, Float, NumCast};
 
-use crate::{validate_filter_bands, FilterBandError, FilterGenPlane, FilterGenType};
+use crate::{validate_filter_bands, gen::filter::{FilterGenPlane, FilterGenType, FilterBandError}};
 
 pub fn cheb2ord<T, const F: usize>(
     mut passband_frequencies: [T; F],

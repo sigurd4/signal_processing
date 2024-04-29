@@ -4,7 +4,12 @@ use array_math::{ArrayOps, SliceMath};
 use num::{complex::ComplexFloat, traits::FloatConst, Float, Complex, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{Conv, List, Lists, MaybeList, MaybeLists, System, Tf};
+use crate::{
+    operations::convolution::Conv,
+    quantities::{List, Lists, MaybeList, MaybeLists},
+    System,
+    systems::Tf
+};
 
 pub trait GrpDelay<'a, H, W, N>: System
 where
@@ -126,14 +131,14 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Butter, FilterGenPlane, GrpDelay, Tf};
+    use crate::{plot, gen::filter::{Butter, FilterGenPlane}, analysis::GrpDelay, systems::Tf};
 
     #[test]
     fn test()
     {
         let fs = 1000.0;
 
-        let (n, wp, _ws, t) = crate::buttord(
+        let (n, wp, _ws, t) = crate::gen::filter::buttord(
             [40.0],
             [150.0],
             3.0,

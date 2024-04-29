@@ -1,6 +1,6 @@
 use core::array::TryFromSliceError;
 
-use crate::SumSequence;
+use crate::quantities::SumSequence;
 
 impl<T1, T2, const M: usize> TryFrom<SumSequence<T1, Vec<T1>>> for SumSequence<T2, [T2; M]>
 where

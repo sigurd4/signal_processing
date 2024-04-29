@@ -2,7 +2,7 @@ use array_math::SliceOps;
 use num::{complex::ComplexFloat, Float};
 use option_trait::Maybe;
 
-use crate::{ListOrSingle, MaybeOwnedList, MaybeList, MaybeLists, Sos, System, Tf, ToTf, Zpk};
+use crate::{quantities::{ListOrSingle, MaybeOwnedList, MaybeList, MaybeLists}, System, systems::{Sos, Tf, Zpk}, transforms::system::ToTf};
 
 pub trait IsLinPhase<'a>: System
 {
@@ -222,7 +222,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{IsLinPhase, Tf};
+    use crate::{analysis::IsLinPhase, systems::Tf};
 
     #[test]
     fn test()

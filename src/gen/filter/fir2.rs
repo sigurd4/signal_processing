@@ -4,7 +4,7 @@ use array_math::{SliceOps, SliceMath};
 use num::{complex::ComplexFloat, traits::float::TotalOrder, Complex, Float, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{window::{Hamming, WindowGen, WindowRange}, FilterGenError, List, MaybeList, Polynomial, System, Tf, TruncateIm};
+use crate::{windows::Hamming, gen::{filter::FilterGenError, window::{WindowGen, WindowRange}}, quantities::{List, MaybeList, Polynomial}, System, systems::Tf, util::TruncateIm};
 
 pub trait Fir2<O, F, M, W, WW = (), const WWW: bool = false>: System + Sized
 where
@@ -312,9 +312,7 @@ mod test
 
     use array_math::ArrayOps;
     
-    
-
-    use crate::{plot, Fir2, FreqZ, Plane, Tf, ToZpk, Zpk};
+    use crate::{plot, gen::filter::Fir2, analysis::FreqZ, Plane, systems::Tf, transforms::system::ToZpk, systems::Zpk};
 
     #[test]
     fn test()

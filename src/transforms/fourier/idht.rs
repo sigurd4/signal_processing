@@ -3,7 +3,7 @@
 
 use num::{complex::ComplexFloat, Complex};
 
-use crate::{Lists, Idft, ContainerOrSingle};
+use crate::{quantities::{Lists, ContainerOrSingle}, transforms::fourier::Idft};
 
 pub trait Idht<T>: Lists<T>
 where
@@ -34,7 +34,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, Dht, Idht};
+    use crate::{plot, transforms::fourier::{Dht, Idht}};
 
     #[test]
     fn test()

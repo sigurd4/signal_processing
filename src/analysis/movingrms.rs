@@ -4,7 +4,7 @@ use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex, Float, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{Container, ContainerOrSingle, ListOrSingle, Lists, OwnedList, SigmoidTrain, OwnedListOrSingle};
+use crate::{quantities::{Container, ContainerOrSingle, ListOrSingle, Lists, OwnedList, OwnedListOrSingle}, gen::pulse::SigmoidTrain};
 
 pub trait MovingRms<T>: Lists<T, RowOwned: Container<T>>
 where
@@ -115,7 +115,7 @@ mod test
     use linspace::LinspaceArray;
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, MovingRms};
+    use crate::{plot, analysis::MovingRms};
 
     #[test]
     fn test()

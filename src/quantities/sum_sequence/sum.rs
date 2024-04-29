@@ -2,7 +2,7 @@ use core::iter::Sum;
 
 use num::Zero;
 
-use crate::{MaybeList, SumSequence};
+use crate::quantities::{MaybeList, SumSequence};
 
 impl<T, S1, S2> Sum<SumSequence<T, S1>> for SumSequence<T, S2>
 where

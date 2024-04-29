@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::{AddAssign, Div, Mul}};
 use num::{complex::ComplexFloat, NumCast, One};
 use option_trait::Maybe;
 
-use crate::{Ar, ContainerOrSingle, List, ListOrSingle, Lists, System};
+use crate::{systems::Ar, quantities::{ContainerOrSingle, List, ListOrSingle, Lists}, System};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ArBurgCriterion
@@ -196,7 +196,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{Ar, ArBurg};
+    use crate::{systems::Ar, gen::ar::ArBurg};
 
     #[test]
     fn test()

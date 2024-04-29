@@ -1,7 +1,7 @@
 use ndarray::{Array1, ArrayView1};
 
 
-use crate::{ListOrSingle, MaybeLists};
+use crate::quantities::{ListOrSingle, MaybeLists};
 
 pub trait MaybeList<T>: MaybeLists<T>
 {

@@ -2,7 +2,7 @@ use core::ops::DivAssign;
 
 use num::{complex::ComplexFloat, One, Zero};
 
-use crate::{ComplexOp, List, ListOrSingle, Lists, MaybeList, MaybeLists, System, Tf};
+use crate::{util::ComplexOp, quantities::{List, ListOrSingle, Lists, MaybeList, MaybeLists}, System, systems::Tf};
 
 pub trait FiltIC<X, XX, Y>: System
 where
@@ -81,7 +81,12 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{Butter, FiltIC, Filter, FilterGenPlane, FilterGenType, Tf};
+    use crate::{
+        gen::filter::{Butter, FilterGenPlane, FilterGenType},
+        analysis::FiltIC,
+        operations::filtering::Filter,
+        systems::Tf
+    };
 
     #[test]
     fn test()

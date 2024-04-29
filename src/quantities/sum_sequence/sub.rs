@@ -1,6 +1,6 @@
 use core::ops::{Add, Neg, Sub};
 
-use crate::{MaybeList, SumSequence};
+use crate::quantities::{MaybeList, SumSequence};
 
 impl<T1, T2, T3, S1, S2, S3> Sub<SumSequence<T2, S2>> for SumSequence<T1, S1>
 where

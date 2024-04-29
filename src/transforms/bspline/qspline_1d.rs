@@ -2,7 +2,7 @@ use core::{iter::Sum, ops::{AddAssign, DivAssign, MulAssign, SubAssign}};
 
 use num::{traits::FloatConst, Float};
 
-use crate::{ContainerOrSingle, FiltIC, Filter, ListOrSingle, Lists, OwnedList, OwnedListOrSingle, Tf};
+use crate::{quantities::{ContainerOrSingle, ListOrSingle, Lists, OwnedList, OwnedListOrSingle}, analysis::FiltIC, operations::filtering::Filter, systems::Tf};
 
 
 pub trait QSpline1d<T>: Lists<T>
@@ -78,7 +78,7 @@ mod test
     use linspace::LinspaceArray;
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, QSpline1d, QSpline1dEval};
+    use crate::{plot, transforms::bspline::{QSpline1d, QSpline1dEval}};
 
     #[test]
     fn test()

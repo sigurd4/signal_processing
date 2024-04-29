@@ -2,7 +2,7 @@ use core::iter::Product;
 
 use num::One;
 
-use crate::{MaybeLists, Polynomial};
+use crate::quantities::{MaybeLists, Polynomial};
 
 impl<T, C1, C2> Product<Polynomial<T, C1>> for Polynomial<T, C2>
 where

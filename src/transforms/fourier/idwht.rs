@@ -4,7 +4,7 @@ use array_math::{SliceMath, SliceOps};
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{Lists, OwnedListOrSingle, Matrix, OwnedList, WhtOrdering};
+use crate::{quantities::{Lists, OwnedListOrSingle, Matrix, OwnedList}, transforms::fourier::WhtOrdering};
 
 pub trait Idwht<T, O, OO, const OOO: bool>: Lists<T>
 where
@@ -80,7 +80,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{WhtOrdering, Dwht, Idwht};
+    use crate::transforms::fourier::{WhtOrdering, Dwht, Idwht};
 
     #[test]
     fn test()

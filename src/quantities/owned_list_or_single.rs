@@ -1,7 +1,7 @@
 use ndarray::Array1;
 use option_trait::StaticMaybe;
 
-use crate::ListOrSingle;
+use crate::quantities::ListOrSingle;
 
 pub trait OwnedListOrSingle<T>: ListOrSingle<T> + Sized
 {

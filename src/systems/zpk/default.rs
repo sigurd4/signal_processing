@@ -1,6 +1,6 @@
 use num::complex::ComplexFloat;
 
-use crate::{MaybeList, ProductSequence, Zpk};
+use crate::{quantities::{MaybeList, ProductSequence}, systems::Zpk};
 
 impl<T, Z, P, K> Default for Zpk<T, Z, P, K>
 where

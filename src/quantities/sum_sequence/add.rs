@@ -1,6 +1,6 @@
 use core::ops::Add;
 
-use crate::{Chain, MaybeList, SumSequence};
+use crate::{util::Chain, quantities::{MaybeList, SumSequence}};
 
 impl<T, S1, S2> Add<SumSequence<T, S2>> for SumSequence<T, S1>
 where

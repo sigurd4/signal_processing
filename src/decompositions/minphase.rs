@@ -3,7 +3,7 @@ use core::ops::MulAssign;
 use num::{complex::ComplexFloat, Complex, One};
 use option_trait::Maybe;
 
-use crate::{MaybeList, MaybeLists, MaybeOwnedList, Sos, System, Tf, ToSos, ToTf, ToZpk, Zpk};
+use crate::{quantities::{MaybeList, MaybeLists, MaybeOwnedList}, System, systems::{Sos, Tf, Zpk}, transforms::system::{ToSos, ToTf, ToZpk}};
 
 pub trait MinPhase: System
 {
@@ -102,7 +102,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{tf, MinPhase};
+    use crate::{systems::tf, decompositions::MinPhase};
 
     #[test]
     fn test()

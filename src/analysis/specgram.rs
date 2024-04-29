@@ -5,7 +5,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, NumCast};
 use option_trait::Maybe;
 use array_math::{Array2dOps, ArrayOps, SliceMath};
 
-use crate::{window::{Hamming, WindowGen, WindowRange}, List, Matrix, MaybeList, ListOrSingle};
+use crate::{windows::Hamming, gen::window::{WindowGen, WindowRange}, quantities::{List, Matrix, MaybeList, ListOrSingle}};
 
 pub trait SpecGram<T, S, N, O, W, WW, const WWW: bool>: List<T>
 where
@@ -192,7 +192,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Chirp, ChirpCurve, SpecGram};
+    use crate::{plot, gen::{Chirp, ChirpCurve}, analysis::SpecGram};
 
     #[test]
     fn test()

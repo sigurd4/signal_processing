@@ -2,8 +2,7 @@ use core::ops::Neg;
 
 use array_math::ArrayOps;
 
-
-use crate::Polynomial;
+use crate::quantities::Polynomial;
 
 macro_rules! impl_neg {
     (($(<$($a:lifetime),* $(,)? $($c:ident),* >)?) $s:ty [$n:tt] $(where $($w:tt)*)?) => {

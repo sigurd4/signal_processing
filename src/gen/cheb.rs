@@ -1,10 +1,10 @@
 use core::ops::{Add, AddAssign, Mul, Neg, Sub};
 
-use array_math::{ArrayMath};
+use array_math::ArrayMath;
 use num::{Num, One, Zero};
 use option_trait::Maybe;
 
-use crate::{List, Polynomial};
+use crate::quantities::{List, Polynomial};
 
 pub trait Cheb<T, N>: List<T> + Sized
 where
@@ -91,7 +91,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::Cheb;
+    use crate::gen::Cheb;
 
     #[test]
     fn test()

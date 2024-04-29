@@ -3,7 +3,7 @@ use std::{iter::Product, ops::Mul};
 use num::{complex::ComplexFloat, One};
 use option_trait::Maybe;
 
-use crate::{MaybeList, MaybeOwnedList, Sos, Tf, ToSos};
+use crate::{quantities::{MaybeList, MaybeOwnedList}, systems::{Sos, Tf}, transforms::system::ToSos};
 
 impl<T1, B1, A1, S1, T2, B2, A2, S2> Product<Sos<T1, B1, A1, S1>> for Sos<T2, B2, A2, S2>
 where

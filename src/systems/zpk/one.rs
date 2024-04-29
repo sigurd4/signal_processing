@@ -2,7 +2,7 @@ use core::ops::Mul;
 
 use num::{complex::ComplexFloat, One};
 
-use crate::{List, Zpk};
+use crate::{quantities::List, systems::Zpk};
 
 impl<T, Z, P, K> One for Zpk<T, Z, P, K>
 where

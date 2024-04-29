@@ -4,8 +4,7 @@ use ndarray::Array2;
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 
-
-use crate::{Bilinear, EllipAP, FilterGenError, FilterGenPlane, FilterGenType, SfTrans, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, ToSos, ToSs, ToTf, Zpk};
+use crate::{gen::filter::{EllipAP, FilterGenError, FilterGenPlane, FilterGenType}, transforms::{domain::Bilinear, filter::SfTrans, system::{ToSos, ToSs, ToTf}}, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, System};
 
 pub trait Ellip<O>: System + Sized
 where
@@ -240,16 +239,14 @@ mod test
 {
     use array_math::ArrayOps;
     
-    
-
-    use crate::{plot, Ellip, FilterGenPlane, Plane, RealFreqZ, Tf, ToZpk, Zpk};
+    use crate::{plot, gen::filter::{Ellip, FilterGenPlane}, Plane, analysis::RealFreqZ, systems::Tf, transforms::system::ToZpk, systems::Zpk};
 
     #[test]
     fn test()
     {
         let fs = 1000.0;
 
-        let (n, wp, _ws, rp, rs, t) = crate::ellipord(
+        let (n, wp, _ws, rp, rs, t) = crate::gen::filter::ellipord(
             [40.0],
             [150.0],
             3.0,

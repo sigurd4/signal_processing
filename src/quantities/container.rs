@@ -3,7 +3,7 @@
 use ndarray::{prelude::ArrayView, ArrayBase, Dimension, NdIndex, OwnedRepr};
 use option_trait::NotVoid;
 
-use crate::{ContainerOrSingle, MaybeContainer};
+use crate::quantities::{ContainerOrSingle, MaybeContainer};
 
 pub trait Container<T>: MaybeContainer<T> + ContainerOrSingle<T> + NotVoid
 {

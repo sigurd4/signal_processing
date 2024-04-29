@@ -35,17 +35,6 @@
 
 moddef::moddef!(
     flat(pub) mod {
-        analysis,
-        decompositions,
-        error,
-        gen,
-        identification,
-        operations,
-        quantities,
-        systems,
-        transforms,
-        util,
-
         maybe_rtf_or_system,
         maybe_system,
         rtf_or_system,
@@ -53,12 +42,28 @@ moddef::moddef!(
         validate_filter_bands
     },
     pub mod {
-        window,
+        analysis,
+        decompositions,
+        gen,
+        identification,
+        operations,
+        quantities,
+        systems,
+        transforms,
+        util,
+        windows,
     },
     mod {
         plot for cfg(test)
     }
 );
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Plane
+{
+    S,
+    Z
+}
 
 #[cfg(test)]
 mod tests
@@ -67,7 +72,7 @@ mod tests
     use linspace::LinspaceArray;
     use num::Complex;
 
-    use crate::{plot, BesselAP, BesselF, ButtAP, Butter, Cheb1AP, Cheb2AP, EllipAP, FilterGenPlane, FilterGenType, FreqS, FreqZ, RealFreqZ, Tf, Zpk};
+    use crate::{plot, gen::filter::{BesselAP, BesselF, ButtAP, Butter, Cheb1AP, Cheb2AP, EllipAP, FilterGenPlane, FilterGenType}, analysis::{FreqS, FreqZ, RealFreqZ}, systems::{Tf, Zpk}};
 
     #[test]
     fn testt()
@@ -78,7 +83,7 @@ mod tests
         let dp = 3.0;
         let ds = 80.0;
 
-        let (n, wn, _, t) = crate::buttord([f_p], [f_s], dp, ds, FilterGenPlane::Z { sampling_frequency: Some(fs) })
+        let (n, wn, _, t) = crate::gen::filter::buttord([f_p], [f_s], dp, ds, FilterGenPlane::Z { sampling_frequency: Some(fs) })
             .unwrap();
         let ba = Tf::butter(n, wn, t, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
@@ -124,9 +129,9 @@ mod tests
     fn test()
     {
         let fs: f64 = 44100.0;
-        let h1 = Tf::<_, [_; 2], [_; 2]>::besself((), [800.0], FilterGenType::HighPass, crate::FilterGenPlane::Z { sampling_frequency: Some(fs) }).unwrap();
-        let h2 = Tf::<_, [_; 5], [_; 5]>::butter((), [8000.0], FilterGenType::LowPass, crate::FilterGenPlane::Z { sampling_frequency: Some(fs) }).unwrap();
-        let h3 = Tf::<_, [_; 3], [_; 3]>::butter((), [20000.0], FilterGenType::HighPass, crate::FilterGenPlane::Z { sampling_frequency: Some(fs) }).unwrap();
+        let h1 = Tf::<_, [_; 2], [_; 2]>::besself((), [800.0], FilterGenType::HighPass, FilterGenPlane::Z { sampling_frequency: Some(fs) }).unwrap();
+        let h2 = Tf::<_, [_; 5], [_; 5]>::butter((), [8000.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(fs) }).unwrap();
+        let h3 = Tf::<_, [_; 3], [_; 3]>::butter((), [20000.0], FilterGenType::HighPass, FilterGenPlane::Z { sampling_frequency: Some(fs) }).unwrap();
 
         let h = h1*&h2 + h3;
 

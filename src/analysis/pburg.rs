@@ -1,7 +1,7 @@
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{Ar, ArBurg, ArBurgCriterion, List, Lists, Psd, PsdMethod, PsdRange, System};
+use crate::{systems::Ar, gen::ar::{ArBurg, ArBurgCriterion}, quantities::{List, Lists}, analysis::{Psd, PsdMethod, PsdRange}, System};
 
 
 pub trait PBurg<X, O, P, F, N, FF, R, M, C>: Lists<X>
@@ -50,7 +50,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, PBurg};
+    use crate::{plot, analysis::PBurg};
 
     #[test]
     fn test()

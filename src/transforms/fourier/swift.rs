@@ -1,6 +1,6 @@
 use num::{complex::ComplexFloat, traits::MulAddAssign, Complex};
 
-use crate::ListOrSingle;
+use crate::quantities::ListOrSingle;
 
 pub trait Swift<T, X>: ComplexFloat<Real = T::Real>
 where

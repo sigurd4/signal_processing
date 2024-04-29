@@ -1,12 +1,13 @@
 moddef::moddef!(
     flat(pub) mod {
+        sampled_to_continuous,
+    },
+    pub mod {
         bspline,
+        domain,
         filter,
         fourier,
-        representation,
-
-        bilinear,
-        impinvar,
-        sampled_to_continuous,
+        system,
+        window
     }
 );

@@ -3,7 +3,7 @@
 use ndarray::{Array1, ArrayView1};
 use option_trait::StaticMaybe;
 
-use crate::{ContainerOrSingle, OwnedList};
+use crate::quantities::{ContainerOrSingle, OwnedList};
 
 pub trait ListOrSingle<T>: ContainerOrSingle<T>
 {

@@ -3,7 +3,7 @@ use core::ops::Add;
 use num::{complex::ComplexFloat, Zero};
 use option_trait::Maybe;
 
-use crate::{MaybeList, MaybeOwnedList, ProductSequence, Sos, Tf, Polynomial};
+use crate::{quantities::{MaybeList, MaybeOwnedList, ProductSequence, Polynomial}, systems::{Sos, Tf}};
 
 impl<T, B, A, S> Zero for Sos<T, B, A, S>
 where

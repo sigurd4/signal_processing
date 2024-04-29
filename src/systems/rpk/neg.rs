@@ -2,7 +2,7 @@ use core::ops::Neg;
 
 use num::complex::ComplexFloat;
 
-use crate::{MaybeList, Polynomial, Rpk, SumSequence};
+use crate::{quantities::{MaybeList, Polynomial, SumSequence}, systems::Rpk};
 
 impl<T, T2, R, P, RP, K, K2> Neg for Rpk<T, R, P, RP, K>
 where

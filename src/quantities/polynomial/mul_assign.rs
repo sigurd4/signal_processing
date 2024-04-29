@@ -1,6 +1,6 @@
 use core::ops::{Mul, MulAssign};
 
-use crate::{MaybeLists, Polynomial};
+use crate::quantities::{MaybeLists, Polynomial};
 
 impl<T, C, Rhs> MulAssign<Rhs> for Polynomial<T, C>
 where

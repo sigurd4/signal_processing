@@ -1,7 +1,4 @@
-
-
-
-use crate::ProductSequence;
+use crate::quantities::ProductSequence;
 
 impl<T1, T2> From<ProductSequence<T1, ()>> for ProductSequence<T2, [T2; 0]>
 {

@@ -2,7 +2,7 @@ use core::ops::SubAssign;
 
 use num::{Float, Zero};
 
-use crate::{List, Matrix, MaybeList, ContainerOrSingle};
+use crate::quantities::{List, Matrix, MaybeList, ContainerOrSingle};
 
 pub enum FullWidthAt<T>
 where
@@ -161,7 +161,12 @@ mod test
 
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
-    use crate::{window::{Barthann, BlackmanHarris, Boxcar, Hamming, Hann, Kaiser, Triangular, WindowGen, WindowRange}, FullWidthAt, Dft, FWHM};
+    use crate::{
+        gen::window::{WindowGen, WindowRange},
+        windows::{Barthann, BlackmanHarris, Boxcar, Hamming, Hann, Kaiser, Triangular},
+        analysis::{FWHM, FullWidthAt},
+        transforms::fourier::Dft
+    };
 
     #[test]
     fn test()

@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, Complex, Float, One, Zero};
 use option_trait::Maybe;
 
-use crate::{ListOrSingle, MaybeList, MaybeLists, MaybeOwnedList, Plane, Polynomial, Sos, System, Tf, ToZpk, Zpk};
+use crate::{quantities::{ListOrSingle, MaybeList, MaybeLists, MaybeOwnedList, Polynomial}, systems::{Sos, Tf, Zpk}, transforms::system::ToZpk, Plane, System};
 
 pub trait IsStable<'a>: System
 {

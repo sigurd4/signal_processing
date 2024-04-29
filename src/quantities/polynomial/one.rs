@@ -3,7 +3,7 @@ use core::ops::Mul;
 
 use num::{One};
 
-use crate::Polynomial;
+use crate::quantities::Polynomial;
 
 impl<T> One for Polynomial<T, Vec<T>>
 where

@@ -1,6 +1,6 @@
 use ndarray::{Array1, Array2, ArrayView1, ArrayView2};
 
-use crate::{Lists, MaybeMatrix};
+use crate::quantities::{Lists, MaybeMatrix};
 
 pub trait Matrix<T>: Lists<T> + MaybeMatrix<T>
 {

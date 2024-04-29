@@ -2,7 +2,7 @@ use ndarray::Array2;
 use num::{traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 
-use crate::Matrix;
+use crate::quantities::Matrix;
 
 pub trait DftMatrix<T, N>: Matrix<Complex<T>>
 where
@@ -52,7 +52,7 @@ mod test
     use array_math::{ArrayOps, CollumnArrayOps, MatrixMath};
     use num::Complex;
 
-    use crate::{DftMatrix, Dft};
+    use crate::{gen::matrix::DftMatrix, transforms::fourier::Dft};
 
     #[test]
     fn test()

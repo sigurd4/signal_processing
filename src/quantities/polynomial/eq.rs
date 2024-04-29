@@ -1,4 +1,4 @@
-use crate::{MaybeLists, Polynomial};
+use crate::quantities::{MaybeLists, Polynomial};
 
 impl<T, C> Eq for Polynomial<T, C>
 where

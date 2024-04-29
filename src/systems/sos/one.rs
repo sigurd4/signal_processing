@@ -3,7 +3,7 @@ use std::ops::Mul;
 use num::{complex::ComplexFloat, One};
 use option_trait::Maybe;
 
-use crate::{MaybeList, MaybeOwnedList, Sos, Tf, ToTf};
+use crate::{quantities::{MaybeList, MaybeOwnedList}, systems::{Sos, Tf}, transforms::system::ToTf};
 
 impl<T, B, A, S> One for Sos<T, B, A, S>
 where

@@ -3,7 +3,7 @@ use core::ops::{AddAssign, MulAssign};
 use array_math::SliceMath;
 use num::{One, Zero};
 
-use crate::{MaybeList, MaybeLists, Polynomial};
+use crate::quantities::{MaybeList, MaybeLists, Polynomial};
 
 impl<T, C, X> FnOnce<(X,)> for Polynomial<T, C>
 where

@@ -4,7 +4,7 @@ use num::{Float, complex::ComplexFloat};
 use array_math::{SliceMath, SliceOps};
 use option_trait::Maybe;
 
-use crate::{ListOrSingle, MaybeOwnedList, MaybeList, MaybeLists, Sos, System, Tf, ToTf, Zpk};
+use crate::{quantities::{ListOrSingle, MaybeOwnedList, MaybeList, MaybeLists}, systems::{Sos, Tf, Zpk}, System, transforms::system::ToTf};
 
 pub trait IsAllPass<'a>: System
 {

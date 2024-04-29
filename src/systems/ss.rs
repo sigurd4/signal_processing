@@ -3,7 +3,7 @@ use core::marker::PhantomData;
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{LenEq, Matrix};
+use crate::{util::LenEq, quantities::Matrix};
 
 pub trait SsAMatrix<T, B: Matrix<T>, C: Matrix<T>, D: Matrix<T>>: Matrix<T> {}
 impl<T, A, B, C, D, N> SsAMatrix<T, B, C, D> for A
@@ -125,7 +125,7 @@ pub macro ss {
 #[cfg(test)]
 mod test
 {
-    use crate::ss;
+    use crate::systems::ss;
 
     #[test]
     fn test()

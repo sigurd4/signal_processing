@@ -2,7 +2,7 @@ use core::ops::Add;
 
 use num::{complex::ComplexFloat, Float, NumCast, Zero};
 
-use crate::{List, ListOrSingle, Lists};
+use crate::quantities::{List, ListOrSingle, Lists};
 
 pub trait Rms<'a, T>: Lists<T>
 where

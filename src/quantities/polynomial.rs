@@ -4,7 +4,7 @@ use array_math::{ArrayOps, SliceMath, SliceOps};
 use num::{complex::ComplexFloat, traits::Euclid, One, Zero, Float};
 use option_trait::NotVoid;
 
-use crate::{Lists, MaybeList, MaybeLists, TruncateIm};
+use crate::{quantities::{Lists, MaybeList, MaybeLists}, util::TruncateIm};
 
 moddef::moddef!(
     mod {

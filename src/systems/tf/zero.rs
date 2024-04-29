@@ -2,7 +2,7 @@ use core::ops::Add;
 
 use num::{complex::ComplexFloat, Zero};
 
-use crate::{MaybeList, MaybeLists, Polynomial, Tf};
+use crate::{quantities::{MaybeList, MaybeLists, Polynomial}, systems::Tf};
 
 impl<T, B, A> Zero for Tf<T, B, A>
 where

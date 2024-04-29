@@ -5,7 +5,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast, Ze
 use option_trait::{Maybe, NotVoid, StaticMaybe};
 use array_math::SliceMath;
 
-use crate::{util, window::{Hamming, WindowGen, WindowRange}, List, MaybeLenEq, MaybeList};
+use crate::{util::{self, MaybeLenEq}, windows::Hamming, gen::window::{WindowGen, WindowRange}, quantities::{List, MaybeList}};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PWelchDetrend
@@ -617,7 +617,7 @@ mod test
 
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, RealPWelch};
+    use crate::{plot, analysis::RealPWelch};
 
     #[test]
     fn test()

@@ -9,7 +9,7 @@ where
     T: Float + FloatConst + MulAssign + DivAssign + TotalOrder + Lapack<Complex = Complex<T>>,
     (): Maybe<T>
 {
-    crate::dbaux(order, ())
+    crate::gen::wavelet::dbaux(order, ())
 }
 
 #[cfg(test)]
@@ -22,7 +22,7 @@ mod test
     #[test]
     fn test()
     {
-        let psi = crate::dbwavf(38);
+        let psi = crate::gen::wavelet::dbwavf(38);
 
         plot::plot_curves("ψ[n]", "plots/psi_n_dbwavf.png", [
                 &(0.0..psi.len() as f64).linspace(psi.len())

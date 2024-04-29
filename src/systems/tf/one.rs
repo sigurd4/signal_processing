@@ -2,7 +2,7 @@ use std::ops::Mul;
 
 use num::{complex::ComplexFloat, One};
 
-use crate::{MaybeList, Tf};
+use crate::{quantities::MaybeList, systems::Tf};
 
 impl<T, B, A> One for Tf<T, B, A>
 where

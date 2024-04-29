@@ -1,6 +1,6 @@
 use core::ops::Mul;
 
-use crate::{Chain, MaybeList, ProductSequence};
+use crate::{quantities::{MaybeList, ProductSequence}, util::Chain};
 
 impl<T, S1, S2> Mul<ProductSequence<T, S2>> for ProductSequence<T, S1>
 where

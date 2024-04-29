@@ -4,7 +4,7 @@ use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, Float, NumC
 use option_trait::Maybe;
 use array_math::SliceMath;
 
-use crate::{Ar, ContainerOrSingle, List, ListOrSingle, Lists, MaybeList, System};
+use crate::{systems::Ar, quantities::{ContainerOrSingle, List, ListOrSingle, Lists, MaybeList}, System};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PsdMethod
@@ -210,7 +210,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, Ar, Psd};
+    use crate::{plot, systems::Ar, analysis::Psd};
 
     #[test]
     fn test()

@@ -6,9 +6,7 @@ use ndarray_linalg::{solve::Solve, Lapack, least_squares::LeastSquaresSvd};
 use num::{complex::ComplexFloat, traits::FloatConst, Float, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{FilterGenError, Polynomial, System, Tf};
-
-
+use crate::{gen::filter::FilterGenError, System, systems::Tf};
 
 pub trait FirLS<O>: System + Sized
 where
@@ -54,14 +52,13 @@ where
     {
         let mut h = Tf::firls(N.saturating_sub(1), frequencies, magnitudes, weights, sampling_frequency)?;
         h.b.resize(N, T::zero());
-        Ok(Tf {
-            b: Polynomial::new(h.b.into_inner()
+        Ok(Tf::new(
+            h.b.into_inner()
                 .try_into()
                 .ok()
-                .unwrap()
-            ),
-            a: Polynomial::new(())
-        })
+                .unwrap(),
+            ()
+        ))
     }
 }
 
@@ -189,10 +186,7 @@ where
             ).collect();
         coef.resize(order + 1, zero.into());
 
-        Ok(Tf {
-            b: Polynomial::new(coef),
-            a: Polynomial::new(())
-        })
+        Ok(Tf::new(coef, ()))
     }
 }
 
@@ -201,7 +195,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, FirLS, Plane, RealFreqZ, Tf, ToZpk, Zpk};
+    use crate::{plot, gen::filter::FirLS, Plane, analysis::RealFreqZ, systems::{Tf, Zpk}, transforms::system::ToZpk};
 
     #[test]
     fn test()

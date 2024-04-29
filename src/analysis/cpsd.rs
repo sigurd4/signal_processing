@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, Complex};
 use option_trait::{Maybe, NotVoid, StaticMaybe};
 
-use crate::{List, MaybeLenEq, PWelch, PWelchDetrend};
+use crate::{quantities::List, util::MaybeLenEq, analysis::{PWelch, PWelchDetrend}};
 
 pub trait CPsd<T, Y, YY, W, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
 where
@@ -87,7 +87,14 @@ mod test
     use array_math::ArrayOps;
     use rand::distributions::uniform::SampleRange;
 
-    use crate::{plot, window::{Boxcar, Triangular, WindowGen, WindowRange}, Filter, Fir1, Fir1Type, RealCPsd, Tf};
+    use crate::{
+        plot,
+        windows::{Boxcar, Triangular},
+        operations::filtering::Filter,
+        gen::{window::{WindowGen, WindowRange}, filter::{Fir1, Fir1Type}},
+        analysis::RealCPsd,
+        systems::Tf
+    };
 
     #[test]
     fn test()

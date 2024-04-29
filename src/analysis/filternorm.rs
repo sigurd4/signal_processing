@@ -2,7 +2,12 @@ use core::iter::Sum;
 
 use num::{complex::ComplexFloat, Complex, Float, Zero};
 
-use crate::{FreqZ, ImpZ, List, ListOrSingle, Lists, MaybeList, MaybeLists, System, Tf};
+use crate::{
+    analysis::{FreqZ, ImpZ},
+    quantities::{List, ListOrSingle, Lists, MaybeList, MaybeLists},
+    System,
+    systems::Tf
+};
 
 pub trait FilterNorm<'a>: System
 {
@@ -65,7 +70,11 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{Butter, FilterGenPlane, FilterGenType, FilterNorm, Tf};
+    use crate::{
+        gen::filter::{Butter, FilterGenPlane, FilterGenType},
+        analysis::FilterNorm,
+        systems::Tf
+    };
 
     #[test]
     fn test()

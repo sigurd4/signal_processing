@@ -2,7 +2,11 @@ use array_math::SliceMath;
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{ListOrSingle, MaybeList, MaybeOwnedList, MaybeLists, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, System, Tf, Zpk};
+use crate::{
+    quantities::{ListOrSingle, MaybeList, MaybeOwnedList, MaybeLists},
+    systems::{Sos, Tf, Zpk, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix},
+    System
+};
 
 pub trait FiltOrd: System
 {

@@ -3,7 +3,7 @@ use core::ops::{BitAnd, Shr};
 use num::{complex::ComplexFloat, pow::Pow, traits::Inv, Integer};
 use option_trait::{Maybe, MaybeOr};
 
-use crate::{MaybeList, MaybeOwnedList, Sos, Tf, ToSos};
+use crate::{quantities::{MaybeList, MaybeOwnedList}, systems::{Sos, Tf}, transforms::system::ToSos};
 
 impl<T, B, A, S, I> Pow<I> for Sos<T, B, A, S>
 where

@@ -2,7 +2,7 @@ use core::ops::{AddAssign, BitAnd, Shr};
 
 use num::{complex::ComplexFloat, pow::Pow, traits::Inv, Integer, One};
 
-use crate::{MaybeList, Normalize, Tf, ToTf};
+use crate::{quantities::MaybeList, operations::Simplify, systems::Tf, transforms::system::ToTf};
 
 impl<T, B, A, I> Pow<I> for Tf<T, B, A>
 where
@@ -11,7 +11,7 @@ where
     A: MaybeList<T>,
     I: Integer + BitAnd<I, Output = I> + Shr<usize, Output = I> + Copy,
     Self: ToTf<T, Vec<T>, Vec<T>, (), ()> + Inv<Output: ToTf<T, Vec<T>, Vec<T>, (), ()>>,
-    Tf<T, Vec<T>, Vec<T>>: Normalize<Output = Tf<T, Vec<T>, Vec<T>>>
+    Tf<T, Vec<T>, Vec<T>>: Simplify<Output = Tf<T, Vec<T>, Vec<T>>>
 {
     type Output = Tf<T, Vec<T>, Vec<T>>;
 

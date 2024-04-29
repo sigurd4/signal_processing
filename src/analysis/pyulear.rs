@@ -1,7 +1,7 @@
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{Ar, ArYule, List, Lists, Psd, PsdMethod, PsdRange, System};
+use crate::{systems::Ar, gen::ar::ArYule, quantities::{List, Lists}, analysis::{Psd, PsdMethod, PsdRange}, System};
 
 pub trait PYuleAr<X, P, F, O, N, FF, R, M>: Lists<X>
 where
@@ -47,7 +47,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, PYuleAr};
+    use crate::{plot, analysis::PYuleAr};
 
     #[test]
     fn test()

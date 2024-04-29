@@ -1,7 +1,7 @@
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{List, MaybeOwnedList, ProductSequence, Sos, Tf};
+use crate::{quantities::{List, MaybeOwnedList, ProductSequence}, systems::{Sos, Tf}};
 
 impl<'a, T1, T2, B1, B2, A1, A2, S1, S2> From<&'a Sos<T1, B1, A1, S1>> for Sos<T2, B2, A2, S2>
 where

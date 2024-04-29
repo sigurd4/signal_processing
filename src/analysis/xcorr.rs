@@ -4,7 +4,7 @@ use array_math::{SliceMath, SliceOps};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{ComplexOp, Lists, MaybeList, TruncateIm};
+use crate::{util::{ComplexOp, TruncateIm}, quantities::{Lists, MaybeList}};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum XCorrScale
@@ -283,7 +283,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{plot, XCorr};
+    use crate::{plot, analysis::XCorr};
 
     #[test]
     fn test()

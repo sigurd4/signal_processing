@@ -6,7 +6,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Float, NumCast, One};
 use option_trait::Maybe;
 use thiserror::Error;
 
-use crate::{MaybeList, MaybeLists, Polynomial, System, Tf, ToTf};
+use crate::{quantities::{MaybeList, MaybeLists, Polynomial}, System, systems::Tf, transforms::system::ToTf};
 
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum ZfTransError
@@ -197,7 +197,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, Ellip, FilterGenPlane, FilterGenType, RealFreqZ, Tf, ZfTrans};
+    use crate::{plot, gen::filter::{Ellip, FilterGenPlane, FilterGenType}, analysis::RealFreqZ, systems::Tf, transforms::filter::ZfTrans};
 
     #[test]
     fn test()

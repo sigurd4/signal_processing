@@ -1,7 +1,7 @@
 use ndarray::{ArrayBase, ArrayView, Dimension, NdIndex, OwnedRepr};
 use option_trait::NotVoid;
 
-use crate::MaybeContainer;
+use crate::quantities::MaybeContainer;
 
 pub trait ContainerOrSingle<T>
 {

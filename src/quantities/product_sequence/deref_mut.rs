@@ -1,6 +1,6 @@
 use core::ops::DerefMut;
 
-use crate::{MaybeList, ProductSequence};
+use crate::quantities::{MaybeList, ProductSequence};
 
 impl<T, S> DerefMut for ProductSequence<T, S>
 where

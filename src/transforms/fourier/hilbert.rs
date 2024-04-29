@@ -3,7 +3,7 @@ use core::ops::{AddAssign, MulAssign};
 use num::{complex::ComplexFloat, Complex, One, Zero};
 use array_math::SliceMath;
 
-use crate::{Lists, OwnedLists, TruncateIm};
+use crate::{quantities::{Lists, OwnedLists}, util::TruncateIm};
 
 pub trait Hilbert<T>: Lists<T>
 where
@@ -69,7 +69,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{plot, Hilbert, MaybeContainer};
+    use crate::{plot, transforms::fourier::Hilbert, quantities::MaybeContainer};
 
     #[test]
     fn test()

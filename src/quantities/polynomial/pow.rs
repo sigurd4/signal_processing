@@ -2,7 +2,7 @@ use core::ops::{BitAnd, Mul, Shr};
 
 use num::{pow::Pow, Integer, One, Unsigned};
 
-use crate::{MaybeList, Polynomial};
+use crate::quantities::{MaybeList, Polynomial};
 
 impl<T, S, I> Pow<I> for Polynomial<T, S>
 where

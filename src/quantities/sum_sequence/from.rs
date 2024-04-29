@@ -1,7 +1,4 @@
-
-
-
-use crate::SumSequence;
+use crate::quantities::SumSequence;
 
 impl<T1, T2> From<SumSequence<T1, ()>> for SumSequence<T2, [T2; 0]>
 {

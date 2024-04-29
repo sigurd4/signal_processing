@@ -2,7 +2,7 @@ use core::ops::RangeInclusive;
 
 use num::{Bounded, Float, Integer, NumCast};
 
-use crate::Lists;
+use crate::quantities::Lists;
 
 pub trait Decode<T, I>: Lists<I>
 where

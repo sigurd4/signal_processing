@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::DivAssign};
 use num::{complex::ComplexFloat, traits::FloatConst, Float};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{ComplexOp, ContainerOrSingle, Conv2d, Lists, Matrix, MaybeMatrix, OwnedLists, OwnedMatrix, XCorrScale};
+use crate::{util::ComplexOp, quantities::{ContainerOrSingle, Lists, Matrix, MaybeMatrix, OwnedLists, OwnedMatrix}, operations::convolution::Conv2d, analysis::XCorrScale};
 
 pub trait XCorr2d<X, Y, YY, Z>: Matrix<X>
 where
@@ -162,7 +162,7 @@ mod test
     use image::{GenericImageView, Rgb};
     use ndarray::Array2;
 
-    use crate::{XCorr2d, XCorrScale};
+    use crate::analysis::{XCorr2d, XCorrScale};
 
     #[test]
     fn test() -> Result<(), Box<dyn std::error::Error>>

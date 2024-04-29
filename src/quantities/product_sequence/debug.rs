@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 
-use crate::{MaybeList, ProductSequence};
+use crate::quantities::{MaybeList, ProductSequence};
 
 impl<T, S> Debug for ProductSequence<T, S>
 where

@@ -2,7 +2,7 @@ use core::ops::Sub;
 
 use num::Zero;
 
-use crate::{List, ListOrSingle, Lists};
+use crate::quantities::{List, ListOrSingle, Lists};
 
 pub trait PeakToPeak<'a, T>: Lists<T>
 where

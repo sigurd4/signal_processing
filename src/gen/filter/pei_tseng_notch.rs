@@ -6,7 +6,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Float};
 use option_trait::Maybe;
 use thiserror::Error;
 
-use crate::{List, System, Tf};
+use crate::{quantities::List, System, systems::Tf};
 
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum PeiTsengNotchError
@@ -118,7 +118,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, PeiTsengNotch, Plane, RealFreqZ, Tf, ToZpk, Zpk};
+    use crate::{plot, gen::filter::PeiTsengNotch, Plane, analysis::RealFreqZ, transforms::system::ToZpk, systems::{Tf, Zpk}};
 
     #[test]
     fn test()

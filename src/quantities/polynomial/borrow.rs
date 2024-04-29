@@ -1,6 +1,6 @@
 use core::borrow::Borrow;
 
-use crate::{MaybeLists, Polynomial};
+use crate::quantities::{MaybeLists, Polynomial};
 
 impl<T, C> Borrow<C> for Polynomial<T, C>
 where

@@ -4,7 +4,7 @@ use ndarray::{Array1, ArrayView1};
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::ListOrSingle;
+use crate::quantities::ListOrSingle;
 
 pub trait IntoList<T, L, N>
 where

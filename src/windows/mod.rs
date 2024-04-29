@@ -1,0 +1,28 @@
+moddef::moddef!(
+    flat(pub) mod {
+        barthann,
+        blackman_harris,
+        blackman_nuttall,
+        blackman,
+        bohman,
+        boxcar,
+        confined_gaussian,
+        confined_normal,
+        dolph_chebyshev,
+        flattop,
+        gaussian,
+        hamming,
+        hann,
+        kaiser,
+        normal,
+        nuttall,
+        parzen,
+        planck_taper,
+        power_of_sine,
+        sine,
+        triangular,
+        tukey,
+        ultraspherical,
+        welch
+    }
+);
