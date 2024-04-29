@@ -15,13 +15,13 @@ use crate::{
 
 pub trait ImpZ<'a, B, T, N>: System
 where
-    B: Lists<Self::Domain>,
-    T: List<<Self::Domain as ComplexFloat>::Real>,
+    B: Lists<Self::Set>,
+    T: List<<Self::Set as ComplexFloat>::Real>,
     N: Maybe<usize>
 {
     fn impz<FS>(&'a self, numtaps: N, sampling_frequency: FS) -> (B, T)
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<'a, T, B, A> ImpZ<'a, B::RowsMapped<Vec<T>>, Vec<T::Real>, usize> for Tf<T, B, A>
@@ -33,7 +33,7 @@ where
     Self: 'a,
     B::View<'a>: MaybeLists<T>,
     A::View<'a>: MaybeList<T>,
-    Tf<T, B::View<'a>, A::View<'a>>: Filter<T, Vec<T>, Output = B::RowsMapped<Vec<T>>> + System<Domain = T>,
+    Tf<T, B::View<'a>, A::View<'a>>: Filter<T, Vec<T>, Output = B::RowsMapped<Vec<T>>> + System<Set = T>,
     &'a Self: Into<Tf<T, B::RowsMapped<Vec<T>>, Vec<T>>>,
     Vec<T>: for<'b> Conv<T, T, &'b [T], Output = Vec<T>>,
     T::Real: Into<T>,
@@ -94,7 +94,7 @@ where
     A: MaybeList<T>,
     B::RowsMapped<Vec<T>>: Lists<T, RowsMapped<[T; N]> = B::RowsMapped<[T; N]>>,
     B::RowsMapped<[T; N]>: Lists<T>,
-    Self: ImpZ<'a, B::RowsMapped<Vec<T>>, Vec<T::Real>, usize> + System<Domain = T> + 'a
+    Self: ImpZ<'a, B::RowsMapped<Vec<T>>, Vec<T::Real>, usize> + System<Set = T> + 'a
 {
     fn impz<FS>(&'a self, (): (), sampling_frequency: FS) -> (B::RowsMapped<[T; N]>, [T::Real; N])
     where
@@ -123,7 +123,7 @@ where
     B: MaybeLists<T>,
     A: MaybeList<T>,
     B::RowsMapped<Vec<T>>: Lists<T>,
-    Self: ImpZ<'a, B::RowsMapped<Vec<T>>, Vec<<T as ComplexFloat>::Real>, usize> + System<Domain = T>
+    Self: ImpZ<'a, B::RowsMapped<Vec<T>>, Vec<<T as ComplexFloat>::Real>, usize> + System<Set = T>
 {
     fn impz<FS>(&'a self, (): (), sampling_frequency: FS) -> (B::RowsMapped<Vec<T>>, Vec<<T as ComplexFloat>::Real>)
     where

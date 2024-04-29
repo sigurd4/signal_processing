@@ -10,9 +10,9 @@ pub trait Fir2<O, F, M, W, WW = (), const WWW: bool = false>: System + Sized
 where
     O: Maybe<usize>,
     WW: MaybeList<W>,
-    F: List<<Self::Domain as ComplexFloat>::Real>,
-    M: List<Self::Domain, Length = F::Length>,
-    W: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real> + Into<Self::Domain>
+    F: List<<Self::Set as ComplexFloat>::Real>,
+    M: List<Self::Set, Length = F::Length>,
+    W: ComplexFloat<Real = <Self::Set as ComplexFloat>::Real> + Into<Self::Set>
 {
     fn fir2<NPT, LAP, FS>(
         order: O,
@@ -26,7 +26,7 @@ where
     where
         NPT: Maybe<usize>,
         LAP: Maybe<usize>,
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<T, F, M, W, WW>  Fir2<(), F, M, W, WW, true> for Tf<T, WW::Mapped<T>, ()>
@@ -237,7 +237,7 @@ where
     T::Real: Into<T>,
     F: List<T::Real>,
     M: List<T, Length = F::Length>,
-    Self: Fir2<(), F, M, T::Real, Vec<T::Real>, true> + System<Domain = T>,
+    Self: Fir2<(), F, M, T::Real, Vec<T::Real>, true> + System<Set = T>,
     [(); F::LENGTH - M::LENGTH]:,
     [(); M::LENGTH - F::LENGTH]:,
     [(); F::LENGTH - 1]:
@@ -254,7 +254,7 @@ where
     where
         NPT: Maybe<usize>,
         LAP: Maybe<usize>,
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>
     {
         Self::fir2(
             (),
@@ -274,7 +274,7 @@ where
     T::Real: Into<T>,
     F: List<T::Real>,
     M: List<T, Length = F::Length>,
-    Self: Fir2<(), F, M, T::Real, [T::Real; N], true> + System<Domain = T>,
+    Self: Fir2<(), F, M, T::Real, [T::Real; N], true> + System<Set = T>,
     [(); F::LENGTH - M::LENGTH]:,
     [(); M::LENGTH - F::LENGTH]:,
     [(); F::LENGTH - 1]:
@@ -291,7 +291,7 @@ where
     where
         NPT: Maybe<usize>,
         LAP: Maybe<usize>,
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>
     {
         Self::fir2(
             (),

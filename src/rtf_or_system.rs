@@ -8,20 +8,20 @@ use crate::{
     System
 };
 
-pub trait RtfOrSystem: MaybeRtfOrSystem<Self::Domain>
+pub trait RtfOrSystem: MaybeRtfOrSystem<Self::Set>
 {
-    type Domain: ComplexFloat;
+    type Set: ComplexFloat;
 }
 
 impl !RtfOrSystem for () {}
 
 impl<W, S> RtfOrSystem for Rtf<W, S>
 where
-    W: ComplexFloat<Real = <S::Domain as ComplexFloat>::Real>,
-    S::Domain: Into<W>,
+    W: ComplexFloat<Real = <S::Set as ComplexFloat>::Real>,
+    S::Set: Into<W>,
     S: System
 {
-    type Domain = W;
+    type Set = W;
 }
 
 impl<T, B, A> RtfOrSystem for Tf<T, B, A>
@@ -30,7 +30,7 @@ where
     B: MaybeLists<T>,
     A: MaybeList<T>
 {
-    type Domain = T;
+    type Set = T;
 }
 
 impl<T, Z, P, K, R> RtfOrSystem for Zpk<T, Z, P, K>
@@ -40,7 +40,7 @@ where
     Z: MaybeList<T>,
     P: MaybeList<T>
 {
-    type Domain = K;
+    type Set = K;
 }
 
 impl<T, A, B, C, D> RtfOrSystem for Ss<T, A, B, C, D>
@@ -51,7 +51,7 @@ where
     C: SsCMatrix<T, A, B, D>,
     D: SsDMatrix<T, A, B, C>
 {
-    type Domain = T;
+    type Set = T;
 }
 
 impl<T, B, A, S> RtfOrSystem for Sos<T, B, A, S>
@@ -61,7 +61,7 @@ where
     A: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>>
 {
-    type Domain = T;
+    type Set = T;
 }
 
 impl<T, R, P, RP, K> RtfOrSystem for Rpk<T, R, P, RP, K>
@@ -72,7 +72,7 @@ where
     RP: MaybeList<(R, P)>,
     K: MaybeList<T>
 {
-    type Domain = T;
+    type Set = T;
 }
 
 impl<T, A, AV> RtfOrSystem for Ar<T, A, AV>
@@ -81,5 +81,5 @@ where
     A: MaybeList<T>,
     AV: ListOrSingle<(A, T::Real)>
 {
-    type Domain = T;
+    type Set = T;
 }

@@ -9,12 +9,12 @@ use crate::{util::{ComplexOp, MaybeLenEq, Overlay}, quantities::{ContainerOrSing
 
 pub trait FilterMut<X, XX>: RtfOrSystem
 where
-    Self::Domain: ComplexOp<X>,
-    X: Into<<Self::Domain as ComplexOp<X>>::Output>,
-    X: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>,
+    Self::Set: ComplexOp<X>,
+    X: Into<<Self::Set as ComplexOp<X>>::Output>,
+    X: ComplexFloat<Real = <Self::Set as ComplexFloat>::Real>,
     XX: Lists<X>
 {
-    type Output: Lists<<Self::Domain as ComplexOp<X>>::Output>;
+    type Output: Lists<<Self::Set as ComplexOp<X>>::Output>;
 
     fn filter_mut(&mut self, x: XX) -> Self::Output;
 }

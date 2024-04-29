@@ -9,11 +9,11 @@ use crate::{util::{ComplexOp, TruncateIm}, quantities::{List, ContainerOrSingle,
 
 pub trait FftFilt<'a, X, XX>: System
 where
-    Self::Domain: ComplexOp<X>,
-    X: Into<<Self::Domain as ComplexOp<X>>::Output> + ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>,
+    Self::Set: ComplexOp<X>,
+    X: Into<<Self::Set as ComplexOp<X>>::Output> + ComplexFloat<Real = <Self::Set as ComplexFloat>::Real>,
     XX: Lists<X>
 {
-    type Output: ListOrSingle<XX::Mapped<<Self::Domain as ComplexOp<X>>::Output>>;
+    type Output: ListOrSingle<XX::Mapped<<Self::Set as ComplexOp<X>>::Output>>;
 
     fn fftfilt<N>(&'a self, x: XX, n: N) -> Self::Output
     where

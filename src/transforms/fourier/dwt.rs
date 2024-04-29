@@ -69,7 +69,7 @@ where
     X: Lists<T, RowOwned: List<T>> + Dwt<T, W, (), L, <L as Qmf>::Output>,
     T: ComplexFloat + Into<<W as ComplexOp<T>>::Output>,
     W: ComplexFloat<Real = T::Real> + ComplexOp<T>,
-    L: System<Domain = W> + Clone + Qmf,
+    L: System<Set = W> + Clone + Qmf,
     <X::RowOwned as ContainerOrSingle<T>>::Mapped<<W as ComplexOp<T>>::Output>: List<<W as ComplexOp<T>>::Output>,
 {
     fn dwt(
@@ -93,8 +93,8 @@ impl<T, W, Y, L, H, X, YY> Dwt<T, W, (), L, H> for X
 where
     T: ComplexFloat + Into<Y>,
     W: ComplexFloat<Real = T::Real> + ComplexOp<T, Output = Y>,
-    L: System<Domain = W>,
-    H: System<Domain = W>,
+    L: System<Set = W>,
+    H: System<Set = W>,
     X: Lists<T, RowOwned: List<T, Mapped<Y> = YY> + List<T, Mapped<()>: List<(), ResizedList<{<Self::RowOwned as ListOrSingle<T>>::LENGTH/2}>: List<(), Mapped<Y>: Into<<<Self::RowOwned as ContainerOrSingle<T>>::Mapped<Y> as List<Y>>::ResizedList<{<Self::RowOwned as ListOrSingle<T>>::LENGTH/2}>>>>>> + Clone,
     YY: List<Y, RowsMapped<Vec<Y>> = Vec<Y>> + Downsample<Y, usize, Vec<Y>>,
     L: for<'a> FftFilt<'a, T, X::RowOwned, Output = YY>,

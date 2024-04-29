@@ -5,8 +5,8 @@ use crate::{quantities::{MaybeContainer, MaybeList, MaybeOwnedList, MaybeLists, 
 
 pub trait SplitNumerDenom: System
 {
-    type OutputNum: System<Domain: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>>;
-    type OutputDen: System<Domain: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>>;
+    type OutputNum: System<Set: ComplexFloat<Real = <Self::Set as ComplexFloat>::Real>>;
+    type OutputDen: System<Set: ComplexFloat<Real = <Self::Set as ComplexFloat>::Real>>;
 
     fn split_numer_denom(self) -> (Self::OutputNum, Self::OutputDen);
 }

@@ -7,7 +7,7 @@ use crate::{windows::Kaiser, gen::window::{WindowGen, WindowRange}, operations::
 
 pub trait QpKaiser: System
 {
-    fn qp_kaiser(num_bands: usize, attenuation: <Self::Domain as ComplexFloat>::Real, linear: bool) -> Self;
+    fn qp_kaiser(num_bands: usize, attenuation: <Self::Set as ComplexFloat>::Real, linear: bool) -> Self;
 }
 
 impl<T> QpKaiser for Tf<T, Vec<T>>

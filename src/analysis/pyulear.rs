@@ -1,7 +1,7 @@
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{systems::Ar, gen::ar::ArYule, quantities::{List, Lists}, analysis::{Psd, PsdMethod, PsdRange}, System};
+use crate::{systems::Ar, identification::ar::ArYule, quantities::{List, Lists}, analysis::{Psd, PsdMethod, PsdRange}, System};
 
 pub trait PYuleAr<X, P, F, O, N, FF, R, M>: Lists<X>
 where
@@ -30,7 +30,7 @@ where
     FF: Maybe<F>,
     M: Maybe<PsdMethod>,
     R: Maybe<PsdRange>,
-    Ar<X, Vec<X>, XX::RowsMapped<(Vec<X>, X::Real)>>: ArYule<XX, O, XX::RowsMapped<Vec<X>>> + for<'a> Psd<'a, P, F, N, FF, R, M> + System<Domain = X>,
+    Ar<X, Vec<X>, XX::RowsMapped<(Vec<X>, X::Real)>>: ArYule<XX, O, XX::RowsMapped<Vec<X>>> + for<'a> Psd<'a, P, F, N, FF, R, M> + System<Set = X>,
     XX::RowsMapped<Vec<X>>: Lists<X>
 {
     fn pyulear<FS>(self, order: O, numtaps: N, frequencies: FF, sampling_frequency: FS, range: R, method: M) -> (P, F)

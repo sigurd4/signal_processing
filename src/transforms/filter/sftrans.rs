@@ -21,12 +21,12 @@ pub trait SfTrans<const W: usize>: System
 where
     [(); W - 1]:
 {
-    type Output: System<Domain = Self::Domain>;
+    type Output: System<Set = Self::Set>;
 
     fn sftrans(
         self,
-        wo: <Self::Domain as ComplexFloat>::Real,
-        w: [<Self::Domain as ComplexFloat>::Real; W],
+        wo: <Self::Set as ComplexFloat>::Real,
+        w: [<Self::Set as ComplexFloat>::Real; W],
         stop: bool
     ) -> Result<Self::Output, SfTransError>;
 }
@@ -39,7 +39,7 @@ where
     Complex<T::Real>: Add<T, Output = Complex<T::Real>>,
     Z: MaybeList<T>,
     P: MaybeList<T>,
-    Self: ToZpk<T, Vec<T>, Vec<T>, K, (), ()> + System<Domain = K>,
+    Self: ToZpk<T, Vec<T>, Vec<T>, K, (), ()> + System<Set = K>,
     [(); W - 1]:,
     [(); 2 - W]:,
 {
@@ -47,7 +47,7 @@ where
 
     fn sftrans(
         self,
-        wo: <Self::Domain as ComplexFloat>::Real,
+        wo: <Self::Set as ComplexFloat>::Real,
         w: [T::Real; W],
         stop: bool
     ) -> Result<Self::Output, SfTransError>

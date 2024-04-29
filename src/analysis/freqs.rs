@@ -11,7 +11,7 @@ where
     S: ComplexFloat,
     SS: Lists<S> + 'a
 {
-    fn freqs(&'a self, s: SS) -> SS::Mapped<Complex<<Self::Domain as ComplexFloat>::Real>>;
+    fn freqs(&'a self, s: SS) -> SS::Mapped<Complex<<Self::Set as ComplexFloat>::Real>>;
 }
 
 impl<'a, T, S, SS, B, A> FreqS<'a, S, SS> for Tf<T, B, A>
@@ -50,7 +50,7 @@ where
     S: MaybeList<Tf<T, B, A>>,
     SS: ComplexFloat<Real = T::Real> + 'a,
     SSS: Lists<SS> + 'a,
-    Tf<T, B, A>: FreqS<'a, SS, [SS; 1]> + System<Domain = T>
+    Tf<T, B, A>: FreqS<'a, SS, [SS; 1]> + System<Set = T>
 {
     fn freqs(&'a self, s: SSS) -> SSS::Mapped<Complex<T::Real>>
     {
@@ -75,10 +75,10 @@ where
     SS: Lists<S> + 'a,
     Z::View<'a>: MaybeList<T>,
     P::View<'a>: MaybeList<T>,
-    Zpk<T, Z::View<'a>, P::View<'a>, K>: ToSos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>, (), ()> + 'a + System<Domain = K>,
-    Sos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>>: for<'b> FreqS<'b, S, SS> + System<Domain = K>
+    Zpk<T, Z::View<'a>, P::View<'a>, K>: ToSos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>, (), ()> + 'a + System<Set = K>,
+    Sos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>>: for<'b> FreqS<'b, S, SS> + System<Set = K>
 {
-    fn freqs(&'a self, s: SS) -> SS::Mapped<Complex<<Self::Domain as ComplexFloat>::Real>>
+    fn freqs(&'a self, s: SS) -> SS::Mapped<Complex<<Self::Set as ComplexFloat>::Real>>
     {
         self.as_view()
             .to_sos((), ())

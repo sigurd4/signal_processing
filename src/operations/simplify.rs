@@ -7,7 +7,7 @@ use crate::{quantities::{ListOrSingle, MaybeList, MaybeLists, OwnedLists, Polyno
 
 pub trait Simplify: System
 {
-    type Output: System<Domain = Self::Domain>;
+    type Output: System<Set = Self::Set>;
 
     fn simplify(self) -> Self::Output;
 }

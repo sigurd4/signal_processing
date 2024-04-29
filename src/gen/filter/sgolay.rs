@@ -26,7 +26,7 @@ where
 {
     fn sgolay<TS, M>(order: usize, numtaps: N, derivative: M, scale: TS) -> Result<L, SGolayError>
     where
-        TS: Maybe<Self::Domain>,
+        TS: Maybe<Self::Set>,
         M: Maybe<usize>;
 }
 

@@ -8,15 +8,15 @@ use crate::{gen::filter::{Cheb2AP, FilterGenError, FilterGenPlane, FilterGenType
 
 pub trait Cheby2<O>: System + Sized
 where
-    Self::Domain: Float,
+    Self::Set: Float,
     O: Maybe<usize>
 {
     fn cheby2<const F: usize>(
         order: O,
-        ripple: Self::Domain,
-        frequencies: [Self::Domain; F],
+        ripple: Self::Set,
+        frequencies: [Self::Set; F],
         filter_type: FilterGenType,
-        plane: FilterGenPlane<Self::Domain>
+        plane: FilterGenPlane<Self::Set>
     ) -> Result<Self, FilterGenError>
     where
         [(); F - 1]:,
@@ -27,8 +27,8 @@ impl<T> Cheby2<usize> for Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>
 where
     T: Float + FloatConst,
     Complex<T>: ComplexFloat<Real = T>,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Cheb2AP<usize> + SfTrans<1, Output = Self> + SfTrans<2, Output = Self> + System<Domain = T>,
-    Self: Bilinear<Output = Self> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Cheb2AP<usize> + SfTrans<1, Output = Self> + SfTrans<2, Output = Self> + System<Set = T>,
+    Self: Bilinear<Output = Self> + System<Set = T>
 {
     fn cheby2<const F: usize>(
         order: usize,
@@ -116,7 +116,7 @@ where
 impl<T> Cheby2<usize> for Tf<T, Vec<T>, Vec<T>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Cheby2<usize> + ToTf<T, Vec<T>, Vec<T>, (), ()> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Cheby2<usize> + ToTf<T, Vec<T>, Vec<T>, (), ()> + System<Set = T>
 {
     fn cheby2<const F: usize>(
         order: usize,
@@ -139,7 +139,7 @@ impl<T, const N: usize> Cheby2<()> for Tf<T, [T; N], [T; N]>
 where
     [(); N - 2]:,
     T: Float + FloatConst,
-    Tf<T, Vec<T>, Vec<T>>: Cheby2<usize> + System<Domain = T>
+    Tf<T, Vec<T>, Vec<T>>: Cheby2<usize> + System<Set = T>
 {
     fn cheby2<const F: usize>(
         (): (),
@@ -161,7 +161,7 @@ where
 impl<T> Cheby2<usize> for Sos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Cheby2<usize> + ToSos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Cheby2<usize> + ToSos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()> + System<Set = T>
 {
     fn cheby2<const F: usize>(
         order: usize,
@@ -183,7 +183,7 @@ where
 impl<T, const N: usize> Cheby2<()> for Sos<T, [T; 3], [T; 3], [Tf<T, [T; 3], [T; 3]>; N]>
 where
     T: Float + FloatConst,
-    Sos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>>: Cheby2<usize> + System<Domain = T>
+    Sos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>>: Cheby2<usize> + System<Set = T>
 {
     fn cheby2<const F: usize>(
         (): (),
@@ -207,7 +207,7 @@ where
 impl<T> Cheby2<usize> for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Cheby2<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>,
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: Cheby2<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Set = T>,
     Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>>+ SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>
 {
     fn cheby2<const F: usize>(

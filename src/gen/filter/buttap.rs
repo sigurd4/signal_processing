@@ -7,7 +7,7 @@ use crate::{quantities::ProductSequence, System, systems::Zpk};
 
 pub trait ButtAP<O>: System + Sized
 where
-    Self::Domain: Float,
+    Self::Set: Float,
     O: Maybe<usize>
 {
     fn buttap(order: O) -> Self;
@@ -42,7 +42,7 @@ where
 impl<T, const N: usize> ButtAP<()> for Zpk<Complex<T>, (), [Complex<T>; N], T>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, (), Vec<Complex<T>>, T>: ButtAP<usize> + System<Domain = T>
+    Zpk<Complex<T>, (), Vec<Complex<T>>, T>: ButtAP<usize> + System<Set = T>
 {
     fn buttap((): ()) -> Self
     {

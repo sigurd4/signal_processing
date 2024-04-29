@@ -20,8 +20,8 @@ impl<T, L> Decimate<T, usize, Vec<T>> for L
 where
     L: Lists<T, RowOwned: List<T>>,
     T: ComplexFloat<Real: ComplexOp<T, Output = T> + ComplexFloat<Real = T::Real>>,
-    Tf<T::Real, Vec<T::Real>, ()>: Fir1<usize, [T::Real; 1], T::Real, (), false> + System<Domain = T::Real> + for<'a> FftFilt<'a, T, Vec<T>, Output = Vec<T>>,
-    Tf<T::Real, Vec<T::Real>, Vec<T::Real>>: Cheby1<usize> + System<Domain = T::Real> + for<'a> FiltFilt<'a, T, Vec<T>, Output = Vec<T>>
+    Tf<T::Real, Vec<T::Real>, ()>: Fir1<usize, [T::Real; 1], T::Real, (), false> + System<Set = T::Real> + for<'a> FftFilt<'a, T, Vec<T>, Output = Vec<T>>,
+    Tf<T::Real, Vec<T::Real>, Vec<T::Real>>: Cheby1<usize> + System<Set = T::Real> + for<'a> FiltFilt<'a, T, Vec<T>, Output = Vec<T>>
 {
     fn decimate<N, F>(self, ratio: usize, order: N, filter_type: F) -> Self::RowsMapped<Vec<T>>
     where

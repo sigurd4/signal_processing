@@ -5,14 +5,14 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, One};
 use option_trait::{Maybe, StaticMaybe};
 use ndarray::{Array1, Array2};
 
-use crate::{identification::InvFreqMethod, quantities::{List, MaybeList}, System, systems::Tf, util::TruncateIm};
+use crate::{identification::filter::InvFreqMethod, quantities::{List, MaybeList}, System, systems::Tf, util::TruncateIm};
 
 pub trait InvFreqS<H, S, W, HFW, NB, NA>: System + Sized
 where
-    H: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>,
-    S: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>,
+    H: ComplexFloat<Real = <Self::Set as ComplexFloat>::Real>,
+    S: ComplexFloat<Real = <Self::Set as ComplexFloat>::Real>,
     HFW: List<(H, S, W)>,
-    W: Maybe<<Self::Domain as ComplexFloat>::Real>,
+    W: Maybe<<Self::Set as ComplexFloat>::Real>,
     NB: Maybe<usize>,
     NA: Maybe<usize>
 {
@@ -23,7 +23,7 @@ where
         zb: ZB,
         norm: bool,
         method: InvFreqMethod
-    ) -> (Self, <Self::Domain as ComplexFloat>::Real)
+    ) -> (Self, <Self::Set as ComplexFloat>::Real)
     where
         ZB: Maybe<NB>;
 }
@@ -323,7 +323,7 @@ mod test
     use array_math::ArrayOps;
     use num::Complex;
 
-    use crate::{plot, gen::filter::{Butter, FilterGenPlane, FilterGenType}, analysis::FreqS, identification::{InvFreqMethod, InvFreqS}, systems::Tf};
+    use crate::{plot, gen::filter::{Butter, FilterGenPlane, FilterGenType}, analysis::FreqS, identification::filter::{InvFreqMethod, InvFreqS}, systems::Tf};
 
     #[test]
     fn test()

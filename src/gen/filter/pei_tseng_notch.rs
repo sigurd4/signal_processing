@@ -21,11 +21,11 @@ pub enum PeiTsengNotchError
 
 pub trait PeiTsengNotch<B>: System + Sized
 where
-    B: List<(<Self::Domain as ComplexFloat>::Real, <Self::Domain as ComplexFloat>::Real)>
+    B: List<(<Self::Set as ComplexFloat>::Real, <Self::Set as ComplexFloat>::Real)>
 {
     fn pei_tseng_notch<FS>(bands: B, sampling_frequency: FS) -> Result<Self, PeiTsengNotchError>
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<T, BB> PeiTsengNotch<BB> for Tf<T, Vec<T>, Vec<T>>
@@ -35,7 +35,7 @@ where
 {
     fn pei_tseng_notch<FS>(bands: BB, sampling_frequency: FS) -> Result<Self, PeiTsengNotchError>
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>
     {
         let zero = T::zero();
         let one = T::one();

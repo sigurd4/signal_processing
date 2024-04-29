@@ -21,9 +21,9 @@ pub enum InvFreqMethod
 
 pub trait InvFreqZ<H, W, HFW, NB, NA>: System + Sized
 where
-    H: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>,
-    HFW: List<(H, <Self::Domain as ComplexFloat>::Real, W)>,
-    W: Maybe<<Self::Domain as ComplexFloat>::Real>,
+    H: ComplexFloat<Real = <Self::Set as ComplexFloat>::Real>,
+    HFW: List<(H, <Self::Set as ComplexFloat>::Real, W)>,
+    W: Maybe<<Self::Set as ComplexFloat>::Real>,
     NB: Maybe<usize>,
     NA: Maybe<usize>
 {
@@ -33,7 +33,7 @@ where
         na: NA,
         zb: ZB,
         method: InvFreqMethod
-    ) -> (Self, <Self::Domain as ComplexFloat>::Real)
+    ) -> (Self, <Self::Set as ComplexFloat>::Real)
     where
         ZB: Maybe<NB>;
 }
@@ -291,7 +291,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, gen::filter::{Butter, FilterGenPlane, FilterGenType}, identification::{InvFreqMethod, InvFreqZ}, analysis::RealFreqZ, systems::Tf};
+    use crate::{plot, gen::filter::{Butter, FilterGenPlane, FilterGenType}, identification::filter::{InvFreqMethod, InvFreqZ}, analysis::RealFreqZ, systems::Tf};
 
     #[test]
     fn test()

@@ -29,13 +29,13 @@ where
 
     fn zftrans<FS>(
         self,
-        wo: <Self::Domain as ComplexFloat>::Real,
-        wt: [<Self::Domain as ComplexFloat>::Real; W],
+        wo: <Self::Set as ComplexFloat>::Real,
+        wt: [<Self::Set as ComplexFloat>::Real; W],
         sampling_frequency: FS,
         stop: bool
     ) -> Result<Self::Output, ZfTransError>
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<T, B, A, const W: usize> ZfTrans<W> for Tf<T, B, A>
@@ -44,7 +44,7 @@ where
     B: MaybeLists<T>,
     A: MaybeList<T>,
     B::RowsMapped<Vec<T>>: MaybeLists<T, RowsMapped<Tf<T, Vec<T>, Vec<T>>> = B::RowsMapped<Tf<T, Vec<T>, Vec<T>>>, RowOwned = Vec<T>>,
-    Self: ToTf<T, B::RowsMapped<Vec<T>>, Vec<T>, (), ()> + System<Domain = T>,
+    Self: ToTf<T, B::RowsMapped<Vec<T>>, Vec<T>, (), ()> + System<Set = T>,
     [(); W - 1]:
 {
     type Output = (B::RowsMapped<Tf<T, Vec<T>, Vec<T>>>, Tf<T, Vec<T>, Vec<T>>);

@@ -12,7 +12,7 @@ pub trait IsAllPass<'a>: System
 
     fn is_allpass<TOL>(&'a self, tol: TOL) -> Self::Output
     where
-        TOL: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        TOL: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<'a, T, B, A> IsAllPass<'a> for Tf<T, B, A>
@@ -82,7 +82,7 @@ where
     S: MaybeList<Tf<T, B, A>> + 'a,
     S::View<'a>: MaybeList<Tf<T, B, A>>,
     Sos<T, B, A, S::View<'a>>: ToTf<T, Vec<T>, Vec<T>, (), ()>,
-    Tf<T, Vec<T>, Vec<T>>: for<'b> IsAllPass<'b, Output = bool> + System<Domain = T>
+    Tf<T, Vec<T>, Vec<T>>: for<'b> IsAllPass<'b, Output = bool> + System<Set = T>
 {
     type Output = bool;
 

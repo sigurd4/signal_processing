@@ -1,6 +1,5 @@
 moddef::moddef!(
     pub mod {
-        ar,
         bspline,
         filter,
         matrix,

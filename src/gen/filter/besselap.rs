@@ -10,7 +10,7 @@ use crate::{util::Chain, quantities::{Polynomial, ProductSequence}, System, syst
 
 pub trait BesselAP<O>: System + Sized
 where
-    Self::Domain: Float,
+    Self::Set: Float,
     O: Maybe<usize>
 {
     fn besselap(order: O) -> Self;
@@ -64,7 +64,7 @@ where
 impl<T, const N: usize> BesselAP<()> for Zpk<Complex<T>, (), [Complex<T>; N], T>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, (), Vec<Complex<T>>, T>: BesselAP<usize> + System<Domain = T>
+    Zpk<Complex<T>, (), Vec<Complex<T>>, T>: BesselAP<usize> + System<Set = T>
 {
     fn besselap((): ()) -> Self
     {

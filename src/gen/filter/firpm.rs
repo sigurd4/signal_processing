@@ -69,23 +69,23 @@ where
 
 pub trait FirPm: System + Sized
 where
-    Self::Domain: Float
+    Self::Set: Float
 {
     fn firpm<FS, RES, const B2: usize, const R: usize, const W: usize>(
         order: usize,
-        bands: [Self::Domain; B2],
-        response: [Self::Domain; R],
-        weight: [Self::Domain; W],
+        bands: [Self::Set; B2],
+        response: [Self::Set; R],
+        weight: [Self::Set; W],
         filter_type: FirPmType,
         sampling_frequency: FS,
-        accuracy: Self::Domain,
-        persistence: Self::Domain,
-        robustness: Self::Domain,
-        target: Self::Domain
-    ) -> Result<(Self, Self::Domain, RES), FirPmError>
+        accuracy: Self::Set,
+        persistence: Self::Set,
+        robustness: Self::Set,
+        target: Self::Set
+    ) -> Result<(Self, Self::Set, RES), FirPmError>
     where
-        FS: Maybe<Self::Domain>,
-        RES: StaticMaybe<FirPmReport<Self::Domain>>,
+        FS: Maybe<Self::Set>,
+        RES: StaticMaybe<FirPmReport<Self::Set>>,
         [(); 0 - B2%2]:,
         [(); B2/2 - 1]:,
         [(); B2 - R]:,
@@ -101,19 +101,19 @@ where
 {
     fn firpm<FS, RES, const B2: usize, const R: usize, const W: usize>(
         order: usize,
-        bands: [Self::Domain; B2],
-        response: [Self::Domain; R],
-        weight: [Self::Domain; W],
+        bands: [Self::Set; B2],
+        response: [Self::Set; R],
+        weight: [Self::Set; W],
         filter_type: FirPmType,
         sampling_frequency: FS,
-        accuracy: Self::Domain,
-        persistence: Self::Domain,
-        robustness: Self::Domain,
-        target: Self::Domain
-    ) -> Result<(Self, Self::Domain, RES), FirPmError>
+        accuracy: Self::Set,
+        persistence: Self::Set,
+        robustness: Self::Set,
+        target: Self::Set
+    ) -> Result<(Self, Self::Set, RES), FirPmError>
     where
-        FS: Maybe<Self::Domain>,
-        RES: StaticMaybe<FirPmReport<Self::Domain>>,
+        FS: Maybe<Self::Set>,
+        RES: StaticMaybe<FirPmReport<Self::Set>>,
         [(); 0 - B2%2]:,
         [(); B2/2 - 1]:,
         [(); B2 - R]:,
@@ -219,23 +219,23 @@ impl<T> FirPm for Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>
 where
     T: Float + FloatConst,
     Complex<T>: ComplexFloat<Real = T>,
-    Tf<T, Vec<T>, ()>: FirPm + ToZpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T, (), ()> + System<Domain = T>
+    Tf<T, Vec<T>, ()>: FirPm + ToZpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T, (), ()> + System<Set = T>
 {
     fn firpm<FS, RES, const B2: usize, const R: usize, const W: usize>(
         order: usize,
-        bands: [Self::Domain; B2],
-        response: [Self::Domain; R],
-        weight: [Self::Domain; W],
+        bands: [Self::Set; B2],
+        response: [Self::Set; R],
+        weight: [Self::Set; W],
         filter_type: FirPmType,
         sampling_frequency: FS,
-        accuracy: Self::Domain,
-        persistence: Self::Domain,
-        robustness: Self::Domain,
-        target: Self::Domain
-    ) -> Result<(Self, Self::Domain, RES), FirPmError>
+        accuracy: Self::Set,
+        persistence: Self::Set,
+        robustness: Self::Set,
+        target: Self::Set
+    ) -> Result<(Self, Self::Set, RES), FirPmError>
     where
-        FS: Maybe<Self::Domain>,
-        RES: StaticMaybe<FirPmReport<Self::Domain>>,
+        FS: Maybe<Self::Set>,
+        RES: StaticMaybe<FirPmReport<Self::Set>>,
         [(); 0 - B2%2]:,
         [(); B2/2 - 1]:,
         [(); B2 - R]:,
@@ -263,24 +263,24 @@ where
 impl<T> FirPm for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: Float + FloatConst,
-    Tf<T, Vec<T>, ()>: FirPm + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>,
+    Tf<T, Vec<T>, ()>: FirPm + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Set = T>,
     Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>>+ SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>
 {
     fn firpm<FS, RES, const B2: usize, const R: usize, const W: usize>(
         order: usize,
-        bands: [Self::Domain; B2],
-        response: [Self::Domain; R],
-        weight: [Self::Domain; W],
+        bands: [Self::Set; B2],
+        response: [Self::Set; R],
+        weight: [Self::Set; W],
         filter_type: FirPmType,
         sampling_frequency: FS,
-        accuracy: Self::Domain,
-        persistence: Self::Domain,
-        robustness: Self::Domain,
-        target: Self::Domain
-    ) -> Result<(Self, Self::Domain, RES), FirPmError>
+        accuracy: Self::Set,
+        persistence: Self::Set,
+        robustness: Self::Set,
+        target: Self::Set
+    ) -> Result<(Self, Self::Set, RES), FirPmError>
     where
-        FS: Maybe<Self::Domain>,
-        RES: StaticMaybe<FirPmReport<Self::Domain>>,
+        FS: Maybe<Self::Set>,
+        RES: StaticMaybe<FirPmReport<Self::Set>>,
         [(); 0 - B2%2]:,
         [(); B2/2 - 1]:,
         [(); B2 - R]:,

@@ -8,7 +8,7 @@ use crate::{
     MaybeSystem
 };
 
-pub trait System: RtfOrSystem + MaybeSystem<Self::Domain>
+pub trait System: RtfOrSystem + MaybeSystem<Self::Set>
 {
     
 }

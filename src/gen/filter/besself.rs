@@ -6,14 +6,14 @@ use crate::{gen::filter::{BesselAP, FilterGenError, FilterGenPlane, FilterGenTyp
 
 pub trait BesselF<O>: System + Sized
 where
-    Self::Domain: Float,
+    Self::Set: Float,
     O: Maybe<usize>
 {
     fn besself<const F: usize>(
         order: O,
-        frequencies: [Self::Domain; F],
+        frequencies: [Self::Set; F],
         filter_type: FilterGenType,
-        plane: FilterGenPlane<Self::Domain>
+        plane: FilterGenPlane<Self::Set>
     ) -> Result<Self, FilterGenError>
     where
         [(); F - 1]:,
@@ -25,8 +25,8 @@ where
     T: Float + FloatConst,
     Z: MaybeList<Complex<T>>,
     P: MaybeList<Complex<T>>,
-    Zpk<Complex<T>, (), P, T>: BesselAP<usize> + SfTrans<1, Output = Self> + SfTrans<2, Output = Self> + System<Domain = T>,
-    Self: Bilinear<Output = Self> + System<Domain = T>
+    Zpk<Complex<T>, (), P, T>: BesselAP<usize> + SfTrans<1, Output = Self> + SfTrans<2, Output = Self> + System<Set = T>,
+    Self: Bilinear<Output = Self> + System<Set = T>
 {
     fn besself<const F: usize>(
         order: usize,
@@ -113,7 +113,7 @@ where
 impl<T> BesselF<usize> for Tf<T, Vec<T>, Vec<T>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + ToTf<T, Vec<T>, Vec<T>, (), ()> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + ToTf<T, Vec<T>, Vec<T>, (), ()> + System<Set = T>
 {
     fn besself<const F: usize>(
         order: usize,
@@ -135,7 +135,7 @@ impl<T, const N: usize> BesselF<()> for Tf<T, [T; N], [T; N]>
 where
     [(); N - 2]:,
     T: Float + FloatConst,
-    Tf<T, Vec<T>, Vec<T>>: BesselF<usize> + System<Domain = T>
+    Tf<T, Vec<T>, Vec<T>>: BesselF<usize> + System<Set = T>
 {
     fn besself<const F: usize>(
         (): (),
@@ -156,7 +156,7 @@ where
 impl<T> BesselF<usize> for Sos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + ToSos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + ToSos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()> + System<Set = T>
 {
     fn besself<const F: usize>(
         order: usize,
@@ -177,7 +177,7 @@ where
 impl<T, const N: usize> BesselF<()> for Sos<T, [T; 3], [T; 3], [Tf<T, [T; 3], [T; 3]>; N]>
 where
     T: Float + FloatConst,
-    Sos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>>: BesselF<usize> + System<Domain = T>
+    Sos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>>: BesselF<usize> + System<Set = T>
 {
     fn besself<const F: usize>(
         (): (),
@@ -200,7 +200,7 @@ where
 impl<T> BesselF<usize> for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>,
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: BesselF<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Set = T>,
     Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>>+ SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>
 {
     fn besself<const F: usize>(

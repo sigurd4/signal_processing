@@ -5,10 +5,10 @@ use option_trait::Maybe;
 
 use crate::{quantities::{ContainerOrSingle, List, ListOrSingle, Lists, MaybeLists, OwnedList, OwnedListOrSingle}, analysis::{PhaseUnwrapReference, RealFreqZ}, System};
 
-pub trait RealPhaseZ<'a, H, W, N>: System<Domain: Float + FloatConst>
+pub trait RealPhaseZ<'a, H, W, N>: System<Set: Float + FloatConst>
 where
-    H: Lists<Self::Domain>,
-    W: List<Self::Domain>,
+    H: Lists<Self::Set>,
+    W: List<Self::Set>,
     N: Maybe<usize>,
 {
     fn real_phasez(&'a self, n: N, reference: PhaseUnwrapReference) -> (H, W);
@@ -17,7 +17,7 @@ where
 impl<'a, S, T, H, W, N> RealPhaseZ<'a, H, W, N> for S
 where
     T: Float + FloatConst + Sum + AddAssign + SubAssign,
-    S: RealFreqZ<'a, H::Mapped<Complex<T>>, W, N> + System<Domain = T>,
+    S: RealFreqZ<'a, H::Mapped<Complex<T>>, W, N> + System<Set = T>,
     H: Lists<T>,
     H::Mapped<Complex<T>>: Lists<Complex<T>, RowOwned: OwnedList<Complex<T>, Mapped<T>: OwnedList<T>>, RowsMapped<<<H::Mapped<Complex<T>> as MaybeLists<Complex<T>>>::RowOwned as ContainerOrSingle<Complex<T>>>::Mapped<T>>: Into<H>>,
     W: List<T>,

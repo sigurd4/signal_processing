@@ -23,8 +23,8 @@ pub enum PsdRange
 
 pub trait Psd<'a, P, F, N, FF, R, M>: System
 where
-    P: Lists<<Self::Domain as ComplexFloat>::Real>,
-    F: List<<Self::Domain as ComplexFloat>::Real>,
+    P: Lists<<Self::Set as ComplexFloat>::Real>,
+    F: List<<Self::Set as ComplexFloat>::Real>,
     N: Maybe<usize>,
     FF: Maybe<F>,
     M: Maybe<PsdMethod>,
@@ -32,7 +32,7 @@ where
 {
     fn psd<FS>(&'a self, numtaps: N, frequencies: FF, sampling_frequency: FS, range: R, method: M) -> (P, F)
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<'a, T, A, AV, N, M, R> Psd<'a, AV::Mapped<Vec<T::Real>>, Vec<T::Real>, N, (), R, M> for Ar<T, A, AV>
@@ -48,7 +48,7 @@ where
 {
     fn psd<FS>(&'a self, numtaps: N, (): (), sampling_frequency: FS, range: R, method: M) -> (AV::Mapped<Vec<T::Real>>, Vec<T::Real>)
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>
     {
         let one = T::Real::one();
         let two = one + one;
@@ -135,12 +135,12 @@ where
     AV::Mapped<[T::Real; N]>: Lists<T::Real>,
     M: Maybe<PsdMethod>,
     R: Maybe<PsdRange>,
-    Self: Psd<'a, AV::Mapped<Vec<T::Real>>, Vec<T::Real>, usize, (), PsdRange, M> + System<Domain = T>,
+    Self: Psd<'a, AV::Mapped<Vec<T::Real>>, Vec<T::Real>, usize, (), PsdRange, M> + System<Set = T>,
     AV::Mapped<Vec<T::Real>>: Lists<T::Real> + ListOrSingle<Vec<T::Real>, Mapped<[T::Real; N]> = AV::Mapped<[T::Real; N]>>
 {
     fn psd<FS>(&'a self, (): (), (): (), sampling_frequency: FS, range: R, method: M) -> (AV::Mapped<[T::Real; N]>, [T::Real; N])
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>
     {
         if N == 0
         {
@@ -179,7 +179,7 @@ where
 {
     fn psd<FS>(&'a self, (): (), frequencies: FF, sampling_frequency: FS, (): (), (): ()) -> (AV::Mapped<FF::Mapped<T::Real>>, FF)
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>
     {
         let fs = sampling_frequency.into_option()
             .unwrap_or(T::Real::TAU());

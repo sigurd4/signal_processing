@@ -196,7 +196,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{systems::Ar, gen::ar::ArBurg};
+    use crate::{systems::Ar, identification::ar::ArBurg};
 
     #[test]
     fn test()

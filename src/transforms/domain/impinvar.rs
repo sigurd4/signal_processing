@@ -24,8 +24,8 @@ pub trait ImpInvar: System
         tolerance: TOL
     ) -> Result<Self::Output, ImpInvarError>
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>,
-        TOL: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>,
+        TOL: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<T, T2, B, B2, A, A2, R, R2, P, RP, K> ImpInvar for Tf<T, B, A>
@@ -33,8 +33,8 @@ where
     T: ComplexFloat<Real: Into<T> + NotPolynomial> + 'static,
     B: MaybeLists<T>,
     A: MaybeList<T>,
-    Self: Residue<Output = Rpk<T, R, P, RP, K>> + System<Domain = T>,
-    Rpk<R, R2, P, Vec<(R2, P)>, [R; 1]>: Residue<Output = Tf<T2, B2, A2>> + System<Domain: ComplexFloat<Real = T::Real>>,
+    Self: Residue<Output = Rpk<T, R, P, RP, K>> + System<Set = T>,
+    Rpk<R, R2, P, Vec<(R2, P)>, [R; 1]>: Residue<Output = Tf<T2, B2, A2>> + System<Set: ComplexFloat<Real = T::Real>>,
     T2: ComplexFloat<Real = T::Real> + 'static,
     B2: MaybeLists<T2>,
     A2: MaybeList<T2>,

@@ -7,10 +7,10 @@ use crate::{quantities::ProductSequence, System, systems::Zpk};
 
 pub trait Cheb2AP<O>: System + Sized
 where
-    Self::Domain: Float,
+    Self::Set: Float,
     O: Maybe<usize>
 {
-    fn cheb2ap(order: O, ripple: Self::Domain) -> Self;
+    fn cheb2ap(order: O, ripple: Self::Set) -> Self;
 }
 
 impl<T> Cheb2AP<usize> for Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>
@@ -77,7 +77,7 @@ where
 impl<T, const N: usize> Cheb2AP<()> for Zpk<Complex<T>, (), [Complex<T>; N], T>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, (), Vec<Complex<T>>, T>: Cheb2AP<usize> + System<Domain = T>
+    Zpk<Complex<T>, (), Vec<Complex<T>>, T>: Cheb2AP<usize> + System<Set = T>
 {
     fn cheb2ap((): (), ripple: T) -> Self
     {

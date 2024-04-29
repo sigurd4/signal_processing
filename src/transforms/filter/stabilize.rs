@@ -9,7 +9,7 @@ use crate::{quantities::{MaybeList, MaybeLists, MaybeOwnedList, Polynomial}, Pla
 
 pub trait Stabilize: System
 {
-    type Output: System<Domain = Self::Domain>;
+    type Output: System<Set = Self::Set>;
 
     fn stabilize(self, plane: Plane) -> Self::Output;
 }

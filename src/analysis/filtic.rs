@@ -6,13 +6,13 @@ use crate::{util::ComplexOp, quantities::{List, ListOrSingle, Lists, MaybeList, 
 
 pub trait FiltIC<X, XX, Y>: System
 where
-    Self::Domain: ComplexOp<X>,
-    X: ComplexFloat + Into<<Self::Domain as ComplexOp<X>>::Output>,
+    Self::Set: ComplexOp<X>,
+    X: ComplexFloat + Into<<Self::Set as ComplexOp<X>>::Output>,
     XX: List<X>,
-    XX::Mapped<<Self::Domain as ComplexOp<X>>::Output>: List<<Self::Domain as ComplexOp<X>>::Output>,
-    Y: ListOrSingle<XX::Mapped<<Self::Domain as ComplexOp<X>>::Output>>
+    XX::Mapped<<Self::Set as ComplexOp<X>>::Output>: List<<Self::Set as ComplexOp<X>>::Output>,
+    Y: ListOrSingle<XX::Mapped<<Self::Set as ComplexOp<X>>::Output>>
 {
-    fn filtic(self, y: Y, x: XX) -> Vec<<Self::Domain as ComplexOp<X>>::Output>;
+    fn filtic(self, y: Y, x: XX) -> Vec<<Self::Set as ComplexOp<X>>::Output>;
 }
 
 impl<'a, T, B, A, X, XX, Y> FiltIC<X, XX, B::RowsMapped<XX::Mapped<Y>>> for Tf<T, B, A>

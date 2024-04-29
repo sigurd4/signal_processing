@@ -8,11 +8,11 @@ use crate::{quantities::{MaybeList, MaybeOwnedList}, operations::Simplify, decom
 
 pub trait ResidueZ: System
 {
-    type Output: System<Domain: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>>;
+    type Output: System<Set: ComplexFloat<Real = <Self::Set as ComplexFloat>::Real>>;
     
     fn residuez<TOL>(self, tol: TOL) -> Self::Output
     where
-        TOL: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        TOL: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<T, B, B2, A, A2, TR, R, P, RP, K> ResidueZ for Tf<T, B, A>
@@ -23,8 +23,8 @@ where
     B2: MaybeOwnedList<T>,
     A2: MaybeOwnedList<T>,
     TR: Float + FloatConst,
-    Self: Simplify<Output = Tf<T, B2, A2>> + System<Domain = T>,
-    Tf<T, B2, A2>: Residue<Output = Rpk<T, R, P, RP, K>> + System<Domain = T>,
+    Self: Simplify<Output = Tf<T, B2, A2>> + System<Set = T>,
+    Tf<T, B2, A2>: Residue<Output = Rpk<T, R, P, RP, K>> + System<Set = T>,
     RP: MaybeOwnedList<(R, P)>,
     K: MaybeOwnedList<T>,
     R: ComplexFloat<Real = TR> + Mul<P, Output = R>,
@@ -90,16 +90,16 @@ where
     K: MaybeList<T>,
     RP::Owned: MaybeOwnedList<(R, P)>,
     K::Owned: MaybeOwnedList<T>,
-    Rpk<T, R, P, RP::Owned, K::Owned>: Residue<Output = Tf<T, B, A>> + System<Domain = T>,
+    Rpk<T, R, P, RP::Owned, K::Owned>: Residue<Output = Tf<T, B, A>> + System<Set = T>,
     B: MaybeOwnedList<T>,
     A: MaybeOwnedList<T>,
-    Tf<T, B, A>: Simplify + System<Domain = T>
+    Tf<T, B, A>: Simplify + System<Set = T>
 {
     type Output = <Tf<T, B, A> as Simplify>::Output;
 
     fn residuez<TOL>(self, tol: TOL) -> Self::Output
     where
-        TOL: Maybe<<Self::Domain as ComplexFloat>::Real>
+        TOL: Maybe<<Self::Set as ComplexFloat>::Real>
     {
         let mut rpk = self.into_owned();
 

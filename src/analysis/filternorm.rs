@@ -11,9 +11,9 @@ use crate::{
 
 pub trait FilterNorm<'a>: System
 {
-    type Output: ListOrSingle<<Self::Domain as ComplexFloat>::Real>;
+    type Output: ListOrSingle<<Self::Set as ComplexFloat>::Real>;
 
-    fn filternorm(&'a self, p: <Self::Domain as ComplexFloat>::Real) -> Self::Output;
+    fn filternorm(&'a self, p: <Self::Set as ComplexFloat>::Real) -> Self::Output;
 }
 
 const FILTER_INF_NORM_RES: usize = 1024;
@@ -25,7 +25,7 @@ where
     A: MaybeList<T>,
     B::RowsMapped<Vec<T>>: for<'b> Lists<T, RowView<'b>: List<T>, RowsMapped<T::Real> = B::RowsMapped<T::Real>>,
     B::RowsMapped<[Complex<T::Real>; FILTER_INF_NORM_RES]>: for<'b> Lists<Complex<T::Real>, RowView<'b>: List<Complex<T::Real>>, RowsMapped<T::Real> = B::RowsMapped<T::Real>>, 
-    Self: ImpZ<'a, B::RowsMapped<Vec<T>>, Vec<T::Real>, ()> + FreqZ<'a, B::RowsMapped<[Complex<T::Real>; FILTER_INF_NORM_RES]>, [T::Real; FILTER_INF_NORM_RES], ()> + System<Domain = T>
+    Self: ImpZ<'a, B::RowsMapped<Vec<T>>, Vec<T::Real>, ()> + FreqZ<'a, B::RowsMapped<[Complex<T::Real>; FILTER_INF_NORM_RES]>, [T::Real; FILTER_INF_NORM_RES], ()> + System<Set = T>
 {
     type Output = B::RowsMapped<T::Real>;
 

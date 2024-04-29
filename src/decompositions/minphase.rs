@@ -7,8 +7,8 @@ use crate::{quantities::{MaybeList, MaybeLists, MaybeOwnedList}, System, systems
 
 pub trait MinPhase: System
 {
-    type OutputMin: System<Domain = Self::Domain>;
-    type OutputAp: System<Domain: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>>;
+    type OutputMin: System<Set = Self::Set>;
+    type OutputAp: System<Set: ComplexFloat<Real = <Self::Set as ComplexFloat>::Real>>;
 
     fn minphase(self) -> (Self::OutputMin, Self::OutputAp);
 }
@@ -65,7 +65,7 @@ where
     T: ComplexFloat + MulAssign<T::Real>,
     B: MaybeLists<T>,
     A: MaybeList<T>,
-    Self: ToZpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T, (), ()> + System<Domain = T>,
+    Self: ToZpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T, (), ()> + System<Set = T>,
     Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T>: ToTf<T, Vec<T>, Vec<T>, (), ()>,
     Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T::Real>: ToTf<T, Vec<T>, Vec<T>, (), ()>
 {
@@ -85,7 +85,7 @@ where
     B: Maybe<[T; 3]> + MaybeOwnedList<T>,
     A: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>>,
-    Self: ToZpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T, (), ()> + System<Domain = T>,
+    Self: ToZpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T, (), ()> + System<Set = T>,
     Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T>: ToSos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()>,
     Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T::Real>: ToSos<T, [T; 3], [T; 3], Vec<Tf<T, [T; 3], [T; 3]>>, (), ()>
 {

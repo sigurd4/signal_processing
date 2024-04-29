@@ -5,23 +5,23 @@ use crate::{util::ComplexOp, operations::filtering::FilterMut, quantities::Lists
 
 pub trait Filter<X, XX>: System
 where
-    Self::Domain: ComplexOp<X>,
-    X: Into<<Self::Domain as ComplexOp<X>>::Output> + ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>,
+    Self::Set: ComplexOp<X>,
+    X: Into<<Self::Set as ComplexOp<X>>::Output> + ComplexFloat<Real = <Self::Set as ComplexFloat>::Real>,
     XX: Lists<X>
 {
-    type Output: Lists<<Self::Domain as ComplexOp<X>>::Output>;
+    type Output: Lists<<Self::Set as ComplexOp<X>>::Output>;
 
-    fn filter<W: Maybe<Vec<<Self::Domain as ComplexOp<X>>::Output>>>(self, x: XX, w: W) -> Self::Output;
+    fn filter<W: Maybe<Vec<<Self::Set as ComplexOp<X>>::Output>>>(self, x: XX, w: W) -> Self::Output;
 }
 
 impl<W, S, X, XX, O> Filter<X, XX> for S
 where
     S: System,
-    S::Domain: ComplexOp<X, Output = W>,
+    S::Set: ComplexOp<X, Output = W>,
     X: Into<W> + ComplexFloat<Real = W::Real>,
     XX: Lists<X>,
-    W: ComplexOp<X, Output = W> + ComplexFloat<Real = <S::Domain as ComplexFloat>::Real>,
-    Rtf<W, S>: FilterMut<X, XX, Output = O> + RtfOrSystem<Domain = W>,
+    W: ComplexOp<X, Output = W> + ComplexFloat<Real = <S::Set as ComplexFloat>::Real>,
+    Rtf<W, S>: FilterMut<X, XX, Output = O> + RtfOrSystem<Set = W>,
     O: Lists<W>
 {
     type Output = O;

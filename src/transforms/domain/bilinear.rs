@@ -18,7 +18,7 @@ pub trait Bilinear: System
 {
     type Output: Sized;
 
-    fn bilinear(self, sampling_frequency: <Self::Domain as ComplexFloat>::Real) -> Result<Self::Output, BilinearError>;
+    fn bilinear(self, sampling_frequency: <Self::Set as ComplexFloat>::Real) -> Result<Self::Output, BilinearError>;
 }
 
 impl<'a, T, Z, P, K> Bilinear for Zpk<T, Z, P, K>
@@ -28,7 +28,7 @@ where
     Z: MaybeList<T>,
     P: MaybeList<T>,
     T::Real: Into<T>,
-    Self: ToZpk<T, Vec<T>, Vec<T>, K, (), ()> + System<Domain = K>
+    Self: ToZpk<T, Vec<T>, Vec<T>, K, (), ()> + System<Set = K>
 {
     type Output = Zpk<T, Vec<T>, Vec<T>, K>;
 
@@ -101,8 +101,8 @@ where
     T: ComplexFloat,
     B: MaybeList<T>,
     A: MaybeList<T>,
-    Self: ToZpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T, (), ()> + System<Domain = T>,
-    Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T>: Bilinear<Output: ToTf<T, Vec<T>, Vec<T>, (), ()>> + System<Domain = T>,
+    Self: ToZpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T, (), ()> + System<Set = T>,
+    Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T>: Bilinear<Output: ToTf<T, Vec<T>, Vec<T>, (), ()>> + System<Set = T>,
 {
     type Output = Tf<T, Vec<T>, Vec<T>>;
 

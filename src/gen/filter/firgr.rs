@@ -44,21 +44,21 @@ pub enum FirGrOrder
 
 pub trait FirGr<O>: System + Sized
 where
-    Self::Domain: Float,
+    Self::Set: Float,
     O: Maybe<usize>
 {
     fn firgr<FS, MI, GD, const B: usize>(
         order: O,
-        bands: [Self::Domain; B*2],
-        response: [Self::Domain; B],
-        weight: [Self::Domain; B],
+        bands: [Self::Set; B*2],
+        response: [Self::Set; B],
+        weight: [Self::Set; B],
         filter_type: FilterClassType,
         sampling_frequency: FS,
         max_iter: MI,
         grid_density: GD
     ) -> Result<Self, FirGrError>
     where
-        FS: Maybe<Self::Domain>,
+        FS: Maybe<Self::Set>,
         MI: Maybe<usize>,
         GD: Maybe<usize>;
 }
@@ -141,7 +141,7 @@ impl<T> FirGr<usize> for Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>
 where
     T: Float + FloatConst,
     Complex<T>: ComplexFloat<Real = T>,
-    Tf<T, Vec<T>, ()>: FirGr<usize> + ToZpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T, (), ()> + System<Domain = T>
+    Tf<T, Vec<T>, ()>: FirGr<usize> + ToZpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T, (), ()> + System<Set = T>
 {
     fn firgr<FS, MI, GD, const B: usize>(
         order: usize,
@@ -176,7 +176,7 @@ where
 impl<T> FirGr<usize> for Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>
 where
     T: Float + FloatConst,
-    Tf<T, Vec<T>, ()>: FirGr<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Domain = T>,
+    Tf<T, Vec<T>, ()>: FirGr<usize> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>> + System<Set = T>,
     Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>>+ SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>
 {
     fn firgr<FS, MI, GD, const B: usize>(

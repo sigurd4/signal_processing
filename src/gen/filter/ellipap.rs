@@ -8,11 +8,11 @@ use crate::{quantities::ProductSequence, System, systems::Zpk};
 
 pub trait EllipAP<O>: System + Sized
 where
-    Self::Domain: Float,
+    Self::Set: Float,
     O: Maybe<usize>
 {
     #[doc(alias = "ncauer")]
-    fn ellipap(order: O, passband_ripple: Self::Domain, stopband_ripple: Self::Domain) -> Self;
+    fn ellipap(order: O, passband_ripple: Self::Set, stopband_ripple: Self::Set) -> Self;
 }
 
 impl<T> EllipAP<usize> for Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>
@@ -199,7 +199,7 @@ where
 impl<T, const N: usize> EllipAP<()> for Zpk<Complex<T>, Vec<Complex<T>>, [Complex<T>; N], T>
 where
     T: Float + FloatConst,
-    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: EllipAP<usize> + System<Domain = T>
+    Zpk<Complex<T>, Vec<Complex<T>>, Vec<Complex<T>>, T>: EllipAP<usize> + System<Set = T>
 {
     fn ellipap((): (), passband_ripple: T, stopband_ripple: T) -> Self
     {

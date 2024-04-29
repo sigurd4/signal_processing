@@ -5,11 +5,11 @@ use crate::{util::ComplexOp, operations::{convolution::Conv, filtering::Filter},
 
 pub trait ResidueD: System
 {
-    type Output: System<Domain: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>>;
+    type Output: System<Set: ComplexFloat<Real = <Self::Set as ComplexFloat>::Real>>;
     
     fn residued<TOL>(self, tol: TOL) -> Self::Output
     where
-        TOL: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        TOL: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<T, TR, B, A, R, P, RP, K> ResidueD for Tf<T, B, A>
@@ -18,8 +18,8 @@ where
     TR: Float + FloatConst + Into<T>,
     B: MaybeList<T, Owned: MaybeOwnedList<T>>,
     A: MaybeList<T> + for<'a> Conv<T, T, &'a [T], Output = Vec<T>, OutputT = T> + Clone,
-    Tf<T, B::Owned, A>: ResidueZ<Output = Rpk<T, R, P, RP, K>> + System<Domain = T>,
-    Tf<T, Vec<T>, A>: Filter<TR, Vec<TR>, Output = Vec<T>> + System<Domain = T>,
+    Tf<T, B::Owned, A>: ResidueZ<Output = Rpk<T, R, P, RP, K>> + System<Set = T>,
+    Tf<T, Vec<T>, A>: Filter<TR, Vec<TR>, Output = Vec<T>> + System<Set = T>,
     R: ComplexFloat<Real = TR>,
     P: ComplexFloat<Real = TR>,
     RP: MaybeList<(R, P)>,
@@ -29,7 +29,7 @@ where
 
     fn residued<TOL>(self, tol: TOL) -> Self::Output
     where
-        TOL: Maybe<<Self::Domain as ComplexFloat>::Real>
+        TOL: Maybe<<Self::Set as ComplexFloat>::Real>
     {
         let mut tf = Tf {
             b: self.b.to_owned(),

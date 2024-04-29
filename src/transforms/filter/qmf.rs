@@ -9,7 +9,7 @@ use crate::{quantities::{MaybeList, MaybeLists, MaybeOwnedList, MaybeOwnedLists,
 
 pub trait Qmf: System
 {
-    type Output: System<Domain = Self::Domain>;
+    type Output: System<Set = Self::Set>;
 
     fn qmf(self) -> Self::Output;
 }
@@ -107,7 +107,7 @@ where
     B2: Maybe<[T; 3]> + MaybeOwnedList<T>,
     A2: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S::MaybeMapped<Tf<T, B2, A2>>: MaybeList<Tf<T, B2, A2>>,
-    Tf<T, B, A>: Qmf<Output = Tf<T, B2, A2>> + System<Domain = T>
+    Tf<T, B, A>: Qmf<Output = Tf<T, B2, A2>> + System<Set = T>
 {
     type Output = Sos<T, B2, A2, S::MaybeMapped<Tf<T, B2, A2>>>;
 

@@ -15,8 +15,8 @@ pub enum PhaseUnwrapReference
 
 pub trait PhaseZ<'a, H, W, N>: System
 where
-    H: Lists<<Self::Domain as ComplexFloat>::Real>,
-    W: List<<Self::Domain as ComplexFloat>::Real>,
+    H: Lists<<Self::Set as ComplexFloat>::Real>,
+    W: List<<Self::Set as ComplexFloat>::Real>,
     N: Maybe<usize>,
 {
     fn phasez(&'a self, n: N, reference: PhaseUnwrapReference, shift: bool) -> (H, W);
@@ -25,7 +25,7 @@ where
 impl<'a, S, T, H, W, N> PhaseZ<'a, H, W, N> for S
 where
     T: ComplexFloat<Real: Sum + AddAssign + SubAssign>,
-    S: FreqZ<'a, H::Mapped<Complex<T::Real>>, W, N> + System<Domain = T>,
+    S: FreqZ<'a, H::Mapped<Complex<T::Real>>, W, N> + System<Set = T>,
     H: Lists<T::Real>,
     H::Mapped<Complex<T::Real>>: Lists<Complex<T::Real>, RowOwned: OwnedList<Complex<T::Real>, Mapped<T::Real>: OwnedList<T::Real>>, RowsMapped<<<H::Mapped<Complex<T::Real>> as MaybeLists<Complex<T::Real>>>::RowOwned as ContainerOrSingle<Complex<T::Real>>>::Mapped<T::Real>>: Into<H>>,
     W: List<T::Real>,

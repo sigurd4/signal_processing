@@ -8,9 +8,9 @@ use crate::{quantities::{List, Lists, MaybeList, MaybeOwnedList}, systems::{Sos,
 
 pub trait RealFreqZ<'a, H, W, N>: System
 where
-    Self::Domain: Float,
-    H: Lists<Complex<<Self::Domain as ComplexFloat>::Real>>,
-    W: List<<Self::Domain as ComplexFloat>::Real>,
+    Self::Set: Float,
+    H: Lists<Complex<<Self::Set as ComplexFloat>::Real>>,
+    W: List<<Self::Set as ComplexFloat>::Real>,
     N: Maybe<usize>,
 {
     fn real_freqz(&'a self, n: N) -> (H, W);
@@ -129,7 +129,7 @@ where
     S: MaybeList<Tf<T, B, A>>,
     Self: 'a,
     &'a Self: Into<Sos<T, B, A, &'a [Tf<T, B, A>]>>,
-    Tf<T, B, A>: RealFreqZ<'a, [Complex<T>; N], [T; N], ()> + System<Domain = T>
+    Tf<T, B, A>: RealFreqZ<'a, [Complex<T>; N], [T; N], ()> + System<Set = T>
 {
     fn real_freqz(&'a self, (): ()) -> ([Complex<T>; N], [T; N])
     {
@@ -152,7 +152,7 @@ where
     S: MaybeList<Tf<T, B, A>>,
     Self: 'a,
     &'a Self: Into<Sos<T, B, A, &'a [Tf<T, B, A>]>>,
-    Tf<T, B, A>: RealFreqZ<'a, Vec<Complex<T>>, Vec<T>, ()> + System<Domain = T>
+    Tf<T, B, A>: RealFreqZ<'a, Vec<Complex<T>>, Vec<T>, ()> + System<Set = T>
 {
     fn real_freqz(&'a self, n: usize) -> (Vec<Complex<T>>, Vec<T>)
     {
@@ -182,8 +182,8 @@ where
     N: Maybe<usize>,
     Z::View<'a>: MaybeList<T>,
     P::View<'a>: MaybeList<T>,
-    Zpk<T, Z::View<'a>, P::View<'a>, K>: ToSos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>, (), ()> + System<Domain = K>,
-    Sos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>>: for<'b> RealFreqZ<'b, H, W, N> + System<Domain = K>
+    Zpk<T, Z::View<'a>, P::View<'a>, K>: ToSos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>, (), ()> + System<Set = K>,
+    Sos<K, [K; 3], [K; 3], Vec<Tf<K, [K; 3], [K; 3]>>>: for<'b> RealFreqZ<'b, H, W, N> + System<Set = K>
 {
     fn real_freqz(&'a self, n: N) -> (H, W)
     {

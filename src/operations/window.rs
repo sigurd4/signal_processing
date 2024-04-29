@@ -4,10 +4,10 @@ use crate::{util::ComplexOp, analysis::ImpZ, quantities::{List, Lists, MaybeList
 
 pub trait Window<W, WW, O>: System
 where
-    Self::Domain: ComplexOp<W>,
-    W: ComplexFloat + Into<<Self::Domain as ComplexOp<W>>::Output>,
+    Self::Set: ComplexOp<W>,
+    W: ComplexFloat + Into<<Self::Set as ComplexOp<W>>::Output>,
     WW: List<W>,
-    O: System<Domain = <Self::Domain as ComplexOp<W>>::Output>
+    O: System<Set = <Self::Set as ComplexOp<W>>::Output>
 {
     fn window(&self, window: WW) -> O;
 }
@@ -24,7 +24,7 @@ where
     B::RowsMapped<Vec<T>>: Lists<T, RowsMapped<WW::Mapped<Y>> = B::RowsMapped<WW::Mapped<Y>>>,
     B::RowsMapped<WW::Mapped<Y>>: Lists<Y>,
     Polynomial<Y, ()>: Into<Polynomial<Y, A2>>,
-    Self: for<'a> ImpZ<'a, B::RowsMapped<Vec<T>>, Vec<T::Real>, usize> + System<Domain = T>
+    Self: for<'a> ImpZ<'a, B::RowsMapped<Vec<T>>, Vec<T::Real>, usize> + System<Set = T>
 {
     fn window(&self, window: WW) -> Tf<Y, B::RowsMapped<WW::Mapped<Y>>, A2>
     {

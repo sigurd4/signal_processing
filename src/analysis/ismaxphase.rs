@@ -9,7 +9,7 @@ pub trait IsMaxPhase<'a>: System
 
     fn is_maxphase<TOL>(&'a self, tol: TOL) -> Self::Output
     where
-        TOL: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        TOL: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<'a, T, B, A> IsMaxPhase<'a> for Tf<T, B, A>
@@ -19,7 +19,7 @@ where
     A: MaybeList<T> + 'a,
     A::View<'a>: MaybeList<T> + Clone,
     Tf<T, B::RowView<'a>, A::View<'a>>: ToZpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T, (), ()>,
-    Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T>: for<'b> IsMaxPhase<'b, Output = bool> + System<Domain = T>
+    Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T>: for<'b> IsMaxPhase<'b, Output = bool> + System<Set = T>
 {
     type Output = B::RowsMapped<bool>;
 
@@ -51,7 +51,7 @@ where
     S: MaybeList<Tf<T, B, A>> + 'a,
     S::View<'a>: MaybeList<Tf<T, B, A>>,
     Sos<T, B, A, S::View<'a>>: ToZpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T, (), ()>,
-    Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T>: for<'b> IsMaxPhase<'b, Output = bool> + System<Domain = T>
+    Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T>: for<'b> IsMaxPhase<'b, Output = bool> + System<Set = T>
 {
     type Output = bool;
 

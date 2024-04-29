@@ -6,11 +6,11 @@ use crate::{util::ComplexOp, operations::filtering::FilterMut, quantities::{List
 
 pub trait FiltFilt<'a, X, XX>: System
 where
-    Self::Domain: ComplexOp<X>,
-    X: Into<<Self::Domain as ComplexOp<X>>::Output> + ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>,
+    Self::Set: ComplexOp<X>,
+    X: Into<<Self::Set as ComplexOp<X>>::Output> + ComplexFloat<Real = <Self::Set as ComplexFloat>::Real>,
     XX: Lists<X>
 {
-    type Output: ListOrSingle<XX::Mapped<<Self::Domain as ComplexOp<X>>::Output>>;
+    type Output: ListOrSingle<XX::Mapped<<Self::Set as ComplexOp<X>>::Output>>;
 
     fn filtfilt(&'a self, x: XX) -> Self::Output;
 }
@@ -25,10 +25,10 @@ where
     XX: Lists<X>,
     Self: 'a,
     &'a Self: Into<Tf<T, Vec<Vec<T>>, Vec<T>>>,
-    for<'b> Tf<T, &'b [T], &'b [T]>: System<Domain = T>,
-    for<'b> Rtf<<T as ComplexOp<X>>::Output, Tf<T, &'b [T], &'b [T]>>: FilterMut<X, Vec<X>, Output = Vec<<T as ComplexOp<X>>::Output>> + FilterMut<<T as ComplexOp<X>>::Output, Vec<<T as ComplexOp<X>>::Output>, Output = Vec<<T as ComplexOp<X>>::Output>> + RtfOrSystem<Domain = <T as ComplexOp<X>>::Output>
+    for<'b> Tf<T, &'b [T], &'b [T]>: System<Set = T>,
+    for<'b> Rtf<<T as ComplexOp<X>>::Output, Tf<T, &'b [T], &'b [T]>>: FilterMut<X, Vec<X>, Output = Vec<<T as ComplexOp<X>>::Output>> + FilterMut<<T as ComplexOp<X>>::Output, Vec<<T as ComplexOp<X>>::Output>, Output = Vec<<T as ComplexOp<X>>::Output>> + RtfOrSystem<Set = <T as ComplexOp<X>>::Output>
 {
-    type Output = B::RowsMapped<XX::Mapped<<Self::Domain as ComplexOp<X>>::Output>>;
+    type Output = B::RowsMapped<XX::Mapped<<Self::Set as ComplexOp<X>>::Output>>;
 
     fn filtfilt(&'a self, x: XX) -> Self::Output
     {

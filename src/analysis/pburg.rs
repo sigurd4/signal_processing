@@ -1,7 +1,7 @@
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{systems::Ar, gen::ar::{ArBurg, ArBurgCriterion}, quantities::{List, Lists}, analysis::{Psd, PsdMethod, PsdRange}, System};
+use crate::{systems::Ar, identification::ar::{ArBurg, ArBurgCriterion}, quantities::{List, Lists}, analysis::{Psd, PsdMethod, PsdRange}, System};
 
 
 pub trait PBurg<X, O, P, F, N, FF, R, M, C>: Lists<X>
@@ -33,7 +33,7 @@ where
     M: Maybe<PsdMethod>,
     R: Maybe<PsdRange>,
     C: Maybe<ArBurgCriterion>,
-    Ar<X, Vec<X>, XX::RowsMapped<(Vec<X>, X::Real)>>: ArBurg<XX, O, C, XX::RowsMapped<Vec<X>>> + for<'a> Psd<'a, P, F, N, FF, R, M> + System<Domain = X>,
+    Ar<X, Vec<X>, XX::RowsMapped<(Vec<X>, X::Real)>>: ArBurg<XX, O, C, XX::RowsMapped<Vec<X>>> + for<'a> Psd<'a, P, F, N, FF, R, M> + System<Set = X>,
     XX::RowsMapped<Vec<X>>: Lists<X>
 {
     fn pburg<FS>(self, order: O, numtaps: N, frequencies: FF, sampling_frequency: FS, range: R, method: M, criterion: C) -> (P, F)

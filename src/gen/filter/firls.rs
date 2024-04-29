@@ -14,14 +14,14 @@ where
 {
     fn firls<const B2: usize, const M: usize, FS, W>(
         order: O,
-        frequencies: [<Self::Domain as ComplexFloat>::Real; B2],
-        magnitudes: [Self::Domain; M],
+        frequencies: [<Self::Set as ComplexFloat>::Real; B2],
+        magnitudes: [Self::Set; M],
         weights: W,
         sampling_frequency: FS
     ) -> Result<Self, FilterGenError>
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>,
-        W: Maybe<[Self::Domain; B2/2]>,
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>,
+        W: Maybe<[Self::Set; B2/2]>,
         [(); 0 - B2 % 2]:,
         [(); B2/2 - 1]:,
         [(); B2 - M]:,
@@ -32,18 +32,18 @@ where
 impl<T, const N: usize> FirLS<()> for Tf<T, [T; N], ()>
 where
     T: ComplexFloat,
-    Tf<T, Vec<T>, ()>: FirLS<usize> + System<Domain = T>
+    Tf<T, Vec<T>, ()>: FirLS<usize> + System<Set = T>
 {
     fn firls<const B2: usize, const M: usize, FS, W>(
         (): (),
-        frequencies: [<Self::Domain as ComplexFloat>::Real; B2],
-        magnitudes: [Self::Domain; M],
+        frequencies: [<Self::Set as ComplexFloat>::Real; B2],
+        magnitudes: [Self::Set; M],
         weights: W,
         sampling_frequency: FS
     ) -> Result<Self, FilterGenError>
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>,
-        W: Maybe<[Self::Domain; B2/2]>,
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>,
+        W: Maybe<[Self::Set; B2/2]>,
         [(); 0 - B2 % 2]:,
         [(); B2/2 - 1]:,
         [(); B2 - M]:,
@@ -69,8 +69,8 @@ where
 {
     fn firls<const B2: usize, const M: usize, FS, W>(
         order: usize,
-        mut frequencies: [<Self::Domain as ComplexFloat>::Real; B2],
-        magnitudes: [Self::Domain; M],
+        mut frequencies: [<Self::Set as ComplexFloat>::Real; B2],
+        magnitudes: [Self::Set; M],
         weights: W,
         sampling_frequency: FS
     ) -> Result<Self, FilterGenError>

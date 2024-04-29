@@ -10,11 +10,11 @@ use crate::{quantities::{MaybeContainer, MaybeList, Polynomial, SumSequence}, op
 
 pub trait Residue: System
 {
-    type Output: System<Domain: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real>>;
+    type Output: System<Set: ComplexFloat<Real = <Self::Set as ComplexFloat>::Real>>;
 
     fn residue<TOL>(self, tol: TOL) -> Self::Output
     where
-        TOL: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        TOL: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<T, B, A, R> Residue for Tf<T, B, A>
@@ -23,7 +23,7 @@ where
     R: Float + FloatConst + TotalOrder + Into<T>,
     B: MaybeList<T>,
     A: MaybeList<T>,
-    Self: Simplify<Output: ToTf<T, Vec<T>, Vec<T>, (), ()>> + System<Domain = T>,
+    Self: Simplify<Output: ToTf<T, Vec<T>, Vec<T>, (), ()>> + System<Set = T>,
     Complex<R>: AddAssign + SubAssign + MulAssign + DivAssign + From<T> + DivAssign<R> + Div<T, Output = Complex<R>>,
     Polynomial<T, Vec<T>>: Euclid
 {
@@ -209,7 +209,7 @@ where
     K: MaybeList<T, MaybeMapped<Complex<T::Real>>: MaybeList<Complex<T::Real>>>,
     Polynomial<Complex<T::Real>, <K as MaybeContainer<T>>::MaybeMapped<Complex<T::Real>>>: Mul<Polynomial<Complex<T::Real>, Vec<Complex<T::Real>>>, Output = Polynomial<Complex<T::Real>, Vec<Complex<T::Real>>>>,
     Complex<T::Real>: AddAssign,
-    Tf<T, Vec<T>, Vec<T>>: Simplify + System<Domain = T>
+    Tf<T, Vec<T>, Vec<T>>: Simplify + System<Set = T>
 {
     type Output = <Tf<T, Vec<T>, Vec<T>> as Simplify>::Output;
 

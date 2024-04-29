@@ -10,7 +10,7 @@ pub trait IsLinPhase<'a>: System
 
     fn is_linphase<TOL>(&'a self, tol: TOL, generalized: bool) -> Self::Output
     where
-        TOL: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        TOL: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<'a, T, B, A> IsLinPhase<'a> for Tf<T, B, A>

@@ -21,8 +21,8 @@ pub trait Fir1<O, F, W, WW = (), const WWW: bool = false>: System + Sized
 where
     O: Maybe<usize>,
     WW: MaybeList<W>,
-    F: List<<Self::Domain as ComplexFloat>::Real>,
-    W: ComplexFloat<Real = <Self::Domain as ComplexFloat>::Real> + Into<Self::Domain>
+    F: List<<Self::Set as ComplexFloat>::Real>,
+    W: ComplexFloat<Real = <Self::Set as ComplexFloat>::Real> + Into<Self::Set>
 {
     fn fir1<FS>(
         order: O,
@@ -33,7 +33,7 @@ where
         sampling_frequency: FS
     ) -> Result<Self, FilterGenError>
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<T, F, W, WW> Fir1<(), F, W, WW, true> for Tf<T, WW::Mapped<T>, ()>
@@ -45,7 +45,7 @@ where
     F: List<T::Real>,
     W: ComplexFloat<Real = T::Real> + Into<T>,
     WW::Mapped<T>: List<T, Mapped<T> = WW::Mapped<T>>,
-    Self: Fir2<(), Vec<T::Real>, Vec<T>, W, WW, true> + System<Domain = T>
+    Self: Fir2<(), Vec<T::Real>, Vec<T>, W, WW, true> + System<Set = T>
 {
     fn fir1<FS>(
         (): (),
@@ -149,7 +149,7 @@ where
     T: ComplexFloat,
     F: List<T::Real>,
     T::Real: Into<T>,
-    Self: Fir1<(), F, T::Real, Vec<T::Real>, true> + System<Domain = T>
+    Self: Fir1<(), F, T::Real, Vec<T::Real>, true> + System<Set = T>
 {
     fn fir1<FS>(
         order: usize,
@@ -178,7 +178,7 @@ where
     T: ComplexFloat,
     F: List<T::Real>,
     T::Real: Into<T>,
-    Self: Fir1<(), F, T::Real, [T::Real; N], true> + System<Domain = T>
+    Self: Fir1<(), F, T::Real, [T::Real; N], true> + System<Set = T>
 {
     fn fir1<FS>(
         (): (),

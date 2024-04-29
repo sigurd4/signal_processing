@@ -23,7 +23,7 @@ where
     T: ComplexFloat<Real: ComplexOp<T, Output = T> + ComplexFloat<Real = T::Real>> + MulAssign<T::Real>,
     L: Lists<T, RowOwned: List<T>>,
     (): Maybe<T::Real>,
-    Tf<T::Real, Vec<T::Real>>: Fir1<usize, [T::Real; 1], T::Real, (), false> + for<'a> FftFilt<'a, T, Vec<T>, Output = Vec<T>> + System<Domain = T::Real>
+    Tf<T::Real, Vec<T::Real>>: Fir1<usize, [T::Real; 1], T::Real, (), false> + for<'a> FftFilt<'a, T, Vec<T>, Output = Vec<T>> + System<Set = T::Real>
 {
     fn interp<N, W>(self, ratio: usize, order: N, cutoff: W) -> Self::RowsMapped<Vec<T>>
     where

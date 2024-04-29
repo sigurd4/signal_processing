@@ -13,13 +13,13 @@ use crate::{
 
 pub trait GrpDelay<'a, H, W, N>: System
 where
-    H: Lists<<Self::Domain as ComplexFloat>::Real>,
-    W: List<<Self::Domain as ComplexFloat>::Real>,
+    H: Lists<<Self::Set as ComplexFloat>::Real>,
+    W: List<<Self::Set as ComplexFloat>::Real>,
     N: Maybe<usize>,
 {
     fn grpdelay<FS>(&'a self, n: N, sampling_rate: FS) -> (H, W)
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>;
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>;
 }
 
 impl<'a, T, B, A, const N: usize> GrpDelay<'a, B::RowsMapped<[T::Real; N]>, [T::Real; N], ()> for Tf<T, B, A>
@@ -35,7 +35,7 @@ where
 {
     fn grpdelay<FS>(&'a self, (): (), sampling_rate: FS) -> (B::RowsMapped<[T::Real; N]>, [T::Real; N])
     where
-        FS: Maybe<<Self::Domain as ComplexFloat>::Real>
+        FS: Maybe<<Self::Set as ComplexFloat>::Real>
     {
         let Tf { b, a }: Tf<Complex<T::Real>, Vec<Vec<Complex<T::Real>>>, Vec<Complex<T::Real>>> = self.into();
 

@@ -23,8 +23,8 @@ where
 
 impl<W, S> MaybeRtfOrSystem<W> for Rtf<W, S>
 where
-    W: ComplexFloat<Real = <S::Domain as ComplexFloat>::Real>,
-    S::Domain: Into<W>,
+    W: ComplexFloat<Real = <S::Set as ComplexFloat>::Real>,
+    S::Set: Into<W>,
     S: System
 {
     

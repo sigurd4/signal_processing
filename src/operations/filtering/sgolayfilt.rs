@@ -38,7 +38,7 @@ where
     Y: ComplexFloat + Clone + 'static,
     XX::RowsMapped<<XX::RowOwned as ContainerOrSingle<X>>::Mapped<Y>>: Into<XX::Mapped<Y>>,
     for<'a> <B::Owned as MaybeContainer<T>>::View<'a>: List<T>,
-    for<'a> Tf<T, <B::Owned as MaybeContainer<T>>::View<'a>>: Filter<X, XX::RowOwned, Output = <XX::RowOwned as ContainerOrSingle<X>>::Mapped<Y>> + System<Domain = T>
+    for<'a> Tf<T, <B::Owned as MaybeContainer<T>>::View<'a>>: Filter<X, XX::RowOwned, Output = <XX::RowOwned as ContainerOrSingle<X>>::Mapped<Y>> + System<Set = T>
 {
     fn sgolayfilt(self, x: XX) -> Result<XX::Mapped<Y>, SGolayFiltError>
     {
