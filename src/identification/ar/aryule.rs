@@ -5,9 +5,9 @@ use crate::{systems::Ar, identification::ar::Levinson, quantities::{List, ListOr
 
 pub trait ArYule<X, O, K>: System + Sized
 where
-    X: Lists<Self::Domain>,
+    X: Lists<Self::Set>,
     O: Maybe<usize>,
-    K: Lists<Self::Domain>
+    K: Lists<Self::Set>
 {
     fn aryule(x: X, order: O) -> (Self, K);
 }
@@ -22,7 +22,7 @@ where
     K: Lists<T>,
     X::RowOwned: XCorr<T, T, (), T> + List<T, RowsMapped<<X::RowOwned as MaybeLists<T>>::RowsMapped<Vec<T>>> = Vec<T>>,
     X::RowsMapped<Vec<T>>: Lists<T>,
-    Self: Levinson<X::RowsMapped<Vec<T>>, O, K> + System<Domain = T>
+    Self: Levinson<X::RowsMapped<Vec<T>>, O, K> + System<Set = T>
 {
     fn aryule(x: X, order: O) -> (Self, K)
     {

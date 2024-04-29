@@ -2,7 +2,7 @@ use core::{iter::Sum, ops::{AddAssign, DivAssign, MulAssign, SubAssign}};
 
 use num::{traits::FloatConst, Float};
 
-use crate::{quantities::{ContainerOrSingle, ListOrSingle, Lists, OwnedList, OwnedListOrSingle}, analysis::FiltIC, operations::filtering::Filter, systems::Tf};
+use crate::{quantities::{ContainerOrSingle, ListOrSingle, Lists, OwnedList, OwnedListOrSingle}, analysis::FiltIc, operations::filtering::Filter, systems::Tf};
 
 
 pub trait QSpline1d<T>: Lists<T>

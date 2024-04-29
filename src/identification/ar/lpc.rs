@@ -5,7 +5,7 @@ use crate::{systems::Ar, identification::ar::Levinson, quantities::{List, ListOr
 
 pub trait Lpc<X, O>: System + Sized
 where
-    X: Lists<Self::Domain>,
+    X: Lists<Self::Set>,
     O: Maybe<usize>
 {
     fn lpc(x: X, order: O) -> Self;
@@ -17,7 +17,7 @@ where
     X: Lists<T, RowOwned = XX>,
     X::RowsMapped<([T; N], T::Real)>: ListOrSingle<([T; N], T::Real)>,
     XX: XCorr<T, T, (), T> + List<T, RowsMapped<Vec<T>> = Vec<T>>,
-    Ar<T, [T; N], ([T; N], T::Real)>: Levinson<Vec<T>, (), [T; N - 1]> + System<Domain = T>
+    Ar<T, [T; N], ([T; N], T::Real)>: Levinson<Vec<T>, (), [T; N - 1]> + System<Set = T>
 {
     fn lpc(x: X, (): ()) -> Self
     {
@@ -40,7 +40,7 @@ where
     X: Lists<T, RowOwned = XX>,
     X::RowsMapped<(Vec<T>, T::Real)>: ListOrSingle<(Vec<T>, T::Real)>,
     XX: XCorr<T, T, (), T> + List<T, RowsMapped<Vec<T>> = Vec<T>>,
-    Ar<T, Vec<T>, (Vec<T>, T::Real)>: Levinson<Vec<T>, usize, Vec<T>> + System<Domain = T>
+    Ar<T, Vec<T>, (Vec<T>, T::Real)>: Levinson<Vec<T>, usize, Vec<T>> + System<Set = T>
 {
     fn lpc(x: X, order: usize) -> Self
     {

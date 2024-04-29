@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::{AddAssign, DivAssign, MulAssign, SubAssign}};
 use num::{traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{quantities::{ContainerOrSingle, ListOrSingle, Lists, OwnedList, OwnedListOrSingle}, analysis::FiltIC, operations::filtering::Filter, systems::{Sos, Tf}};
+use crate::{quantities::{ContainerOrSingle, ListOrSingle, Lists, OwnedList, OwnedListOrSingle}, analysis::FiltIc, operations::filtering::Filter, systems::{Sos, Tf}};
 
 pub trait CSpline1d<T>: Lists<T>
 where

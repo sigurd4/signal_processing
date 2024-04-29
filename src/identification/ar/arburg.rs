@@ -17,10 +17,10 @@ pub enum ArBurgCriterion
 
 pub trait ArBurg<X, O, C, K>: System + Sized
 where
-    X: Lists<Self::Domain>,
+    X: Lists<Self::Set>,
     O: Maybe<usize>,
     C: Maybe<ArBurgCriterion>,
-    K: Lists<Self::Domain>
+    K: Lists<Self::Set>
 {
     fn arburg(x: X, order: O, criterion: C) -> (Self, K);
 }
@@ -32,7 +32,7 @@ where
     X::RowsMapped<[T; N - 1]>: Lists<T>,
     X::RowsMapped<(Vec<T>, T::Real)>: ListOrSingle<(Vec<T>, T::Real), Mapped<([T; N], T::Real)> = X::RowsMapped<([T; N], T::Real)>>,
     X::RowsMapped<Vec<T>>: ListOrSingle<Vec<T>, Mapped<[T; N - 1]> = X::RowsMapped<[T; N - 1]>> + Lists<T>,
-    Ar<T, Vec<T>, X::RowsMapped<(Vec<T>, T::Real)>>: ArBurg<X, usize, (), X::RowsMapped<Vec<T>>> + System<Domain = T>,
+    Ar<T, Vec<T>, X::RowsMapped<(Vec<T>, T::Real)>>: ArBurg<X, usize, (), X::RowsMapped<Vec<T>>> + System<Set = T>,
     [(); N - 1]:
 {
     fn arburg(x: X, (): (), (): ()) -> (Self, X::RowsMapped<[T; N - 1]>)

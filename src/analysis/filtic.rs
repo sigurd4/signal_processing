@@ -4,7 +4,7 @@ use num::{complex::ComplexFloat, One, Zero};
 
 use crate::{util::ComplexOp, quantities::{List, ListOrSingle, Lists, MaybeList, MaybeLists}, System, systems::Tf};
 
-pub trait FiltIC<X, XX, Y>: System
+pub trait FiltIc<X, XX, Y>: System
 where
     Self::Set: ComplexOp<X>,
     X: ComplexFloat + Into<<Self::Set as ComplexOp<X>>::Output>,
@@ -15,7 +15,7 @@ where
     fn filtic(self, y: Y, x: XX) -> Vec<<Self::Set as ComplexOp<X>>::Output>;
 }
 
-impl<'a, T, B, A, X, XX, Y> FiltIC<X, XX, B::RowsMapped<XX::Mapped<Y>>> for Tf<T, B, A>
+impl<'a, T, B, A, X, XX, Y> FiltIc<X, XX, B::RowsMapped<XX::Mapped<Y>>> for Tf<T, B, A>
 where
     T: ComplexOp<X, Output = Y>,
     B: MaybeLists<T>,
@@ -83,7 +83,7 @@ mod test
 {
     use crate::{
         gen::filter::{Butter, FilterGenPlane, FilterGenType},
-        analysis::FiltIC,
+        analysis::FiltIc,
         operations::filtering::Filter,
         systems::Tf
     };

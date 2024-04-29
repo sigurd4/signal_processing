@@ -3,6 +3,7 @@ moddef::moddef!(
         cceps,
         cpsd,
         filternorm,
+        filtic_u,
         filtic,
         filtord,
         findpeaks,

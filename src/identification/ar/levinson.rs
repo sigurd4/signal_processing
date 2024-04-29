@@ -7,9 +7,9 @@ use crate::{systems::Ar, quantities::{ContainerOrSingle, List, ListOrSingle, Lis
 
 pub trait Levinson<C, O, K>: System + Sized
 where
-    C: Lists<Self::Domain>,
+    C: Lists<Self::Set>,
     O: Maybe<usize>,
-    K: Lists<Self::Domain>
+    K: Lists<Self::Set>
 {
     fn levinson(c: C, order: O) -> (Self, K);
 }
@@ -21,7 +21,7 @@ where
     X::RowsMapped<[T; N - 1]>: Lists<T>,
     X::RowsMapped<(Vec<T>, T::Real)>: ListOrSingle<(Vec<T>, T::Real), Mapped<([T; N], T::Real)> = X::RowsMapped<([T; N], T::Real)>>,
     X::RowsMapped<Vec<T>>: ListOrSingle<Vec<T>, Mapped<[T; N - 1]> = X::RowsMapped<[T; N - 1]>> + Lists<T>,
-    Ar<T, Vec<T>, X::RowsMapped<(Vec<T>, T::Real)>>: Levinson<X, usize, X::RowsMapped<Vec<T>>> + System<Domain = T>,
+    Ar<T, Vec<T>, X::RowsMapped<(Vec<T>, T::Real)>>: Levinson<X, usize, X::RowsMapped<Vec<T>>> + System<Set = T>,
     [(); N - 1]:
 {
     fn levinson(x: X, (): ()) -> (Self, X::RowsMapped<[T; N - 1]>)
