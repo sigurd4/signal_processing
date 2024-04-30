@@ -24,6 +24,7 @@ where
     F: List<<Self::Set as ComplexFloat>::Real>,
     W: ComplexFloat<Real = <Self::Set as ComplexFloat>::Real> + Into<Self::Set>
 {
+    #[doc(alias = "firwin")]
     fn fir1<FS>(
         order: O,
         frequencies: F,
