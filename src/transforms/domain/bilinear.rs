@@ -186,21 +186,21 @@ where
 impl<T, B, A, B2, A2, S> Bilinear for Sos<T, B, A, S>
 where
     T: ComplexFloat,
-    B: Maybe<[T; 3]> + MaybeOwnedList<T>,
-    A: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T> + Clone,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T> + Clone,
     B2: Maybe<[T; 3]> + MaybeOwnedList<T>,
     A2: Maybe<[T; 3]> + MaybeOwnedList<T>,
     S: MaybeList<Tf<T, B, A>>,
     S::MaybeMapped<Tf<T, B2, A2>>: MaybeList<Tf<T, B2, A2>>,
-    Tf<T, B, A>: Bilinear<Output = Tf<T, B2, A2>>
+    Tf<T, B, A>: Bilinear<Output = Tf<T, B2, A2>> + System<Set = T>
 {
     type Output = Sos<T, B2, A2, S::MaybeMapped<Tf<T, B2, A2>>>;
 
     fn bilinear(self, sampling_frequency: T::Real) -> Result<Self::Output, BilinearError>
     {
-        Sos::new(self.sos.into_inner()
-            .maybe_try_map_into_owned(|sos| sos.bilinear())?
-        )
+        Ok(Sos::new(self.sos.into_inner()
+            .maybe_try_map_into_owned(|sos| sos.bilinear(sampling_frequency))?
+        ))
     }
 }
 

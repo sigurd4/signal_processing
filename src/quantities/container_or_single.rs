@@ -94,7 +94,7 @@ impl<T> ContainerOrSingle<T> for Vec<T>
             .map(map)
             .collect()
     }
-    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    fn try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::Mapped<O>, E>
     where
         T: 'a,
         F: FnMut(&'a T) -> Result<O, E>
@@ -103,7 +103,7 @@ impl<T> ContainerOrSingle<T> for Vec<T>
             .map(map)
             .collect()
     }
-    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    fn try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::Mapped<O>, E>
     where
         T: Clone,
         Self: Sized,
@@ -142,7 +142,7 @@ impl<T> ContainerOrSingle<T> for [T]
             .map(|x| map(x.clone()))
             .collect()
     }
-    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    fn try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::Mapped<O>, E>
     where
         T: 'a,
         F: FnMut(&'a T) -> Result<O, E>
@@ -187,7 +187,7 @@ impl<T, const N: usize> ContainerOrSingle<T> for [T; N]
     {
         self.map(map)
     }
-    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    fn try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::Mapped<O>, E>
     where
         T: 'a,
         F: FnMut(&'a T) -> Result<O, E>
@@ -195,7 +195,7 @@ impl<T, const N: usize> ContainerOrSingle<T> for [T; N]
         self.each_ref()
             .try_map(map)
     }
-    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    fn try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::Mapped<O>, E>
     where
         T: Clone,
         Self: Sized,
@@ -232,7 +232,7 @@ impl<'c, T> ContainerOrSingle<T> for &'c [T]
             .map(|x| map(x.clone()))
             .collect()
     }
-    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    fn try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::Mapped<O>, E>
     where
         T: 'a,
         F: FnMut(&'a T) -> Result<O, E>
@@ -278,7 +278,7 @@ impl<'b, T, const N: usize> ContainerOrSingle<T> for &'b [T; N]
         self.each_ref()
             .map(|x| map(x.clone()))
     }
-    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    fn try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::Mapped<O>, E>
     where
         T: 'a,
         F: FnMut(&'a T) -> Result<O, E>
