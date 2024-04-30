@@ -8,15 +8,14 @@ use crate::{gen::filter::{Cheb1AP, FilterGenError, FilterGenPlane, FilterGenType
 
 pub trait Cheby1<O>: System + Sized
 where
-    Self::Set: Float,
     O: Maybe<usize>
 {
     fn cheby1<const F: usize>(
         order: O,
-        ripple: Self::Set,
-        frequencies: [Self::Set; F],
+        ripple: <Self::Set as ComplexFloat>::Real,
+        frequencies: [<Self::Set as ComplexFloat>::Real; F],
         filter_type: FilterGenType,
-        plane: FilterGenPlane<Self::Set>
+        plane: FilterGenPlane<<Self::Set as ComplexFloat>::Real>
     ) -> Result<Self, FilterGenError>
     where
         [(); F - 1]:,

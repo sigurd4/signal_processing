@@ -25,6 +25,7 @@ moddef::moddef!(
         firpmord,
         gammatone_fir,
         gammatone_iir,
+        iir_design,
         kaiserord,
         pei_tseng_notch,
         qp_kaiser,
