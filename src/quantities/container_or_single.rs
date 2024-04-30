@@ -12,12 +12,20 @@ pub trait ContainerOrSingle<T>
     where
         T: 'a,
         F: FnMut<(&'a T,)>;
-        
     fn map_into_owned<F>(self, map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
         Self: Sized,
         F: FnMut<(T,)>;
+    fn try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>;
+    fn try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>;
     fn index_get(&self, i: Self::Index) -> Option<&T>;
 }
 
@@ -41,6 +49,21 @@ impl<T> ContainerOrSingle<T> for T
     {
         map(self)
     }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        map(self)
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        map(self)
+    }
     fn index_get(&self, (): Self::Index) -> Option<&T>
     {
         Some(self)
@@ -61,12 +84,30 @@ impl<T> ContainerOrSingle<T> for Vec<T>
             .map(map)
             .collect()
     }
-
     fn map_into_owned<F>(self, map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
         Self: Sized,
         F: FnMut<(T,)>
+    {
+        self.into_iter()
+            .map(map)
+            .collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(map)
+            .collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
     {
         self.into_iter()
             .map(map)
@@ -91,12 +132,30 @@ impl<T> ContainerOrSingle<T> for [T]
             .map(map)
             .collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
         Self: Sized,
         F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| map(x.clone()))
+            .collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(map)
+            .collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
     {
         self.iter()
             .map(|x| map(x.clone()))
@@ -120,7 +179,6 @@ impl<T, const N: usize> ContainerOrSingle<T> for [T; N]
         self.each_ref()
             .map(map)
     }
-
     fn map_into_owned<F>(self, map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -128,6 +186,22 @@ impl<T, const N: usize> ContainerOrSingle<T> for [T; N]
         F: FnMut<(T,)>
     {
         self.map(map)
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(map)
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map(map)
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
@@ -148,12 +222,30 @@ impl<'c, T> ContainerOrSingle<T> for &'c [T]
             .map(map)
             .collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
         Self: Sized,
         F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| map(x.clone()))
+            .collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(map)
+            .collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
     {
         self.iter()
             .map(|x| map(x.clone()))
@@ -177,7 +269,6 @@ impl<'b, T, const N: usize> ContainerOrSingle<T> for &'b [T; N]
         self.each_ref()
             .map(map)
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -186,6 +277,23 @@ impl<'b, T, const N: usize> ContainerOrSingle<T> for &'b [T; N]
     {
         self.each_ref()
             .map(|x| map(x.clone()))
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(map)
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|x| map(x.clone()))
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
@@ -209,12 +317,34 @@ impl<T> ContainerOrSingle<T> for Vec<Vec<T>>
                 .collect()
             ).collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
         Self: Sized,
         F: FnMut<(T,)>
+    {
+        self.into_iter()
+            .map(|x| x.into_iter()
+                .map(&mut map)
+                .collect()
+            ).collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|s| s.iter()
+                .map(&mut map)
+                .collect()
+            ).collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
     {
         self.into_iter()
             .map(|x| x.into_iter()
@@ -244,7 +374,6 @@ impl<T, const M: usize> ContainerOrSingle<T> for [Vec<T>; M]
                 .collect()
             )
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -254,6 +383,28 @@ impl<T, const M: usize> ContainerOrSingle<T> for [Vec<T>; M]
         self.map(|x| x.into_iter()
                 .map(&mut map)
                 .collect()
+            )
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|s| s.iter()
+                .map(&mut map)
+                .collect::<Result<Vec<_>, _>>()
+            )
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map(|x| x.into_iter()
+                .map(&mut map)
+                .collect::<Result<Vec<_>, _>>()
             )
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
@@ -278,12 +429,34 @@ impl<T> ContainerOrSingle<T> for [Vec<T>]
                 .collect()
             ).collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
         Self: Sized,
         F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| x.iter()
+                .map(|x| map(x.clone()))
+                .collect()
+            ).collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|s| s.iter()
+                .map(&mut map)
+                .collect()
+            ).collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
     {
         self.iter()
             .map(|x| x.iter()
@@ -313,7 +486,6 @@ impl<'b, T, const M: usize> ContainerOrSingle<T> for &'b [Vec<T>; M]
                 .collect()
             )
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -324,6 +496,29 @@ impl<'b, T, const M: usize> ContainerOrSingle<T> for &'b [Vec<T>; M]
             .map(|x| x.iter()
                 .map(|x| map(x.clone()))
                 .collect()
+            )
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|s| s.iter()
+                .map(&mut map)
+                .collect::<Result<Vec<_>, _>>()
+            )
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|x| x.iter()
+                .map(|x| map(x.clone()))
+                .collect::<Result<Vec<_>, _>>()
             )
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
@@ -348,12 +543,34 @@ impl<'b, T> ContainerOrSingle<T> for &'b [Vec<T>]
                 .collect()
             ).collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
         Self: Sized,
         F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| x.iter()
+                .map(|x| map(x.clone()))
+                .collect()
+            ).collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|s| s.iter()
+                .map(&mut map)
+                .collect()
+            ).collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
     {
         self.iter()
             .map(|x| x.iter()
@@ -383,7 +600,6 @@ impl<T, const N: usize> ContainerOrSingle<T> for Vec<[T; N]>
                 .map(&mut map)
             ).collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -393,6 +609,27 @@ impl<T, const N: usize> ContainerOrSingle<T> for Vec<[T; N]>
         self.iter()
             .map(|x| x.each_ref()
                 .map(|x| map(x.clone()))
+            ).collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|s| s.each_ref()
+                .try_map(&mut map)
+            ).collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|x| x.each_ref()
+                .try_map(|x| map(x.clone()))
             ).collect()
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
@@ -416,7 +653,6 @@ impl<T, const N: usize, const M: usize> ContainerOrSingle<T> for [[T; N]; M]
                 .map(&mut map)
             )
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -424,6 +660,24 @@ impl<T, const N: usize, const M: usize> ContainerOrSingle<T> for [[T; N]; M]
         F: FnMut<(T,)>
     {
         self.map(|x| x.map(&mut map))
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|s| s.each_ref()
+                .try_map(&mut map)
+            )
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map(|x| x.try_map(&mut map))
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
@@ -446,7 +700,6 @@ impl<T, const N: usize> ContainerOrSingle<T> for [[T; N]]
                 .map(&mut map)
             ).collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -456,6 +709,27 @@ impl<T, const N: usize> ContainerOrSingle<T> for [[T; N]]
         self.iter()
             .map(|x| x.each_ref()
                 .map(|x| map(x.clone()))
+            ).collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|s| s.each_ref()
+                .try_map(&mut map)
+            ).collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|x| x.each_ref()
+                .try_map(|x| map(x.clone()))
             ).collect()
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
@@ -479,7 +753,6 @@ impl<'b, T, const N: usize, const M: usize> ContainerOrSingle<T> for &'b [[T; N]
                 .map(&mut map)
             )
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -489,6 +762,27 @@ impl<'b, T, const N: usize, const M: usize> ContainerOrSingle<T> for &'b [[T; N]
         self.each_ref()
             .map(|x| x.each_ref()
                 .map(|x| map(x.clone()))
+            )
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|s| s.each_ref()
+                .try_map(&mut map)
+            )
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|x| x.each_ref()
+                .try_map(|x| map(x.clone()))
             )
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
@@ -512,7 +806,6 @@ impl<'b, T, const N: usize> ContainerOrSingle<T> for &'b [[T; N]]
                 .map(&mut map)
             ).collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -522,6 +815,27 @@ impl<'b, T, const N: usize> ContainerOrSingle<T> for &'b [[T; N]]
         self.iter()
             .map(|x| x.each_ref()
                 .map(|x| map(x.clone()))
+            ).collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|s| s.each_ref()
+                .try_map(&mut map)
+            ).collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|x| x.each_ref()
+                .try_map(|x| map(x.clone()))
             ).collect()
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
@@ -547,12 +861,34 @@ impl<'b, T> ContainerOrSingle<T> for Vec<&'b [T]>
                 .collect()
             ).collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
         Self: Sized,
         F: FnMut<(T,)>
+    {
+        self.into_iter()
+            .map(|x| x.iter()
+                .map(|x| map(x.clone()))
+                .collect()
+            ).collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|s| s.iter()
+                .map(&mut map)
+                .collect()
+            ).collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
     {
         self.into_iter()
             .map(|x| x.iter()
@@ -582,7 +918,6 @@ impl<'b, T, const M: usize> ContainerOrSingle<T> for [&'b [T]; M]
                 .collect()
             )
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -592,6 +927,28 @@ impl<'b, T, const M: usize> ContainerOrSingle<T> for [&'b [T]; M]
         self.map(|x| x.iter()
                 .map(|x| map(x.clone()))
                 .collect()
+            )
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|s| s.iter()
+                .map(&mut map)
+                .collect::<Result<Vec<_>, _>>()
+            )
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map(|x| x.iter()
+                .map(|x| map(x.clone()))
+                .collect::<Result<Vec<_>, _>>()
             )
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
@@ -616,12 +973,34 @@ impl<'b, T> ContainerOrSingle<T> for [&'b [T]]
                 .collect()
             ).collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
         Self: Sized,
         F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| x.iter()
+                .map(|x| map(x.clone()))
+                .collect()
+            ).collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|s| s.iter()
+                .map(&mut map)
+                .collect()
+            ).collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
     {
         self.iter()
             .map(|x| x.iter()
@@ -651,7 +1030,6 @@ impl<'b, 'c, T, const M: usize> ContainerOrSingle<T> for &'b [&'c [T]; M]
                 .collect()
             )
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -662,6 +1040,29 @@ impl<'b, 'c, T, const M: usize> ContainerOrSingle<T> for &'b [&'c [T]; M]
             .map(|x| x.iter()
                 .map(|x| map(x.clone()))
                 .collect()
+            )
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|s| s.iter()
+                .map(&mut map)
+                .collect::<Result<Vec<_>, _>>()
+            )
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|x| x.iter()
+                .map(|x| map(x.clone()))
+                .collect::<Result<Vec<_>, _>>()
             )
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
@@ -686,12 +1087,34 @@ impl<'b, 'c, T> ContainerOrSingle<T> for &'b [&'c [T]]
                 .collect()
             ).collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
         Self: Sized,
         F: FnMut<(T,)>
+    {
+        self.iter()
+            .map(|x| x.iter()
+                .map(|x| map(x.clone()))
+                .collect()
+            ).collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|s| s.iter()
+                .map(&mut map)
+                .collect()
+            ).collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
     {
         self.iter()
             .map(|x| x.iter()
@@ -721,7 +1144,6 @@ impl<'b, T, const N: usize> ContainerOrSingle<T> for Vec<&'b [T; N]>
                 .map(&mut map)
             ).collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -731,6 +1153,27 @@ impl<'b, T, const N: usize> ContainerOrSingle<T> for Vec<&'b [T; N]>
         self.into_iter()
             .map(|x| x.each_ref()
                 .map(|x| map(x.clone()))
+            ).collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|s| s.each_ref()
+                .try_map(&mut map)
+            ).collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.into_iter()
+            .map(|x| x.each_ref()
+                .try_map(|x| map(x.clone()))
             ).collect()
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
@@ -754,7 +1197,6 @@ impl<'b, T, const N: usize, const M: usize> ContainerOrSingle<T> for [&'b [T; N]
                 .map(&mut map)
             )
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -763,6 +1205,26 @@ impl<'b, T, const N: usize, const M: usize> ContainerOrSingle<T> for [&'b [T; N]
     {
         self.map(|x| x.each_ref()
                 .map(|x| map(x.clone()))
+            )
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|s| s.each_ref()
+                .try_map(&mut map)
+            )
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map(|x| x.each_ref()
+                .try_map(|x| map(x.clone()))
             )
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
@@ -786,7 +1248,6 @@ impl<'b, T, const N: usize> ContainerOrSingle<T> for [&'b [T; N]]
                 .map(&mut map)
             ).collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -796,6 +1257,27 @@ impl<'b, T, const N: usize> ContainerOrSingle<T> for [&'b [T; N]]
         self.iter()
             .map(|x| x.each_ref()
                 .map(|x| map(x.clone()))
+            ).collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|s| s.each_ref()
+                .try_map(&mut map)
+            ).collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|x| x.each_ref()
+                .try_map(|x| map(x.clone()))
             ).collect()
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
@@ -819,7 +1301,6 @@ impl<'b, 'c, T, const N: usize, const M: usize> ContainerOrSingle<T> for &'b [&'
                 .map(&mut map)
             )
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -828,6 +1309,26 @@ impl<'b, 'c, T, const N: usize, const M: usize> ContainerOrSingle<T> for &'b [&'
     {
         self.map(|x| x.each_ref()
                 .map(|x| map(x.clone()))
+            )
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.each_ref()
+            .try_map(|s| s.each_ref()
+                .try_map(&mut map)
+            )
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map(|x| x.each_ref()
+                .try_map(|x| map(x.clone()))
             )
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
@@ -851,7 +1352,6 @@ impl<'b, 'c, T, const N: usize> ContainerOrSingle<T> for &'b [&'c [T; N]]
                 .map(&mut map)
             ).collect()
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -861,6 +1361,27 @@ impl<'b, 'c, T, const N: usize> ContainerOrSingle<T> for &'b [&'c [T; N]]
         self.iter()
             .map(|x| x.each_ref()
                 .map(|x| map(x.clone()))
+            ).collect()
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|s| s.each_ref()
+                .try_map(&mut map)
+            ).collect()
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.iter()
+            .map(|x| x.each_ref()
+                .try_map(|x| map(x.clone()))
             ).collect()
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
@@ -885,7 +1406,6 @@ where
     {
         ArrayBase::from_shape_fn(self.dim(), |i| map(&self[i]))
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -893,6 +1413,35 @@ where
         F: FnMut<(T,)>
     {
         ArrayBase::from_shape_fn(self.dim(), |i| map(self[i].clone()))
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        let dim = self.dim();
+        Ok(ArrayBase::from_iter(self.iter()
+                .map(|x| map(x))
+                .collect::<Result<Vec<_>, _>>()?
+                .into_iter()
+            ).into_shape(dim)
+            .unwrap()
+        )
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        let dim = self.dim();
+        Ok(ArrayBase::from_iter(self.into_iter()
+                .map(|x| map(x))
+                .collect::<Result<Vec<_>, _>>()?
+                .into_iter()
+            ).into_shape(dim)
+            .unwrap()
+        )
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {
@@ -915,7 +1464,6 @@ where
     {
         ArrayBase::from_shape_fn(self.dim(), |i| map(&self[i]))
     }
-
     fn map_into_owned<F>(self, mut map: F) -> Self::Mapped<F::Output>
     where
         T: Clone,
@@ -923,6 +1471,35 @@ where
         F: FnMut<(T,)>
     {
         ArrayBase::from_shape_fn(self.dim(), |i| map(self[i].clone()))
+    }
+    fn try_map_to_owned<'a, F, O, E>(&'a self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        let dim = self.dim();
+        Ok(ArrayBase::from_iter(self.iter()
+                .map(|x| map(x))
+                .collect::<Result<Vec<_>, _>>()?
+                .into_iter()
+            ).into_shape(dim)
+            .unwrap()
+        )
+    }
+    fn try_map_into_owned<F, O, E>(self, mut map: F) -> Result<Self::Mapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        let dim = self.dim();
+        Ok(ArrayBase::from_iter(self.iter()
+                .map(|x| map(x.clone()))
+                .collect::<Result<Vec<_>, _>>()?
+                .into_iter()
+            ).into_shape(dim)
+            .unwrap()
+        )
     }
     fn index_get(&self, i: Self::Index) -> Option<&T>
     {

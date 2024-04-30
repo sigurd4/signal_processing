@@ -1,10 +1,11 @@
-use core::{any::Any, iter::Product, ops::{Add, AddAssign, Div, Mul, MulAssign}};
+use core::{any::Any, iter::Product, ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign}};
 
+use array_math::{SliceMath, SliceOps};
 use num::{complex::ComplexFloat, NumCast, One};
-use option_trait::StaticMaybe;
+use option_trait::{Maybe, StaticMaybe};
 use thiserror::Error;
 
-use crate::{operations::Simplify, quantities::{ListOrSingle, MaybeList, MaybeOwnedList}, systems::{Tf, Zpk}, transforms::system::ToZpk, util::{self, Overlay}, System};
+use crate::{quantities::{ListOrSingle, MaybeList, MaybeOwnedList}, systems::{Sos, Tf, Zpk}, transforms::system::ToZpk, util::{self, Overlay}, System};
 
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum BilinearError
@@ -93,15 +94,14 @@ where
     }
 }
 
-impl<T, B, A, BA2, O> Bilinear for Tf<T, B, A>
+impl<T, B, A, BA2> Bilinear for Tf<T, B, A>
 where
-    T: ComplexFloat + AddAssign + Mul<T::Real, Output = T>,
+    T: ComplexFloat + AddAssign + DivAssign + Mul<T::Real, Output = T>,
     B: MaybeList<T> + Overlay<T, A, Output = BA2>,
     A: MaybeList<T>,
-    BA2: MaybeOwnedList<T, Some: ListOrSingle<T, Length: StaticMaybe<usize, Opposite: Sized>>>,
-    Tf<T, BA2, BA2>: Simplify<Output = O>
+    BA2: MaybeOwnedList<T, Some: ListOrSingle<T, Length: StaticMaybe<usize, Opposite: Sized>>>
 {
-    type Output = O;
+    type Output = Tf<T, BA2, BA2>;
 
     fn bilinear(self, sampling_frequency: T::Real) -> Result<Self::Output, BilinearError>
     {
@@ -121,7 +121,7 @@ where
         let na = a.len();
         let m = nb.max(na);
 
-        let bb = BA2::maybe_from_len_fn(StaticMaybe::maybe_from_fn(|| m), |j| {
+        let mut bb = BA2::maybe_from_len_fn(StaticMaybe::maybe_from_fn(|| m), |j| {
             let mut val = T::zero();
 
             for i in 0..nb
@@ -144,7 +144,7 @@ where
 
             val
         });
-        let aa = BA2::maybe_from_len_fn(StaticMaybe::maybe_from_fn(|| m), |j| {
+        let mut aa = BA2::maybe_from_len_fn(StaticMaybe::maybe_from_fn(|| m), |j| {
             let mut val = T::zero();
 
             for i in 0..na
@@ -168,8 +168,39 @@ where
             val
         });
 
-        Ok(Tf::new(bb, aa)
-            .simplify())
+        if let Some(aa) = aa.as_mut_slice_option() && let Some(bb) = bb.as_mut_slice_option()
+        {
+            if let Some(a0) = aa.trim_zeros_front()
+                .first()
+                .copied()
+            {
+                bb.div_assign_all(a0);
+                aa.div_assign_all(a0);
+            }
+        }
+
+        Ok(Tf::new(bb, aa))
+    }
+}
+
+impl<T, B, A, B2, A2, S> Bilinear for Sos<T, B, A, S>
+where
+    T: ComplexFloat,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    B2: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    A2: Maybe<[T; 3]> + MaybeOwnedList<T>,
+    S: MaybeList<Tf<T, B, A>>,
+    S::MaybeMapped<Tf<T, B2, A2>>: MaybeList<Tf<T, B2, A2>>,
+    Tf<T, B, A>: Bilinear<Output = Tf<T, B2, A2>>
+{
+    type Output = Sos<T, B2, A2, S::MaybeMapped<Tf<T, B2, A2>>>;
+
+    fn bilinear(self, sampling_frequency: T::Real) -> Result<Self::Output, BilinearError>
+    {
+        Sos::new(self.sos.into_inner()
+            .maybe_try_map_into_owned(|sos| sos.bilinear())?
+        )
     }
 }
 

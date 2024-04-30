@@ -38,6 +38,15 @@ pub trait MaybeContainer<T>
         T: Clone,
         Self: Sized,
         F: FnMut<(T,)>;
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>;
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>;
     fn to_some_or<F>(self, or: F) -> Self::Some
     where
         Self: Sized,
@@ -91,6 +100,21 @@ impl<T> MaybeContainer<T> for ()
         F: FnMut<(T,)>
     {
 
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, _map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        Ok(())
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, _map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        Ok(())
     }
     fn to_some_or<F>(self, or: F) -> Self::Some
     where
@@ -151,6 +175,21 @@ impl<T> MaybeContainer<T> for Vec<T>
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -208,6 +247,21 @@ impl<T> MaybeContainer<T> for [T]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
     }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
@@ -267,6 +321,21 @@ impl<T, const N: usize> MaybeContainer<T> for [T; N]
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -325,6 +394,21 @@ impl<T> MaybeContainer<T> for &[T]
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -382,6 +466,21 @@ impl<T, const N: usize> MaybeContainer<T> for &[T; N]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
     }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
@@ -444,6 +543,21 @@ impl<T> MaybeContainer<T> for Vec<Vec<T>>
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -503,6 +617,21 @@ impl<T, const M: usize> MaybeContainer<T> for [Vec<T>; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
     }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
@@ -564,6 +693,21 @@ impl<T> MaybeContainer<T> for [Vec<T>]
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -622,6 +766,21 @@ impl<T, const M: usize> MaybeContainer<T> for &[Vec<T>; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
     }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
@@ -683,6 +842,21 @@ impl<T> MaybeContainer<T> for &[Vec<T>]
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -743,6 +917,21 @@ impl<T, const N: usize> MaybeContainer<T> for Vec<[T; N]>
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -801,6 +990,21 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for [[T; N]; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
     }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
@@ -861,6 +1065,21 @@ impl<T, const N: usize> MaybeContainer<T> for [[T; N]]
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -919,6 +1138,21 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[[T; N]; M]
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -976,6 +1210,21 @@ impl<T, const N: usize> MaybeContainer<T> for &[[T; N]]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
     }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
@@ -1040,6 +1289,21 @@ impl<T> MaybeContainer<T> for Vec<&[T]>
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -1097,6 +1361,21 @@ impl<T, const M: usize> MaybeContainer<T> for [&[T]; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
     }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
@@ -1160,6 +1439,21 @@ impl<T> MaybeContainer<T> for [&[T]]
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -1217,6 +1511,21 @@ impl<T, const M: usize> MaybeContainer<T> for &[&[T]; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
     }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
@@ -1279,6 +1588,21 @@ impl<T> MaybeContainer<T> for &[&[T]]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
     }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
@@ -1343,6 +1667,21 @@ impl<T, const N: usize> MaybeContainer<T> for Vec<&[T; N]>
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -1400,6 +1739,21 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for [&[T; N]; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
     }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
@@ -1463,6 +1817,21 @@ impl<T, const N: usize> MaybeContainer<T> for [&[T; N]]
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -1520,6 +1889,21 @@ impl<T, const N: usize, const M: usize> MaybeContainer<T> for &[&[T; N]; M]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
     }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
@@ -1582,6 +1966,21 @@ impl<T, const N: usize> MaybeContainer<T> for &[&[T; N]]
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
     }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
@@ -1646,6 +2045,21 @@ where
     {
         self.map_into_owned(map)
     }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
+    }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
         Self: Sized,
@@ -1708,6 +2122,21 @@ where
         F: FnMut<(T,)>
     {
         self.map_into_owned(map)
+    }
+    fn maybe_try_map_to_owned<'a, F, O, E>(&'a self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: 'a,
+        F: FnMut(&'a T) -> Result<O, E>
+    {
+        self.try_map_to_owned(map)
+    }
+    fn maybe_try_map_into_owned<F, O, E>(self, map: F) -> Result<Self::MaybeMapped<O>, E>
+    where
+        T: Clone,
+        Self: Sized,
+        F: FnMut(T) -> Result<O, E>
+    {
+        self.try_map_into_owned(map)
     }
     fn to_some_or<F>(self, _or: F) -> Self::Some
     where
