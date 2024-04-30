@@ -1,4 +1,4 @@
-use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, Float, NumCast, One, Zero};
+use num::{complex::ComplexFloat, Complex, Float, NumCast, One, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
 use crate::{quantities::{ListOrSingle, MaybeList, MaybeLists, MaybeOwnedList, OwnedList, OwnedLists}, systems::{Sos, Tf, Zpk}, transforms::system::ToZpk, System};
