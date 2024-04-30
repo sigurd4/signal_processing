@@ -16,7 +16,7 @@ exclude = ["/plots", "/images", "/temp"]
 [dependencies]
 thiserror = "1.0.59"
 moddef = "0.2.2"
-array_math = {version = "0.2.42", features = ["ndarray"]}
+array_math = {version = "0.2.44", features = ["ndarray"]}
 num = "0.4.2"
 option_trait = "0.1.16"
 rand = "0.8.5"
