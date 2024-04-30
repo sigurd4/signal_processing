@@ -23,6 +23,8 @@ moddef::moddef!(
         firls,
         firpm,
         firpmord,
+        gammatone_fir,
+        gammatone_iir,
         kaiserord,
         pei_tseng_notch,
         qp_kaiser,
