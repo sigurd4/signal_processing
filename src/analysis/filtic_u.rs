@@ -1,18 +1,19 @@
-use core::ops::DivAssign;
+use core::ops::{AddAssign, Deref, DivAssign, MulAssign};
 
 use ndarray::{Array1, Array2};
 use ndarray_linalg::{Lapack, Solve};
-use num::complex::ComplexFloat;
-use array_math::{SliceMath, SliceOps};
+use num::{complex::ComplexFloat, One};
+use array_math::{SliceMath, ArrayMath, SliceOps};
+use option_trait::Maybe;
 
-use crate::{quantities::MaybeList, systems::Tf, System};
+use crate::{quantities::{MaybeList, MaybeOwnedList}, systems::{Sos, Tf}, System};
 
 pub trait FiltIcU: System
 {
     fn filtic_u(self) -> Option<Vec<Self::Set>>;
 }
 
-impl<'a, T, B, A> FiltIcU for Tf<T, B, A>
+impl<T, B, A> FiltIcU for Tf<T, B, A>
 where
     T: ComplexFloat + DivAssign + Lapack,
     B: MaybeList<T>,
@@ -75,19 +76,67 @@ where
     }
 }
 
+impl<T, B, A, S> FiltIcU for Sos<T, B, A, S>
+where
+    T: ComplexFloat + MulAssign + AddAssign,
+    B: Maybe<[T; 3]> + MaybeOwnedList<T> + Clone,
+    A: Maybe<[T; 3]> + MaybeOwnedList<T> + Clone,
+    S: MaybeList<Tf<T, B, A>>,
+    Tf<T, B, A>: FiltIcU + System<Set = T>
+{
+    fn filtic_u(self) -> Option<Vec<T>>
+    {
+        let mut zi = vec![];
+
+        if let Some(sos) = self.sos.into_inner()
+            .into_vec_option()
+        {
+            let mut scale = T::one();
+
+            for sos in sos
+            {
+                let scale_scale = sos.b.deref()
+                        .as_option()
+                        .map(|b| b.sum())
+                        .unwrap_or_else(One::one)
+                    /sos.a.deref()
+                        .as_option()
+                        .map(|a| a.sum())
+                        .unwrap_or_else(One::one);
+                if !scale_scale.is_finite()
+                {
+                    return None
+                }
+                if let Some(mut w) = sos.filtic_u()
+                {
+                    w.mul_assign_all(scale);
+                    zi.append(&mut w)
+                }
+                else
+                {
+                    return None
+                }
+                scale *= scale_scale;
+            }
+        }
+
+        Some(zi)
+    }
+}
+
 #[cfg(test)]
 mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{analysis::FiltIcU, gen::filter::{Butter, FilterGenPlane, FilterGenType}, operations::filtering::Filter, plot, systems::Tf};
+    use crate::{analysis::FiltIcU, gen::filter::{Butter, FilterGenPlane, FilterGenType}, operations::filtering::Filter, plot, systems::Sos};
 
     #[test]
     fn test()
     {
         const FS: f64 = 1000.0;
 
-        let h = Tf::butter(2, [100.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(FS) })
+        let h = Sos::butter(2, [100.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(FS) })
             .unwrap();
 
         let w = h.as_view().filtic_u().unwrap();
