@@ -1,9 +1,10 @@
-use core::{any::Any, iter::Product, ops::{Add, Div, Mul, MulAssign}};
+use core::{any::Any, iter::Product, ops::{Add, AddAssign, Div, Mul, MulAssign}};
 
-use num::{complex::ComplexFloat, Complex, One};
+use num::{complex::ComplexFloat, NumCast, One};
+use option_trait::StaticMaybe;
 use thiserror::Error;
 
-use crate::{quantities::{MaybeList, ProductSequence}, System, systems::{Tf, Zpk}, transforms::system::{ToTf, ToZpk}};
+use crate::{operations::Simplify, quantities::{ListOrSingle, MaybeList, MaybeOwnedList}, systems::{Tf, Zpk}, transforms::system::ToZpk, util::{self, Overlay}, System};
 
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum BilinearError
@@ -36,7 +37,10 @@ where
     {
         let Zpk::<T, Vec<T>, Vec<T>, K> {z: sz, p: sp, k: sg} = self.to_zpk((), ());
     
-        let t = sampling_frequency;
+        let one = K::Real::one();
+        let two = one + one;
+        
+        let t = sampling_frequency.recip();
 
         let p = sp.len();
         let z = sz.len();
@@ -48,9 +52,6 @@ where
         {
             return Err(BilinearError::ZeroPoles)
         }
-    
-        let one = K::Real::one();
-        let two = one + one;
 
         let mut zg = sg;
         let n = sz.iter()
@@ -88,26 +89,114 @@ where
             .map(|sz| (sz*t + two)/(-sz*t + two))
             .collect();
         zz.resize(p, -T::one());
-        Ok(Zpk {
-            z: ProductSequence::new(zz),
-            p: ProductSequence::new(zp),
-            k: zg
-        })
+        Ok(Zpk::new(zz, zp, zg))
     }
 }
 
-impl<T, B, A> Bilinear for Tf<T, B, A>
+impl<T, B, A, BA2, O> Bilinear for Tf<T, B, A>
 where
-    T: ComplexFloat,
-    B: MaybeList<T>,
+    T: ComplexFloat + AddAssign + Mul<T::Real, Output = T>,
+    B: MaybeList<T> + Overlay<T, A, Output = BA2>,
     A: MaybeList<T>,
-    Self: ToZpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T, (), ()> + System<Set = T>,
-    Zpk<Complex<T::Real>, Vec<Complex<T::Real>>, Vec<Complex<T::Real>>, T>: Bilinear<Output: ToTf<T, Vec<T>, Vec<T>, (), ()>> + System<Set = T>,
+    BA2: MaybeOwnedList<T, Some: ListOrSingle<T, Length: StaticMaybe<usize, Opposite: Sized>>>,
+    Tf<T, BA2, BA2>: Simplify<Output = O>
 {
-    type Output = Tf<T, Vec<T>, Vec<T>>;
+    type Output = O;
 
     fn bilinear(self, sampling_frequency: T::Real) -> Result<Self::Output, BilinearError>
     {
-        Ok(self.to_zpk((), ()).bilinear(sampling_frequency)?.to_tf((), ()))
+        let one = T::Real::one();
+        let two = one + one;
+
+        let fs = sampling_frequency;
+
+        let b = self.b.into_inner()
+            .into_vec_option()
+            .unwrap_or_else(|| vec![T::one()]);
+        let a = self.a.into_inner()
+            .into_vec_option()
+            .unwrap_or_else(|| vec![T::one()]);
+        
+        let nb = b.len();
+        let na = a.len();
+        let m = nb.max(na);
+
+        let bb = BA2::maybe_from_len_fn(StaticMaybe::maybe_from_fn(|| m), |j| {
+            let mut val = T::zero();
+
+            for i in 0..nb
+            {
+                for k in 0..=i
+                {
+                    for l in 0..m - i
+                    {
+                        if k + l == j
+                        {
+                            val += b[nb - 1 - i]*(
+                                util::bincoeff::<T::Real, _>(i, k)*util::bincoeff::<T::Real, _>(m - 1 - i, l)
+                                *(two*fs).powi(i as i32)
+                                *<T::Real as NumCast>::from(1 - (k % 2) as i8*2).unwrap()
+                            )
+                        }
+                    }
+                }
+            }
+
+            val
+        });
+        let aa = BA2::maybe_from_len_fn(StaticMaybe::maybe_from_fn(|| m), |j| {
+            let mut val = T::zero();
+
+            for i in 0..na
+            {
+                for k in 0..=i
+                {
+                    for l in 0..m - i
+                    {
+                        if k + l == j
+                        {
+                            val += a[na - 1 - i]*(
+                                util::bincoeff::<T::Real, _>(i, k)*util::bincoeff::<T::Real, _>(m - 1 - i, l)
+                                *(two*fs).powi(i as i32)
+                                *<T::Real as NumCast>::from(1 - (k % 2) as i8*2).unwrap()
+                            )
+                        }
+                    }
+                }
+            }
+
+            val
+        });
+
+        Ok(Tf::new(bb, aa)
+            .simplify())
+    }
+}
+
+#[cfg(test)]
+mod test
+{
+    use array_math::ArrayOps;
+
+    use crate::{analysis::RealFreqZ, gen::filter::{Butter, FilterGenPlane, FilterGenType}, plot, systems::{Tf, Zpk}, transforms::domain::Bilinear};
+
+    #[test]
+    fn test()
+    {
+        const M: usize = 3;
+        let h = Tf::butter(M, [250.0], FilterGenType::LowPass, FilterGenPlane::S)
+            .unwrap();
+        let h2 = Zpk::butter(M, [250.0], FilterGenType::LowPass, FilterGenPlane::S)
+            .unwrap();
+
+        let h = h.bilinear(1000.0).unwrap();
+        let h2 = h2.bilinear(1000.0).unwrap();
+
+        const N: usize = 1024;
+        let (hf, _w): (_, [_; N]) = h.real_freqz(());
+        let (hf2, w): (_, [_; N]) = h2.real_freqz(());
+
+        plot::plot_curves("H(e^jw)", "plots/h_z_bilinear.png", [&w.zip(hf.map(|h| h.norm())), &w.zip(hf2.map(|h| h.norm()))])
+            .unwrap();
     }
 }

@@ -101,7 +101,7 @@ where
 
         if let Some(t) = t
         {
-            Ok(zpk.bilinear(t).unwrap())
+            Ok(zpk.bilinear(t.recip()).unwrap())
         }
         else
         {

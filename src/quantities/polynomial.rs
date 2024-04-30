@@ -1,7 +1,7 @@
 use core::{marker::PhantomData, ops::DivAssign};
 
 use array_math::{ArrayOps, SliceMath, SliceOps};
-use num::{complex::ComplexFloat, traits::Euclid, One, Zero, Float};
+use num::{complex::ComplexFloat, traits::Euclid, Float, One, Zero};
 use option_trait::NotVoid;
 
 use crate::{quantities::{Lists, MaybeList, MaybeLists}, util::TruncateIm};
@@ -223,7 +223,7 @@ where
                 let mut b: Polynomial<T, Vec<T>> = rhs.clone().into();
 
                 while !b.iter()
-                    .all(|b| b.abs() < T::Real::epsilon())
+                    .all(|b| !(b.abs() > /*<T::Real as NumCast>::from(100u8).unwrap()**/T::Real::epsilon()))
                 {
                     let r = a.rem_euclid(&b);
                     a = b;

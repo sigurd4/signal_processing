@@ -95,8 +95,8 @@ where
     T: Float,
     U: Unsigned + Integer + ToPrimitive + Copy
 {
-    let n = NumCast::from(x).unwrap();
-    if let Some(y) = (1..=n).try_fold(n, u128::checked_mul)
+    let n: u128 = NumCast::from(x).unwrap();
+    if let Some(y) = (1..n.max(1)).try_fold(n.max(1), u128::checked_mul)
     {
         T::from(y).unwrap()
     }
@@ -114,9 +114,14 @@ where
     let nn: u128 = NumCast::from(n).unwrap();
     let kk: u128 = NumCast::from(k).unwrap();
 
-    let b = if let Some(b) = (nn + 1).checked_sub(kk)
+    if kk == 0
+    {
+        return T::one()
+    }
+
+    let b = if let Some(b) = nn.checked_sub(kk)
         .and_then(|nmkp1| {
-            (nmkp1..=nn).try_fold(nn, u128::checked_mul)
+            ((nmkp1 + 1).max(1)..nn.max(1)).try_fold(nn.max(1), u128::checked_mul)
         })
     {
         T::from(b).unwrap()

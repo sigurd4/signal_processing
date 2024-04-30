@@ -1,24 +1,34 @@
-use core::ops::{AddAssign, Div, Mul, MulAssign, Rem, Sub};
+use core::ops::{AddAssign, Deref, Div, Rem, Sub};
 
-use num::{traits::Euclid, Zero};
+use num::{traits::Euclid, One, Zero};
 
 use array_math::SliceMath;
 
-use crate::quantities::{MaybeList, Polynomial, Lists, NotPolynomial};
+use crate::quantities::{Lists, MaybeList, NotPolynomial, Polynomial};
 
 impl<T, C1, C2> Div<Polynomial<T, C2>> for Polynomial<T, C1>
 where
-    T: Zero + Sub<Output = T> + Mul<Output = T> + Div<Output = T> + AddAssign + MulAssign + Copy,
+    T: Zero + One + Sub<Output = T> + Div<Output = T> + AddAssign + Copy,
     C1: MaybeList<T>,
     C2: MaybeList<T>,
-    Self: Into<Polynomial<T, Vec<T>>>,
-    Polynomial<T, C2>: Into<Polynomial<T, Vec<T>>>
 {
     type Output = Polynomial<T, Vec<T>>;
 
     fn div(self, rhs: Polynomial<T, C2>) -> Self::Output
     {
-        self.into().div_euclid(&rhs.into())
+        let one = T::one();
+        let (mut q, _): (Vec<_>, Vec<_>) = self.deref()
+            .as_view_slice_option()
+            .unwrap_or_else(|| core::slice::from_ref(&one))
+            .deconvolve_direct(rhs.deref()
+                .as_view_slice_option()
+                .unwrap_or_else(|| core::slice::from_ref(&one))
+            ).unwrap();
+        while let Some(q0) = q.first() && q0.is_zero()
+        {
+            q.remove(0);
+        }
+        Polynomial::new(q)
     }
 }
 
@@ -40,59 +50,72 @@ where
 
 impl<T, C1, C2> Rem<Polynomial<T, C2>> for Polynomial<T, C1>
 where
-    T: Zero + Sub<Output = T> + Mul<Output = T> + Div<Output = T> + AddAssign + MulAssign + Copy,
+    T: Zero + One + Sub<Output = T> + Div<Output = T> + AddAssign + Copy,
     C1: MaybeList<T>,
     C2: MaybeList<T>,
-    Self: Into<Polynomial<T, Vec<T>>>,
-    Polynomial<T, C2>: Into<Polynomial<T, Vec<T>>>
 {
     type Output = Polynomial<T, Vec<T>>;
 
+    #[inline]
     fn rem(self, rhs: Polynomial<T, C2>) -> Self::Output
     {
-        self.into().rem_euclid(&rhs.into())
+        let one = T::one();
+        let (_, mut r): (Vec<_>, Vec<_>) = self.deref()
+            .as_view_slice_option()
+            .unwrap_or_else(|| core::slice::from_ref(&one))
+            .deconvolve_direct(rhs.deref()
+                .as_view_slice_option()
+                .unwrap_or_else(|| core::slice::from_ref(&one))
+            ).unwrap();
+        while let Some(r0) = r.first() && r0.is_zero()
+        {
+            r.remove(0);
+        }
+        Polynomial::new(r)
     }
 }
 
 impl<T> Euclid for Polynomial<T, Vec<T>>
 where
-    T: Zero + Sub<Output = T> + Mul<Output = T> + Div<Output = T> + AddAssign + MulAssign + Copy
+    T: Zero + One + Sub<Output = T> + Div<Output = T> + AddAssign + Copy,
 {
+    #[inline]
     fn div_euclid(&self, v: &Self) -> Self
     {
-        self.div_rem_euclid(v).0
+        let (mut q, _): (Vec<_>, Vec<_>) = self.deconvolve_direct(v.deref())
+            .unwrap();
+        while let Some(q0) = q.first() && q0.is_zero()
+        {
+            q.remove(0);
+        }
+        Polynomial::new(q)
     }
     
+    #[inline]
     fn rem_euclid(&self, v: &Self) -> Self
     {
-        self.div_rem_euclid(v).1
+        let (_, mut r): (Vec<_>, Vec<_>) = self.deconvolve_direct(v.deref())
+            .unwrap();
+        while let Some(r0) = r.first() && r0.is_zero()
+        {
+            r.remove(0);
+        }
+        Polynomial::new(r)
     }
 
+    #[inline]
     fn div_rem_euclid(&self, v: &Self) -> (Self, Self)
     {
-        let mut q: Polynomial<T, Vec<T>> = Polynomial::zero();
-        let mut r = self.clone();
-        let d = v.trim_zeros_front().len() - 1;
-        let c = *v.trim_zeros_front().first().unwrap();
-        loop
+        let (mut q, mut r): (Vec<_>, Vec<_>) = self.deconvolve_direct(v.deref())
+            .unwrap();
+        while let Some(q0) = q.first() && q0.is_zero()
         {
-            let nr = r.trim_zeros_front().len();
-            if nr <= d
-            {
-                while q.first().is_some_and(|x| x.is_zero())
-                {
-                    q.remove(0);
-                }
-                while r.first().is_some_and(|x| x.is_zero())
-                {
-                    r.remove(0);
-                }
-                return (q, r)
-            }
-            let mut s = Polynomial::new(vec![T::zero(); nr - d]);
-            s[0] = *r.trim_zeros_front().first().unwrap()/c;
-            q = q + s.as_view();
-            r = r - s*v.as_view();
+            q.remove(0);
         }
+        while let Some(r0) = r.first() && r0.is_zero()
+        {
+            r.remove(0);
+        }
+        (Polynomial::new(q), Polynomial::new(r))
     }
 }

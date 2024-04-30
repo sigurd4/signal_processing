@@ -101,7 +101,7 @@ where
     
         if let Some(t) = t
         {
-            Ok(zpk.bilinear(t).unwrap())
+            Ok(zpk.bilinear(t.recip()).unwrap())
         }
         else
         {
@@ -239,7 +239,7 @@ mod test
             FilterGenPlane::Z { sampling_frequency: Some(fs) }
         ).unwrap();*/
 
-        let h = Tf::besself(6, [90.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(fs) })
+        let h = Tf::besself(6, [50.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(fs) })
             .unwrap();
 
         const N: usize = 1024;
