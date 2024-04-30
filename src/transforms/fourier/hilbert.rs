@@ -34,7 +34,7 @@ where
             y.fft();
 
             let n = y.len();
-            let nhalf = n/2;
+            let nhalf = n/2 + 1;
 
             for (i, y) in y.iter_mut()
                 .enumerate()

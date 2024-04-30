@@ -10,6 +10,7 @@ moddef::moddef!(
         dst,
         dwht,
         dwt,
+        hilbert_2d,
         hilbert,
         iczt,
         idft_2d,
