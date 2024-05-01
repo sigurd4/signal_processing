@@ -25,6 +25,7 @@ moddef::moddef!(
         firpmord,
         gammatone_fir,
         gammatone_iir,
+        iir_comb,
         iir_design,
         iir_notch,
         iir_peak,
