@@ -146,7 +146,7 @@ mod test
             FilterGenPlane::Z { sampling_frequency: Some(fs) }
         ).unwrap();
 
-        let h = Tf::butter(n, wp, t, FilterGenPlane::Z { sampling_frequency: None })
+        let h: Tf::<f64, _, _> = Tf::butter(n, wp, t, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
 
         const N: usize = 1024;

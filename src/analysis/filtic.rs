@@ -91,7 +91,7 @@ mod test
     #[test]
     fn test()
     {
-        let h = Tf::butter(2, [100.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(1000.0) })
+        let h: Tf::<f64, _, _> = Tf::butter(2, [100.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(1000.0) })
             .unwrap();
 
         let w1 = vec![10.0, -5.0];

@@ -228,7 +228,7 @@ mod test
         let mut rng = rand::thread_rng();
         let mut x: [_; N] = ArrayOps::fill(|_| (-1.0..1.0).sample_single(&mut rng));
 
-        let h = Tf::butter(2, [10.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(1000.0) })
+        let h: Tf::<f64, _, _> = Tf::butter(2, [10.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(1000.0) })
             .unwrap();
         x = h.filtfilt(x);
 

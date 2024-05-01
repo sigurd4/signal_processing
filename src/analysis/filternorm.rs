@@ -81,14 +81,14 @@ mod test
     {
         let fs = 1000.0;
         
-        let h = Tf::butter(15, [220.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(fs) })
+        let h: Tf::<f64, _, _> = Tf::butter(15, [220.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(fs) })
             .unwrap();
         
         let n2 = h.filternorm(2.0);
 
         println!("n2 = {}", n2);
         
-        let n_inf = h.filternorm(f32::INFINITY);
+        let n_inf = h.filternorm(f64::INFINITY);
 
         println!("n_inf = {}", n_inf);
     }

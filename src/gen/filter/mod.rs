@@ -26,6 +26,8 @@ moddef::moddef!(
         gammatone_fir,
         gammatone_iir,
         iir_design,
+        iir_notch,
+        iir_peak,
         kaiserord,
         pei_tseng_notch,
         qp_kaiser,

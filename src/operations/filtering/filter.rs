@@ -45,7 +45,7 @@ mod test
     #[test]
     fn test()
     {
-        let h = Ss::butter(4, [0.2], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: None })
+        let h: Ss::<f64, _, _, _, _> = Ss::butter(4, [0.2], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
 
         const N: usize = 64;

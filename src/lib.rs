@@ -85,7 +85,7 @@ mod tests
 
         let (n, wn, _, t) = crate::gen::filter::buttord([f_p], [f_s], dp, ds, FilterGenPlane::Z { sampling_frequency: Some(fs) })
             .unwrap();
-        let ba = Tf::butter(n, wn, t, FilterGenPlane::Z { sampling_frequency: None })
+        let ba: Tf::<f64, _, _> = Tf::butter(n, wn, t, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
 
         const N: usize = 1024;
@@ -129,9 +129,9 @@ mod tests
     fn test()
     {
         let fs: f64 = 44100.0;
-        let h1 = Tf::<_, [_; 2], [_; 2]>::besself((), [800.0], FilterGenType::HighPass, FilterGenPlane::Z { sampling_frequency: Some(fs) }).unwrap();
-        let h2 = Tf::<_, [_; 5], [_; 5]>::butter((), [8000.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(fs) }).unwrap();
-        let h3 = Tf::<_, [_; 3], [_; 3]>::butter((), [20000.0], FilterGenType::HighPass, FilterGenPlane::Z { sampling_frequency: Some(fs) }).unwrap();
+        let h1 = Tf::<f64, [_; 2], [_; 2]>::besself((), [800.0], FilterGenType::HighPass, FilterGenPlane::Z { sampling_frequency: Some(fs) }).unwrap();
+        let h2 = Tf::<f64, [_; 5], [_; 5]>::butter((), [8000.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(fs) }).unwrap();
+        let h3 = Tf::<f64, [_; 3], [_; 3]>::butter((), [20000.0], FilterGenType::HighPass, FilterGenPlane::Z { sampling_frequency: Some(fs) }).unwrap();
 
         let h = h1*&h2 + h3;
 

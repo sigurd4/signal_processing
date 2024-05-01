@@ -296,7 +296,7 @@ mod test
     #[test]
     fn test()
     {
-        let h = Tf::butter(2, [0.5], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: None })
+        let h: Tf::<f64, _, _> = Tf::butter(2, [0.5], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
 
         const N: usize = 1024;

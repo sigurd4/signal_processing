@@ -4,7 +4,6 @@ use thiserror::Error;
 
 use crate::{quantities::OwnedList, systems::Tf, util, System};
 
-
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum GammatoneError
 {

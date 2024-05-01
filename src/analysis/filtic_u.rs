@@ -136,7 +136,7 @@ mod test
     {
         const FS: f64 = 1000.0;
 
-        let h = Sos::butter(2, [100.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(FS) })
+        let h: Sos::<f64, _, _, _> = Sos::butter(2, [100.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(FS) })
             .unwrap();
 
         let w = h.as_view().filtic_u().unwrap();

@@ -328,7 +328,7 @@ mod test
     #[test]
     fn test()
     {
-        let h = Tf::butter(2, [220.0], FilterGenType::LowPass, FilterGenPlane::S)
+        let h: Tf::<f64, _, _> = Tf::butter(2, [220.0], FilterGenType::LowPass, FilterGenPlane::S)
             .unwrap();
 
         const N: usize = 1024;
