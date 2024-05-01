@@ -1,6 +1,5 @@
 use num::{complex::ComplexFloat, traits::FloatConst, Float};
 use option_trait::{Maybe, StaticMaybe};
-use thiserror::Error;
 
 use crate::{quantities::OwnedList, systems::Tf, System};
 
@@ -105,8 +104,7 @@ mod test
     #[test]
     fn test()
     {
-        let h: Tf::<_, Vec<_>, Vec<_>> = Tf::iir_comb(10, 30.0, CombFilterType::Notch, false)
-            .unwrap();
+        let h: Tf::<_, Vec<_>, Vec<_>> = Tf::iir_comb(10, 30.0, CombFilterType::Notch, false);
 
         const N: usize = 1024;
         let (h_f, w): ([_; N], _) = h.real_freqz(());
