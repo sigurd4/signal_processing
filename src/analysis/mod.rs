@@ -40,6 +40,7 @@ moddef::moddef!(
         sim_s,
         specgram,
         statelevels,
+        step_s,
         tfestimate,
         xcorr_2d,
         xcorr,

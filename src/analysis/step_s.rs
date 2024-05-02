@@ -6,7 +6,7 @@ use crate::{quantities::{ContainerOrSingle, List, ListOrSingle, Lists, Matrix, M
 
 use super::SimS;
 
-pub trait ImpulseS<L>: System
+pub trait StepS<L>: System
 where
     L: List<<Self::Set as ComplexFloat>::Real>,
     <L::Length as StaticMaybe<usize>>::Opposite: Sized
@@ -14,14 +14,14 @@ where
     type OutputI: Lists<Self::Set> + ListOrSingle<L::Mapped<Self::Set>>;
     type Output: MatrixOrSingle<L::Mapped<Self::Set>>;
 
-    fn impulse_s<T, W>(self, t: T, numtaps: <L::Length as StaticMaybe<usize>>::Opposite, w: W)
+    fn step_s<T, W>(self, t: T, numtaps: <L::Length as StaticMaybe<usize>>::Opposite, w: W)
         -> (L, Self::Output)
     where
         T: TwoSidedRange<<Self::Set as ComplexFloat>::Real> + Clone,
         W: Maybe<Vec<Self::Set>>;
 }
 
-impl<T, A, B, C, D, L, YY> ImpulseS<L> for Ss<T, A, B, C, D>
+impl<T, A, B, C, D, L, YY> StepS<L> for Ss<T, A, B, C, D>
 where
     T: ComplexFloat,
     A: SsAMatrix<T, B, C, D>,
@@ -45,15 +45,13 @@ where
     type OutputI = D::RowsMapped<YY>;
     type Output = <<D::Transpose as MaybeLists<T>>::RowsMapped<Self::OutputI> as Lists<YY>>::CoercedMatrix;
 
-    fn impulse_s<TT, W>(self, t: TT, numtaps: <L::Length as StaticMaybe<usize>>::Opposite, w: W)
+    fn step_s<TT, W>(self, t: TT, numtaps: <L::Length as StaticMaybe<usize>>::Opposite, w: W)
         -> (L, Self::Output)
     where
         TT: TwoSidedRange<T::Real> + Clone,
         W: Maybe<Vec<T>>
     {
         let w = w.into_option();
-        
-        let d: Array2<T> = self.d.to_array2();
 
         let n = numtaps.into_option()
             .unwrap_or(L::LENGTH);
@@ -76,28 +74,11 @@ where
 
         let dn = self.d.matrix_dim().1.max(self.b.matrix_dim().1);
         let y = <D::Transpose as MaybeLists<T>>::RowsMapped::<Self::OutputI>::from_len_fn(StaticMaybe::maybe_from_fn(|| dn), |i| {
-            let d = d.column(i)
-                .to_vec();
-    
-            let w = match w.clone()
-            {
-                Some(w) => {
-                    let wn = w.len();
-                    w.into_iter()
-                        .chain(core::iter::repeat(T::zero())
-                            .take(d.len().saturating_sub(wn))
-                        ).zip(d)
-                        .map(|(w, b)| w + b)
-                        .collect()
-                },
-                None => d
-            };
-    
             let (_, y, _) = self.as_view()
                 .sim_s(
                     t.clone(),
-                    Array2::from_elem((dn, n), T::zero()),
-                    w,
+                    Array2::from_shape_fn((dn, n), |(k, _)| if i == k {T::one()} else {T::zero()}),
+                    w.clone(),
                     false
                 );
     
@@ -114,7 +95,7 @@ where
     }
 }
 
-impl<T, B, A, L> ImpulseS<L> for Tf<T, B, A>
+impl<T, B, A, L> StepS<L> for Tf<T, B, A>
 where
     T: ComplexFloat,
     B: MaybeLists<T>,
@@ -124,19 +105,19 @@ where
     B::RowsMapped<L::Mapped<T>>: Lists<T> + OwnedListOrSingle<L::Mapped<T>, Length: StaticMaybe<usize, Opposite: Sized>>,
     Self: System<Set = T> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>,
     Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>,
-    Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>: ImpulseS<L, Output = Array2<L::Mapped<T>>> + System<Set = T>
+    Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>: StepS<L, Output = Array2<L::Mapped<T>>> + System<Set = T>
 {
     type OutputI = B::RowsMapped<L::Mapped<T>>;
     type Output = B::RowsMapped<L::Mapped<T>>;
 
-    fn impulse_s<TT, W>(self, t: TT, numtaps: <L::Length as StaticMaybe<usize>>::Opposite, w: W)
+    fn step_s<TT, W>(self, t: TT, numtaps: <L::Length as StaticMaybe<usize>>::Opposite, w: W)
         -> (L, Self::Output)
     where
         TT: TwoSidedRange<T::Real> + Clone,
         W: Maybe<Vec<T>>
     {
         let (t, y) = self.to_ss()
-            .impulse_s(t, numtaps, w);
+            .step_s(t, numtaps, w);
 
         let q = y.len();
         let mut y = y.into_iter();
@@ -148,7 +129,7 @@ where
     }
 }
 
-impl<T, Z, P, K, L> ImpulseS<L> for Zpk<T, Z, P, K>
+impl<T, Z, P, K, L> StepS<L> for Zpk<T, Z, P, K>
 where
     T: ComplexFloat,
     Z: MaybeList<T>,
@@ -159,19 +140,19 @@ where
     L::Mapped<K>: List<K> + ListOrSingle<L::Mapped<K>>,
     Self: System<Set = K> + ToSs<K, Array2<K>, Array2<K>, Array2<K>, Array2<K>>,
     Array2<K>: SsAMatrix<K, Array2<K>, Array2<K>, Array2<K>> + SsBMatrix<K, Array2<K>, Array2<K>, Array2<K>> + SsCMatrix<K, Array2<K>, Array2<K>, Array2<K>> + SsDMatrix<K, Array2<K>, Array2<K>, Array2<K>>,
-    Ss<K, Array2<K>, Array2<K>, Array2<K>, Array2<K>>: System<Set = K> + ImpulseS<L, Output = Array2<L::Mapped<K>>>
+    Ss<K, Array2<K>, Array2<K>, Array2<K>, Array2<K>>: System<Set = K> + StepS<L, Output = Array2<L::Mapped<K>>>
 {
     type OutputI = L::Mapped<K>;
     type Output = L::Mapped<K>;
 
-    fn impulse_s<TT, W>(self, t: TT, numtaps: <L::Length as StaticMaybe<usize>>::Opposite, w: W)
+    fn step_s<TT, W>(self, t: TT, numtaps: <L::Length as StaticMaybe<usize>>::Opposite, w: W)
         -> (L, Self::Output)
     where
         TT: TwoSidedRange<T::Real> + Clone,
         W: Maybe<Vec<K>>
     {
         let (t, y) = self.to_ss()
-            .impulse_s(t, numtaps, w);
+            .step_s(t, numtaps, w);
 
         (
             t,
@@ -182,7 +163,7 @@ where
     }
 }
 
-impl<T, B, A, S, L> ImpulseS<L> for Sos<T, B, A, S>
+impl<T, B, A, S, L> StepS<L> for Sos<T, B, A, S>
 where
     T: ComplexFloat,
     B: Maybe<[T; 3]> + MaybeOwnedList<T>,
@@ -193,19 +174,19 @@ where
     L::Mapped<T>: List<T> + ListOrSingle<L::Mapped<T>>,
     Self: System<Set = T> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>,
     Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>,
-    Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>: System<Set = T> + ImpulseS<L, Output = Array2<L::Mapped<T>>>
+    Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>: System<Set = T> + StepS<L, Output = Array2<L::Mapped<T>>>
 {
     type OutputI = L::Mapped<T>;
     type Output = L::Mapped<T>;
 
-    fn impulse_s<TT, W>(self, t: TT, numtaps: <L::Length as StaticMaybe<usize>>::Opposite, w: W)
+    fn step_s<TT, W>(self, t: TT, numtaps: <L::Length as StaticMaybe<usize>>::Opposite, w: W)
         -> (L, Self::Output)
     where
         TT: TwoSidedRange<T::Real> + Clone,
         W: Maybe<Vec<T>>
     {
         let (t, y) = self.to_ss()
-            .impulse_s(t, numtaps, w);
+            .step_s(t, numtaps, w);
 
         (
             t,
@@ -223,7 +204,7 @@ mod test
 
     use array_math::ArrayOps;
 
-    use crate::{analysis::ImpulseS, gen::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::Tf};
+    use crate::{analysis::StepS, gen::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::Tf};
 
     #[test]
     fn test()
@@ -233,9 +214,9 @@ mod test
 
         const T: f64 = 1.25;
         const N: usize = 200;
-        let (t, y): ([_; N], _) = h.impulse_s(0.0..T, (), ());
+        let (t, y): ([_; N], _) = h.step_s(0.0..T, (), ());
 
-        plot::plot_curves("y(t)", "plots/y_t_impulse_s.png", [&t.zip(y)])
+        plot::plot_curves("y(t)", "plots/y_t_step_s.png", [&t.zip(y)])
             .unwrap();
     }
 }
