@@ -136,7 +136,7 @@ where
 {
     fn to_tf(self, input: usize, (): ()) -> Tf<T2, Vec<Vec<T2>>, Vec<T2>>
     {
-        let ss = self.simplify().to_ss().unwrap();
+        let ss = self.simplify().to_ss();
 
         let (nout, _nin) = ss.d.dim();
 

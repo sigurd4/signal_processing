@@ -205,7 +205,7 @@ where
             grid_density
         )?;
 
-        Ok(h.to_ss().unwrap())
+        Ok(h.to_ss())
     }
 }
 

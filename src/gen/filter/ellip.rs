@@ -229,7 +229,7 @@ where
     {
         let zpk = Zpk::ellip(order, passband_ripple, stopband_ripple, frequencies, filter_type, plane)?;
     
-        Ok(zpk.to_ss().unwrap())
+        Ok(zpk.to_ss())
     }
 }
 

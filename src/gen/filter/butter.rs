@@ -214,7 +214,7 @@ where
     {
         let zpk = Zpk::butter(order, frequencies, filter_type, plane)?;
     
-        Ok(zpk.to_ss().unwrap())
+        Ok(zpk.to_ss())
     }
 }
 

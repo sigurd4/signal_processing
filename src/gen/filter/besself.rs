@@ -215,7 +215,7 @@ where
     {
         let zpk = Zpk::besself(order, frequencies, filter_type, plane)?;
     
-        Ok(zpk.to_ss().unwrap())
+        Ok(zpk.to_ss())
     }
 }
 

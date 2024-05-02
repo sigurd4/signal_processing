@@ -1,16 +1,15 @@
 use ndarray::Array2;
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
-use thiserror::Error;
 
 use crate::{quantities::{MaybeList, MaybeLists, MaybeOwnedList}, operations::Simplify, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, System, transforms::system::ToTf};
 
-#[derive(Debug, Clone, Copy, PartialEq, Error)]
+/*#[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum ToSsError
 {
     #[error("Non causal transfer function, i.e. it contains one or more poles at infinity.")]
     NonCausal
-}
+}*/
 
 pub trait ToSs<T, A, B, C, D>: System
 where
@@ -20,7 +19,7 @@ where
     C: SsCMatrix<T, A, B, D>,
     D: SsDMatrix<T, A, B, C>
 {
-    fn to_ss(self) -> Result<Ss<T, A, B, C, D>, ToSsError>;
+    fn to_ss(self) -> Ss<T, A, B, C, D>;
 }
 
 impl<T1, A1, B1, C1, D1, T2, A2, B2, C2, D2> ToSs<T2, A2, B2, C2, D2> for Ss<T1, A1, B1, C1, D1>
@@ -40,14 +39,14 @@ where
     C1::Mapped<T2>: Into<C2>,
     D1::Mapped<T2>: Into<D2>,
 {
-    fn to_ss(self) -> Result<Ss<T2, A2, B2, C2, D2>, ToSsError>
+    fn to_ss(self) -> Ss<T2, A2, B2, C2, D2>
     {
-        Ok(Ss::new(
+        Ss::new(
             self.a.map_into_owned(|x| x.into()).into(),
             self.b.map_into_owned(|x| x.into()).into(),
             self.c.map_into_owned(|x| x.into()).into(),
             self.d.map_into_owned(|x| x.into()).into()
-        ))
+        )
     }
 }
 
@@ -61,7 +60,7 @@ where
     Tf<T2, Vec<Vec<T2>>, Vec<T2>>: Simplify<Output = Tf<T2, Vec<Vec<T2>>, Vec<T2>>>,
     Array2<T2>: SsAMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>> + SsBMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>> + SsCMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>>+ SsDMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>>
 {
-    fn to_ss(self) -> Result<Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>, ToSsError>
+    fn to_ss(self) -> Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>
     {
         let tf: Tf<T2, Vec<Vec<T2>>, Vec<T2>> = self.to_tf((), ());
         let mut tf = tf.simplify();
@@ -72,17 +71,17 @@ where
         let k = tf.a.len();
         if m_min > k
         {
-            return Err(ToSsError::NonCausal)
+            //return Err(ToSsError::NonCausal)
         }
     
         if m_min == 0 || k == 0
         {
-            return Ok(Ss::new(
+            return Ss::new(
                 Array2::default((0, 0)),
                 Array2::default((0, 0)),
                 Array2::default((0, 0)),
                 Array2::default((0, 0))
-            ))
+            )
         }
     
         for b in tf.b.iter_mut()
@@ -107,12 +106,12 @@ where
     
         if k == 1
         {
-            return Ok(Ss::new(
+            return Ss::new(
                 Array2::default((1, 1)),
                 Array2::default((1, k)),
                 Array2::default((tf.b.len(), 1)),
                 d
-            ))
+            )
         }
     
         let a = Array2::from_shape_fn((k - 1, k - 1), |(i, j)| if i == 0
@@ -126,12 +125,12 @@ where
         let b = Array2::from_shape_fn((k - 1, 1), |(i, j)| T2::from((j == i) as u8).unwrap());
         let c = Array2::from_shape_fn((tf.b.len(), k - 1), |(i, j)| tf.b[i][j + 1] - tf.b[i][0]*tf.a[j + 1]);
     
-        Ok(Ss::new(
+        Ss::new(
             a,
             b,
             c,
             d
-        ))
+        )
     }
 }
 
@@ -146,7 +145,7 @@ where
     Tf<T2, Vec<T2>, Vec<T2>>: ToSs<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>,
     Array2<T2>: SsAMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>> + SsBMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>> + SsCMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>>+ SsDMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>>
 {
-    fn to_ss(self) -> Result<Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>, ToSsError>
+    fn to_ss(self) -> Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>
     {
         self.to_tf((), ())
             .to_ss()
@@ -164,7 +163,7 @@ where
     Tf<T2, Vec<T2>, Vec<T2>>: ToSs<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>,
     Array2<T2>: SsAMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>> + SsBMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>> + SsCMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>>+ SsDMatrix<T2, Array2<T2>, Array2<T2>, Array2<T2>>
 {
-    fn to_ss(self) -> Result<Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>, ToSsError>
+    fn to_ss(self) -> Ss<T2, Array2<T2>, Array2<T2>, Array2<T2>, Array2<T2>>
     {
         self.to_tf((), ())
             .to_ss()

@@ -222,7 +222,7 @@ where
     {
         let zpk = Zpk::cheby1(order, ripple, frequencies, filter_type, plane)?;
     
-        Ok(zpk.to_ss().unwrap())
+        Ok(zpk.to_ss())
     }
 }
 

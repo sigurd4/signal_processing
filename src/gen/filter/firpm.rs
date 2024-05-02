@@ -301,7 +301,7 @@ where
             target
         )?;
 
-        Ok((h.to_ss().unwrap(), m, r))
+        Ok((h.to_ss(), m, r))
     }
 }
 
