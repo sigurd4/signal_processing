@@ -15,8 +15,8 @@ where
 {
     type Output: Lists<<Self::Set as ComplexOp<X>>::Output> + ListOrSingle<<XX::Transpose as MaybeLists<X>>::RowsMapped<<Self::Set as ComplexOp<X>>::Output>>;
 
-    fn sims<T, W>(self, t: T, x: XX, w: W, interpolate: bool)
-        -> (<XX::Transpose as MaybeLists<X>>::RowsMapped<<Self::Set as ComplexFloat>::Real>, Self::Output, Self::Output)
+    fn sim_s<T, W>(self, t: T, x: XX, w: W, interpolate: bool)
+        -> (<XX::Transpose as MaybeLists<X>>::RowsMapped<<Self::Set as ComplexFloat>::Real>, Self::Output, <XX::Transpose as MaybeLists<X>>::RowsMapped<Vec<<Self::Set as ComplexOp<X>>::Output>>)
     where
         T: TwoSidedRange<<Self::Set as ComplexFloat>::Real>,
         W: Maybe<Vec<<Self::Set as ComplexOp<X>>::Output>>;
@@ -29,8 +29,8 @@ where
     Y: ComplexFloat<Real = T::Real> + Mul<T::Real, Output = Y> + Lapack,
     A: SsAMatrix<T, B, C, D>,
     B: SsBMatrix<T, A, C, D>,
-    C: SsCMatrix<T, A, B, D, RowsMapped<YY> = YYY>,
-    D: SsDMatrix<T, A, B, C>,
+    C: SsCMatrix<T, A, B, D>,
+    D: SsDMatrix<T, A, B, C, RowsMapped<YY> = YYY>,
     XX: Matrix<X, Transpose: Matrix<X, RowOwned: MaybeLenEq<B::RowOwned, true>>> + Clone,
     Array2<Y>: SsAMatrix<Y, Array2<Y>, Array2<Y>, Array2<Y>> + SsBMatrix<Y, Array2<Y>, Array2<Y>, Array2<Y>> + SsCMatrix<Y, Array2<Y>, Array2<Y>, Array2<Y>> + SsDMatrix<Y, Array2<Y>, Array2<Y>, Array2<Y>>,
     YYY: OwnedLists<Y> + OwnedListOrSingle<YY>,
@@ -39,12 +39,14 @@ where
     <XX::Transpose as MaybeLists<X>>::RowsMapped<T::Real>: OwnedList<T::Real>,
     <<<XX::Transpose as MaybeLists<X>>::RowsMapped<T::Real> as ListOrSingle<T::Real>>::Length as StaticMaybe<usize>>::Opposite: Sized,
     <YY::Length as StaticMaybe<usize>>::Opposite: Sized,
-    <<YYY as ListOrSingle<YY>>::Length as StaticMaybe<usize>>::Opposite: Sized
+    <<YYY as ListOrSingle<YY>>::Length as StaticMaybe<usize>>::Opposite: Sized,
+    <XX::Transpose as MaybeLists<X>>::RowsMapped<Vec<Y>>: OwnedList<Vec<Y>>,
+    <<<XX::Transpose as MaybeLists<X>>::RowsMapped<Vec<Y>> as ListOrSingle<Vec<Y>>>::Length as StaticMaybe<usize>>::Opposite: Sized
 {
-    type Output = C::RowsMapped<YY>;
+    type Output = D::RowsMapped<YY>;
 
-    fn sims<TT, W>(self, t: TT, x: XX, w: W, interpolate: bool)
-        -> (<XX::Transpose as MaybeLists<X>>::RowsMapped<T::Real>, Self::Output, Self::Output)
+    fn sim_s<TT, W>(self, t: TT, x: XX, w: W, interpolate: bool)
+        -> (<XX::Transpose as MaybeLists<X>>::RowsMapped<T::Real>, Self::Output, <XX::Transpose as MaybeLists<X>>::RowsMapped<Vec<Y>>)
     where
         TT: TwoSidedRange<T::Real>,
         W: Maybe<Vec<Y>>
@@ -152,8 +154,8 @@ where
             let yout: Vec<_> = xout.iter()
                 .map(|xout| Array1::from_vec(xout.clone()).dot(&c_t).into_vec())
                 .collect();
-            let mut xout = util::transpose_vec_vec(xout).into_iter();
             let mut yout = util::transpose_vec_vec(yout).into_iter();
+            let mut xout = xout.into_iter();
             return (
                 tt,
                 OwnedListOrSingle::from_len_fn(StaticMaybe::maybe_from_fn(|| q), |_| {
@@ -162,12 +164,7 @@ where
                         .into_iter();
                     OwnedListOrSingle::from_len_fn(StaticMaybe::maybe_from_fn(|| nu), |_| yout.next().unwrap())
                 }),
-                OwnedListOrSingle::from_len_fn(StaticMaybe::maybe_from_fn(|| n), |_| {
-                    let mut xout = xout.next()
-                        .unwrap()
-                        .into_iter();
-                    OwnedListOrSingle::from_len_fn(StaticMaybe::maybe_from_fn(|| nu), |_| xout.next().unwrap())
-                })
+                OwnedListOrSingle::from_len_fn(StaticMaybe::maybe_from_fn(|| nu), |_| xout.next().unwrap())
             )
         }
 
@@ -265,7 +262,7 @@ where
                 ).into_vec()
             ).collect();
 
-        let mut xout = util::transpose_vec_vec(xout).into_iter();
+        let mut xout = xout.into_iter();
         let mut yout = util::transpose_vec_vec(yout).into_iter();
         (
             tt,
@@ -275,12 +272,7 @@ where
                     .into_iter();
                 OwnedListOrSingle::from_len_fn(StaticMaybe::maybe_from_fn(|| nu), |_| yout.next().unwrap())
             }),
-            OwnedListOrSingle::from_len_fn(StaticMaybe::maybe_from_fn(|| n), |_| {
-                let mut xout = xout.next()
-                    .unwrap()
-                    .into_iter();
-                OwnedListOrSingle::from_len_fn(StaticMaybe::maybe_from_fn(|| nu), |_| xout.next().unwrap())
-            })
+            OwnedListOrSingle::from_len_fn(StaticMaybe::maybe_from_fn(|| nu), |_| xout.next().unwrap())
         )
     }
 }
@@ -300,25 +292,22 @@ where
 {
     type Output = YYY;
 
-    fn sims<TT, W>(self, t: TT, x: XX, w: W, interpolate: bool)
-        -> (<XX::Transpose as MaybeLists<X>>::RowsMapped<T::Real>, Self::Output, Self::Output)
+    fn sim_s<TT, W>(self, t: TT, x: XX, w: W, interpolate: bool)
+        -> (<XX::Transpose as MaybeLists<X>>::RowsMapped<T::Real>, Self::Output, <XX::Transpose as MaybeLists<X>>::RowsMapped<Vec<Y>>)
     where
         TT: TwoSidedRange<<Self::Set as ComplexFloat>::Real>,
         W: Maybe<Vec<Y>>
     {
         let (t, y, x) = self.to_ss()
-            .sims(t, x, w, interpolate);
+            .sim_s(t, x, w, interpolate);
 
         let q = y.len();
-        let n = x.len();
-        
         let mut y = y.into_iter();
-        let mut x = x.into_iter();
 
         (
             t,
             OwnedListOrSingle::from_len_fn(StaticMaybe::maybe_from_fn(|| q), |_| y.next().unwrap()),
-            OwnedListOrSingle::from_len_fn(StaticMaybe::maybe_from_fn(|| n), |_| x.next().unwrap())
+            x
         )
     }
 }
@@ -338,19 +327,19 @@ where
 {
     type Output = YY;
 
-    fn sims<TT, W>(self, t: TT, x: XX, w: W, interpolate: bool)
-        -> (<XX::Transpose as MaybeLists<X>>::RowsMapped<T::Real>, Self::Output, Self::Output)
+    fn sim_s<TT, W>(self, t: TT, x: XX, w: W, interpolate: bool)
+        -> (<XX::Transpose as MaybeLists<X>>::RowsMapped<T::Real>, Self::Output, <XX::Transpose as MaybeLists<X>>::RowsMapped<Vec<Y>>)
     where
         TT: TwoSidedRange<T::Real>,
         W: Maybe<Vec<Y>>
     {
         let (t, y, x) = self.to_ss()
-            .sims(t, x, w, interpolate);
+            .sim_s(t, x, w, interpolate);
 
         (
             t,
             y.into_iter().next().unwrap(),
-            x.into_iter().next().unwrap()
+            x
         )
     }
 }
@@ -371,19 +360,19 @@ where
 {
     type Output = YY;
 
-    fn sims<TT, W>(self, t: TT, x: XX, w: W, interpolate: bool)
-        -> (<<XX>::Transpose as MaybeLists<X>>::RowsMapped<<Self::Set as ComplexFloat>::Real>, Self::Output, Self::Output)
+    fn sim_s<TT, W>(self, t: TT, x: XX, w: W, interpolate: bool)
+        -> (<XX::Transpose as MaybeLists<X>>::RowsMapped<T::Real>, Self::Output, <XX::Transpose as MaybeLists<X>>::RowsMapped<Vec<Y>>)
     where
-        TT: TwoSidedRange<<Self::Set as ComplexFloat>::Real>,
-        W: Maybe<Vec<<Self::Set as ComplexOp<X>>::Output>>
+        TT: TwoSidedRange<T::Real>,
+        W: Maybe<Vec<Y>>
     {
         let (t, y, x) = self.to_ss()
-            .sims(t, x, w, interpolate);
+            .sim_s(t, x, w, interpolate);
 
         (
             t,
             y.into_iter().next().unwrap(),
-            x.into_iter().next().unwrap()
+            x
         )
     }
 }
@@ -396,7 +385,7 @@ mod test
     use array_math::ArrayOps;
     use linspace::LinspaceArray;
 
-    use crate::{analysis::SimS, gen::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::{Ss, Tf}};
+    use crate::{analysis::SimS, gen::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::Tf};
 
     #[test]
     fn test()
@@ -409,9 +398,9 @@ mod test
         let t: [_; N] = (0.0..T).linspace_array();
         let u = t.map(|t| (TAU*4.0*t).cos() + 0.6*(TAU*40.0*t).sin() + 0.5*(TAU*80.0*t).cos());
 
-        let (t, y, _) = h.sims(0.0..T, u, (), true);
+        let (t, y, _) = h.sim_s(0.0..T, u, (), true);
 
-        plot::plot_curves("u(t), y(t)", "plots/uy_t_sims.png", [&t.zip(u), &t.zip(y)])
+        plot::plot_curves("u(t), y(t)", "plots/uy_t_sim_s.png", [&t.zip(u), &t.zip(y)])
             .unwrap();
     }
 }

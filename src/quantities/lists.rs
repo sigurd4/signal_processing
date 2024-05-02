@@ -3,19 +3,16 @@
 use ndarray::{Array1, Array2, ArrayBase, ArrayView1, ArrayView2};
 use option_trait::StaticMaybe;
 
-use crate::quantities::{Container, ListOrSingle, MaybeContainer, MaybeLists};
+use crate::quantities::{Container, ListOrSingle, MaybeContainer, MaybeLists, OwnedMatrix, ListsOrSingle};
 
-pub trait Lists<T>: MaybeLists<T> + Container<T>
+pub trait Lists<T>: MaybeLists<T> + Container<T> + ListsOrSingle<T>
 {
+    type CoercedMatrix: OwnedMatrix<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a;
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a;
-    fn height(&self) -> usize;
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), fill: F) -> Self::Owned
     where
         T: Clone,
@@ -23,34 +20,23 @@ pub trait Lists<T>: MaybeLists<T> + Container<T>
         F: FnMut() -> T,
         <Self::Height as StaticMaybe<usize>>::Opposite: Sized,
         <Self::Width as StaticMaybe<usize>>::Opposite: Sized;
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone;
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone;
+        T: Clone,
+        F: FnMut() -> T;
 }
 
 impl<T> Lists<T> for Vec<T>
 {
+    type CoercedMatrix = Vec<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
     {
         vec![self.as_slice()]
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        vec![self.as_slice()]
-    }
-    fn height(&self) -> usize
-    {
-        1
     }
     fn resize_to_owned<F>(mut self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), fill: F) -> Self::Owned
     where
@@ -61,39 +47,25 @@ impl<T> Lists<T> for Vec<T>
         self.resize_with(size.1, fill);
         self
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        vec![self.clone()]
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        vec![self]
+        self
     }
 }
 impl<T> Lists<T> for [T]
 {
+    type CoercedMatrix = Vec<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
     {
         vec![self]
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        vec![self]
-    }
-    fn height(&self) -> usize
-    {
-        1
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), fill: F) -> Self::Owned
     where
@@ -105,39 +77,25 @@ impl<T> Lists<T> for [T]
         v.resize_with(size.1, fill);
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        vec![self.to_vec()]
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        vec![self.to_vec()]
+        self.to_vec()
     }
 }
 impl<T, const N: usize> Lists<T> for [T; N]
 {
+    type CoercedMatrix = [T; N];
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
     {
         vec![self]
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        vec![self.as_slice()]
-    }
-    fn height(&self) -> usize
-    {
-        1
     }
     fn resize_to_owned<F>(self, ((), ()): (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), _: F) -> Self::Owned
     where
@@ -147,39 +105,25 @@ impl<T, const N: usize> Lists<T> for [T; N]
     {
         self
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        vec![self.as_slice().to_vec()]
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        vec![self.into_iter().collect()]
+        self
     }
 }
 impl<T> Lists<T> for &[T]
 {
+    type CoercedMatrix = Vec<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
     {
         vec![*self]
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        vec![*self]
-    }
-    fn height(&self) -> usize
-    {
-        1
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), fill: F) -> Self::Owned
     where
@@ -191,39 +135,25 @@ impl<T> Lists<T> for &[T]
         v.resize_with(size.1, fill);
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        vec![self.to_vec()]
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        vec![self.to_vec()]
+        self.to_vec()
     }
 }
 impl<T, const N: usize> Lists<T> for &[T; N]
 {
+    type CoercedMatrix = [T; N];
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
     {
         vec![self]
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        vec![self.as_slice()]
-    }
-    fn height(&self) -> usize
-    {
-        1
     }
     fn resize_to_owned<F>(self, ((), ()): (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), _: F) -> Self::Owned
     where
@@ -233,23 +163,20 @@ impl<T, const N: usize> Lists<T> for &[T; N]
     {
         self.clone()
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        vec![self.as_slice().to_vec()]
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        vec![self.as_slice().to_vec()]
+        self.clone()
     }
 }
 
 impl<T> Lists<T> for Vec<Vec<T>>
 {
+    type CoercedMatrix = Array2<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -258,19 +185,6 @@ impl<T> Lists<T> for Vec<Vec<T>>
         self.iter()
             .map(|s| s.as_slice())
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        self.len()
     }
     fn resize_to_owned<F>(mut self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -284,22 +198,27 @@ impl<T> Lists<T> for Vec<Vec<T>>
         }
         self
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.clone()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, mut or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self
+        let m = self.len();
+        let n = self.iter()
+            .map(|v| v.len())
+            .max()
+            .unwrap_or(0);
+        Array2::from_shape_fn((m, n), |(i, j)| self[i].get(j)
+            .cloned()
+            .unwrap_or_else(&mut or)
+        )
     }
 }
 impl<T, const M: usize> Lists<T> for [Vec<T>; M]
 {
+    type CoercedMatrix = Array2<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -308,19 +227,6 @@ impl<T, const M: usize> Lists<T> for [Vec<T>; M]
         self.iter()
             .map(|s| s.as_slice())
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        M
     }
     fn resize_to_owned<F>(mut self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -334,22 +240,26 @@ impl<T, const M: usize> Lists<T> for [Vec<T>; M]
         }
         self
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.to_vec()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, mut or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.into_vec()
+        let n = self.iter()
+            .map(|v| v.len())
+            .max()
+            .unwrap_or(0);
+        Array2::from_shape_fn((M, n), |(i, j)| self[i].get(j)
+            .cloned()
+            .unwrap_or_else(&mut or)
+        )
     }
 }
 impl<T> Lists<T> for [Vec<T>]
 {
+    type CoercedMatrix = Array2<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -358,19 +268,6 @@ impl<T> Lists<T> for [Vec<T>]
         self.iter()
             .map(|s| s.as_slice())
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        self.len()
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -386,22 +283,27 @@ impl<T> Lists<T> for [Vec<T>]
         }
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.to_vec()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, mut or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.into_vec()
+        let m = self.len();
+        let n = self.iter()
+            .map(|v| v.len())
+            .max()
+            .unwrap_or(0);
+        Array2::from_shape_fn((m, n), |(i, j)| self[i].get(j)
+            .cloned()
+            .unwrap_or_else(&mut or)
+        )
     }
 }
 impl<T, const M: usize> Lists<T> for &[Vec<T>; M]
 {
+    type CoercedMatrix = Array2<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -410,19 +312,6 @@ impl<T, const M: usize> Lists<T> for &[Vec<T>; M]
         self.iter()
             .map(|s| s.as_slice())
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        M
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -437,22 +326,26 @@ impl<T, const M: usize> Lists<T> for &[Vec<T>; M]
         }
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.to_vec()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, mut or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.into_vec()
+        let n = self.iter()
+            .map(|v| v.len())
+            .max()
+            .unwrap_or(0);
+        Array2::from_shape_fn((M, n), |(i, j)| self[i].get(j)
+            .cloned()
+            .unwrap_or_else(&mut or)
+        )
     }
 }
 impl<T> Lists<T> for &[Vec<T>]
 {
+    type CoercedMatrix = Array2<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -461,19 +354,6 @@ impl<T> Lists<T> for &[Vec<T>]
         self.iter()
             .map(|s| s.as_slice())
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        self.len()
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -489,23 +369,28 @@ impl<T> Lists<T> for &[Vec<T>]
         }
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.to_vec()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, mut or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.into_vec()
+        let m = self.len();
+        let n = self.iter()
+            .map(|v| v.len())
+            .max()
+            .unwrap_or(0);
+        Array2::from_shape_fn((m, n), |(i, j)| self[i].get(j)
+            .cloned()
+            .unwrap_or_else(&mut or)
+        )
     }
 }
 
 impl<T, const N: usize> Lists<T> for Vec<[T; N]>
 {
+    type CoercedMatrix = Vec<[T; N]>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -513,19 +398,6 @@ impl<T, const N: usize> Lists<T> for Vec<[T; N]>
     {
         self.iter()
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        self.len()
     }
     fn resize_to_owned<F>(mut self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -536,26 +408,19 @@ impl<T, const N: usize> Lists<T> for Vec<[T; N]>
         self.resize_with(size.0, || core::array::from_fn(|_| fill()));
         self
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.into_iter()
-            .map(|r| r.into_vec())
-            .collect()
+        self
     }
 }
 impl<T, const N: usize, const M: usize> Lists<T> for [[T; N]; M]
 {
+    type CoercedMatrix = [[T; N]; M];
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -563,19 +428,6 @@ impl<T, const N: usize, const M: usize> Lists<T> for [[T; N]; M]
     {
         self.iter()
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        M
     }
     fn resize_to_owned<F>(self, ((), ()): (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), _: F) -> Self::Owned
     where
@@ -585,26 +437,19 @@ impl<T, const N: usize, const M: usize> Lists<T> for [[T; N]; M]
     {
         self
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.into_iter()
-            .map(|r| r.into_vec())
-            .collect()
+        self
     }
 }
 impl<T, const N: usize> Lists<T> for [[T; N]]
 {
+    type CoercedMatrix = Vec<[T; N]>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -612,19 +457,6 @@ impl<T, const N: usize> Lists<T> for [[T; N]]
     {
         self.iter()
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        self.len()
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -636,26 +468,19 @@ impl<T, const N: usize> Lists<T> for [[T; N]]
         v.resize_with(size.0, || core::array::from_fn(|_| fill()));
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
+        self.to_vec()
     }
 }
 impl<T, const N: usize, const M: usize> Lists<T> for &[[T; N]; M]
 {
+    type CoercedMatrix = [[T; N]; M];
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -663,19 +488,6 @@ impl<T, const N: usize, const M: usize> Lists<T> for &[[T; N]; M]
     {
         self.iter()
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        M
     }
     fn resize_to_owned<F>(self, ((), ()): (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), _: F) -> Self::Owned
     where
@@ -685,26 +497,19 @@ impl<T, const N: usize, const M: usize> Lists<T> for &[[T; N]; M]
     {
         self.clone()
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
+        self.clone()
     }
 }
 impl<T, const N: usize> Lists<T> for &[[T; N]]
 {
+    type CoercedMatrix = Vec<[T; N]>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -712,19 +517,6 @@ impl<T, const N: usize> Lists<T> for &[[T; N]]
     {
         self.iter()
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        self.len()
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -736,44 +528,26 @@ impl<T, const N: usize> Lists<T> for &[[T; N]]
         v.resize_with(size.0, || core::array::from_fn(|_| fill()));
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
+        self.to_vec()
     }
 }
 
 impl<T> Lists<T> for Vec<&[T]>
 {
+    type CoercedMatrix = Array2<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
     {
         self.to_vec()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.to_vec()
-    }
-    fn height(&self) -> usize
-    {
-        self.len()
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -791,26 +565,27 @@ impl<T> Lists<T> for Vec<&[T]>
         }
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, mut or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.into_iter()
-            .map(|r| r.to_vec())
-            .collect()
+        let m = self.len();
+        let n = self.iter()
+            .map(|v| v.len())
+            .max()
+            .unwrap_or(0);
+        Array2::from_shape_fn((m, n), |(i, j)| self[i].get(j)
+            .cloned()
+            .unwrap_or_else(&mut or)
+        )
     }
 }
 impl<T, const M: usize> Lists<T> for [&[T]; M]
 {
+    type CoercedMatrix = Array2<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -818,18 +593,6 @@ impl<T, const M: usize> Lists<T> for [&[T]; M]
     {
         self.iter().copied()
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter().copied()
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        M
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -844,43 +607,32 @@ impl<T, const M: usize> Lists<T> for [&[T]; M]
         }
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, mut or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.into_iter()
-            .map(|r| r.to_vec())
-            .collect()
+        let n = self.iter()
+            .map(|v| v.len())
+            .max()
+            .unwrap_or(0);
+        Array2::from_shape_fn((M, n), |(i, j)| self[i].get(j)
+            .cloned()
+            .unwrap_or_else(&mut or)
+        )
     }
 }
 impl<T> Lists<T> for [&[T]]
 {
+    type CoercedMatrix = Array2<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
     {
         self.to_vec()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.to_vec()
-    }
-    fn height(&self) -> usize
-    {
-        self.len()
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -898,26 +650,27 @@ impl<T> Lists<T> for [&[T]]
         }
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, mut or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
+        let m = self.len();
+        let n = self.iter()
+            .map(|v| v.len())
+            .max()
+            .unwrap_or(0);
+        Array2::from_shape_fn((m, n), |(i, j)| self[i].get(j)
+            .cloned()
+            .unwrap_or_else(&mut or)
+        )
     }
 }
 impl<T, const M: usize> Lists<T> for &[&[T]; M]
 {
+    type CoercedMatrix = Array2<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -925,18 +678,6 @@ impl<T, const M: usize> Lists<T> for &[&[T]; M]
     {
         self.iter().copied()
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter().copied()
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        M
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -951,43 +692,32 @@ impl<T, const M: usize> Lists<T> for &[&[T]; M]
         }
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, mut or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
+        let n = self.iter()
+            .map(|v| v.len())
+            .max()
+            .unwrap_or(0);
+        Array2::from_shape_fn((M, n), |(i, j)| self[i].get(j)
+            .cloned()
+            .unwrap_or_else(&mut or)
+        )
     }
 }
 impl<T> Lists<T> for &[&[T]]
 {
+    type CoercedMatrix = Array2<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
     {
         self.to_vec()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.to_vec()
-    }
-    fn height(&self) -> usize
-    {
-        self.len()
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -1005,46 +735,34 @@ impl<T> Lists<T> for &[&[T]]
         }
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, mut or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
+        let m = self.len();
+        let n = self.iter()
+            .map(|v| v.len())
+            .max()
+            .unwrap_or(0);
+        Array2::from_shape_fn((m, n), |(i, j)| self[i].get(j)
+            .cloned()
+            .unwrap_or_else(&mut or)
+        )
     }
 }
 
 impl<T, const N: usize> Lists<T> for Vec<&[T; N]>
 {
+    type CoercedMatrix = Vec<[T; N]>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
     {
         self.to_vec()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        self.len()
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -1058,26 +776,21 @@ impl<T, const N: usize> Lists<T> for Vec<&[T; N]>
         v.resize_with(size.0, || core::array::from_fn(|_| fill()));
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
         self.into_iter()
-            .map(|r| r.to_vec())
+            .map(|v| v.clone())
             .collect()
     }
 }
 impl<T, const N: usize, const M: usize> Lists<T> for [&[T; N]; M]
 {
+    type CoercedMatrix = [[T; N]; M];
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -1085,19 +798,6 @@ impl<T, const N: usize, const M: usize> Lists<T> for [&[T; N]; M]
     {
         self.iter().copied()
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        M
     }
     fn resize_to_owned<F>(self, ((), ()): (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), _: F) -> Self::Owned
     where
@@ -1107,45 +807,25 @@ impl<T, const N: usize, const M: usize> Lists<T> for [&[T; N]; M]
     {
         self.map(|r| r.clone())
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.into_iter()
-            .map(|r| r.to_vec())
-            .collect()
+        self.map(|v| v.clone())
     }
 }
 impl<T, const N: usize> Lists<T> for [&[T; N]]
 {
+    type CoercedMatrix = Vec<[T; N]>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
     {
         self.to_vec()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        self.len()
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -1159,26 +839,21 @@ impl<T, const N: usize> Lists<T> for [&[T; N]]
         v.resize_with(size.0, || core::array::from_fn(|_| fill()));
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
         self.iter()
-            .map(|r| r.to_vec())
+            .map(|&v| v.clone())
             .collect()
     }
 }
 impl<T, const N: usize, const M: usize> Lists<T> for &[&[T; N]; M]
 {
+    type CoercedMatrix = [[T; N]; M];
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -1186,19 +861,6 @@ impl<T, const N: usize, const M: usize> Lists<T> for &[&[T; N]; M]
     {
         self.iter().copied()
             .collect()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        M
     }
     fn resize_to_owned<F>(self, ((), ()): (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), _: F) -> Self::Owned
     where
@@ -1208,45 +870,25 @@ impl<T, const N: usize, const M: usize> Lists<T> for &[&[T; N]; M]
     {
         (*self).map(|r| r.clone())
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
+        self.map(|v| v.clone())
     }
 }
 impl<T, const N: usize> Lists<T> for &[&[T; N]]
 {
+    type CoercedMatrix = Vec<[T; N]>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
         Self: 'a
     {
         self.to_vec()
-    }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.iter()
-            .map(|s| s.as_slice())
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        self.len()
     }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
@@ -1260,27 +902,22 @@ impl<T, const N: usize> Lists<T> for &[&[T; N]]
         v.resize_with(size.0, || core::array::from_fn(|_| fill()));
         v
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
         self.iter()
-            .map(|r| r.to_vec())
+            .map(|&v| v.clone())
             .collect()
     }
 }
 
 impl<T> Lists<T> for Array1<T>
 {
+    type CoercedMatrix = Array1<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
         where
             T: 'a,
@@ -1288,17 +925,6 @@ impl<T> Lists<T> for Array1<T>
     {
         vec![self.as_view()]
     }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        vec![self.as_slice().unwrap()]
-    }
-    fn height(&self) -> usize
-    {
-        1
-    }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
         T: Clone,
@@ -1307,22 +933,19 @@ impl<T> Lists<T> for Array1<T>
     {
         ArrayBase::from_shape_fn(size.1, |i| self.get(i).map(|x| x.clone()).unwrap_or_else(&mut fill))
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        vec![self.to_vec()]
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        vec![self.to_vec()]
+        self
     }
 }
 impl<'b, T> Lists<T> for ArrayView1<'b, T>
 {
+    type CoercedMatrix = Array1<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
         where
             T: 'a,
@@ -1330,17 +953,6 @@ impl<'b, T> Lists<T> for ArrayView1<'b, T>
     {
         vec![self.as_view().reborrow()]
     }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        vec![self.as_slice().unwrap()]
-    }
-    fn height(&self) -> usize
-    {
-        1
-    }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
         T: Clone,
@@ -1349,23 +961,20 @@ impl<'b, T> Lists<T> for ArrayView1<'b, T>
     {
         ArrayBase::from_shape_fn(size.1, |i| self.get(i).map(|x| x.clone()).unwrap_or_else(&mut fill))
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        vec![self.to_vec()]
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        vec![self.to_vec()]
+        self.into_owned()
     }
 }
 
 impl<T> Lists<T> for Array2<T>
 {
+    type CoercedMatrix = Array2<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -1375,20 +984,6 @@ impl<T> Lists<T> for Array2<T>
             .into_iter()
             .collect()
     }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.as_slice()
-            .unwrap()
-            .chunks(self.dim().1)
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        self.dim().0
-    }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
         T: Clone,
@@ -1397,24 +992,13 @@ impl<T> Lists<T> for Array2<T>
     {
         ArrayBase::from_shape_fn(size, |i| self.get(i).map(|x| x.clone()).unwrap_or_else(&mut fill))
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.rows()
-            .into_iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.rows()
-            .into_iter()
-            .map(|r| r.to_vec())
-            .collect()
+        self
     }
 }
 impl<'b, 'c, T> Lists<T> for ArrayView2<'c, T>
@@ -1422,6 +1006,8 @@ where
     'b: 'c,
     Self: 'b
 {
+    type CoercedMatrix = Array2<T>;
+
     fn as_views<'a>(&'a self) -> Vec<Self::RowView<'a>>
     where
         T: 'a,
@@ -1431,20 +1017,6 @@ where
             .into_iter()
             .collect()
     }
-    fn as_view_slices<'a>(&'a self) -> Vec<&'a [T]>
-    where
-        T: 'a,
-        Self: 'a
-    {
-        self.as_slice()
-            .unwrap()
-            .chunks(self.dim().1)
-            .collect()
-    }
-    fn height(&self) -> usize
-    {
-        self.dim().0
-    }
     fn resize_to_owned<F>(self, size: (<Self::Height as StaticMaybe<usize>>::Opposite, <Self::Width as StaticMaybe<usize>>::Opposite), mut fill: F) -> Self::Owned
     where
         T: Clone,
@@ -1453,23 +1025,12 @@ where
     {
         ArrayBase::from_shape_fn(size, |i| self.get(i).map(|x| x.clone()).unwrap_or_else(&mut fill))
     }
-    fn to_vecs(&self) -> Vec<Vec<T>>
-    where
-        T: Clone
-    {
-        self.rows()
-            .into_iter()
-            .map(|r| r.to_vec())
-            .collect()
-    }
-    fn into_vecs(self) -> Vec<Vec<T>>
+    fn coerce_into_matrix<F>(self, _or: F) -> Self::CoercedMatrix
     where
         Self: Sized,
-        T: Clone
+        T: Clone,
+        F: FnMut() -> T
     {
-        self.rows()
-            .into_iter()
-            .map(|r| r.to_vec())
-            .collect()
+        self.into_owned()
     }
 }

@@ -3,7 +3,7 @@ use core::ops::Mul;
 use ndarray::{Array1, Array2, ArrayView1, ArrayView2};
 use num::{complex::ComplexFloat, Complex, Zero};
 
-use crate::{transforms::fourier::{Dft2d, Idft2d}, quantities::{Matrix, MaybeMatrix, ContainerOrSingle}, util::TruncateIm, operations::convolution::Conv};
+use crate::{transforms::fourier::{Dft2d, Idft2d}, quantities::{MatrixOrSingle, Matrix, MaybeMatrix, ContainerOrSingle}, util::TruncateIm, operations::convolution::Conv};
 
 pub trait Conv2d<T1, T2, Rhs>: MaybeMatrix<T1>
 where
@@ -114,8 +114,8 @@ macro_rules! impl_conv_2d {
 
             fn conv_2d(self, rhs: $rhs) -> Self::Output
             {
-                let (m1, n1) = Matrix::<T1>::matrix_dim(&self);
-                let (m2, n2) = Matrix::<T2>::matrix_dim(&rhs);
+                let (m1, n1) = MatrixOrSingle::<T1>::matrix_dim(&self);
+                let (m2, n2) = MatrixOrSingle::<T2>::matrix_dim(&rhs);
                 let dim = ((m1 + m2).saturating_sub(1), (n1 + n2).saturating_sub(1));
                 let dim_fft = (dim.0.next_power_of_two(), dim.1.next_power_of_two());
         
@@ -150,8 +150,8 @@ macro_rules! impl_conv_2d {
 
             fn conv_2d(self, rhs: $rhs) -> Self::Output
             {
-                let (m1, n1) = Matrix::<T1>::matrix_dim(&self);
-                let (m2, n2) = Matrix::<T2>::matrix_dim(&rhs);
+                let (m1, n1) = MatrixOrSingle::<T1>::matrix_dim(&self);
+                let (m2, n2) = MatrixOrSingle::<T2>::matrix_dim(&rhs);
                 let dim = ((m1 + m2).saturating_sub(1), (n1 + n2).saturating_sub(1));
                 let dim_fft = (dim.0.next_power_of_two(), dim.1.next_power_of_two());
         
@@ -186,8 +186,8 @@ macro_rules! impl_conv_2d {
         
             fn conv_2d(self, rhs: $rhs) -> Self::Output
             {
-                let (m1, n1) = Matrix::<T1>::matrix_dim(&self);
-                let (m2, n2) = Matrix::<T2>::matrix_dim(&rhs);
+                let (m1, n1) = MatrixOrSingle::<T1>::matrix_dim(&self);
+                let (m2, n2) = MatrixOrSingle::<T2>::matrix_dim(&rhs);
                 let dim = ((m1 + m2).saturating_sub(1), (n1 + n2).saturating_sub(1));
                 let dim_fft = (dim.0.next_power_of_two(), dim.1.next_power_of_two());
         

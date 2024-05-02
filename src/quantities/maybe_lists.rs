@@ -3,7 +3,7 @@
 use ndarray::{prelude::Array1, Array2, ArrayView1, ArrayView2};
 use option_trait::StaticMaybe;
 
-use crate::quantities::{ListOrSingle, Lists, MaybeContainer, MaybeList};
+use crate::quantities::{ListOrSingle, Lists, MaybeContainer, MaybeList, ListsOrSingle};
 
 pub trait MaybeLists<T>: MaybeContainer<T>
 {
@@ -188,7 +188,7 @@ impl<T> MaybeLists<T> for Vec<T>
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -276,7 +276,7 @@ impl<T> MaybeLists<T> for [T]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -365,7 +365,7 @@ impl<T, const N: usize> MaybeLists<T> for [T; N]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -453,7 +453,7 @@ impl<T> MaybeLists<T> for &[T]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -541,7 +541,7 @@ impl<T, const N: usize> MaybeLists<T> for &[T; N]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -630,7 +630,7 @@ impl<T> MaybeLists<T> for Vec<Vec<T>>
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -726,7 +726,7 @@ impl<T, const M: usize> MaybeLists<T> for [Vec<T>; M]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -817,7 +817,7 @@ impl<T> MaybeLists<T> for [Vec<T>]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -916,7 +916,7 @@ impl<T, const M: usize> MaybeLists<T> for &[Vec<T>; M]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -1010,7 +1010,7 @@ impl<T> MaybeLists<T> for &[Vec<T>]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -1109,7 +1109,7 @@ impl<T, const N: usize> MaybeLists<T> for Vec<[T; N]>
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -1205,7 +1205,7 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [[T; N]; M]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -1296,7 +1296,7 @@ impl<T, const N: usize> MaybeLists<T> for [[T; N]]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -1395,7 +1395,7 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[[T; N]; M]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -1489,7 +1489,7 @@ impl<T, const N: usize> MaybeLists<T> for &[[T; N]]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -1588,7 +1588,7 @@ impl<T> MaybeLists<T> for Vec<&[T]>
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -1686,7 +1686,7 @@ impl<T, const M: usize> MaybeLists<T> for [&[T]; M]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -1778,7 +1778,7 @@ impl<T> MaybeLists<T> for [&[T]]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -1877,7 +1877,7 @@ impl<T, const M: usize> MaybeLists<T> for &[&[T]; M]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -1969,7 +1969,7 @@ impl<T> MaybeLists<T> for &[&[T]]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -2068,7 +2068,7 @@ impl<T, const N: usize> MaybeLists<T> for Vec<&[T; N]>
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -2166,7 +2166,7 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for [&[T; N]; M]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -2258,7 +2258,7 @@ impl<T, const N: usize> MaybeLists<T> for [&[T; N]]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -2357,7 +2357,7 @@ impl<T, const N: usize, const M: usize> MaybeLists<T> for &[&[T; N]; M]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -2449,7 +2449,7 @@ impl<T, const N: usize> MaybeLists<T> for &[&[T; N]]
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -2548,7 +2548,7 @@ impl<T> MaybeLists<T> for Array1<T>
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -2636,7 +2636,7 @@ impl<'c, T> MaybeLists<T> for ArrayView1<'c, T>
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -2725,7 +2725,7 @@ impl<T> MaybeLists<T> for Array2<T>
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where
@@ -2828,7 +2828,7 @@ impl<'b, T> MaybeLists<T> for ArrayView2<'b, T>
         T: 'a,
         Self: 'a
     {
-        Some(Lists::<T>::as_view_slices(self))
+        Some(ListsOrSingle::<T>::as_view_slices(self))
     }
     fn map_rows_to_owned<'a, F>(&'a self, mut map: F) -> Self::RowsMapped<F::Output>
     where

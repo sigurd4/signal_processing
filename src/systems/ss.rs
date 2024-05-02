@@ -71,6 +71,57 @@ where
     C: SsCMatrix<T, A, B, D>,
     D: SsDMatrix<T, A, B, C>
 {
+    pub type View<'a> = Ss<T, A::View<'a>, B::View<'a>, C::View<'a>, D::View<'a>>
+    where
+        A: 'a,
+        B: 'a,
+        C: 'a,
+        D: 'a,
+        A::View<'a>: SsAMatrix<T, B::View<'a>, C::View<'a>, D::View<'a>>,
+        B::View<'a>: SsBMatrix<T, A::View<'a>, C::View<'a>, D::View<'a>>,
+        C::View<'a>: SsCMatrix<T, A::View<'a>, B::View<'a>, D::View<'a>>,
+        D::View<'a>: SsDMatrix<T, A::View<'a>, B::View<'a>, C::View<'a>>;
+    pub type Owned = Ss<T, A::Owned, B::Owned, C::Owned, D::Owned>
+    where
+        A::Owned: SsAMatrix<T, B::Owned, C::Owned, D::Owned>,
+        B::Owned: SsBMatrix<T, A::Owned, C::Owned, D::Owned>,
+        C::Owned: SsCMatrix<T, A::Owned, B::Owned, D::Owned>,
+        D::Owned: SsDMatrix<T, A::Owned, B::Owned, C::Owned>;
+
+    pub fn as_view<'a>(&'a self) -> Ss<T, A::View<'a>, B::View<'a>, C::View<'a>, D::View<'a>>
+    where
+        A: 'a,
+        B: 'a,
+        C: 'a,
+        D: 'a,
+        A::View<'a>: SsAMatrix<T, B::View<'a>, C::View<'a>, D::View<'a>>,
+        B::View<'a>: SsBMatrix<T, A::View<'a>, C::View<'a>, D::View<'a>>,
+        C::View<'a>: SsCMatrix<T, A::View<'a>, B::View<'a>, D::View<'a>>,
+        D::View<'a>: SsDMatrix<T, A::View<'a>, B::View<'a>, C::View<'a>>
+    {
+        Ss::new(self.a.as_view(), self.b.as_view(), self.c.as_view(), self.d.as_view())
+    }
+    pub fn to_owned(&self) -> Ss<T, A::Owned, B::Owned, C::Owned, D::Owned>
+    where
+        T: Clone,
+        A::Owned: SsAMatrix<T, B::Owned, C::Owned, D::Owned>,
+        B::Owned: SsBMatrix<T, A::Owned, C::Owned, D::Owned>,
+        C::Owned: SsCMatrix<T, A::Owned, B::Owned, D::Owned>,
+        D::Owned: SsDMatrix<T, A::Owned, B::Owned, C::Owned>
+    {
+        Ss::new(self.a.to_owned(), self.b.to_owned(), self.c.to_owned(), self.d.to_owned())
+    }
+    pub fn into_owned(self) -> Ss<T, A::Owned, B::Owned, C::Owned, D::Owned>
+    where
+        T: Clone,
+        A::Owned: SsAMatrix<T, B::Owned, C::Owned, D::Owned>,
+        B::Owned: SsBMatrix<T, A::Owned, C::Owned, D::Owned>,
+        C::Owned: SsCMatrix<T, A::Owned, B::Owned, D::Owned>,
+        D::Owned: SsDMatrix<T, A::Owned, B::Owned, C::Owned>
+    {
+        Ss::new(self.a.into_owned(), self.b.into_owned(), self.c.into_owned(), self.d.into_owned())
+    }
+
     pub fn new(a: A, b: B, c: C, d: D) -> Self
     {
         Self {
@@ -81,6 +132,7 @@ where
             phantom: PhantomData
         }
     }
+
 }
 
 #[allow(unused)]

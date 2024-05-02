@@ -3,7 +3,7 @@ use core::{iter::Sum, ops::DivAssign};
 use num::{complex::ComplexFloat, traits::FloatConst, Float};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{util::ComplexOp, quantities::{ContainerOrSingle, Lists, Matrix, MaybeMatrix, OwnedLists, OwnedMatrix}, operations::convolution::Conv2d, analysis::XCorrScale};
+use crate::{util::ComplexOp, quantities::{ContainerOrSingle, ListsOrSingle, Matrix, MaybeMatrix, OwnedLists, OwnedMatrix}, operations::convolution::Conv2d, analysis::XCorrScale};
 
 pub trait XCorr2d<X, Y, YY, Z>: Matrix<X>
 where
