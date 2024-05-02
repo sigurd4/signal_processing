@@ -115,13 +115,13 @@ where
             ))
         }
     
-        let a = Array2::from_shape_fn((k - 1, k - 1), |(i, j)| if j == 0
+        let a = Array2::from_shape_fn((k - 1, k - 1), |(i, j)| if i == 0
         {
-            -tf.a[i + 1]
+            -tf.a[j + 1]
         }
         else
         {
-            T2::from((j == 1 + i) as u8).unwrap()
+            T2::from((1 + j == i) as u8).unwrap()
         });
         let b = Array2::from_shape_fn((k - 1, 1), |(i, j)| T2::from((j == i) as u8).unwrap());
         let c = Array2::from_shape_fn((tf.b.len(), k - 1), |(i, j)| tf.b[i][j + 1] - tf.b[i][0]*tf.a[j + 1]);

@@ -1,8 +1,8 @@
 use core::ops::Mul;
 
 use ndarray::{prelude::Axis, Array2, Slice};
-use ndarray_linalg::{Lapack, SVDInto};
-use num::{traits::FloatConst, Float, Integer, NumCast, ToPrimitive, Unsigned};
+use ndarray_linalg::{error::LinalgError, Lapack, SVDInto, Scalar};
+use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, Integer, NumCast, ToPrimitive, Unsigned};
 
 moddef::moddef!(
     flat(pub) mod {
@@ -15,8 +15,57 @@ moddef::moddef!(
         result_or_ok,
         truncate_im,
         two_sided_range
+    },
+    mod {
+        expm, // This should be pushed to the ndarray_linalg crate and does not belong here.
     }
 );
+
+pub(crate) fn transpose_vec_vec<T, I>(y_t: Vec<I>) -> Vec<Vec<T>>
+where
+    I: IntoIterator<Item = T>
+{
+    let mut y_t: Vec<_> = y_t.into_iter()
+        .map(|y| y.into_iter())
+        .collect();
+    let mut y = vec![];
+    'lp:
+    loop
+    {
+        let mut first = true;
+
+        for y_t in y_t.iter_mut()
+        {
+            if let Some(y_t) = y_t.next()
+            {
+                if first
+                {
+                    y.push(vec![]);
+                    first = false;
+                }
+                let y = y.last_mut().unwrap();
+                y.push(y_t)
+            }
+            else
+            {
+                break 'lp
+            }
+        }
+    }
+    y
+}
+
+pub(crate) fn expm<T>(m: Array2<T>) -> Result<Array2<T>, LinalgError>
+where
+    T: Scalar + Lapack + ComplexFloat<Real: Into<T>>
+{
+    Ok(expm::expm(&m.map(|&a| {
+        Complex::new(a.re().to_f64().unwrap(), a.im().to_f64().unwrap())
+    }))?.map(|&a| {
+        Complex::new(<<T as ComplexFloat>::Real as NumCast>::from(a.re()).unwrap(), <<T as ComplexFloat>::Real as NumCast>::from(a.im()).unwrap())
+            .truncate_im::<T>()
+    }))
+}
 
 pub(crate) fn pinv<T>(m: Array2<T>) -> Array2<T>
 where

@@ -36,6 +36,7 @@ moddef::moddef!(
         real_specgram,
         rms,
         rssq,
+        sims,
         specgram,
         statelevels,
         tfestimate,

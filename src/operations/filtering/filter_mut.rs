@@ -5,7 +5,7 @@ use ndarray::{Array1, Array2};
 use num::{complex::ComplexFloat, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{util::{ComplexOp, MaybeLenEq, Overlay}, quantities::{ContainerOrSingle, List, Lists, Matrix, MaybeList, MaybeLists, MaybeMatrix, MaybeOwnedList, OwnedList}, RtfOrSystem, systems::{Rtf, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf}};
+use crate::{quantities::{ContainerOrSingle, List, Lists, Matrix, MaybeList, MaybeLists, MaybeMatrix, MaybeOwnedList, OwnedList}, systems::{Rtf, Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf}, util::{self, ComplexOp, MaybeLenEq, Overlay}, RtfOrSystem};
 
 pub trait FilterMut<X, XX>: RtfOrSystem
 where
@@ -231,7 +231,7 @@ where
         
         self.w.resize(n, W::zero());
 
-        let mut y_t: Vec<std::vec::IntoIter<W>> = x.to_array2()
+        let y_t: Vec<std::vec::IntoIter<W>> = x.to_array2()
             .columns()
             .into_iter()
             .map(|u| {
@@ -252,30 +252,7 @@ where
                     .to_vec()
                     .into_iter()
             }).collect();
-        let mut y = vec![];
-        'lp:
-        loop
-        {
-            let mut first = true;
-
-            for y_t in y_t.iter_mut()
-            {
-                if let Some(y_t) = y_t.next()
-                {
-                    if first
-                    {
-                        y.push(vec![]);
-                        first = false;
-                    }
-                    let y = y.last_mut().unwrap();
-                    y.push(y_t)
-                }
-                else
-                {
-                    break 'lp
-                }
-            }
-        }
+        let y = util::transpose_vec_vec(y_t);
         let mut y = y.into_iter();
 
         let d_empty = self.sys.d.map_to_owned(|_| ());
