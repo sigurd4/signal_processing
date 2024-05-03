@@ -4,18 +4,18 @@ use option_trait::{Maybe, StaticMaybe};
 
 use crate::{quantities::{Lists, MatrixOrSingle, MaybeList, MaybeLists, MaybeOwnedList, OwnedListOrSingle}, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, transforms::system::ToSs, util::{self, TwoSidedRange}, System};
 
-pub trait ImpulseZ: System
+pub trait StepZ: System
 {
     type Output: MatrixOrSingle<Vec<Self::Set>>;
 
-    fn impulse_z<T, W>(self, t: T, w: W, sampling_frequency: <Self::Set as ComplexFloat>::Real)
+    fn step_z<T, W>(self, t: T, w: W, sampling_frequency: <Self::Set as ComplexFloat>::Real)
         -> (Vec<<Self::Set as ComplexFloat>::Real>, Self::Output)
     where
         T: TwoSidedRange<<Self::Set as ComplexFloat>::Real>,
         W: Maybe<Vec<Self::Set>>;
 }
 
-impl<T, A, B, C, D> ImpulseZ for Ss<T, A, B, C, D>
+impl<T, A, B, C, D> StepZ for Ss<T, A, B, C, D>
 where
     T: ComplexFloat + 'static,
     A: SsAMatrix<T, B, C, D>,
@@ -28,7 +28,7 @@ where
 {
     type Output = <<D::Transpose as MaybeLists<T>>::RowsMapped<D::RowsMapped<Vec<T>>> as Lists<Vec<T>>>::CoercedMatrix;
 
-    fn impulse_z<TT, W>(self, t: TT, w: W, sampling_frequency: T::Real)
+    fn step_z<TT, W>(self, t: TT, w: W, sampling_frequency: T::Real)
         -> (Vec<T::Real>, Self::Output)
     where
         TT: TwoSidedRange<T::Real>,
@@ -98,29 +98,21 @@ where
         let yout = <D::Transpose as MaybeLists<T>>::RowsMapped::<D::RowsMapped::<Vec<T>>>::from_len_fn(StaticMaybe::maybe_from_fn(|| p), |i| {
             let mut xout = vec![w0.clone()];
             let mut yout = vec![];
+            let u = Array1::from_shape_fn(p, |p| T::from((p == i) as u8).unwrap());
+            for _ in 1..*t_range.end()
+            {
+                let x = xout.last()
+                    .map(|x| Array1::from_vec(x.clone()))
+                    .unwrap_or_else(|| Array1::from_elem(n, T::zero()));
+                yout.push((c.dot(&x) + d.dot(&u)).to_vec());
+                xout.push((a.dot(&x) + b.dot(&u)).to_vec());
+            }
             if *t_range.start() < *t_range.end()
             {
                 let x = xout.last()
                     .map(|x| Array1::from_vec(x.clone()))
                     .unwrap_or_else(|| Array1::from_elem(n, T::zero()));
-                let u = Array1::from_shape_fn(p, |p| T::from((p == i) as u8).unwrap());
                 yout.push((c.dot(&x) + d.dot(&u)).to_vec());
-                xout.push((a.dot(&x) + b.dot(&u)).to_vec());
-            }
-            for _ in 2..*t_range.end()
-            {
-                let x = xout.last()
-                    .map(|x| Array1::from_vec(x.clone()))
-                    .unwrap_or_else(|| Array1::from_elem(n, T::zero()));
-                yout.push(c.dot(&x).to_vec());
-                xout.push(a.dot(&x).to_vec());
-            }
-            if *t_range.end() > 1 && *t_range.start() < *t_range.end()
-            {
-                let x = xout.last()
-                    .map(|x| Array1::from_vec(x.clone()))
-                    .unwrap_or_else(|| Array1::from_elem(n, T::zero()));
-                yout.push(c.dot(&x).to_vec());
             }
     
             let mut yout = util::transpose_vec_vec(yout.into_iter()
@@ -142,26 +134,26 @@ where
     }
 }
 
-impl<T, B, A> ImpulseZ for Tf<T, B, A>
+impl<T, B, A> StepZ for Tf<T, B, A>
 where
     T: ComplexFloat,
     B: MaybeLists<T>,
     A: MaybeList<T>,
     Self: System<Set = T> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>,
     Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>,
-    Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>: ImpulseZ<Output = Array2<Vec<T>>> + System<Set = T>,
+    Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>: StepZ<Output = Array2<Vec<T>>> + System<Set = T>,
     B::RowsMapped<Vec<T>>: Lists<T> + OwnedListOrSingle<Vec<T>, Length: StaticMaybe<usize, Opposite: Sized>>
 {
     type Output = B::RowsMapped<Vec<T>>;
 
-    fn impulse_z<TT, W>(self, t: TT, w: W, sampling_frequency: T::Real)
+    fn step_z<TT, W>(self, t: TT, w: W, sampling_frequency: T::Real)
         -> (Vec<T::Real>, Self::Output)
     where
         TT: TwoSidedRange<T::Real>,
         W: Maybe<Vec<T>>
     {
         let (t, y) = self.to_ss()
-            .impulse_z(t, w, sampling_frequency);
+            .step_z(t, w, sampling_frequency);
 
         let q = y.len();
         let mut y = y.into_iter();
@@ -173,7 +165,7 @@ where
     }
 }
 
-impl<T, Z, P, K> ImpulseZ for Zpk<T, Z, P, K>
+impl<T, Z, P, K> StepZ for Zpk<T, Z, P, K>
 where
     T: ComplexFloat,
     Z: MaybeList<T>,
@@ -181,18 +173,18 @@ where
     K: ComplexFloat<Real = T::Real>,
     Self: System<Set = K> + ToSs<K, Array2<K>, Array2<K>, Array2<K>, Array2<K>>,
     Array2<K>: SsAMatrix<K, Array2<K>, Array2<K>, Array2<K>> + SsBMatrix<K, Array2<K>, Array2<K>, Array2<K>> + SsCMatrix<K, Array2<K>, Array2<K>, Array2<K>> + SsDMatrix<K, Array2<K>, Array2<K>, Array2<K>>,
-    Ss<K, Array2<K>, Array2<K>, Array2<K>, Array2<K>>: System<Set = K> + ImpulseZ<Output = Array2<Vec<K>>>
+    Ss<K, Array2<K>, Array2<K>, Array2<K>, Array2<K>>: System<Set = K> + StepZ<Output = Array2<Vec<K>>>
 {
     type Output = Vec<K>;
 
-    fn impulse_z<TT, W>(self, t: TT, w: W, sampling_frequency: T::Real)
+    fn step_z<TT, W>(self, t: TT, w: W, sampling_frequency: T::Real)
         -> (Vec<T::Real>, Self::Output)
     where
         TT: TwoSidedRange<T::Real>,
         W: Maybe<Vec<K>>
     {
         let (t, y) = self.to_ss()
-            .impulse_z(t, w, sampling_frequency);
+            .step_z(t, w, sampling_frequency);
 
         (
             t,
@@ -201,7 +193,7 @@ where
     }
 }
 
-impl<T, B, A, S> ImpulseZ for Sos<T, B, A, S>
+impl<T, B, A, S> StepZ for Sos<T, B, A, S>
 where
     T: ComplexFloat,
     B: Maybe<[T; 3]> + MaybeOwnedList<T>,
@@ -209,18 +201,18 @@ where
     S: MaybeList<Tf<T, B, A>>,
     Self: System<Set = T> + ToSs<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>,
     Array2<T>: SsAMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsBMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsCMatrix<T, Array2<T>, Array2<T>, Array2<T>> + SsDMatrix<T, Array2<T>, Array2<T>, Array2<T>>,
-    Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>: System<Set = T> + ImpulseZ<Output = Array2<Vec<T>>>
+    Ss<T, Array2<T>, Array2<T>, Array2<T>, Array2<T>>: System<Set = T> + StepZ<Output = Array2<Vec<T>>>
 {
     type Output = Vec<T>;
 
-    fn impulse_z<TT, W>(self, t: TT, w: W, sampling_frequency: T::Real)
+    fn step_z<TT, W>(self, t: TT, w: W, sampling_frequency: T::Real)
         -> (Vec<T::Real>, Self::Output)
     where
         TT: TwoSidedRange<T::Real>,
         W: Maybe<Vec<T>>
     {
         let (t, y) = self.to_ss()
-            .impulse_z(t, w, sampling_frequency);
+            .step_z(t, w, sampling_frequency);
 
         (
             t,
@@ -232,7 +224,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{analysis::ImpulseZ, gen::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::Tf};
+    use crate::{analysis::StepZ, gen::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::Tf};
 
     #[test]
     fn test()
@@ -243,9 +235,9 @@ mod test
         let h = Tf::besself(5, [12.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(FS) })
             .unwrap();
 
-        let (tt, y) = h.impulse_z(0.0..T, (), FS);
+        let (tt, y) = h.step_z(0.0..T, (), FS);
 
-        plot::plot_curves("y(t)", "plots/y_t_impulse_z.png", [&tt.into_iter().zip(y).collect::<Vec<_>>()])
+        plot::plot_curves("y(t)", "plots/y_t_step_z.png", [&tt.into_iter().zip(y).collect::<Vec<_>>()])
             .unwrap();
     }
 }

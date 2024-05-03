@@ -43,6 +43,7 @@ moddef::moddef!(
         specgram,
         statelevels,
         step_s,
+        step_z,
         tfestimate,
         xcorr_2d,
         xcorr,

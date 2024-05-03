@@ -1,12 +1,10 @@
-use core::{iter::Sum, ops::{DivAssign, MulAssign}};
+use core::ops::MulAssign;
 
 use ndarray::Array2;
 use num::{complex::ComplexFloat, NumCast, One};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{quantities::{ContainerOrSingle, List, ListOrSingle, Lists, Matrix, MatrixOrSingle, MaybeList, MaybeLists, MaybeOwnedList, OwnedList, OwnedListOrSingle}, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, transforms::system::ToSs, util::TwoSidedRange, System};
-
-use super::SimS;
+use crate::{quantities::{ContainerOrSingle, List, ListOrSingle, Lists, Matrix, MatrixOrSingle, MaybeList, MaybeLists, MaybeOwnedList, OwnedList, OwnedListOrSingle}, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, transforms::system::ToSs, util::TwoSidedRange, System, analysis::SimS};
 
 pub trait ImpulseS<L>: System
 where
