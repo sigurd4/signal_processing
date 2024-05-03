@@ -51,7 +51,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, gen::Diric};
+    use crate::{plot, gen::waveform::Diric};
 
     #[test]
     fn test()

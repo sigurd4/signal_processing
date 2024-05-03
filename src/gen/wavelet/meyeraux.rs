@@ -37,7 +37,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, gen::Meyeraux};
+    use crate::{plot, gen::wavelet::Meyeraux};
 
     #[test]
     fn test()

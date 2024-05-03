@@ -93,7 +93,7 @@ mod test
     use linspace::LinspaceArray;
     use num::{Complex, Zero};
 
-    use crate::{plot, gen::{Chirp, ChirpCurve}, transforms::fourier::Sdft};
+    use crate::{plot, gen::waveform::{Chirp, ChirpCurve}, transforms::fourier::Sdft};
 
     #[test]
     fn test()

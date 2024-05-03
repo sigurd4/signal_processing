@@ -78,7 +78,7 @@ mod test
 {
     use array_math::ArrayOps;
 
-    use crate::{plot, gen::{Chirp, ChirpCurve}};
+    use crate::{plot, gen::waveform::{Chirp, ChirpCurve}};
 
     #[test]
     fn test()

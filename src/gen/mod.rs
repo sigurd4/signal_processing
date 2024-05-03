@@ -4,13 +4,11 @@ moddef::moddef!(
         filter,
         matrix,
         pulse,
+        waveform,
         wavelet,
         window,
     },
     flat(pub) mod {
-        cheb,
-        chirp,
-        diric,
-        meyeraux
+        cheb
     }
 );

@@ -7,6 +7,7 @@ moddef::moddef!(
         dbwavf,
         haarwavf,
         mexihat,
+        meyeraux,
         morlet,
         shanwavf
     }

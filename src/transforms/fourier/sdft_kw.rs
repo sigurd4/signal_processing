@@ -141,7 +141,7 @@ mod test
     use linspace::LinspaceArray;
     use num::{Complex, Zero};
 
-    use crate::{plot, windows::Sine, gen::{window::{WindowGen, WindowRange}, Chirp, ChirpCurve}, transforms::{fourier::SdftKw, window::ToKw}};
+    use crate::{plot, windows::Sine, gen::{window::{WindowGen, WindowRange}, waveform::{Chirp, ChirpCurve}}, transforms::{fourier::SdftKw, window::ToKw}};
 
     #[test]
     fn test()
