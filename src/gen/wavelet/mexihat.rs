@@ -9,6 +9,7 @@ where
     L: ListOrSingle<T>,
     N: Maybe<usize>
 {
+    #[doc(alias = "ricker")]
     fn mexihat(self, numtaps: N) -> (L::Mapped<T>, L);
 }
 
