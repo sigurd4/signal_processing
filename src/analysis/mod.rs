@@ -38,6 +38,7 @@ moddef::moddef!(
         rms,
         rssq,
         sim_s,
+        sim_z,
         specgram,
         statelevels,
         step_s,

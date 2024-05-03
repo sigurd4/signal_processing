@@ -31,7 +31,7 @@ where
     B: SsBMatrix<T, A, C, D>,
     C: SsCMatrix<T, A, B, D>,
     D: SsDMatrix<T, A, B, C, RowsMapped<YY> = YYY>,
-    XX: Matrix<X, Transpose: Matrix<X, RowOwned: MaybeLenEq<B::RowOwned, true>>> + Clone,
+    XX: Matrix<X, Transpose: Matrix<X, RowOwned: MaybeLenEq<D::RowOwned, true> + MaybeLenEq<B::RowOwned, true>>> + Clone,
     Array2<Y>: SsAMatrix<Y, Array2<Y>, Array2<Y>, Array2<Y>> + SsBMatrix<Y, Array2<Y>, Array2<Y>, Array2<Y>> + SsCMatrix<Y, Array2<Y>, Array2<Y>, Array2<Y>> + SsDMatrix<Y, Array2<Y>, Array2<Y>, Array2<Y>>,
     YYY: OwnedLists<Y> + OwnedListOrSingle<YY>,
     XX::Transpose: MaybeLists<X, RowsMapped<Y> = YY>,
