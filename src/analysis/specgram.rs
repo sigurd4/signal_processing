@@ -16,6 +16,7 @@ where
     W: ComplexFloat<Real = T::Real> + Into<Complex<T::Real>>,
     WW: MaybeList<W>
 {
+    #[doc(alias = "spectrogram")]
     fn specgram<FS>(
         &self,
         width: N,

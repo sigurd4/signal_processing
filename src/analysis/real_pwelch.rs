@@ -17,6 +17,7 @@ where
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<T>>: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<T>>>,
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<T>>>: StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<T>>>>,
 {
+    #[doc(alias = "real_welch")]
     fn real_pwelch<O, FS, CONF, DT, XPOW, CROSS, TRANS, COHER, YPOW, CONFF, F>(
         self,
         y: YY,

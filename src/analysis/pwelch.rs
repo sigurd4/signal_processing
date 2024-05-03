@@ -33,6 +33,7 @@ where
     WW::Mapped<Complex<T::Real>>: StaticMaybe<WW::Mapped<Complex<T::Real>>>,
     WW::Mapped<T::Real>: StaticMaybe<WW::Mapped<T::Real>>
 {
+    #[doc(alias = "welch")]
     fn pwelch<O, FS, CONF, DT, XPOW, CROSS, TRANS, COHER, YPOW, CONFF, F>(
         self,
         y: YY,

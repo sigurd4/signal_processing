@@ -15,7 +15,7 @@ where
     N: Maybe<usize>,
     S: Maybe<bool>
 {
-    #[doc(alias = "cohere")]
+    #[doc(alias = "cohere", alias = "coherence")]
     fn mscohere<O, FS, CONF, DT, F>(
         self,
         y: YY,
