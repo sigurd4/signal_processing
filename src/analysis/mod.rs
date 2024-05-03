@@ -13,6 +13,7 @@ moddef::moddef!(
         fwhm,
         grpdelay,
         impulse_s,
+        impulse_z,
         impz,
         isallpass,
         islinphase,

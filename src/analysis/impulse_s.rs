@@ -1,3 +1,5 @@
+use core::{iter::Sum, ops::{DivAssign, MulAssign}};
+
 use ndarray::Array2;
 use num::{complex::ComplexFloat, NumCast, One};
 use option_trait::{Maybe, StaticMaybe};
@@ -23,11 +25,11 @@ where
 
 impl<T, A, B, C, D, L, YY> ImpulseS<L> for Ss<T, A, B, C, D>
 where
-    T: ComplexFloat,
+    T: ComplexFloat + MulAssign<T::Real>,
     A: SsAMatrix<T, B, C, D>,
-    B: SsBMatrix<T, A, C, D>,
+    B: for<'a> SsBMatrix<T, A, C, D, RowView<'a>: List<T>>,
     C: SsCMatrix<T, A, B, D>,
-    D: for<'a> SsDMatrix<T, A, B, C, RowView<'a>: List<T>>,
+    D: SsDMatrix<T, A, B, C>,
     L: OwnedList<T::Real, Mapped<T> = YY>,
     <L::Length as StaticMaybe<usize>>::Opposite: Sized + Clone,
     D::RowsMapped<YY>: Lists<T>,
@@ -53,7 +55,7 @@ where
     {
         let w = w.into_option();
         
-        let d: Array2<T> = self.d.to_array2();
+        let b: Array2<T> = self.b.to_array2();
 
         let n = numtaps.into_option()
             .unwrap_or(L::LENGTH);
@@ -76,8 +78,12 @@ where
 
         let dn = self.d.matrix_dim().1.max(self.b.matrix_dim().1);
         let y = <D::Transpose as MaybeLists<T>>::RowsMapped::<Self::OutputI>::from_len_fn(StaticMaybe::maybe_from_fn(|| dn), |i| {
-            let d = d.column(i)
+            let mut b = b.column(i)
                 .to_vec();
+            for b in b.iter_mut()
+            {
+                *b *= dt
+            }
     
             let w = match w.clone()
             {
@@ -85,12 +91,12 @@ where
                     let wn = w.len();
                     w.into_iter()
                         .chain(core::iter::repeat(T::zero())
-                            .take(d.len().saturating_sub(wn))
-                        ).zip(d)
+                            .take(b.len().saturating_sub(wn))
+                        ).zip(b)
                         .map(|(w, b)| w + b)
                         .collect()
                 },
-                None => d
+                None => b
             };
     
             let (_, y, _) = self.as_view()

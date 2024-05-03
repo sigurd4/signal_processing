@@ -43,7 +43,6 @@ where
         TT: TwoSidedRange<T::Real>,
         W: Maybe<Vec<Y>>
     {
-        (|| {
         let Ss {mut a, mut b, mut c, mut d, ..} = Ss::new(
             self.a.to_array2().map(|&a| a.into()),
             self.b.to_array2().map(|&b| b.into()),
@@ -207,7 +206,6 @@ where
             }),
             xout
         )
-        })()
     }
 }
 

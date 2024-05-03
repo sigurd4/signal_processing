@@ -3,7 +3,9 @@
 use ndarray::{prelude::Array1, Array2, ArrayView1, ArrayView2};
 use option_trait::StaticMaybe;
 
-use crate::quantities::{ListOrSingle, Lists, MaybeContainer, MaybeList, ListsOrSingle};
+use crate::quantities::{ListOrSingle, Lists, MaybeContainer, MaybeList, ListsOrSingle, OwnedListOrSingle};
+
+use super::MaybeOwnedList;
 
 pub trait MaybeLists<T>: MaybeContainer<T>
 {
@@ -13,12 +15,12 @@ pub trait MaybeLists<T>: MaybeContainer<T>
     const WIDTH: usize;
     const IS_FLATTENED: bool;
 
-    type RowsMapped<M>: ListOrSingle<M>;
+    type RowsMapped<M>: OwnedListOrSingle<M, Length = Self::Height>;
     type RowView<'a>: MaybeList<T> + 'a
     where
         T: 'a,
         Self: 'a;
-    type RowOwned: MaybeList<T>;
+    type RowOwned: MaybeOwnedList<T>;
 
     fn index_view<'a>(&'a self, i: usize) -> Self::RowView<'a>
     where
