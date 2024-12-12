@@ -19,6 +19,7 @@ moddef::moddef!(
         idwht,
         sdft_kw,
         sdft,
+        stft,
         swift
     }
 );

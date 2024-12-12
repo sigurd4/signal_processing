@@ -49,9 +49,9 @@ where
         let x: &[T] = self.as_view_slice();
         let window: &[W] = window.as_view_slice();
         let n = window.len();
-        let step = n - overlap;
+        let step = n - overlap % n;
 
-        let s: Vec<_> = (0..x.len() - n).step_by(step)
+        let s: Vec<_> = (0..x.len() + 1 - n).step_by(step)
             .map(|i| {
                 let mut y: Vec<_> = x[i..].iter()
                     .zip(window.iter())
@@ -65,7 +65,7 @@ where
         let fs = sampling_frequency.into_option()
             .unwrap_or_else(FloatConst::TAU);
 
-        let t = (0..x.len() - n).step_by(step)
+        let t = (0..x.len() + 1 - n).step_by(step)
             .map(|i| <T::Real as NumCast>::from(i).unwrap()/fs)
             .collect();
         let f = (0..n).map(|i| <T::Real as NumCast>::from(i).unwrap()/NumCast::from(n).unwrap()*fs)
@@ -82,7 +82,7 @@ where
     WW: List<W, Length = usize>,
     X: List<T, Length = usize>,
     Complex<T::Real>: AddAssign + MulAssign,
-    //[(); 0 - (X::LENGTH - WW::LENGTH) % L]:
+    [(); WW::LENGTH - (X::LENGTH - WW::LENGTH)/L - 1]:
 {
     fn specgram<FS>(
         &self,
@@ -157,7 +157,8 @@ where
     X: List<T, Length = usize>,
     [T::Real; W]: List<T::Real, Length = usize>,
     Complex<T::Real>: AddAssign + MulAssign,
-    [(); <[T::Real; W]>::LENGTH]:
+    [(); <[T::Real; W]>::LENGTH]:,
+    [(); <[T::Real; W]>::LENGTH - (X::LENGTH - <[T::Real; W]>::LENGTH)/L - 1]:
 {
     fn specgram<FS>(
         &self,

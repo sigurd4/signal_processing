@@ -10,16 +10,26 @@ use crate::{quantities::{List, ListOrSingle, Lists}, util::TruncateIm};
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum CepsError
 {
-    #[error("Sequence has one or more zero-valued fourier coefficient.")]
+    #[error("Sequence has one or more zero-valued fourier coefficients.")]
     ZeroInFourier
 }
 
+/// A trait for calculating the complex cepstrum of a sequence or several sequences.
 pub trait CCeps<'a, T, C, N>: Lists<T>
 where
     T: ComplexFloat,
     C: List<T>,
     N: Maybe<usize>,
 {
+    /// Computes the complex cepstrum of a sequence or several sequences.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `numtaps`: Number of taps if cepstrum is dynamically sized, otherwise inferred from return type.
+    /// 
+    /// # Returns
+    /// 
+    /// * `cepstrum`: Complex cepstrum in the form of a sequence.
     fn cceps(&'a self, numtaps: N) -> Result<Self::RowsMapped<C>, CepsError>;
 }
 

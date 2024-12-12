@@ -9,11 +9,21 @@ use crate::{
     systems::Tf
 };
 
+/// A trait for computing the `Lp`-norm or infinity-norm of a digital filter.
 pub trait FilterNorm<'a>: System
 {
     type Output: ListOrSingle<<Self::Set as ComplexFloat>::Real>;
 
-    fn filternorm(&'a self, p: <Self::Set as ComplexFloat>::Real) -> Self::Output;
+    /// Computes the `Lp`-norm or infinity-norm of a digital filter.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `pnorm` - The norm power. If infinite, the infinity-norm of the filter is returned.
+    /// 
+    /// # Returns
+    /// 
+    /// * `norm` - The `Lp`-norm or infinity-norm of the digital filter.
+    fn filternorm(&'a self, pnorm: <Self::Set as ComplexFloat>::Real) -> Self::Output;
 }
 
 const FILTER_INF_NORM_RES: usize = 1024;
@@ -29,15 +39,15 @@ where
 {
     type Output = B::RowsMapped<T::Real>;
 
-    fn filternorm(&'a self, p: T::Real) -> Self::Output
+    fn filternorm(&'a self, pnorm: T::Real) -> Self::Output
     {
-        if Float::abs(p) > Float::sqrt(<T::Real as Float>::max_value())
+        if Float::abs(pnorm) > Float::sqrt(<T::Real as Float>::max_value())
         {
             let (h, _): (_, [_; FILTER_INF_NORM_RES]) = self.freqz((), false);
             h.map_rows_to_owned(|h| h.as_view_slice()
                 .iter()
                 .map(|&h| h.abs())
-                .reduce(if p.is_sign_positive() {Float::max} else {Float::min})
+                .reduce(if pnorm.is_sign_positive() {Float::max} else {Float::min})
                 .unwrap_or_else(Zero::zero)
             )
         }
@@ -48,9 +58,9 @@ where
             let n = h.map_rows_to_owned(|h| {
                 let n = Float::powf(h.as_view_slice()
                     .iter()
-                    .map(|&h| Float::powf(h.abs(), p))
+                    .map(|&h| Float::powf(h.abs(), pnorm))
                     .sum::<T::Real>(),
-                    Float::recip(p)
+                    Float::recip(pnorm)
                 );
                 if Float::is_infinite(n)
                 {
@@ -60,7 +70,7 @@ where
             });
             if inf
             {
-                return self.filternorm(Float::copysign(Float::infinity(), p))
+                return self.filternorm(Float::copysign(Float::infinity(), pnorm))
             }
             n
         }

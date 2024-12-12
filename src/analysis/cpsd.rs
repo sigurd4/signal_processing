@@ -3,6 +3,7 @@ use option_trait::{Maybe, NotVoid, StaticMaybe};
 
 use crate::{quantities::List, util::MaybeLenEq, analysis::{PWelch, PWelchDetrend}};
 
+/// A trait for computing the cross power spectral density of two sequences.
 pub trait CPsd<T, Y, YY, W, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
 where
     T: ComplexFloat,
@@ -15,6 +16,25 @@ where
     N: Maybe<usize>,
     S: Maybe<bool>
 {
+    /// Computes the cross power spectral density of two sequences using Welch's averaged periodogram method.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `y` - The other sequence.
+    /// * `window` - A window sequence. If none, a [Hamming](crate::windows::Hamming) window with lenght `window_length` will be used.
+    /// * `window_length` - A window length if no `window` is given.
+    /// * `overlap` - Overlap length in samples. If none, defaults to `window_length/2`.
+    /// * `nfft` - Length used for FFT if no `window` is given.
+    /// * `sampling_frequency` - Sampling frequency. If none, defaults to `1.0`.
+    /// * `confidence` - Probability in the range `[0.0, 1.0]` for the confidence intervals for the PSD estimate. If none, defaults to `0.95`.
+    /// * `detrend` - Method of detrending the signals before or after analysis. If none, [LongMean](PWelchDetrend::LongMean) is used.
+    /// * `sloppy` - If true, `nfft` will be set to the next power of two. Only applicable if no `window` is given.
+    /// * `shift` - If true, data will be shifted to center-DC.
+    /// 
+    /// # Returns
+    /// 
+    /// * `pxy` - Cross power spectral density.
+    /// * `frequencies` - Frequencies of the cross power spectral density.
     #[doc(alias = "csd")]
     fn cpsd<O, FS, CONF, DT, F>(
         self,
@@ -114,9 +134,9 @@ mod test
 
         const M: usize = 500;
         let w: [_; M] = Triangular.window_gen((), WindowRange::Symmetric);
-        let nov = 250;
+        let noverlap = 250;
 
-        let (pxy, f): (_, [_; M/2 + 1]) = x.real_cpsd(y, w, (), nov, (), (), (), (), ());
+        let (pxy, f): (_, [_; M/2 + 1]) = x.real_cpsd(y, w, (), noverlap, (), (), (), (), ());
 
         plot::plot_curves("P_xy(e^jw)", "plots/pxy_z_cpsd.png", [
             &f.zip(pxy.map(|p| 10.0*p.norm().log10()))
