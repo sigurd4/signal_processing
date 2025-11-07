@@ -6,15 +6,11 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, Integer, Nu
 
 moddef::moddef!(
     flat(pub) mod {
-        chain,
         complex_op,
-        len_eq,
-        maybe_len_eq,
         not_range,
-        overlay,
         result_or_ok,
         truncate_im,
-        two_sided_range
+        two_sided_range,
     },
     mod {
         expm, // This should be pushed to the ndarray_linalg crate and does not belong here.

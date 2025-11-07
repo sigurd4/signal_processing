@@ -34,7 +34,7 @@ mod test
     #[test]
     fn test()
     {
-        let psi = crate::gen::wavelet::coifwavf(17)
+        let psi = crate::generators::wavelet::coifwavf(17)
             .unwrap();
 
         plot::plot_curves("ψ[n]", "plots/psi_n_coifwavf.png", [

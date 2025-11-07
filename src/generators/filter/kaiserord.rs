@@ -123,7 +123,7 @@ mod test
     #[test]
     fn test()
     {
-        let (n, f, beta, t) = crate::gen::filter::kaiserord([1000.0, 1500.0], [true, false], [0.05, 0.01], 8000.0)
+        let (n, f, beta, t) = crate::generators::filter::kaiserord([1000.0, 1500.0], [true, false], [0.05, 0.01], 8000.0)
             .unwrap();
 
         let w: Vec<_> = Kaiser {beta}

@@ -2,9 +2,9 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
 
 pub trait ComplexOp<Rhs>: ComplexFloat + Into<<Self as ComplexOp<Rhs>>::Output>
 where
-    Rhs: ComplexFloat + Into<<Self as ComplexOp<Rhs>>::Output>
+    Rhs: ComplexFloat
 {
-    type Output: ComplexFloat;
+    type Output: ComplexFloat + From<Rhs> + From<Self>;
 }
 
 impl<T> ComplexOp<T> for T

@@ -1,7 +1,6 @@
+use array_trait::length::LengthValue;
+use bulks::Bulk;
 use num::complex::ComplexFloat;
-use option_trait::Maybe;
-
-use crate::quantities::List;
 
 pub enum WindowRange
 {
@@ -9,13 +8,12 @@ pub enum WindowRange
     Periodic
 }
 
-pub trait WindowGen<T, W, N>
+pub const trait WindowGen<T, N>
 where
     T: ComplexFloat,
-    N: Maybe<usize>,
-    W: List<T>
+    N: LengthValue
 {
-    type Output: Maybe<W>;
+    type Output: Bulk<Item = T>;
 
     fn window_gen(&self, numtaps: N, range: WindowRange) -> Self::Output;
 }

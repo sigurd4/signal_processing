@@ -55,7 +55,7 @@ where
         Ok(match filter_type
         {
             IirFilterType::Butterworth => {
-                let (n, wp, _ws, t) = crate::gen::filter::buttord(
+                let (n, wp, _ws, t) = crate::generators::filter::buttord(
                     passband_frequencies,
                     stopband_frequencies,
                     passband_ripple,
@@ -66,7 +66,7 @@ where
                     .unwrap()
             },
             IirFilterType::Chebyshev1 => {
-                let (n, wp, _ws, rp, t) = crate::gen::filter::cheb1ord(
+                let (n, wp, _ws, rp, t) = crate::generators::filter::cheb1ord(
                     passband_frequencies,
                     stopband_frequencies,
                     passband_ripple,
@@ -77,7 +77,7 @@ where
                     .unwrap()
             },
             IirFilterType::Chebyshev2 => {
-                let (n, wp, _ws, rs, t) = crate::gen::filter::cheb2ord(
+                let (n, wp, _ws, rs, t) = crate::generators::filter::cheb2ord(
                     passband_frequencies,
                     stopband_frequencies,
                     passband_ripple,
@@ -88,7 +88,7 @@ where
                     .unwrap()
             },
             IirFilterType::Elliptic => {
-                let (n, wp, _ws, rp, rs, t) = crate::gen::filter::ellipord(
+                let (n, wp, _ws, rp, rs, t) = crate::generators::filter::ellipord(
                     passband_frequencies,
                     stopband_frequencies,
                     passband_ripple,

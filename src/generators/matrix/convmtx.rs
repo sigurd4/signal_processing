@@ -51,7 +51,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::gen::matrix::ConvMatrix;
+    use crate::generators::matrix::ConvMatrix;
 
     #[test]
     fn test()

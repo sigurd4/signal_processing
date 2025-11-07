@@ -91,7 +91,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::gen::Cheb;
+    use crate::generators::Cheb;
 
     #[test]
     fn test()

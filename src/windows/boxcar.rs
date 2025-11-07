@@ -3,7 +3,7 @@
 
 use num::{traits::FloatConst, Float};
 
-use crate::gen::window::{WindowGen, WindowRange};
+use crate::generators::window::{WindowGen, WindowRange};
 
 pub struct Boxcar;
 

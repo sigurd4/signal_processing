@@ -3,9 +3,39 @@
 use array_math::ArrayOps;
 use num::{traits::FloatConst, Float};
 
-use crate::gen::window::{WindowGen, WindowRange};
+use crate::generators::window::{WindowGen, WindowRange};
 
 pub struct BlackmanHarris;
+
+impl<T, N> WindowGen<T, N> for BlackmanHarris
+where
+    T: ComplexFloat,
+    N: LengthValue
+{
+    type Output = impl Bulk<Item = T>;
+
+    fn window_gen(&self, numtaps: N, range: WindowRange) -> Self::Output
+    {
+        let mut i = 0;
+        let n = length::value::len(numtaps);
+        let m = match range
+        {
+            WindowRange::Symmetric => n - 1,
+            WindowRange::Periodic => n,
+        };
+        let a0 = T::from(0.35875).unwrap();
+        let a1 = T::from(0.48829).unwrap();
+        let a2 = T::from(0.14128).unwrap();
+        let a3 = T::from(0.01168).unwrap();
+        bulks::repeat_n_with(|| {
+            let z1 = (T::TAU()*T::from(i).unwrap()/T::from(m).unwrap()).cos();
+            let z2 = (T::TAU()*T::from(i*2).unwrap()/T::from(m).unwrap()).cos();
+            let z3 = (T::TAU()*T::from(i*3).unwrap()/T::from(m).unwrap()).cos();
+            i += 1;
+            a0 - a1*z1 + a2*z2 - a3*z3
+        }, numtaps)
+    }
+}
 
 impl<T, const N: usize> WindowGen<T, [T; N], ()> for BlackmanHarris
 where

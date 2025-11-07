@@ -1,6 +1,6 @@
 use num::Float;
 
-use crate::gen::filter::FilterBandError;
+use crate::generators::filter::FilterBandError;
 
 pub(crate) fn validate_filter_bands<T, const F: usize>(
     passband_frequencies: &[T; F],

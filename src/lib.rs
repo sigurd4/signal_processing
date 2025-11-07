@@ -1,28 +1,19 @@
-#![feature(new_uninit)]
-#![feature(is_sorted)]
-#![feature(generic_arg_infer)]
-#![feature(let_chains)]
-#![feature(array_methods)]
 #![feature(trait_alias)]
 #![feature(unsize)]
-#![feature(associated_type_bounds)]
 #![feature(unboxed_closures)]
-#![feature(array_chunks)]
 #![feature(associated_type_defaults)]
 #![feature(auto_traits)]
 #![feature(negative_impls)]
-#![feature(extract_if)]
 #![feature(associated_const_equality)]
 #![feature(split_array)]
 #![feature(iterator_try_collect)]
-#![feature(slice_flatten)]
 #![feature(float_gamma)]
 #![feature(fn_traits)]
-#![feature(lazy_cell)]
 #![feature(coerce_unsized)]
 #![feature(decl_macro)]
 #![feature(array_try_map)]
-#![feature(inline_const)]
+#![feature(impl_trait_in_assoc_type)]
+#![feature(const_trait_impl)]
 
 #![allow(internal_features)]
 #![allow(incomplete_features)]
@@ -44,7 +35,7 @@ moddef::moddef!(
     pub mod {
         analysis,
         decompositions,
-        gen,
+        generators,
         identification,
         operations,
         quantities,
@@ -68,11 +59,10 @@ pub enum Plane
 #[cfg(test)]
 mod tests
 {
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
     use num::Complex;
 
-    use crate::{plot, gen::filter::{BesselAP, BesselF, ButtAP, Butter, Cheb1AP, Cheb2AP, EllipAP, FilterGenPlane, FilterGenType}, analysis::{FreqS, FreqZ, RealFreqZ}, systems::{Tf, Zpk}};
+    use crate::{plot, generators::filter::{BesselAP, BesselF, ButtAP, Butter, Cheb1AP, Cheb2AP, EllipAP, FilterGenPlane, FilterGenType}, analysis::{FreqS, FreqZ, RealFreqZ}, systems::{Tf, Zpk}};
 
     #[test]
     fn testt()
@@ -83,7 +73,7 @@ mod tests
         let dp = 3.0;
         let ds = 80.0;
 
-        let (n, wn, _, t) = crate::gen::filter::buttord([f_p], [f_s], dp, ds, FilterGenPlane::Z { sampling_frequency: Some(fs) })
+        let (n, wn, _, t) = crate::generators::filter::buttord([f_p], [f_s], dp, ds, FilterGenPlane::Z { sampling_frequency: Some(fs) })
             .unwrap();
         let ba: Tf::<f64, _, _> = Tf::butter(n, wn, t, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();

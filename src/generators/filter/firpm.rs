@@ -316,7 +316,7 @@ mod test
     fn test()
     {
         let fs: f64 = 8000.0;
-        let (n, f, a, w) = crate::gen::filter::firpmord([1900.0, 2000.0], [1.0, 0.0], [0.0001, 0.0001], fs)
+        let (n, f, a, w) = crate::generators::filter::firpmord([1900.0, 2000.0], [1.0, 0.0], [0.0001, 0.0001], fs)
             .unwrap();
         println!("{}", n);
         let (h, _, ()) = Tf::firpm(

@@ -138,7 +138,7 @@ mod test
     {
         let fs = 1000.0;
 
-        let (n, wp, _ws, t) = crate::gen::filter::buttord(
+        let (n, wp, _ws, t) = crate::generators::filter::buttord(
             [40.0],
             [150.0],
             3.0,

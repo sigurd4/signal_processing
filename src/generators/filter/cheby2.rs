@@ -238,7 +238,7 @@ mod test
     {
         let fs = 1000.0;
 
-        let (n, wp, _ws, rs, t) = crate::gen::filter::cheb2ord(
+        let (n, wp, _ws, rs, t) = crate::generators::filter::cheb2ord(
             [40.0],
             [150.0],
             3.0,

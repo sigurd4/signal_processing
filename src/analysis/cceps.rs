@@ -1,8 +1,7 @@
 use core::{iter::Sum, ops::{AddAssign, MulAssign, SubAssign}};
 
+use bulks::{FromBulk, IntoBulk};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, NumCast, Zero};
-use array_math::SliceMath;
-use option_trait::{Maybe, StaticMaybe};
 use thiserror::Error;
 
 use crate::{quantities::{List, ListOrSingle, Lists}, util::TruncateIm};
@@ -19,7 +18,8 @@ pub trait CCeps<'a, T, C, N>: Lists<T>
 where
     T: ComplexFloat,
     C: List<T>,
-    N: Maybe<usize>,
+    N: IntoBulk<Item = usize>,
+    Option<usize>: FromBulk<N::IntoBulk>
 {
     /// Computes the complex cepstrum of a sequence or several sequences.
     /// 

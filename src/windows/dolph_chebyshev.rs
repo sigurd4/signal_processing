@@ -3,7 +3,7 @@ use core::ops::{AddAssign, MulAssign};
 use array_math::{ArrayMath, ArrayOps, SliceMath};
 use num::{traits::FloatConst, Complex, Float};
 
-use crate::gen::window::{WindowGen, WindowRange};
+use crate::generators::window::{WindowGen, WindowRange};
 
 pub struct DolphChebyshev<T>
 where

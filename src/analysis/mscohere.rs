@@ -96,12 +96,12 @@ mod test
         let mut rng = rand::thread_rng();
         let r: Vec<_> = (0..N).map(|_| (-1.0..1.0).sample_single(&mut rng)).collect();
 
-        let (n, wp, _ws, rs, t) = crate::gen::filter::cheb2ord([0.2, 0.4], [0.15, 0.45], 0.1, 60.0, FilterGenPlane::Z { sampling_frequency: None })
+        let (n, wp, _ws, rs, t) = crate::generators::filter::cheb2ord([0.2, 0.4], [0.15, 0.45], 0.1, 60.0, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
         let dx: Tf::<f64, _, _> = Tf::cheby2(n, rs, wp, t, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
         
-        let (n, wp, _ws, rp, t) = crate::gen::filter::cheb1ord([0.6, 0.8], [0.65, 0.75], 0.1, 60.0, FilterGenPlane::Z { sampling_frequency: None })
+        let (n, wp, _ws, rp, t) = crate::generators::filter::cheb1ord([0.6, 0.8], [0.65, 0.75], 0.1, 60.0, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();
         let dy: Tf::<f64, _, _> = Tf::cheby1(n, rp, wp, t, FilterGenPlane::Z { sampling_frequency: None })
             .unwrap();

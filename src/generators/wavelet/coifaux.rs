@@ -8,7 +8,7 @@ where
     T: Float + Sum + MulAssign + DivAssign,
     S: Maybe<T>
 {
-    if let Some(mut h) = crate::gen::wavelet::coifwavf::<T>(order)
+    if let Some(mut h) = crate::generators::wavelet::coifwavf::<T>(order)
     {
         let one = T::one();
     
@@ -50,7 +50,7 @@ mod test
     #[test]
     fn test()
     {
-        let phi = crate::gen::wavelet::coifaux(17, ())
+        let phi = crate::generators::wavelet::coifaux(17, ())
             .unwrap();
 
         plot::plot_curves("ϕ[n]", "plots/phi_n_coifaux.png", [

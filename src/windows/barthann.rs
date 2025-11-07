@@ -1,62 +1,35 @@
 use core::f64::consts::TAU;
 
-use array_math::ArrayOps;
-use num::{traits::FloatConst, Float};
+use array_trait::length::{self, LengthValue};
+use bulks::Bulk;
+use num::{Float, complex::ComplexFloat};
 
-use crate::gen::window::{WindowGen, WindowRange};
+use crate::generators::window::{WindowGen, WindowRange};
 
 pub struct Barthann;
 
-impl<T, const N: usize> WindowGen<T, [T; N], ()> for Barthann
+impl<T, N> WindowGen<T, N> for Barthann
 where
-    T: Float + FloatConst
+    T: ComplexFloat,
+    N: LengthValue
 {
-    type Output = [T; N];
+    type Output = impl Bulk<Item = T>;
 
-    fn window_gen(&self, (): (), r: WindowRange) -> Self::Output
+    fn window_gen(&self, numtaps: N, range: WindowRange) -> Self::Output
     {
-        if N <= 1
-        {
-            return [T::one(); N]
-        }
-
-        let m = match r
-        {
-            WindowRange::Symmetric => N - 1,
-            WindowRange::Periodic => N,
-        };
-
-        ArrayOps::fill(|i| {
-            let p = i as f64/m as f64 - 0.5;
-            let g = 0.62 - 0.48*p.abs() + 0.38*(TAU*p).cos();
-            T::from(g).unwrap()
-        })
-    }
-}
-impl<T> WindowGen<T, Vec<T>, usize> for Barthann
-where
-    T: Float + FloatConst
-{
-    type Output = Vec<T>;
-
-    fn window_gen(&self, n: usize, r: WindowRange) -> Self::Output
-    {
-        if n <= 1
-        {
-            return vec![T::one(); n]
-        }
-
-        let m = match r
+        let mut i = 0;
+        let n = length::value::len(numtaps);
+        let m = match range
         {
             WindowRange::Symmetric => n - 1,
             WindowRange::Periodic => n,
         };
-
-        (0..n).map(|i| {
+        bulks::repeat_n_with(|| {
             let p = i as f64/m as f64 - 0.5;
             let g = 0.62 - 0.48*p.abs() + 0.38*(TAU*p).cos();
+            i += 1;
             T::from(g).unwrap()
-        }).collect()
+        }, numtaps)
     }
 }
 
@@ -65,10 +38,9 @@ mod test
 {
     use core::f64::consts::{PI, TAU};
 
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
 
-    use crate::{plot, gen::window::{WindowGen, WindowRange}, analysis::FreqZ, systems::Tf};
+    use crate::{plot, generators::window::{WindowGen, WindowRange}, analysis::FreqZ, systems::Tf};
 
     use super::Barthann;
 

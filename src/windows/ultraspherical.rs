@@ -6,7 +6,7 @@ use num::{traits::FloatConst, Complex, Float, NumCast};
 
 
 
-use crate::gen::window::{WindowGen, WindowRange};
+use crate::generators::window::{WindowGen, WindowRange};
 
 pub struct Ultraspherical<T>
 where

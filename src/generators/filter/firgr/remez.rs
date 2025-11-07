@@ -3,7 +3,7 @@ use core::ops::{AddAssign, DivAssign, MulAssign};
 
 use num::{traits::FloatConst, Float, NumCast};
 
-use crate::gen::filter::{FirGrError, FilterClassType};
+use crate::generators::filter::{FirGrError, FilterClassType};
 
 pub fn pre_remez<T, const B: usize>(
     numtaps: usize,

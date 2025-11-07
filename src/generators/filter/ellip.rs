@@ -245,7 +245,7 @@ mod test
     {
         let fs = 1000.0;
 
-        let (n, wp, _ws, rp, rs, t) = crate::gen::filter::ellipord(
+        let (n, wp, _ws, rp, rs, t) = crate::generators::filter::ellipord(
             [40.0],
             [150.0],
             3.0,
