@@ -1,7 +1,7 @@
 moddef::moddef!(
     flat(pub) mod {
         barthann,
-        //blackman_harris,
+        blackman_harris,
         //blackman_nuttall,
         //blackman,
         //bohman,

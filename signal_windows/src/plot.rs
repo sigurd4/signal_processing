@@ -3,7 +3,6 @@ use plotters::prelude::*;
 
 type T = f64;
 
-const CLAMP: T = 200.0;
 const PLOT_RES: (u32, u32) = (1024, 760);
 const PLOT_CAPTION_FONT: (&str, u32) = ("sans", 20);
 const PLOT_MARGIN: u32 = 5;

@@ -1,18 +1,15 @@
 use core::f64::consts::TAU;
 
-use array_trait::length::{self, LengthValue};
-use bulks::{Bulk, Map};
-use num_complex::ComplexFloat;
-use num_traits::NumCast;
+use num_traits::{Float, FloatConst, NumCast};
 
-use crate::{Shape, Window, WindowFn};
+use crate::WindowFn;
 
 #[derive(Clone, Copy)]
 pub struct Barthann;
 
 impl<T> WindowFn<T> for Barthann
 where
-    T: ComplexFloat
+    T: Float + FloatConst
 {
     type Functor = impl Fn(usize) -> T;
 
@@ -29,10 +26,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use bulks::*;
-    use linspace::Linspace;
-
-    use crate::{Shape, Window, plot, tests};
+    use crate::tests;
 
     use super::Barthann;
 
