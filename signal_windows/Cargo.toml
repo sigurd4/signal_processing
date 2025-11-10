@@ -1,0 +1,20 @@
+[package]
+name = "signal_windows"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = ["std"]
+std = ["alloc", "num-complex/std", "num-traits/std"]
+alloc = ["bulks/alloc", "array_trait/alloc"]
+
+[dependencies]
+moddef = "0.3.0"
+bulks = { version = "0.3.0", default-features = false }
+array_trait = { version = "1.1.12", default-features = false, features = ["length"] }
+num-complex = { version = "0.4.6", default-features = false }
+num-traits = { version = "0.2.19", default-features = false }
+
+[dev-dependencies]
+linspace = "0.2.4"
+plotters = "0.3.7"

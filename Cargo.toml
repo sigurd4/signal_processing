@@ -2,5 +2,5 @@
 resolver = "3"
 members = [
     #"signal_processing",
-    "signal_processing_windows"
+    "signal_windows"
 ]
