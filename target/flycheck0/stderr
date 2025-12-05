@@ -1,7 +1,90 @@
-   0.151523996s  INFO prepare_target{force=false package_id=signal_windows v0.1.0 (/home/sigurd/Code/rust/sss/signal_processing/signal_windows) target="signal_windows"}: cargo::core::compiler::fingerprint: stale: changed "/home/sigurd/Code/rust/sss/signal_processing/signal_windows/src/plot.rs"
-   0.151543578s  INFO prepare_target{force=false package_id=signal_windows v0.1.0 (/home/sigurd/Code/rust/sss/signal_processing/signal_windows) target="signal_windows"}: cargo::core::compiler::fingerprint:           (vs) "/home/sigurd/Code/rust/sss/signal_processing/target/debug/.fingerprint/signal_windows-ce21de3613e5934d/dep-test-lib-signal_windows"
-   0.151551033s  INFO prepare_target{force=false package_id=signal_windows v0.1.0 (/home/sigurd/Code/rust/sss/signal_processing/signal_windows) target="signal_windows"}: cargo::core::compiler::fingerprint:                FileTime { seconds: 1762744644, nanos: 467707350 } < FileTime { seconds: 1762744667, nanos: 875093578 }
-   0.151659560s  INFO prepare_target{force=false package_id=signal_windows v0.1.0 (/home/sigurd/Code/rust/sss/signal_processing/signal_windows) target="signal_windows"}: cargo::core::compiler::fingerprint: fingerprint dirty for signal_windows v0.1.0 (/home/sigurd/Code/rust/sss/signal_processing/signal_windows)/Check { test: true }/TargetInner { name_inferred: true, ..: lib_target("signal_windows", ["lib"], "/home/sigurd/Code/rust/sss/signal_processing/signal_windows/src/lib.rs", Edition2024) }
-   0.151678766s  INFO prepare_target{force=false package_id=signal_windows v0.1.0 (/home/sigurd/Code/rust/sss/signal_processing/signal_windows) target="signal_windows"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleItem(ChangedFile { reference: "/home/sigurd/Code/rust/sss/signal_processing/target/debug/.fingerprint/signal_windows-ce21de3613e5934d/dep-test-lib-signal_windows", reference_mtime: FileTime { seconds: 1762744644, nanos: 467707350 }, stale: "/home/sigurd/Code/rust/sss/signal_processing/signal_windows/src/plot.rs", stale_mtime: FileTime { seconds: 1762744667, nanos: 875093578 } }))
-    Checking signal_windows v0.1.0 (/home/sigurd/Code/rust/sss/signal_processing/signal_windows)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.33s
+   0.066068431s  INFO prepare_target{force=false package_id=signal_dft v0.1.0 (/home/sigurd/Code/rust/signal_processing/signal_dft) target="signal_dft"}: cargo::core::compiler::fingerprint: fingerprint error for signal_dft v0.1.0 (/home/sigurd/Code/rust/signal_processing/signal_dft)/Check { test: false }/TargetInner { name_inferred: true, ..: lib_target("signal_dft", ["lib"], "/home/sigurd/Code/rust/signal_processing/signal_dft/src/lib.rs", Edition2024) }
+   0.066094372s  INFO prepare_target{force=false package_id=signal_dft v0.1.0 (/home/sigurd/Code/rust/signal_processing/signal_dft) target="signal_dft"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/sigurd/Code/rust/signal_processing/target/debug/.fingerprint/signal_dft-402c1a3c740cd9bf/lib-signal_dft`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/core/src/ops/function.rs:287:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/panicking.rs:582:40
+  16: std::panicking::catch_unwind
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/panicking.rs:545:19
+  17: std::panic::catch_unwind
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/panicking.rs:582:40
+  20: std::panicking::catch_unwind
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/panicking.rs:545:19
+  21: std::panic::catch_unwind
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/rt.rs:171:5
+  23: main
+  24: <unknown>
+  25: __libc_start_main
+  26: <unknown>
+   0.078854978s  INFO prepare_target{force=false package_id=signal_dft v0.1.0 (/home/sigurd/Code/rust/signal_processing/signal_dft) target="signal_dft"}: cargo::core::compiler::fingerprint: fingerprint error for signal_dft v0.1.0 (/home/sigurd/Code/rust/signal_processing/signal_dft)/Check { test: true }/TargetInner { name_inferred: true, ..: lib_target("signal_dft", ["lib"], "/home/sigurd/Code/rust/signal_processing/signal_dft/src/lib.rs", Edition2024) }
+   0.078884629s  INFO prepare_target{force=false package_id=signal_dft v0.1.0 (/home/sigurd/Code/rust/signal_processing/signal_dft) target="signal_dft"}: cargo::core::compiler::fingerprint:     err: failed to read `/home/sigurd/Code/rust/signal_processing/target/debug/.fingerprint/signal_dft-3e85bd36a9a67b29/test-lib-signal_dft`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: cargo_util::paths::read_bytes
+   1: cargo_util::paths::read
+   2: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   3: cargo::core::compiler::fingerprint::prepare_target
+   4: cargo::core::compiler::compile
+   5: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   6: cargo::ops::cargo_compile::compile_ws
+   7: cargo::ops::cargo_compile::compile_with_exec
+   8: cargo::ops::cargo_compile::compile
+   9: cargo::commands::check::exec
+  10: <cargo::cli::Exec>::exec
+  11: cargo::main
+  12: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  13: std::rt::lang_start::<()>::{closure#0}
+  14: core::ops::function::impls::<impl core::ops::function::FnOnce<A> for &F>::call_once
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/core/src/ops/function.rs:287:21
+  15: std::panicking::catch_unwind::do_call
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/panicking.rs:582:40
+  16: std::panicking::catch_unwind
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/panicking.rs:545:19
+  17: std::panic::catch_unwind
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/panic.rs:359:14
+  18: std::rt::lang_start_internal::{{closure}}
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/rt.rs:175:24
+  19: std::panicking::catch_unwind::do_call
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/panicking.rs:582:40
+  20: std::panicking::catch_unwind
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/panicking.rs:545:19
+  21: std::panic::catch_unwind
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/panic.rs:359:14
+  22: std::rt::lang_start_internal
+             at /rustc/01867557cd7dbe256a031a7b8e28d05daecd75ab/library/std/src/rt.rs:171:5
+  23: main
+  24: <unknown>
+  25: __libc_start_main
+  26: <unknown>
+    Checking signal_dft v0.1.0 (/home/sigurd/Code/rust/signal_processing/signal_dft)
+error: could not compile `signal_dft` (lib) due to 3 previous errors; 4 warnings emitted
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `signal_dft` (lib test) due to 3 previous errors; 5 warnings emitted

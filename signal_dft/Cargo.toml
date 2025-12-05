@@ -1,10 +1,11 @@
 [package]
-name = "signal_windows"
+name = "signal_dft"
 version = "0.1.0"
 edition = "2024"
 
 [features]
-default = ["std"]
+default = ["libm"]
+libm = ["num-complex/libm", "num-traits/libm"]
 std = ["alloc", "num-complex/std", "num-traits/std"]
 alloc = ["bulks/alloc", "array_trait/alloc"]
 

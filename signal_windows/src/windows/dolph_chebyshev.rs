@@ -1,10 +1,8 @@
-use core::ops::{AddAssign, MulAssign};
+use num_traits::{Float, FloatConst};
 
-use array_math::{ArrayMath, ArrayOps, SliceMath};
-use num::{traits::FloatConst, Complex, Float};
+use crate::WindowFn;
 
-use crate::generators::window::{WindowGen, WindowRange};
-
+#[derive(Clone, Copy)]
 pub struct DolphChebyshev<T>
 where
     T: Float
@@ -12,26 +10,18 @@ where
     pub alpha: T
 }
 
-impl<T, const N: usize> WindowGen<T, [T; N], ()> for DolphChebyshev<T>
+impl<T> WindowFn<T> for DolphChebyshev<T>
 where
-    T: Float + FloatConst,
-    Complex<T>: AddAssign + MulAssign
+    T: Float + FloatConst
 {
-    type Output = [T; N];
+    type Functor<S> = impl Fn(usize) -> T
+    where
+        S: FnOnce<(), Output: DerefMut<Target = [T]>>;
 
-    fn window_gen(&self, (): (), r: WindowRange) -> Self::Output
+    fn window_fn<S>(self, len: usize, _scrach_space: S) -> Self::Functor<S>
+    where
+        S: FnOnce<(), Output: DerefMut<Target = [T]>>
     {
-        if N <= 1
-        {
-            return [T::one(); N]
-        }
-
-        let m = match r
-        {
-            WindowRange::Symmetric => N - 1,
-            WindowRange::Periodic => N,
-        };
-
         let one = T::one();
         let two = one + one;
         let ten = T::from(10u8).unwrap();
@@ -60,7 +50,7 @@ where
             let x = beta*(T::PI()*i/(l + one)).cos();
             (t(x)).into()
         });
-        if m % 2 == 0
+        let wr = if m % 2 == 0
         {
             w.fft();
             let mut wr = [T::zero(); _];
@@ -96,94 +86,24 @@ where
                 }
             }
             wr
-        }
+        };
+        |i| wr[i]
     }
 }
-impl<T> WindowGen<T, Vec<T>, usize> for DolphChebyshev<T>
-where
-    T: Float + FloatConst,
-    Complex<T>: AddAssign + MulAssign
+
+#[cfg(test)]
+mod test
 {
-    type Output = Vec<T>;
+    use crate::tests;
 
-    fn window_gen(&self, n: usize, r: WindowRange) -> Self::Output
+    use super::DolphChebyshev;
+
+    #[test]
+    fn test()
     {
-        if n <= 1
-        {
-            return vec![T::one(); n]
-        }
-
-        let m = match r
-        {
-            WindowRange::Symmetric => n - 1,
-            WindowRange::Periodic => n,
-        };
-
-        let one = T::one();
-        let two = one + one;
-        let ten = T::from(10u8).unwrap();
-        let l = T::from(m).unwrap();
-        let t = |x: T| {
-            if x <= -one
-            {
-                let s = one - two*T::from(m % 2).unwrap();
-                s*(l*(-x).acosh()).cosh()
-            }
-            else if x >= one
-            {
-                (l*x.acosh()).cosh()
-            }
-            else
-            {
-                (l*x.acos()).cos()
-            }
-        };
-
-        let gamma = ten.powf(-self.alpha);
-        let beta = (gamma.recip().acosh()/l).cosh();
-
-        let mut w: Vec<Complex<T>> = (0..n).map(|i| {
-            let i = T::from(i).unwrap();
-            let x = beta*(T::PI()*i/(l + one)).cos();
-            (t(x)).into()
-        }).collect();
-        if m % 2 == 0
-        {
-            w.fft();
-            let mut wr = vec![T::zero(); n];
-            let mm = (m + 2)/2;
-            for k in 0..mm
-            {
-                let ww = (w[k]/w[0]).re;
-                wr[mm - k - 1] = ww;
-                if k + m + 1 - mm < n
-                {
-                    wr[k + m + 1 - mm] = ww;
-                }
-            }
-            wr
-        }
-        else
-        {
-            for (k, w) in w.iter_mut()
-                .enumerate()
-            {
-                *w *= Complex::cis(T::PI()*T::from(k).unwrap()/(l + one))
-            }
-            w.fft();
-            let mut wr = vec![T::zero(); n];
-            let mm = (m + 1)/2 + 1;
-            for k in 1..mm
-            {
-                let ww = (w[k]/w[1]).re;
-                wr[mm - k - 1] = ww;
-                if k + m + 1 - mm < n
-                {
-                    wr[k + m + 1 - mm] = ww;
-                }
-            }
-            wr
-        }
+        tests::plot_window(DolphChebyshev {
+            alpha: 5.0
+        })
     }
 }
 

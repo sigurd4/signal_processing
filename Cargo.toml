@@ -1,6 +1,16 @@
 [workspace]
 resolver = "3"
-members = [
+members = ["signal_dft"
     #"signal_processing",
-    "signal_windows"
+    #"signal_windows"
 ]
+
+[workspace.dependencies]
+moddef = "0.3.0"
+bulks = { version = "0.3.2", default-features = false }
+array_trait = { version = "1.1.14", default-features = false, features = ["length"] }
+num-complex = { version = "0.4.6", default-features = false }
+num-traits = { version = "0.2.19", default-features = false }
+
+linspace = "0.2.5"
+plotters = "0.3.7"

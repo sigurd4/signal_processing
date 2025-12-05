@@ -1,97 +1,41 @@
+use array_trait::length::Length;
+use num_traits::{Float, FloatConst};
 
+use crate::WindowFn;
 
-use array_math::ArrayOps;
-use num::{traits::FloatConst, Float};
-
-use crate::generators::window::{WindowGen, WindowRange};
-
+#[derive(Clone, Copy)]
 pub struct Blackman;
 
-impl<T, const N: usize> WindowGen<T, [T; N], ()> for Blackman
+impl<L, T> WindowFn<L> for Blackman
 where
+    L: Length<Elem = T> + ?Sized,
     T: Float + FloatConst
 {
-    type Output = [T; N];
+    type Functor = impl Fn(usize) -> T;
 
-    fn window_gen(&self, (): (), r: WindowRange) -> Self::Output
+    fn window_fn(self, len: usize) -> Self::Functor
     {
-        if N <= 1
-        {
-            return [T::one(); N]
-        }
-        
-        let m = match r
-        {
-            WindowRange::Symmetric => N - 1,
-            WindowRange::Periodic => N,
-        };
-
         let a0 = T::from(7938.0/18608.0).unwrap();
         let a1 = T::from(9240.0/18608.0).unwrap();
         let a2 = T::from(1430.0/18608.0).unwrap();
-        ArrayOps::fill(|i| {
-            let z1 = (T::TAU()*T::from(i).unwrap()/T::from(m).unwrap()).cos();
-            let z2 = (T::TAU()*T::from(i*2).unwrap()/T::from(m).unwrap()).cos();
+        move |i| {
+            let z1 = (T::TAU()*T::from(i).unwrap()/T::from(len).unwrap()).cos();
+            let z2 = (T::TAU()*T::from(i*2).unwrap()/T::from(len).unwrap()).cos();
             a0 - a1*z1 + a2*z2
-        })
-    }
-}
-impl<T> WindowGen<T, Vec<T>, usize> for Blackman
-where
-    T: Float + FloatConst
-{
-    type Output = Vec<T>;
-
-    fn window_gen(&self, n: usize, r: WindowRange) -> Self::Output
-    {
-        if n <= 1
-        {
-            return vec![T::one(); n]
         }
-        
-        let m = match r
-        {
-            WindowRange::Symmetric => n - 1,
-            WindowRange::Periodic => n,
-        };
-
-        let a0 = T::from(7938.0/18608.0).unwrap();
-        let a1 = T::from(9240.0/18608.0).unwrap();
-        let a2 = T::from(1430.0/18608.0).unwrap();
-        (0..n).map(|i| {
-            let z1 = (T::TAU()*T::from(i).unwrap()/T::from(m).unwrap()).cos();
-            let z2 = (T::TAU()*T::from(i*2).unwrap()/T::from(m).unwrap()).cos();
-            a0 - a1*z1 + a2*z2
-        }).collect()
     }
 }
 
 #[cfg(test)]
 mod test
 {
-    use core::f64::consts::{PI, TAU};
-
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
-
-    use crate::{plot, gen::window::{WindowGen, WindowRange}, analysis::FreqZ, systems::Tf};
+    use crate::tests;
 
     use super::Blackman;
 
     #[test]
     fn test()
     {
-        const N: usize = 1024;
-        let w: [_; N/2] = Blackman.window_gen((), WindowRange::Symmetric);
-        let n = (0.0..1.0).linspace_array();
-
-        plot::plot_curves("g(n/N)", "plots/windows/g_n_blackman.png", [&n.zip(w)]).unwrap();
-
-        let (mut w_f, mut omega): ([_; N], _) = Tf::new(w, ()).freqz((), false);
-        omega.map_assign(|omega| (omega + PI) % TAU - PI);
-        w_f.rotate_right(N/2);
-        omega.rotate_right(N/2);
-        
-        plot::plot_curves("G(e^jw)", "plots/windows/g_f_blackman.png", [&omega.zip(w_f.map(|w| 20.0*w.norm().log10()))]).unwrap();
+        tests::plot_window(Blackman)
     }
 }

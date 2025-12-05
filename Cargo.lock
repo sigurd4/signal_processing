@@ -19,9 +19,9 @@ dependencies = [
 
 [[package]]
 name = "array_trait"
-version = "1.1.12"
+version = "1.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19e3911d207466e2916db79513686af2ba8c4c9e5490f9e2595cb67d34135f25"
+checksum = "098c048ce5ad50b5b20042f27274e3daad9a5865d242c3a1b0d929c0d5d0533e"
 dependencies = [
  "moddef",
  "slice_trait",
@@ -47,9 +47,9 @@ checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 
 [[package]]
 name = "bulks"
-version = "0.3.0"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc74b93939f6ae9bf8106c398fc1c000d232387af6f20d13fe05ca98a30d531f"
+checksum = "86fe74792975eb4b7df8bef451f5d42e24b06e73815999fabe6f8d23900964c6"
 dependencies = [
  "array_trait",
  "currying",
@@ -297,7 +297,7 @@ checksum = "1a5c6c585bc94aaf2c7b51dd4c2ba22680844aba4c687be581871a6f518c5742"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.109",
+ "syn 2.0.110",
 ]
 
 [[package]]
@@ -415,6 +415,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "libm"
+version = "0.2.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f9fbbcab51052fe104eb5e5d351cf728d30a5be1fe14d9be8a3b097481fb97de"
+
+[[package]]
 name = "libredox"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -426,9 +432,9 @@ dependencies = [
 
 [[package]]
 name = "linspace"
-version = "0.2.4"
+version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26bc3bb4dd1d64d7c7199cfbad73bd108dd911af9fa7e1a4dc12d1c0882417fc"
+checksum = "863f1733efb84e2eb0179f40bad48720f944528dd1c12082538bb7648dd30f07"
 dependencies = [
  "moddef",
  "numscale",
@@ -473,13 +479,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
 dependencies = [
  "autocfg",
+ "libm",
 ]
 
 [[package]]
 name = "numscale"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d8863a34b48c47097d0f184a00f9077e96eb99728b28a475b37dbac6b84237c"
+checksum = "2e2e81933a41dabb70ad7dc59a5c7e8e439a526f3574e3449cb44ddb5a1ebb23"
 
 [[package]]
 name = "once_cell"
@@ -643,7 +650,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
-name = "signal_windows"
+name = "signal_dft"
 version = "0.1.0"
 dependencies = [
  "array_trait",
@@ -663,9 +670,9 @@ checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
 
 [[package]]
 name = "slice_trait"
-version = "0.3.7"
+version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39f1260867452a8395c7ee3d9cc0890446b1b35f60b4e4ccc364b6dd80432d2f"
+checksum = "9009e61d79ed0aac02cbde5b07d796585a150ea997f2383665ef62008db15057"
 dependencies = [
  "moddef",
 ]
@@ -683,9 +690,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.109"
+version = "2.0.110"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f17c7e013e88258aa9543dcbe81aca68a667a9ac37cd69c9fbc07858bfe0e2f"
+checksum = "a99801b5bd34ede4cf3fc688c5919368fea4e4814a4664359503e6015b280aea"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -709,7 +716,7 @@ checksum = "3ff15c8ecd7de3849db632e14d18d2571fa09dfc5ed93479bc4485c7a517c913"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.109",
+ "syn 2.0.110",
 ]
 
 [[package]]
@@ -797,7 +804,7 @@ dependencies = [
  "bumpalo",
  "proc-macro2",
  "quote",
- "syn 2.0.109",
+ "syn 2.0.110",
  "wasm-bindgen-shared",
 ]
 
@@ -822,9 +829,9 @@ dependencies = [
 
 [[package]]
 name = "weezl"
-version = "0.1.11"
+version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "009936b22a61d342859b5f0ea64681cbb35a358ab548e2a44a8cf0dac2d980b8"
+checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 
 [[package]]
 name = "winapi"
@@ -878,7 +885,7 @@ checksum = "053e2e040ab57b9dc951b72c264860db7eb3b0200ba345b4e4c3b14f67855ddf"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.109",
+ "syn 2.0.110",
 ]
 
 [[package]]
@@ -889,7 +896,7 @@ checksum = "3f316c4a2570ba26bbec722032c4099d8c8bc095efccdc15688708623367e358"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.109",
+ "syn 2.0.110",
 ]
 
 [[package]]
