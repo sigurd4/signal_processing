@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
-members = ["signal_dft"
+members = [
+    "signal_fourier"
     #"signal_processing",
     #"signal_windows"
 ]

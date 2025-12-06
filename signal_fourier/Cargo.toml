@@ -1,5 +1,5 @@
 [package]
-name = "signal_dft"
+name = "signal_fourier"
 version = "0.1.0"
 edition = "2024"
 
