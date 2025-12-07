@@ -19,9 +19,9 @@ dependencies = [
 
 [[package]]
 name = "array_trait"
-version = "1.1.14"
+version = "1.1.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "098c048ce5ad50b5b20042f27274e3daad9a5865d242c3a1b0d929c0d5d0533e"
+checksum = "1c7b6277d53ffd7bbf93bb7f94c3387c8dfdf75c8b626cb44c28133a5a09bfce"
 dependencies = [
  "moddef",
  "slice_trait",
@@ -47,13 +47,14 @@ checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 
 [[package]]
 name = "bulks"
-version = "0.3.2"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86fe74792975eb4b7df8bef451f5d42e24b06e73815999fabe6f8d23900964c6"
+checksum = "5003a44ae79a65bfa412218cbd5668b9e40ef742d218f65097135606306006ed"
 dependencies = [
  "array_trait",
  "currying",
  "moddef",
+ "thiserror",
 ]
 
 [[package]]
@@ -432,9 +433,9 @@ dependencies = [
 
 [[package]]
 name = "linspace"
-version = "0.2.5"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "863f1733efb84e2eb0179f40bad48720f944528dd1c12082538bb7648dd30f07"
+checksum = "7d98ba445b32ceb08624188b3fc7dcf8745d7b108608d723643f2a89479d5411"
 dependencies = [
  "moddef",
  "numscale",
@@ -650,7 +651,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
-name = "signal_dft"
+name = "signal_fourier"
 version = "0.1.0"
 dependencies = [
  "array_trait",
@@ -670,9 +671,9 @@ checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
 
 [[package]]
 name = "slice_trait"
-version = "0.3.9"
+version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9009e61d79ed0aac02cbde5b07d796585a150ea997f2383665ef62008db15057"
+checksum = "608bcbd189c663ed8fd2fcb85ee958ce8f7688c488cb5150ad9219b9e7b67d0a"
 dependencies = [
  "moddef",
 ]
