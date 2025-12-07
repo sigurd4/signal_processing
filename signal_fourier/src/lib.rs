@@ -5,7 +5,9 @@
 #![feature(try_trait_v2)]
 #![feature(const_try)]
 #![feature(trusted_random_access)]
+#![feature(maybe_uninit_uninit_array_transpose)]
 #![feature(const_destruct)]
+#![feature(macro_metavar_expr_concat)]
 #![feature(core_intrinsics)]
 #![feature(specialization)]
 
@@ -16,13 +18,25 @@ compile_error!("Either the \"std\" or the \"libm\" feature must be enabled to co
 
 moddef::moddef!(
     pub mod {
-        //fft,
+        fft,
         permute
     },
     flat(pub) mod {
-        //scratch_space
+        scratch_space
     }
 );
+
+macro_rules! temp {
+    ($temp:ident for $bulk:expr) => {
+        let mut ${concat($temp, _owned)} = None;
+        let $temp = match $temp.take()
+        {
+            Some($temp) => $temp,
+            None => ${concat($temp, _owned)}.insert($bulk.scratch_space()).borrow_mut()
+        };
+    };
+}
+use temp as temp;
 
 pub const trait FourierBulk: ~const Bulk
 {

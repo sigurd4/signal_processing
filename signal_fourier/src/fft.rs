@@ -1,12 +1,13 @@
 use core::{borrow::BorrowMut, mem::MaybeUninit, ops::DerefMut};
 use std::{f64::consts::TAU, iter::Sum, ops::{AddAssign, MulAssign}};
 
-use array_trait::length::Nearest;
-use bulks::{Bulk, IntoBulk};
+use bulks::{AsBulk, Bulk, InplaceBulk, IntoBulk, RandomAccessBulk};
 use num_complex::{Complex, ComplexFloat};
 use num_traits::{Float, NumCast, One, Zero};
 
-pub fn fft_unscaled<T, const I: bool>(slice: &mut [T], mut temp: Option<&mut [T]>)
+use crate::{ScratchBulk, ScratchSpace, temp};
+
+/*pub fn fft_unscaled<T, const I: bool>(slice: &mut [T], mut temp: Option<&mut [T]>)
 where
     T: ComplexFloat<Real: Float> + MulAssign + AddAssign + Sum,
     Complex<T::Real>: Into<T>
@@ -693,42 +694,61 @@ where
         return true;
     }
     false
+}*/
+
+pub fn dft_unscaled<B, T, const I: bool>(mut bulk: B, temp: &mut Option<&mut [MaybeUninit<Complex<T>>]>) -> B
+where
+    for<'a> B: InplaceBulk<'a, Item = Complex<T>, ItemMut = &'a mut Complex<T>> + ScratchBulk<Complex<T>>,
+    T: Float,
+    Complex<T>: AddAssign + MulAssign
+{
+    let len = bulk.len();
+
+    temp!(temp for bulk);
+
+    let wn = Complex::cis(<T as NumCast>::from(if I {TAU} else {-TAU}/len as f64).unwrap()).into();
+    let mut wnk = Complex::one();
+
+    bulk.each_mut()
+        .zip(temp.bulk_mut())
+        .for_each(|(src, dst)| { dst.write(core::mem::replace(src, Zero::zero())); });
+        
+    bulk.each_mut()
+        .for_each(|y| {
+            let mut wnki = Complex::one();
+            (*temp).bulk()
+                .for_each(|x| {
+                    let x = unsafe {
+                        MaybeUninit::assume_init(*x)
+                    };
+                    *y += x*wnki;
+                    wnki *= wnk;
+                });
+            wnk *= wn;
+        });
+
+    bulk
 }
 
-pub fn dft_unscaled<T, const I: bool>(slice: &mut [T], temp: &mut Option<&mut [T]>)
-where
-    T: ComplexFloat<Real: Float> + MulAssign + AddAssign,
-    Complex<T::Real>: Into<T>
+#[cfg(test)]
+mod test
 {
-    let len = slice.len();
+    use bulks::{Bulk, IntoBulk};
+    use num_complex::Complex;
 
-    let mut tempvec;
-    let temp = if let Some(temp) = temp.take()
+    use crate::fft::dft_unscaled;
+
+    #[test]
+    fn it_works()
     {
-        temp
-    }
-    else
-    {
-        tempvec = Some(vec![T::zero(); len]);
-        tempvec.as_mut().unwrap()
-    };
+        let a = dft_unscaled::<_, _, false>(
+            [1, 2, 3, 4].into_bulk()
+                .map(|x| Complex::from(x as f32))
+                .collect_array()
+                .into_bulk(),
+            &mut None
+        ).collect_array();
 
-    let wn = Complex::cis(<T::Real as NumCast>::from(if I {TAU} else {-TAU}/len as f64).unwrap()).into();
-    let mut wnk = T::one();
-
-    unsafe {
-        std::ptr::swap_nonoverlapping(temp.as_mut_ptr(), slice.as_mut_ptr(), len);
-    }
-    for k in 0..len
-    {
-        let mut wnki = T::one();
-        slice[k] = Zero::zero();
-        for i in 0..len
-        {
-            slice[k] += temp[i]*wnki;
-            wnki *= wnk;
-        }
-
-        wnk *= wn;
+        println!("{a:?}")
     }
 }
