@@ -1,61 +1,36 @@
-use core::{borrow::BorrowMut, marker::PhantomData, mem::MaybeUninit};
+use core::borrow::BorrowMut;
 
-use array_trait::{length, same::Same};
-use bulks::{AsBulk, Bulk, IntoBulk, StaticBulk};
+use array_trait::{length::{self, LengthValue}, same::Same};
+use bulks::{AsBulk, IntoBulk};
 
-pub type ScratchSpace<I, A = <I as IntoIterator>::Item> = <I as ScratchBulk<A>>::ScratchSpace;
-
-pub const trait ScratchBulk<A = <Self as IntoIterator>::Item>: ~const Bulk
-{
-    type ScratchSpace: ~const BorrowMut<[MaybeUninit<A>]> + Sized + IntoBulk<Item = MaybeUninit<A>> + AsBulk;
-
-    fn scratch_space(&self) -> Self::ScratchSpace;
-}
-impl<I, T> ScratchBulk<T> for I
+pub const trait ScratchLength<T = <Self as IntoIterator>::Item>: LengthValue
 where
-    I: Bulk
+    T: Copy
 {
-    default type ScratchSpace = Vec<MaybeUninit<T>>;
+    type ScratchSpace: ~const BorrowMut<[T]> + Sized + IntoBulk<Item = T> + AsBulk;
 
-    default fn scratch_space(&self) -> Self::ScratchSpace
-    {
-        Box::<[T]>::new_uninit_slice(self.len()).into_vec().same().unwrap()
-    }
+    fn scratch_space(len: Self, fill: T) -> Self::ScratchSpace;
 }
-impl<I, T, const N: usize> const ScratchBulk<T> for I
+impl<I, T> ScratchLength<T> for I
 where
-    I: ~const Bulk + StaticBulk<Array<()> = [(); N]>
+    I: LengthValue,
+    T: Copy
 {
-    type ScratchSpace = [MaybeUninit<T>; N];
+    default type ScratchSpace = Vec<T>;
 
-    fn scratch_space(&self) -> Self::ScratchSpace
+    default fn scratch_space(len: Self, fill: T) -> Self::ScratchSpace
     {
-        MaybeUninit::uninit().transpose()
+        vec![fill; length::value::len(len)].same().ok().unwrap()
     }
 }
-
-struct Uniniter<T>(PhantomData<T>);
-
-impl<T> const FnOnce<()> for Uniniter<T>
+impl<T, const N: usize> const ScratchLength<T> for [(); N]
+where
+    T: Copy
 {
-    type Output = MaybeUninit<T>;
+    type ScratchSpace = [T; N];
 
-    extern "rust-call" fn call_once(self, (): ()) -> Self::Output
+    fn scratch_space(_len: Self, fill: T) -> Self::ScratchSpace
     {
-        MaybeUninit::uninit()
-    }
-}
-impl<T> const FnMut<()> for Uniniter<T>
-{
-    extern "rust-call" fn call_mut(&mut self, (): ()) -> Self::Output
-    {
-        MaybeUninit::uninit()
-    }
-}
-impl<T> const Fn<()> for Uniniter<T>
-{
-    extern "rust-call" fn call(&self, (): ()) -> Self::Output
-    {
-        MaybeUninit::uninit()
+        [fill; _]
     }
 }

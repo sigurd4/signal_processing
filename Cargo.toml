@@ -1,17 +1,20 @@
 [workspace]
 resolver = "3"
-members = [
+members = ["signal_fir_design",
     "signal_fourier"
     #"signal_processing",
     #"signal_windows"
 ]
 
 [workspace.dependencies]
+signal_fourier = { path = "signal_fourier" }
+signal_windows = { path = "signal_windows" }
+
 moddef = "0.3.0"
-bulks = { version = "0.4.1", default-features = false }
-array_trait = { version = "1.1.17", default-features = false, features = ["length"] }
-num-complex = { version = "0.4.6", default-features = false }
-num-traits = { version = "0.2.19", default-features = false }
+bulks = { version = "0.6.0", default-features = false, features = ["alloc"] }
+array_trait = { version = "1.1.20", default-features = false, features = ["alloc", "length"] }
+num-complex = { version = "0.4.6", default-features = false, features = ["std"] }
+num-traits = { version = "0.2.19", default-features = false, features = ["std"] }
 
 linspace = "0.2.7"
 plotters = "0.3.7"

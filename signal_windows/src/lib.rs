@@ -219,11 +219,11 @@ where
     type Left = bulks::Map<<bulks::Enumerate<I> as SplitBulk<L>>::Left, impl ~const Fn((usize, I::Item)) -> U>;
     type Right = bulks::Map<<bulks::Enumerate<I> as SplitBulk<L>>::Right, impl ~const Fn((usize, I::Item)) -> U>;
 
-    fn split_at(self, n: L) -> (Self::Left, Self::Right)
+    fn split_at(bulk: Self, n: L) -> (Self::Left, Self::Right)
     where
         Self: Sized
     {
-        let (bulk, functor) = self.functor(identity);
+        let (bulk, functor) = bulk.functor(identity);
         let (left, right) = bulk.enumerate().split_at(n);
         (
             left.map(functor.clone()),

@@ -1,0 +1,45 @@
+name: Build-stable-all-features
+on:
+  schedule:
+    - cron: '29 15 * * *'
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+env:
+  RUST_BACKTRACE: 1
+  RUST_LOG: "cargo_tarpaulin=trace,llvm_profparser=trace"
+jobs:
+  check:
+    name: "Check"
+    runs-on: "ubuntu-latest"
+    strategy:
+      fail-fast: false
+      matrix:
+        rust:
+        - stable
+        #- beta
+        #- nightly
+    steps:
+    - uses: "actions/checkout@v3"
+      name: "Checkout"
+    - name: Install packages
+      run: sudo apt-get update && sudo apt -y install libfontconfig1-dev libgsl-dev
+    - uses: "actions-rs/toolchain@v1"
+      with:
+        profile: "minimal"
+        toolchain: "${{ matrix.rust }}"
+        override: true
+        name: "Install Rust ${{ matrix.rust }}"
+    - name: cache
+      uses: "Swatinem/rust-cache@v2"
+    - uses: "actions-rs/cargo@v1"
+      with:
+        command: "check"
+      name: "Run `cargo check`"
+    - uses: "taiki-e/install-action@v2"
+      with:
+        tool: "cargo-hack"
+      name: "Install cargo-hack"
+    - run: "cargo hack check --each-feature --optional-deps --all-targets ${{ vars.CARGO_HACK_EACH_FEATURE_EXTRA_ARGS }}"
+      name: "Check all features with 'cargo-hack'"

@@ -19,9 +19,9 @@ dependencies = [
 
 [[package]]
 name = "array_trait"
-version = "1.1.17"
+version = "1.1.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c7b6277d53ffd7bbf93bb7f94c3387c8dfdf75c8b626cb44c28133a5a09bfce"
+checksum = "b03e7973f4e2f3da97f6ed138cb1ca0d52c43739aa5dd25db347b4320cd2d897"
 dependencies = [
  "moddef",
  "slice_trait",
@@ -47,9 +47,9 @@ checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 
 [[package]]
 name = "bulks"
-version = "0.4.1"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5003a44ae79a65bfa412218cbd5668b9e40ef742d218f65097135606306006ed"
+checksum = "dd3751426e5faf686d980d3b3977f40588580e4e4ef806c57f0fc8b82c737823"
 dependencies = [
  "array_trait",
  "currying",
@@ -651,7 +651,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
+name = "signal_fir_design"
+version = "0.1.0"
+dependencies = [
+ "array_trait",
+ "bulks",
+ "num-complex",
+ "num-traits",
+ "signal_windows",
+]
+
+[[package]]
 name = "signal_fourier"
+version = "0.1.0"
+dependencies = [
+ "array_trait",
+ "bulks",
+ "linspace",
+ "moddef",
+ "num-complex",
+ "num-traits",
+ "plotters",
+]
+
+[[package]]
+name = "signal_windows"
 version = "0.1.0"
 dependencies = [
  "array_trait",
@@ -671,9 +695,9 @@ checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
 
 [[package]]
 name = "slice_trait"
-version = "0.3.12"
+version = "0.3.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "608bcbd189c663ed8fd2fcb85ee958ce8f7688c488cb5150ad9219b9e7b67d0a"
+checksum = "c9061d4c2e37b0d1a8d45e47bd315a9f1cb77649e8ce857a7073617fd9f8a308"
 dependencies = [
  "moddef",
 ]
@@ -702,18 +726,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "2.0.17"
+version = "2.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f63587ca0f12b72a0600bcba1d40081f830876000bb46dd2337a3051618f4fc8"
+checksum = "4288b5bcbc7920c07a1149a35cf9590a2aa808e0bc1eafaade0b80947865fbc4"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "2.0.17"
+version = "2.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ff15c8ecd7de3849db632e14d18d2571fa09dfc5ed93479bc4485c7a517c913"
+checksum = "ebc4ee7f67670e9b64d05fa4253e753e016c6c95ff35b89b7941d6b856dec1d5"
 dependencies = [
  "proc-macro2",
  "quote",
