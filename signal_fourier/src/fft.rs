@@ -665,8 +665,8 @@ mod test
             .collect_array()
             .into_bulk();
 
-        bulk.fft_inplace();
-        bulk.ifft_inplace();
+        bulk.dft_inplace();
+        bulk.idft_inplace();
 
         let a = bulk.collect_array();
 
