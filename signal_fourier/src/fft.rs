@@ -1,12 +1,12 @@
-use core::{borrow::{Borrow, BorrowMut}, mem::MaybeUninit, ops::DerefMut};
-use std::{f64::consts::TAU, iter::Sum, ops::{AddAssign, MulAssign}};
+use core::borrow::{Borrow, BorrowMut};
+use std::{f64::consts::TAU};
 
-use array_trait::length::{self, Length, LengthValue, Value};
-use bulks::{AsBulk, Bulk, CollectNearest, CollectionAdapter, InplaceBulk, IntoBulk, RandomAccessBulk, RepeatN, RepeatNWith};
-use num_complex::{Complex, ComplexFloat};
+use array_trait::length::{self, LengthValue, Value};
+use bulks::{AsBulk, Bulk, CollectNearest, InplaceBulk};
+use num_complex::Complex;
 use num_traits::{Float, NumCast, One, Zero};
 
-use crate::{LengthAsBulk, MulAssignSpec, AddAssignSpec, ScratchLength, permute::Permute, temp, util::{self, Radix}};
+use crate::{permute::Permute, temp, util::{self, MulAssignSpec, AddAssignSpec, LengthAsBulk}};
 
 pub fn fft_unscaled<B, T, const I: bool>(bulk: &mut B, mut temp: Option<&mut [Complex<T>]>)
 where
@@ -23,27 +23,27 @@ where
         || fft_radix3_unscaled::<_, _, I>(bulk, &mut temp)
         || fft_radix5_unscaled::<_, _, I>(bulk, &mut temp)
         || fft_radix7_unscaled::<_, _, I>(bulk, &mut temp)
-        /*|| fft_radix_p_unscaled::<_, 11, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 13, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 17, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 19, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 23, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 29, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 31, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 37, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 41, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 43, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 47, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 53, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 59, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 61, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 67, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 71, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 73, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 79, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 83, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 89, I>(bulk, &mut temp)
-        || fft_radix_p_unscaled::<_, 97, I>(bulk, &mut temp)*/
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 11])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 13])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 17])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 19])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 23])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 29])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 31])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 37])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 41])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 43])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 47])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 53])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 59])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 61])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 67])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 71])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 73])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 79])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 83])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 89])
+        || fft_radix_p_unscaled::<_, _, _, I>(bulk, &mut temp, [(); 97])
         || fft_radix_n_sqrt_unscaled::<_, _, I>(bulk, &mut temp)
     )
     {
@@ -185,15 +185,15 @@ where
         let w3 = Complex::cis(<T as NumCast>::from(if I {TAU} else {-TAU}/P as f64).unwrap());
         let w3_p2 = w3*w3;
 
-        if util::is_power_of(len, P)
+        if util::is_power_of(len, [(); P])
         {
             // In-place FFT
 
-            slice.digit_rev_permute(P);
+            slice.digit_rev_permute([(); P]);
 
+            let mut m = P;
             for s in 0..length::value::len(len).ilog(P)
             {
-                let m = P.pow(s + 1);
                 let wm = Complex::cis(<T as NumCast>::from(if I {TAU} else {-TAU}/m as f64).unwrap());
                 for k in (0..length::value::len(len)).step_by(m)
                 {
@@ -213,6 +213,7 @@ where
                         w._mul_assign(wm);
                     }
                 }
+                m *= P
             }
             return true
         }
@@ -266,15 +267,15 @@ where
         let w5_p3 = w5_p2*w5;
         let w5_p4 = w5_p3*w5;
 
-        if util::is_power_of(len, P)
+        if util::is_power_of(len, [(); P])
         {
             // In-place FFT
 
-            slice.digit_rev_permute(P);
+            slice.digit_rev_permute([(); P]);
 
+            let mut m = P;
             for s in 0..length::value::len(len).ilog(P)
             {
-                let m = P.pow(s + 1);
                 let wm = Complex::cis(<T as NumCast>::from(if I {TAU} else {-TAU}/m as f64).unwrap());
                 for k in (0..length::value::len(len)).step_by(m)
                 {
@@ -298,6 +299,7 @@ where
                         w._mul_assign(wm);
                     }
                 }
+                m *= P
             }
             return true
         }
@@ -360,15 +362,15 @@ where
         let w7_p5 = w7_p4*w7;
         let w7_p6 = w7_p5*w7;
 
-        if util::is_power_of(len, P)
+        if util::is_power_of(len, [(); P])
         {
             // In-place FFT
 
-            slice.digit_rev_permute(P);
+            slice.digit_rev_permute([(); P]);
 
+            let mut m = P;
             for s in 0..length::value::len(len).ilog(P)
             {
-                let m = P.pow(s + 1);
                 let wm = Complex::cis(<T as NumCast>::from(if I {TAU} else {-TAU}/m as f64).unwrap());
                 for k in (0..length::value::len(len)).step_by(m)
                 {
@@ -396,6 +398,7 @@ where
                         w._mul_assign(wm);
                     }
                 }
+                m *= P
             }
             return true
         }
@@ -446,146 +449,17 @@ where
     false
 }
 
-/*pub fn fft_radix_p_unscaled<T, const P: usize, const I: bool>(slice: &mut [T], temp: &mut Option<&mut [T]>) -> bool
+pub fn fft_radix_p_unscaled<T, B, P, const I: bool>(bulk: &mut B, temp: &mut Option<&mut [Complex<T>]>, p: P) -> bool
 where
     B: InplaceBulk<ItemPointee = Complex<T>>,
-    T: Float,
-    [(); P - 1]:
-{
-    let len = slice.len();
-
-    if len % P == 0
-    {
-        if is_power_of(len, P)
-        {
-            // In-place FFT
-
-            slice.digit_rev_permutation(P);
-            
-            let wp: [_; P] = {
-                core::array::from_fn(|i| {
-                    if i == 0
-                    {
-                        One::one()
-                    }
-                    else
-                    {
-                        Complex::cis(<T::Real as NumCast>::from(if I {TAU} else {-TAU}*i as f64/P as f64).unwrap()).into()
-                    }
-                })
-            };
-
-            let mut x: [&mut T; P] = unsafe {MaybeUninit::uninit().assume_init()};
-            let mut y: [T; P] = [T::zero(); P];
-            
-            for s in 0..len.ilog(P)
-            {
-                let m = P.pow(s + 1);
-                let wm = Complex::cis(<T::Real as NumCast>::from(if I {TAU} else {-TAU}/m as f64).unwrap()).into();
-                for k in (0..len).step_by(m)
-                {
-                    let mut w = T::one();
-                    for j in 0..m/P
-                    {
-                        for i in 0..P
-                        {
-                            x[i] = unsafe {
-                                core::mem::transmute(&mut slice[k + j + m/P*i])
-                            }
-                        }
-
-                        for i in 0..P
-                        {
-                            y[i] = T::zero();
-                            for j in (1..P).rev()
-                            {
-                                y[i] += *x[j]*wp[(j*i) % P];
-                                y[i] *= w;
-                            }
-                            y[i] += *x[0];
-                        }
-                        
-                        for i in 0..P
-                        {
-                            *x[i] = y[i]
-                        }
-                        
-                        w *= wm;
-                    }
-                }
-            }
-            return true
-        }
-        // Recursive FFT
-        
-        let mut tempvec;
-        let temp = if let Some(temp) = temp.take()
-        {
-            temp
-        }
-        else
-        {
-            tempvec = Some(vec![T::zero(); len]);
-            tempvec.as_mut().unwrap()
-        };
-
-        partial_fft_unscaled::<_, I>(slice, temp, P);
-        let x: Vec<_> = temp.chunks(len/P).collect();
-
-        let wp: [_; P] = {
-            core::array::from_fn(|i| {
-                if i == 0
-                {
-                    One::one()
-                }
-                else
-                {
-                    Complex::cis(<T::Real as NumCast>::from(if I {TAU} else {-TAU}*i as f64/P as f64).unwrap()).into()
-                }
-            })
-        };
-        let mut y: [T; P] = [T::zero(); P];
-
-        let wn = Complex::cis(<T::Real as NumCast>::from(if I {TAU} else {-TAU}/len as f64).unwrap()).into();
-        let mut w = T::one();
-        let m = len/P;
-        for k in 0..m
-        {
-            for i in 0..P
-            {
-                y[i] = T::zero();
-                for j in (1..P).rev()
-                {
-                    y[i] += x[j][k]*wp[(j*i) % P];
-                    y[i] *= w;
-                }
-                y[i] += x[0][k];
-            }
-            
-            for i in 0..P
-            {
-                slice[k + m*i] = y[i]
-            }
-            
-            w *= wn;
-        }
-        return true;
-    }
-    false
-}*/
-
-pub fn fft_radix_n_sqrt_unscaled<B, T, const I: bool>(bulk: &mut B, temp: &mut Option<&mut [Complex<T>]>) -> bool
-where
-    B: InplaceBulk<ItemPointee = Complex<T>>,
+    P: LengthValue,
     T: Float
 {
-    let len = length::value::or_len::<Value<B::Length>>(bulk.len());
-    let p = {
-        util::radix(len)
-    };
-    if let Some(p) = p && length::value::ne(p, [(); 0])
+    assert!(length::value::ne(p, [(); 0]));
+
+    let len = bulk.length();
+    if length::value::eq(length::value::rem(len, length::value::max(p, [(); 1])), [(); 0])
     {
-        assert!(length::value::eq(length::value::rem(len, length::value::max(p, [(); 1])), [(); 0]));
         let pf = length::value::len(p) as f64;
         let wp = bulks::repeat_n((), p)
             .enumerate()
@@ -721,6 +595,22 @@ where
     false
 }
 
+pub fn fft_radix_n_sqrt_unscaled<B, T, const I: bool>(bulk: &mut B, temp: &mut Option<&mut [Complex<T>]>) -> bool
+where
+    B: InplaceBulk<ItemPointee = Complex<T>>,
+    T: Float
+{
+    let len = length::value::or_len::<Value<B::Length>>(bulk.len());
+    let p = {
+        util::radix(len)
+    };
+    if let Some(p) = p && length::value::ne(p, [(); 0])
+    {
+        return fft_radix_p_unscaled::<_, _, _, I>(bulk, temp, p)
+    }
+    false
+}
+
 pub fn dft_unscaled<B, T, const I: bool>(bulk: &mut B, temp: &mut Option<&mut [Complex<T>]>)
 where
     B: InplaceBulk<ItemPointee = Complex<T>>,
@@ -759,45 +649,24 @@ where
         });
 }
 
-pub const trait FourierInplace: ~const Permute<Item = Complex<Self::ItemReal>> + RandomAccessBulk<ItemPointee = Complex<Self::ItemReal>>
-{
-    type ItemReal: Float;
-
-    fn fft_inplace(&mut self);
-}
-impl<T, F> FourierInplace for T
-where
-    T: Permute<Item = Complex<F>> + RandomAccessBulk<ItemPointee = Complex<F>>,
-    F: Float
-{
-    type ItemReal = F;
-
-    fn fft_inplace(&mut self)
-    {
-        fft_unscaled::<_, _, false>(self, None);
-    }
-}
-
 #[cfg(test)]
 mod test
 {
     use bulks::{Bulk, IntoBulk};
     use num_complex::Complex;
 
-    use crate::{fft::{dft_unscaled, fft_unscaled}, util};
+    use crate::FourierInplace;
 
     #[test]
     fn it_works()
     {
-        let mut bulk = [1, 2, 3, 4, 5, 6, 7].into_bulk()
+        let mut bulk = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].into_bulk()
             .map(|x| Complex::from(x as f32))
             .collect_array()
             .into_bulk();
 
-        fft_unscaled::<_, _, false>(
-            &mut bulk,
-            None
-        );
+        bulk.fft_inplace();
+        bulk.ifft_inplace();
 
         let a = bulk.collect_array();
 

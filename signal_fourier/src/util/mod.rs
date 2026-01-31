@@ -1,13 +1,14 @@
-use array_trait::{Array, length::{self, LengthValue}, same::Same};
-use bulks::option::MaybeLength;
+use array_trait::length::{self, LengthValue};
 use moddef::moddef;
 
 use crate::util;
 
 moddef!(
     flat(pub(crate)) mod {
+        assign,
         radix,
-        is_prime
+        is_prime,
+        length_as_bulk
     }
 );
 
