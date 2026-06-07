@@ -4,11 +4,15 @@ use moddef::moddef;
 use crate::util;
 
 moddef!(
+    pub(crate) mod {
+        fft
+    },
     flat(pub(crate)) mod {
         assign,
         radix,
         is_prime,
-        length_as_bulk
+        length_as_bulk,
+        to_complex
     }
 );
 

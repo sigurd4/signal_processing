@@ -1,15 +1,17 @@
 use array_trait::length::{self, LengthValue};
-use bulks::InplaceBulk;
+use bulks::{InplaceBulk, IntoBulk};
 
 use crate::util;
 
-pub const trait Permute: ~const InplaceBulk
+pub const trait Permute: ~const IntoBulk<IntoBulk: ~const InplaceBulk>
 {
-    fn digit_rev_permute<R>(&mut self, radix: R)
+    type Output: ~const IntoBulk<IntoBulk = Self::IntoBulk>;
+
+    fn digit_rev_permute<R>(self, radix: R) -> Self::Output
     where
         R: LengthValue;
 
-    fn bit_rev_permute(&mut self)
+    fn bit_rev_permute(self) -> Self::Output
     {
         self.digit_rev_permute([(); 2])
     }
@@ -17,16 +19,19 @@ pub const trait Permute: ~const InplaceBulk
 
 impl<T> const Permute for T
 where
-    T: ~const InplaceBulk
+    T: ~const IntoBulk<IntoBulk: ~const InplaceBulk>
 {
-    fn digit_rev_permute<R>(&mut self, radix: R)
+    type Output = Self::IntoBulk;
+
+    fn digit_rev_permute<R>(self, radix: R) -> Self::IntoBulk
     where
         R: LengthValue
     {
+        let bulk = self.into_bulk();
         let len = self.length();
         if length::value::le(len, radix)
         {
-            return;
+            return bulk;
         }
         assert!(util::is_power_of(len, radix), "Length must be a power of radix.");
         assert!(length::value::ne(radix, [(); 0]), "Radix must be nonzero!");
@@ -52,6 +57,7 @@ where
             j += k;
             i += 1;
         }
+        bulk
     }
 }
 

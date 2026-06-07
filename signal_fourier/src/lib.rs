@@ -12,6 +12,7 @@
 #![feature(macro_metavar_expr_concat)]
 #![feature(const_ops)]
 #![feature(str_as_str)]
+#![feature(impl_trait_in_assoc_type)]
 #![feature(generic_const_exprs)]
 #![feature(core_intrinsics)]
 #![feature(specialization)]
@@ -21,17 +22,26 @@ compile_error!("Either the \"std\" or the \"libm\" feature must be enabled to co
 
 moddef::moddef!(
     pub mod {
-        fft,
         permute
     },
     flat(pub) mod {
-        scratch_space,
-        fourier_inplace
+        dft_inplace,
+        dft
     },
     mod {
         util
+    },
+    flat mod {
+        scratch_space
     }
 );
+
+pub mod conf
+{
+    pub struct TwoSided;
+    pub struct OneSided;
+    pub struct TwoSidedCentered;
+}
 
 macro_rules! temp {
     ($temp:ident for $len:expr) => {
@@ -49,8 +59,24 @@ macro_rules! temp {
 use temp as temp;
 
 #[cfg(test)]
-mod tests {
+mod tests
+{
+    use num_complex::ComplexFloat;
+
     use super::*;
+
+    pub(crate) fn approx_eq<T>(lhs: &[T], rhs: &[T], diff: T::Real) -> bool
+    where
+        T: ComplexFloat
+    {
+        if lhs.len() != rhs.len()
+        {
+            return false
+        }
+        lhs.iter()
+            .zip(rhs)
+            .all(|(a, b)| (*a - *b).abs() <= diff)
+    }
 
     #[test]
     fn it_works()

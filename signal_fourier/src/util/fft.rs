@@ -648,28 +648,3 @@ where
             wnk._mul_assign(wn);
         });
 }
-
-#[cfg(test)]
-mod test
-{
-    use bulks::{Bulk, IntoBulk};
-    use num_complex::Complex;
-
-    use crate::FourierInplace;
-
-    #[test]
-    fn it_works()
-    {
-        let mut bulk = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].into_bulk()
-            .map(|x| Complex::from(x as f32))
-            .collect_array()
-            .into_bulk();
-
-        bulk.dft_inplace();
-        bulk.idft_inplace();
-
-        let a = bulk.collect_array();
-
-        println!("{a:?}")
-    }
-}
