@@ -1,13 +1,9 @@
 [package]
-name = "signal_fourier"
+name = "signal_processing-fourier"
 version = "0.1.0"
 edition = "2024"
 
 [features]
-default = ["libm"]
-libm = ["num-complex/libm", "num-traits/libm"]
-std = ["alloc", "num-complex/std", "num-traits/std"]
-alloc = ["bulks/alloc", "array_trait/alloc"]
 
 [dependencies]
 moddef = { workspace = true }
@@ -18,4 +14,4 @@ num-traits = { workspace = true }
 
 [dev-dependencies]
 linspace = { workspace = true }
-plotters = { workspace = true }
+ezplot = { workspace = true }

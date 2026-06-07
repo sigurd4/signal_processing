@@ -1,4 +1,4 @@
-use bulks::{Bulk, CollectNearest, CollectionAdapter, CollectionStrategy, FromBulk, InplaceBulk, IntoBulk, IntoInplaceBulk, Map, RandomAccessBulk};
+use bulks::{Bulk, CollectNearest, IntoBulk, Map};
 use num_complex::{Complex, ComplexFloat};
 use crate::{DftInplace, util::IntoComplex};
 
@@ -32,7 +32,8 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use bulks::{CollectNearest, IntoBulk};
+    use bulks::{Bulk, CollectNearest, IntoBulk};
+use linspace::Linspace;
 
     use crate::Dft;
 
@@ -45,10 +46,12 @@ mod test
         
         let x: [_; N] = core::array::from_fn(|i| (TAU*F*i as f64/N as f64*T).sin());
 
+        let w = (0.0..TAU).linspace_array::<N>();
         let xf = x.into_bulk()
             .dft()
             .collect_nearest();
-        
-        println!("{xf:?}")
+
+        ezplot::plot_curves("X(e^jw)", "plots/x_z_dft.png", [&w.into_bulk().zip(xf.map(|xf| xf.norm())).collect_array()])
+            .unwrap()
     }
 }

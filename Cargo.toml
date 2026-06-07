@@ -1,17 +1,21 @@
 [workspace]
 resolver = "3"
-members = ["signal_fir_design",
-    "signal_fourier"
-    #"signal_processing",
-    #"signal_windows"
+members = [
+    "signal_processing",
+    "signal_processing-fourier",
+    "signal_processing-transforms",
+    "signal_processing-windows",
+    "ezplot",
 ]
 
 [workspace.dependencies]
-signal_fourier = { path = "signal_fourier" }
-signal_windows = { path = "signal_windows" }
+signal_processing-transforms = { path = "signal_processing-transforms" }
+signal_processing-fourier = { path = "signal_processing-fourier" }
+signal_processing-windows = { path = "signal_processing-windows" }
+ezplot = { path = "ezplot" }
 
 moddef = "0.3.0"
-bulks = { version = "0.6.4", default-features = false, features = ["alloc"] }
+bulks = { version = "0.6.5", default-features = false, features = ["alloc"] }
 array_trait = { version = "1.1.20", default-features = false, features = ["alloc", "length"] }
 num-complex = { version = "0.4.6", default-features = false, features = ["std"] }
 num-traits = { version = "0.2.19", default-features = false, features = ["std"] }

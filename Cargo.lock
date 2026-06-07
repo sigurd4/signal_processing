@@ -47,9 +47,9 @@ checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 
 [[package]]
 name = "bulks"
-version = "0.6.4"
+version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "192bbdf71d00d9142adeb763efbd3b353a75e3592143a1460f568e06a2d356fa"
+checksum = "5c5f6ccd9ecb00ec2f95cca2536e8e315c7b7c96d9e9172064dd4e5b49dd3507"
 dependencies = [
  "array_trait",
  "currying",
@@ -222,6 +222,19 @@ dependencies = [
  "libc",
  "winapi",
  "wio",
+]
+
+[[package]]
+name = "ezplot"
+version = "0.1.0"
+dependencies = [
+ "array_trait",
+ "bulks",
+ "linspace",
+ "moddef",
+ "num-complex",
+ "num-traits",
+ "plotters",
 ]
 
 [[package]]
@@ -416,12 +429,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "libm"
-version = "0.2.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9fbbcab51052fe104eb5e5d351cf728d30a5be1fe14d9be8a3b097481fb97de"
-
-[[package]]
 name = "libredox"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -480,7 +487,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
 dependencies = [
  "autocfg",
- "libm",
 ]
 
 [[package]]
@@ -651,31 +657,35 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
-name = "signal_fir_design"
+name = "signal_processing"
 version = "0.1.0"
 dependencies = [
- "array_trait",
- "bulks",
- "num-complex",
- "num-traits",
- "signal_windows",
+ "signal_processing-transforms",
+ "signal_processing-windows",
 ]
 
 [[package]]
-name = "signal_fourier"
+name = "signal_processing-fourier"
 version = "0.1.0"
 dependencies = [
  "array_trait",
  "bulks",
+ "ezplot",
  "linspace",
  "moddef",
  "num-complex",
  "num-traits",
- "plotters",
 ]
 
 [[package]]
-name = "signal_windows"
+name = "signal_processing-transforms"
+version = "0.1.0"
+dependencies = [
+ "signal_processing-fourier",
+]
+
+[[package]]
+name = "signal_processing-windows"
 version = "0.1.0"
 dependencies = [
  "array_trait",

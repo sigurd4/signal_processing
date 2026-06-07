@@ -1,0 +1,9 @@
+[package]
+name = "signal_processing-transforms"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+
+[dependencies]
+signal_processing-fourier = { workspace = true }

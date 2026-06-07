@@ -1,12 +1,9 @@
 [package]
-name = "signal_windows"
+name = "signal_processing-windows"
 version = "0.1.0"
 edition = "2024"
 
 [features]
-default = ["std"]
-std = ["alloc", "num-complex/std", "num-traits/std"]
-alloc = ["bulks/alloc", "array_trait/alloc"]
 
 [dependencies]
 moddef = { workspace = true }

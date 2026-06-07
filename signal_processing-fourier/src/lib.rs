@@ -17,16 +17,14 @@
 #![feature(core_intrinsics)]
 #![feature(specialization)]
 
-#[cfg(not(any(feature = "std", feature = "libm")))]
-compile_error!("Either the \"std\" or the \"libm\" feature must be enabled to compile");
-
 moddef::moddef!(
     pub mod {
         permute
     },
     flat(pub) mod {
         dft_inplace,
-        dft
+        dft,
+        idft
     },
     mod {
         util

@@ -1,0 +1,15 @@
+[package]
+name = "ezplot"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+
+[dependencies]
+moddef = { workspace = true }
+bulks = { workspace = true }
+array_trait = { workspace = true }
+num-complex = { workspace = true }
+num-traits = { workspace = true }
+linspace = { workspace = true }
+plotters = { workspace = true }
