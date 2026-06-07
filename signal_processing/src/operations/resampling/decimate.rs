@@ -1,8 +1,7 @@
-use array_math::max_len;
 use num::{complex::ComplexFloat, NumCast};
 use option_trait::Maybe;
 
-use crate::{gen::filter::{Cheby1, FilterGenPlane, FilterGenType, Fir1, Fir1Type}, util::ComplexOp, operations::filtering::{FftFilt, FiltFilt}, quantities::{List, MaybeLists, ListOrSingle, Lists}, System, systems::{Tf, IrType}};
+use crate::{generators::filter::{Cheby1, FilterGenPlane, FilterGenType, Fir1, Fir1Type}, util::ComplexOp, operations::filtering::{FftFilt, FiltFilt}, quantities::{List, MaybeLists, ListOrSingle, Lists}, System, systems::{Tf, IrType}};
 
 pub trait Decimate<T, Q, Y>: Lists<T>
 where
@@ -28,9 +27,9 @@ where
         N: Maybe<usize>,
         F: Maybe<IrType>
     {
-        let ftype = filter_type.into_option()
+        let ftype = filter_type.option()
             .unwrap_or(IrType::IIR);
-        let n = order.into_option()
+        let n = order.option()
             .unwrap_or_else(|| match ftype
             {
                 IrType::FIR => 30,
@@ -78,7 +77,7 @@ where
     L: Lists<T, Width = usize> + Decimate<T, usize, Vec<T>>,
     L::RowsMapped<Vec<T>>: Lists<T, RowsMapped<[T; M]> = L::RowsMapped<[T; M]>, RowOwned = Vec<T>>,
     T: ComplexFloat,
-    [(); 0 - M % max_len(L::WIDTH, 1)]:
+    [(); 0 - M % usize::max(L::WIDTH, 1)]:
 {
     fn decimate<N, F>(self, (): (), order: N, filter_type: F) -> Self::RowsMapped<[T; M]>
     where

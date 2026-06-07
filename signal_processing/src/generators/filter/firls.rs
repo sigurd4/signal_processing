@@ -1,12 +1,11 @@
 use core::ops::{Div, Mul, MulAssign, Sub};
 
-use array_math::{ArrayOps, SliceMath};
 use ndarray::Array2;
 use ndarray_linalg::{solve::Solve, Lapack, least_squares::LeastSquaresSvd};
 use num::{complex::ComplexFloat, traits::FloatConst, Float, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{gen::filter::FilterGenError, System, systems::Tf};
+use crate::{generators::filter::FilterGenError, System, systems::Tf};
 
 pub trait FirLS<O>: System + Sized
 where
@@ -87,7 +86,7 @@ where
         let zero = Zero::zero();
         let two = one + one;
         
-        if let Some(fs) = sampling_frequency.into_option()
+        if let Some(fs) = sampling_frequency.option()
         {
             for wc in frequencies.iter_mut()
             {
@@ -108,13 +107,13 @@ where
             return Err(FilterGenError::FrequenciesNotNondecreasing)
         }
         
-        let weight: [_; B2/2] = weights.into_option()
+        let weight: [_; B2/2] = weights.option()
             .unwrap_or_else(|| [one.into(); B2/2]);
 
         let numtaps = order + 1 - order % 2;
         let m = (numtaps - 1)/2;
-        let i1: [_; B2/2] = ArrayOps::fill(|i| i*2);
-        let i2: [_; B2/2] = ArrayOps::fill(|i| i*2 + 1);
+        let i1: [_; B2/2] = core::array::from_fn(|i| i*2);
+        let i2: [_; B2/2] = core::array::from_fn(|i| i*2 + 1);
         let s = Array2::from_shape_fn((numtaps, B2/2), |(n, i)| {
             let n: <T as ComplexFloat>::Real = NumCast::from(n).unwrap();
             let sinc = [frequencies[i1[i]], frequencies[i2[i]]]
@@ -133,7 +132,7 @@ where
             sinc[1] - sinc[0]
         });
         let w = Array2::from_shape_fn((B2/2, 1), |(i, _)| weight[i]);
-        let q = s.map(|&s| T::from(s).unwrap()).dot(&w).column(0).to_vec();
+        let q = s.map(|s| T::from(s).unwrap()).dot(&w).column(0).to_vec();
         let q1 = &q[0..=m];
         let q2 = &q[m..];
         let q = q1.toeplitz_matrix() + q1.hankel_matrix(q2);
@@ -193,9 +192,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::filter::FirLS, Plane, analysis::RealFreqZ, systems::{Tf, Zpk}, transforms::system::ToZpk};
+    use crate::{plot, generators::filter::FirLS, Plane, analysis::RealFreqZ, systems::{Tf, Zpk}, transforms::system::ToZpk};
 
     #[test]
     fn test()

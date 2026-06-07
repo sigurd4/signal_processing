@@ -1,7 +1,7 @@
 use core::ops::DivAssign;
 
 
-use array_math::ArrayOps;
+
 use num::{traits::FloatConst, Float, NumCast};
 use option_trait::Maybe;
 use thiserror::Error;
@@ -39,7 +39,7 @@ where
     let half = two.recip();
     let zero = T::zero();
 
-    if let Some(fs) = sampling_frequency.into_option()
+    if let Some(fs) = sampling_frequency.option()
     {
         let nyq = fs*half;
         if !(fs > zero) || !fs.is_finite()
@@ -93,7 +93,7 @@ where
     let w = d.mul_all_inv(d.first_max().unwrap_or(zero));
     let mut n = l - 1;
     n += (*amplitudes.last().unwrap() != zero && n % 2 != 0) as usize;
-    let a: [T; F + 2] = ArrayOps::fill(|i| amplitudes[i/2]);
+    let a: [T; F + 2] = core::array::from_fn(|i| amplitudes[i/2]);
 
     Ok((n, f_out, a, w))
 }

@@ -22,7 +22,7 @@ where
     {
         Rtf {
             sys,
-            w: w.into_option()
+            w: w.option()
                 .unwrap_or_else(std::vec::Vec::new)
         }
     }

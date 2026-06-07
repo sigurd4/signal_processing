@@ -63,12 +63,12 @@ where
     where
         ZB: Maybe<<B::Width as StaticMaybe<usize>>::Opposite>
     {
-        let nb = nb.into_option()
+        let nb = nb.option()
             .unwrap_or(B::WIDTH - 1);
-        let na = na.into_option()
+        let na = na.option()
             .unwrap_or(A::WIDTH - 1);
-        let zb = zb.into_option()
-            .and_then(|zb| zb.into_option())
+        let zb = zb.option()
+            .and_then(|zb| zb.option())
             .unwrap_or(0);
         let n = nb.max(na);
         let m = n + 1;
@@ -79,7 +79,7 @@ where
 
         let mut hfw: Vec<_> = hfw.into_vec()
             .into_iter()
-            .map(|(h, f, w)| (h, f, w.into_option().unwrap_or(one)))
+            .map(|(h, f, w)| (h, f, w.option().unwrap_or(one)))
             .collect();
         let nf = hfw.len();
 
@@ -289,9 +289,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::filter::{Butter, FilterGenPlane, FilterGenType}, identification::filter::{InvFreqMethod, InvFreqZ}, analysis::RealFreqZ, systems::Tf};
+    use crate::{plot, generators::filter::{Butter, FilterGenPlane, FilterGenType}, identification::filter::{InvFreqMethod, InvFreqZ}, analysis::RealFreqZ, systems::Tf};
 
     #[test]
     fn test()

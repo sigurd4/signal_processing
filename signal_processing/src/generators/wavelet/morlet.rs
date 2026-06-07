@@ -38,9 +38,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::wavelet::Morlet};
+    use crate::{plot, generators::wavelet::Morlet};
 
     #[test]
     fn test()

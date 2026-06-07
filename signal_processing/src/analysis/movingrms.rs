@@ -1,10 +1,9 @@
 use core::ops::{AddAssign, MulAssign};
 
-use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex, Float, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{quantities::{Container, ContainerOrSingle, ListOrSingle, Lists, OwnedList, OwnedListOrSingle}, gen::pulse::SigmoidTrain};
+use crate::{quantities::{Container, ContainerOrSingle, ListOrSingle, Lists, OwnedList, OwnedListOrSingle}, generators::pulse::SigmoidTrain};
 
 pub trait MovingRms<T>: Lists<T, RowOwned: Container<T>>
 where
@@ -33,7 +32,7 @@ where
         let one = T::Real::one();
         let two = one + one;
 
-        let fs = sampling_frequency.into_option()
+        let fs = sampling_frequency.option()
             .unwrap_or(one);
 
         self.map_rows_into_owned(|mut x| {
@@ -86,7 +85,7 @@ where
                 for x in rmsx.as_mut_slice()
                     .iter_mut()
                 {
-                    if Float::abs(*x) < tol
+                    if <T::Real as Float>::abs(*x) < tol
                     {
                         *x = zero
                     }
@@ -111,9 +110,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
-    use rand::distributions::uniform::SampleRange;
+    
+    use linspace::Linspace;
+    use rand::distr::uniform::SampleRange;
 
     use crate::{plot, analysis::MovingRms};
 
@@ -124,7 +123,7 @@ mod test
 
         let t: [_; N] = (0.0..1.0).linspace_array();
 
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
 
         let x = t.map(|t| (-((t - 0.5)/0.1f64).powi(2)).exp() + (-0.1..0.1).sample_single(&mut rng));
         

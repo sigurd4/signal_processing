@@ -2,7 +2,6 @@ use core::ops::{DivAssign, MulAssign};
 
 use ndarray_linalg::Lapack;
 use num::{traits::{float::TotalOrder, FloatConst}, Complex, Float, One};
-use array_math::SliceMath;
 use option_trait::Maybe;
 
 moddef::moddef!(
@@ -18,7 +17,7 @@ where
 {
     let one = T::one();
 
-    let scale = scale.into_option()
+    let scale = scale.option()
         .unwrap_or(one);
 
     let mut psi = if let Some(c) = lut::DBAUX_LUT.get(order)
@@ -67,7 +66,7 @@ where
         let c: Vec<_> = core::iter::repeat(-cone)
             .take(order)
             .chain(r)
-            .map(|r| vec![cone, -r])
+            .map(|r: Complex<_>| vec![cone, -r])
             .reduce(|a, b| a.convolve_direct(&b))
             .map(|c| c.into_iter()
                 .map(|c| c.re)

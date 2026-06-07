@@ -41,7 +41,7 @@ where
         let two = one + one;
         let four = two + two;
 
-        let n = order.into_option()
+        let n = order.option()
             .unwrap_or(BA::LENGTH - 1);
         let nf = T::from(n).unwrap();
         let w0 = T::TAU()/nf;
@@ -95,7 +95,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
     use crate::{analysis::RealFreqZ, plot, systems::{Tf, Zpk}, transforms::system::ToZpk, Plane};
 

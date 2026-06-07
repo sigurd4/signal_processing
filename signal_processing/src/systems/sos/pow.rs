@@ -1,7 +1,7 @@
 use core::ops::{BitAnd, Shr};
 
 use num::{complex::ComplexFloat, pow::Pow, traits::Inv, Integer};
-use option_trait::{Maybe, MaybeOr};
+use option_trait::{Maybe, ops::MaybeOr};
 
 use crate::{quantities::{MaybeList, MaybeOwnedList}, systems::{Sos, Tf}, transforms::system::ToSos};
 

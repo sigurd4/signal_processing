@@ -105,10 +105,10 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::ArrayOps;
-    use rand::distributions::uniform::SampleRange;
+    
+    use rand::distr::uniform::SampleRange;
 
-    use crate::{plot, gen::filter::SGolay, operations::filtering::SGolayFilt, systems::Tf};
+    use crate::{plot, generators::filter::SGolay, operations::filtering::SGolayFilt, systems::Tf};
 
     #[test]
     fn test()
@@ -122,7 +122,7 @@ mod test
         const F: f64 = 4.0;
         let t: [_; M] = core::array::from_fn(|i| i as f64/FS);
 
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let x = t.map(|t| (TAU*F*t).cos() + (-1.0..1.0).sample_single(&mut rng));
 
         let y = SGolayFilt::sgolayfilt(h, x)

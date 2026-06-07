@@ -45,15 +45,15 @@ where
         H: StaticMaybe<L::Mapped<usize>>,
         HV: StaticMaybe<L>
     {
-        let num_bins = NN::maybe_from_fn(|| num_bins.into_option()
+        let num_bins = NN::maybe_from_fn(|| num_bins.option()
             .unwrap_or(100)
         );
-        let method = method.into_option()
+        let method = method.option()
             .unwrap_or(StateLevelsMethod::Mode);
 
         let x = self.into_vec();
 
-        let bounds = bounds.into_option()
+        let bounds = bounds.option()
             .unwrap_or_else(|| {
                 let xmax = x.iter()
                     .map(|&x| x)
@@ -184,8 +184,8 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
 
     use crate::{plot, analysis::StateLevels};
 

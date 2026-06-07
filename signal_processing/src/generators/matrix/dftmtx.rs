@@ -49,10 +49,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::{ArrayOps, CollumnArrayOps, MatrixMath};
     use num::Complex;
 
-    use crate::{gen::matrix::DftMatrix, transforms::fourier::Dft};
+    use crate::{generators::matrix::DftMatrix, transforms::fourier::Dft};
 
     #[test]
     fn test()

@@ -1,10 +1,8 @@
 use core::{iter::Sum, ops::{RangeInclusive, SubAssign}};
 
-use array_math::{ArrayMath, ArrayOps, SliceOps, SliceMath};
-
 use ndarray_linalg::{Lapack};
 use num::{Float, NumCast};
-use option_trait::{Maybe, MaybeCell};
+use option_trait::{Maybe, StaticMaybe};
 
 use crate::quantities::List;
 
@@ -12,20 +10,20 @@ pub trait FindPeaks<T>: List<T>
 where
     T: Float
 {
-    fn find_peaks<const EXTRA: bool, MPH, MPD, MPW, MMPW>(
+    fn find_peaks<EXTRA, MPH, MPD, MPW, MMPW>(
         &self,
         min_peak_height: MPH,
         min_peak_distance: MPD,
         min_peak_width: MPW,
         max_peak_width: MMPW,
         double_sided: bool
-    ) -> Vec<(usize, T, MaybeCell<((RangeInclusive<usize>, [T; 3]), [T; 2], T, T), EXTRA>)>
+    ) -> Vec<(usize, T, EXTRA)>
     where
         MPH: Maybe<T>,
         MPD: Maybe<usize>,
         MPW: Maybe<usize>,
         MMPW: Maybe<usize>,
-        [(); EXTRA as usize]:;
+        EXTRA: StaticMaybe<((RangeInclusive<usize>, [T; 3]), [T; 2], T, T)>;
 }
 
 impl<T, L> FindPeaks<T> for L
@@ -33,31 +31,31 @@ where
     T: Float + Sum + SubAssign + Lapack,
     L: List<T>
 {
-    fn find_peaks<const EXTRA: bool, MPH, MPD, MPW, MMPW>(
+    fn find_peaks<EXTRA, MPH, MPD, MPW, MMPW>(
         &self,
         min_peak_height: MPH,
         min_peak_distance: MPD,
         min_peak_width: MPW,
         max_peak_width: MMPW,
         double_sided: bool
-    ) -> Vec<(usize, T, MaybeCell<((RangeInclusive<usize>, [T; 3]), [T; 2], T, T), EXTRA>)>
+    ) -> Vec<(usize, T, EXTRA)>
     where
         MPH: Maybe<T>,
         MPD: Maybe<usize>,
         MPW: Maybe<usize>,
         MMPW: Maybe<usize>,
-        [(); EXTRA as usize]:
+        EXTRA: StaticMaybe<((RangeInclusive<usize>, [T; 3]), [T; 2], T, T)>
     {
-        let minh = Float::abs(min_peak_height.into_option()
+        let minh = Float::abs(min_peak_height.option()
                 .unwrap_or_else(T::epsilon)
             );
-        let mind = min_peak_distance.into_option()
+        let mind = min_peak_distance.option()
             .unwrap_or(1)
             .max(1);
-        let minw = min_peak_width.into_option()
+        let minw = min_peak_width.option()
             .unwrap_or(1)
             .max(1);
-        let maxw = max_peak_width.into_option();
+        let maxw = max_peak_width.option();
 
         let zero = T::zero();
 
@@ -120,9 +118,9 @@ where
                     .collect();
                 if !neighs.is_empty()
                 {
-                    idx.extract_if(|i| neighs.contains(i))
+                    idx.extract_if(.., |i| neighs.contains(i))
                         .for_each(core::mem::drop);
-                    node2visit.extract_if(|i| neighs.contains(i))
+                    node2visit.extract_if(.., |i| neighs.contains(i))
                         .for_each(core::mem::drop);
                     visited.append(&mut neighs);
                 }
@@ -188,7 +186,7 @@ where
                     Some((
                         idx,
                         self.as_view_slice()[idx],
-                        MaybeCell::from_fn(|| (
+                        StaticMaybe::maybe_from_fn(|| (
                             (ind[0]..=*ind.last().unwrap(), pp),
                             [-width, width].div_all(two).add_all(xm),
                             h,
@@ -209,12 +207,11 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use rand::distributions::uniform::SampleRange;
+    use rand::distr::uniform::SampleRange;
 
     use crate::{
         plot,
-        gen::filter::{Butter, FilterGenPlane, FilterGenType},
+        generators::filter::{Butter, FilterGenPlane, FilterGenType},
         operations::filtering::FiltFilt,
         analysis::FindPeaks,
         systems::Tf
@@ -225,8 +222,8 @@ mod test
     {
         const N: usize = 1024;
 
-        let mut rng = rand::thread_rng();
-        let mut x: [_; N] = ArrayOps::fill(|_| (-1.0..1.0).sample_single(&mut rng));
+        let mut rng = rand::rng();
+        let mut x: [_; N] = core::array::from_fn(|_| (-1.0..1.0).sample_single(&mut rng));
 
         let h: Tf::<f64, _, _> = Tf::butter(2, [10.0], FilterGenType::LowPass, FilterGenPlane::Z { sampling_frequency: Some(1000.0) })
             .unwrap();

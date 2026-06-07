@@ -1,7 +1,7 @@
 use core::ops::Mul;
 
 use num::complex::ComplexFloat;
-use option_trait::{Maybe, MaybeOr, StaticMaybe};
+use option_trait::{Maybe, PureStaticMaybe, StaticMaybe, ops::MaybeOr};
 
 use crate::{util::ComplexOp, quantities::{MaybeList, MaybeOwnedList, ProductSequence}, systems::{Sos, Tf}, transforms::system::ToTf};
 
@@ -26,8 +26,8 @@ where
     Tf<T2, B2, A2>: ToTf<T3, B3, A3, (), ()>,
     B1::MaybeMapped<T3>: MaybeOr<[T3; 3], B2::MaybeMapped<T3>, Output = B3>,
     A1::MaybeMapped<T3>: MaybeOr<[T3; 3], A2::MaybeMapped<T3>, Output = A3>,
-    B2::MaybeMapped<T3>: StaticMaybe<[T3; 3]>,
-    A2::MaybeMapped<T3>: StaticMaybe<[T3; 3]>
+    B2::MaybeMapped<T3>: PureStaticMaybe<[T3; 3]>,
+    A2::MaybeMapped<T3>: PureStaticMaybe<[T3; 3]>
 {
     type Output = Sos<T3, B3, A3, S3>;
 

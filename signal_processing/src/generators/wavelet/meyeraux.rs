@@ -35,9 +35,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::wavelet::Meyeraux};
+    use crate::{plot, generators::wavelet::Meyeraux};
 
     #[test]
     fn test()

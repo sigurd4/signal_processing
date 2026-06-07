@@ -2,9 +2,10 @@ use core::{iter::Sum, ops::{AddAssign, MulAssign, SubAssign}};
 
 use bulks::{FromBulk, IntoBulk};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, NumCast, Zero};
+use option_trait::{Maybe, StaticMaybe};
 use thiserror::Error;
 
-use crate::{quantities::{List, ListOrSingle, Lists}, util::TruncateIm};
+use crate::{quantities::{List, ListOrSingle, Lists}, transforms::fourier::Dft, util::TruncateIm};
 
 #[derive(Debug, Clone, Copy, PartialEq, Error)]
 pub enum CepsError
@@ -18,8 +19,7 @@ pub trait CCeps<'a, T, C, N>: Lists<T>
 where
     T: ComplexFloat,
     C: List<T>,
-    N: IntoBulk<Item = usize>,
-    Option<usize>: FromBulk<N::IntoBulk>
+    N: option_trait::Maybe<usize>
 {
     /// Computes the complex cepstrum of a sequence or several sequences.
     /// 
@@ -46,7 +46,7 @@ where
 {
     fn cceps(&'a self, n: <C::Length as StaticMaybe<usize>>::Opposite) -> Result<Self::RowsMapped<C>, CepsError>
     {
-        let n = n.into_option()
+        let n = Maybe::option(n)
             .unwrap_or(C::LENGTH);
 
         self.try_map_rows_to_owned(|x| {
@@ -64,7 +64,7 @@ where
                 f.pop();
             }
 
-            f.fft();
+            f = f.dft();
             if f.iter().any(|f| f.is_zero())
             {
                 return Err(CepsError::ZeroInFourier)
@@ -122,8 +122,7 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
 
     use crate::{plot, analysis::CCeps};
 
@@ -136,7 +135,7 @@ mod test
 
         let d = (N as f64*0.3/T) as usize;
         let s1 = t.map(|t| (TAU*45.0*t).sin());
-        let s2 = s1.add_each(ArrayOps::fill(|i| if i >= d {0.5*s1[i - d]} else {0.0}));
+        let s2 = s1.add_each(core::array::from_fn(|i| if i >= d {0.5*s1[i - d]} else {0.0}));
 
         let c: [_; _] = s2.cceps(()).unwrap();
 

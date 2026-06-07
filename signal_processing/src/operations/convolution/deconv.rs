@@ -1,6 +1,5 @@
 use num::{complex::ComplexFloat, One, Complex};
 use core::ops::{Div, SubAssign, AddAssign, MulAssign};
-use array_math::{max_len, ArrayMath, SliceMath};
 
 use crate::quantities::{ListOrSingle, MaybeContainer};
 
@@ -58,7 +57,7 @@ macro_rules! impl_deconv {
         where
             T: ComplexFloat<Real: Into<T>> + SubAssign + AddAssign + Into<Complex<T::Real>> + 'static,
             Complex<T::Real>: AddAssign + MulAssign + MulAssign<T::Real>,
-            [(); max_len($n, $m) - 1]:,
+            [(); usize::max($n, $m) - 1]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two()]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two() - ($n + 1 - $m)]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two() - $m]:,
@@ -102,7 +101,7 @@ macro_rules! impl_deconv {
         where
             T: ComplexFloat<Real: Into<T>> + SubAssign + AddAssign + Into<Complex<T::Real>> + 'static,
             Complex<T::Real>: AddAssign + MulAssign + MulAssign<T::Real>,
-            [(); max_len($n, $m) - 1]:,
+            [(); usize::max($n, $m) - 1]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two()]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two() - ($n + 1 - $m)]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two() - $m]:,
@@ -126,7 +125,7 @@ macro_rules! impl_deconv {
         where
             T: ComplexFloat<Real: Into<T>> + SubAssign + AddAssign + Into<Complex<T::Real>> + 'static,
             Complex<T::Real>: AddAssign + MulAssign + MulAssign<T::Real>,
-            [(); max_len($n, $m) - 1]:,
+            [(); usize::max($n, $m) - 1]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two()]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two() - ($n + 1 - $m)]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two() - $m]:,
@@ -150,7 +149,7 @@ macro_rules! impl_deconv {
         where
             T: ComplexFloat<Real: Into<T>> + SubAssign + AddAssign + Into<Complex<T::Real>> + 'static,
             Complex<T::Real>: AddAssign + MulAssign + MulAssign<T::Real>,
-            [(); max_len($n, $m) - 1]:,
+            [(); usize::max($n, $m) - 1]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two()]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two() - ($n + 1 - $m)]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two() - $m]:,
@@ -175,7 +174,7 @@ macro_rules! impl_deconv {
         where
             T: ComplexFloat<Real: Into<T>> + SubAssign + AddAssign + Into<Complex<T::Real>> + 'static,
             Complex<T::Real>: AddAssign + MulAssign + MulAssign<T::Real>,
-            [(); max_len($n, $m) - 1]:,
+            [(); usize::max($n, $m) - 1]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two()]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two() - ($n + 1 - $m)]:,
             [(); (($n + 1 - $m) + $m - 1).next_power_of_two() - $m]:,

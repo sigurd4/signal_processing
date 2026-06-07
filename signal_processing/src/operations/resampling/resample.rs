@@ -32,7 +32,7 @@ where
 
         ratio = Ratio::new(*ratio.numer(), (*ratio.denom()).max(1));
 
-        let cutoff = cutoff.into_option()
+        let cutoff = cutoff.option()
             .unwrap_or_else(|| <T::Real as NumCast>::from(*ratio.numer()).unwrap()/(two*<T::Real as NumCast>::from((*ratio.numer()).max(*ratio.denom())).unwrap()));
 
         let z = self.interp(*ratio.numer(), order, cutoff);
@@ -53,8 +53,8 @@ where
         N: Maybe<usize>,
         W: Maybe<<T as ComplexFloat>::Real>
     {
-        let order = order.into_option();
-        let cutoff = cutoff.into_option();
+        let order = order.option();
+        let cutoff = cutoff.option();
 
         self.map_rows_into_owned(|x| {
             let ratio = Ratio::new(length, x.length().max(1));
@@ -89,8 +89,8 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
 
     use crate::{plot, operations::resampling::Resample};
 

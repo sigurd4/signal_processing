@@ -1,11 +1,10 @@
 use core::ops::{AddAssign, MulAssign};
 
-use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex};
 
 use crate::quantities::{Lists, OwnedLists};
 
-pub trait Dft<T>: Lists<T>
+pub trait Dft<T>
 where
     T: ComplexFloat
 {
@@ -35,8 +34,8 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
 
     use crate::{plot, transforms::fourier::Dft};
 
@@ -47,7 +46,7 @@ mod test
         const T: f64 = 1.0;
         const F: f64 = 220.0;
         
-        let x: [_; N] = ArrayOps::fill(|i| (TAU*F*i as f64/N as f64*T).sin());
+        let x: [_; N] = core::array::from_fn(|i| (TAU*F*i as f64/N as f64*T).sin());
 
         let xf = x.dft();
         let w = (0.0..TAU).linspace_array();

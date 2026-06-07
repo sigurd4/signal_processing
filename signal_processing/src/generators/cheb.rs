@@ -1,6 +1,5 @@
 use core::ops::{Add, AddAssign, Mul, Neg, Sub};
 
-use array_math::ArrayMath;
 use num::{Num, One, Zero};
 use option_trait::Maybe;
 

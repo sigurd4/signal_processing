@@ -59,11 +59,11 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
     use num::Complex;
 
-    use crate::{plot, transforms::domain::Bilinear, gen::filter::ButtAP, analysis::{FreqS, RealFreqZ}, Plane, systems::Zpk};
+    use crate::{plot, transforms::domain::Bilinear, generators::filter::ButtAP, analysis::{FreqS, RealFreqZ}, Plane, systems::Zpk};
 
     #[test]
     fn test()

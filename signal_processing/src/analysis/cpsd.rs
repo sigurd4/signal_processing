@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, Complex};
 use option_trait::{Maybe, NotVoid, StaticMaybe};
 
-use crate::{quantities::List, util::MaybeLenEq, analysis::{PWelch, PWelchDetrend}};
+use crate::{analysis::{PWelch, PWelchDetrend}, quantities::{ContainerOrSingle, List}, util::MaybeLenEq};
 
 /// A trait for computing the cross power spectral density of two sequences.
 pub trait CPsd<T, Y, YY, W, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
@@ -74,6 +74,8 @@ where
     WW::Mapped<Complex<T::Real>>: StaticMaybe<WW::Mapped<Complex<T::Real>>> + StaticMaybe<<YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<T::Real>>>>,
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<T::Real>>>: NotVoid,
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<T::Real>>: NotVoid,
+    <WW as ContainerOrSingle<W>>::Mapped<T::Real>: NotVoid,
+    <WW as ContainerOrSingle<W>>::Mapped<Complex<T::Real>>: NotVoid,
     (): StaticMaybe<WW::Mapped<T::Real>>,
 {
     fn cpsd<O, FS, CONF, DT, F>(
@@ -104,14 +106,13 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use rand::distributions::uniform::SampleRange;
+    use rand::distr::uniform::SampleRange;
 
     use crate::{
         plot,
         windows::{Boxcar, Triangular},
         operations::filtering::Filter,
-        gen::{window::{WindowGen, WindowRange}, filter::{Fir1, Fir1Type}},
+        generators::{window::{WindowGen, WindowRange}, filter::{Fir1, Fir1Type}},
         analysis::RealCPsd,
         systems::Tf
     };
@@ -120,7 +121,7 @@ mod test
     fn test()
     {
         const N: usize = 16384;
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let r: Vec<_> = (0..N).map(|_| (-1.0..1.0).sample_single(&mut rng)).collect();
 
         const B: usize = 31;

@@ -3,7 +3,6 @@ use core::ops::{Add, AddAssign, Mul, MulAssign};
 use num::{complex::ComplexFloat, Float, NumCast, Zero, One};
 use option_trait::Maybe;
 use thiserror::Error;
-use array_math::SliceMath;
 
 use crate::{util::{self, ComplexOp}, quantities::{MaybeList, MaybeLists, NotPolynomial, Polynomial, SumSequence}, decompositions::Residue, systems::{Rpk, Tf}, System};
 
@@ -55,11 +54,11 @@ where
         FS: Maybe<T::Real>,
         TOL: Maybe<T::Real>
     {
-        let tol = tol.into_option()
+        let tol = tol.option()
             .map(|tol| Float::abs(tol))
             .unwrap_or_else(|| <T::Real as NumCast>::from(1e-3).unwrap());
 
-        let ts = sampling_frequency.into_option()
+        let ts = sampling_frequency.option()
             .map(|fs| Float::recip(fs))
             .unwrap_or_else(One::one);
 

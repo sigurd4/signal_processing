@@ -1,7 +1,6 @@
 use core::ops::{AddAssign, DivAssign, Mul, MulAssign};
 
 use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, NumCast, One, Zero};
-use array_math::SliceMath;
 use option_trait::Maybe;
 
 use crate::quantities::{ContainerOrSingle, List, ListOrSingle, Lists, OwnedList};
@@ -32,10 +31,10 @@ where
         let czero = Complex::zero();
         let cone = Complex::one();
 
-        let a = point.into_option()
+        let a = point.option()
             .map(|a| a.into())
             .unwrap_or(cone);
-        let w = ratio.into_option()
+        let w = ratio.option()
             .map(|w| w.into());
 
         self.map_rows_into_owned(|y| {

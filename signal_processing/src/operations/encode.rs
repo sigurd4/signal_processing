@@ -41,7 +41,7 @@ where
         let imin = T::from(I::min_value())
             .unwrap_or_else(T::min_value);
 
-        let dynamic_range = dynamic_range.into_option()
+        let dynamic_range = dynamic_range.option()
             .unwrap_or(-one..=one);
         let mid = (*dynamic_range.start() + *dynamic_range.end())/two;
 

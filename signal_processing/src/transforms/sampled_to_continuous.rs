@@ -53,7 +53,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
     use crate::{plot, transforms::SampledToContinuous};
 

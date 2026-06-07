@@ -131,11 +131,11 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
-    use rand::distributions::uniform::SampleRange;
+    
+    use linspace::Linspace;
+    use rand::distr::uniform::SampleRange;
 
-    use crate::{plot, gen::filter::{Butter, FilterGenPlane, FilterGenType}, operations::filtering::FiltFilt, systems::Tf};
+    use crate::{plot, generators::filter::{Butter, FilterGenPlane, FilterGenType}, operations::filtering::FiltFilt, systems::Tf};
 
     #[test]
     fn test()
@@ -144,8 +144,8 @@ mod test
             .unwrap();
 
         const N: usize = 64;
-        let mut rng = rand::thread_rng();
-        let x: [_; N] = ArrayOps::fill(|_| (-1.0..1.0).sample_single(&mut rng));
+        let mut rng = rand::rng();
+        let x: [_; N] = core::array::from_fn(|_| (-1.0..1.0).sample_single(&mut rng));
 
         let y = h.filtfilt(x);
 

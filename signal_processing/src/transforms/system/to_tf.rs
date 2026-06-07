@@ -4,7 +4,7 @@ use ndarray::{Array1, Array2};
 use ndarray_linalg::EigVals;
 use num::{complex::ComplexFloat, Complex, One, Zero};
 
-use option_trait::{Maybe, MaybeOr, NotVoid, StaticMaybe};
+use option_trait::{Maybe, NotVoid, PureStaticMaybe, StaticMaybe, ops::MaybeOr};
 
 use crate::{quantities::{List, MaybeContainer, MaybeList, MaybeLists, MaybeOwnedList, Polynomial}, operations::Simplify, decompositions::SplitNumerDenom, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, transforms::system::{ToSos, ToSs, ToZpk}, System};
 
@@ -69,7 +69,7 @@ where
     Z: MaybeList<T1, MaybeSome: StaticMaybe<Z::Some, Maybe<Vec<Complex<T1::Real>>> = Z2>>,
     P: MaybeList<T1, MaybeSome: StaticMaybe<P::Some, Maybe<Vec<Complex<T1::Real>>> = P2>>,
     B: MaybeList<T2>,
-    A: MaybeList<T2> + StaticMaybe<Vec<T2>>,
+    A: MaybeList<T2> + PureStaticMaybe<Vec<T2>>,
     Z2: MaybeList<Complex<T1::Real>, MaybeSome: StaticMaybe<Z2::Some, Maybe<Vec<T2>> = BB>> + Maybe<Vec<Complex<T2::Real>>>,
     P2: MaybeList<Complex<T1::Real>, MaybeSome: StaticMaybe<P2::Some, Maybe<Vec<T2>>: MaybeOr<Vec<T2>, A, Output = A>>> + Maybe<Vec<Complex<T2::Real>>>,
     BB: MaybeList<T2, Some: List<T2> + Sized, MaybeSome: Sized> + StaticMaybe<Vec<T2>>,
@@ -81,7 +81,7 @@ where
     {
         let Zpk::<Complex<T2::Real>, Z2, P2, T2> {z, p, k} = self.to_zpk((), ());
 
-        let z_op: Option<Vec<_>> = z.into_inner().into_option();
+        let z_op: Option<Vec<_>> = z.into_inner().option();
         let b = if let Some(z) = z_op
         {
             Some(z.into_iter()
@@ -94,7 +94,7 @@ where
         {
             None
         };
-        let p_op: Option<Vec<_>> = p.into_inner().into_option();
+        let p_op: Option<Vec<_>> = p.into_inner().option();
         let a = if let Some(p) = p_op
         {
             Some(p.into_iter()
@@ -110,7 +110,7 @@ where
             b: b.map(|b| {
                 let b = BB::maybe_from_fn(|| b.into_inner());
                 b.into_maybe_some()
-                    .into_option()
+                    .option()
                     .map(|b| Polynomial::new(b).into())
                     .unwrap_or_else(|| Polynomial::new([k]).into())
             }).unwrap_or_else(|| Polynomial::new([k]).into()),
@@ -243,7 +243,7 @@ where
         let (b, a) = sos.split_numer_denom();
 
         let b_op: Option<Vec<Tf<T2, B::MaybeMapped<T2>, ()>>> = b.sos.into_inner()
-            .into_option();
+            .option();
         let b = if let Some(b) = b_op
         {
             b.into_iter()
@@ -255,7 +255,7 @@ where
             One::one()
         };
         let a_op: Option<Vec<Tf<T2, (), A::MaybeMapped<T2>>>> = a.sos.into_inner()
-            .into_option();
+            .option();
         let a = if let Some(a) = a_op
         {
             a.into_iter()

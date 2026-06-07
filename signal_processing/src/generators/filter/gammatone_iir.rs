@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 
-use crate::{gen::filter::GammatoneError, systems::Tf, System};
+use crate::{generators::filter::GammatoneError, systems::Tf, System};
 
 pub trait GammatoneIir: System + Sized
 {
@@ -36,7 +36,7 @@ where
         let seven = six + one;
         let eighteen = six*three;
 
-        let fs = if let Some(fs) = sampling_frequency.into_option()
+        let fs = if let Some(fs) = sampling_frequency.option()
         {
             if !(fs > zero)
             {
@@ -109,9 +109,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{analysis::RealFreqZ, gen::filter::GammatoneIir, plot, systems::{Tf, Zpk}, transforms::system::ToZpk, Plane};
+    use crate::{analysis::RealFreqZ, generators::filter::GammatoneIir, plot, systems::{Tf, Zpk}, transforms::system::ToZpk, Plane};
 
     #[test]
     fn test()

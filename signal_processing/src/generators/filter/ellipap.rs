@@ -1,6 +1,5 @@
 use core::{iter::Sum, ops::{AddAssign, DivAssign, MulAssign, SubAssign}};
 
-use array_math::ArrayMath;
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 
@@ -216,11 +215,11 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
     use num::Complex;
 
-    use crate::{plot, gen::filter::EllipAP, transforms::domain::Bilinear, analysis::{FreqS, RealFreqZ}, systems::Zpk, Plane};
+    use crate::{plot, generators::filter::EllipAP, transforms::domain::Bilinear, analysis::{FreqS, RealFreqZ}, systems::Zpk, Plane};
 
     #[test]
     fn test()

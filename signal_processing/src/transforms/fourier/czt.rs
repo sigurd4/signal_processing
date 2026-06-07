@@ -1,7 +1,6 @@
 use core::ops::{AddAssign, MulAssign};
 
 use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, NumCast, One, Zero};
-use array_math::SliceMath;
 use option_trait::Maybe;
 
 use crate::quantities::{ContainerOrSingle, List, ListOrSingle, Lists, OwnedList};
@@ -28,10 +27,10 @@ where
         R: Maybe<Complex<T::Real>>,
         P: Maybe<Complex<T::Real>>
     {
-        let a = point.into_option()
+        let a = point.option()
             .map(|a| a.into())
             .unwrap_or_else(Complex::one);
-        let w = ratio.into_option()
+        let w = ratio.option()
             .map(|w| w.into());
 
         self.map_rows_into_owned(|x| {

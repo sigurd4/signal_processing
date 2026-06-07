@@ -2,7 +2,6 @@ use core::{iter::Sum, ops::{AddAssign, Mul, MulAssign, SubAssign}};
 
 use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, NumCast, One, Zero};
 use option_trait::{Maybe, StaticMaybe};
-use array_math::SliceMath;
 
 use crate::{analysis::CepsError, quantities::{List, ListOrSingle, Lists, MaybeLists}, util::TruncateIm};
 
@@ -33,7 +32,7 @@ where
     where
         YM: StaticMaybe<Self::RowsMapped<C>>
     {
-        let n = n.into_option()
+        let n = Maybe::option(n)
             .unwrap_or(C::LENGTH);
 
         let y = self.try_map_rows_to_owned(|x| {
@@ -125,8 +124,8 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
 
     use crate::{plot, analysis::RCeps};
 
@@ -139,7 +138,7 @@ mod test
 
         let d = (N as f64*0.3/T) as usize;
         let s1 = t.map(|t| (TAU*45.0*t).sin());
-        let s2 = s1.add_each(ArrayOps::fill(|i| if i >= d {0.5*s1[i - d]} else {0.0}));
+        let s2 = s1.add_each(core::array::from_fn(|i| if i >= d {0.5*s1[i - d]} else {0.0}));
 
         let (c, ym): ([_; _], _) = s2.rceps(()).unwrap();
 

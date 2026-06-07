@@ -98,8 +98,8 @@ where
         let d = Sos::new(sos.maybe_map_to_owned(|_| Tf {b: Polynomial::new(()), a: a.next().unwrap()}));
 
         (
-            Sos::new(StaticMaybe::maybe_from_fn(|| n.sos.into_inner().into_maybe_some().into_option().unwrap())),
-            Sos::new(StaticMaybe::maybe_from_fn(|| d.sos.into_inner().into_maybe_some().into_option().unwrap()))
+            Sos::new(StaticMaybe::maybe_from_fn(|| n.sos.into_inner().into_maybe_some().option().unwrap())),
+            Sos::new(StaticMaybe::maybe_from_fn(|| d.sos.into_inner().into_maybe_some().option().unwrap()))
         )
     }
 }

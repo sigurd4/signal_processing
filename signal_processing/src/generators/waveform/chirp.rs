@@ -76,9 +76,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::waveform::{Chirp, ChirpCurve}};
+    use crate::{plot, generators::waveform::{Chirp, ChirpCurve}};
 
     #[test]
     fn test()

@@ -1,6 +1,5 @@
 use core::ops::{AddAssign, MulAssign};
 
-use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex};
 
 use crate::quantities::{Lists, OwnedLists};
@@ -35,8 +34,8 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
 
     use crate::{plot, transforms::fourier::{Dft, Idft}};
 

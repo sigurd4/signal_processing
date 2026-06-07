@@ -1,4 +1,3 @@
-use array_math::max_len;
 use num::Zero;
 use option_trait::Maybe;
 
@@ -42,7 +41,7 @@ impl<T, L, const N: usize> Upsample<T, (), [T; N]> for L
 where
     L: Lists<T, RowOwned: List<T>, Width = usize>,
     T: Copy + Zero,
-    [(); 0 - N % max_len(L::WIDTH, 1)]:
+    [(); 0 - N % usize::max(L::WIDTH, 1)]:
 {
     fn upsample(self, (): (), mut phase: usize) -> Self::RowsMapped<[T; N]>
     {

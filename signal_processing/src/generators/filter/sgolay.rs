@@ -3,7 +3,7 @@ use core::ops::{Deref, DerefMut, Mul, MulAssign};
 use ndarray::Array2;
 use ndarray_linalg::Lapack;
 use num::{complex::ComplexFloat, Float, NumCast};
-use option_trait::{Maybe, MaybeAnd, StaticMaybe};
+use option_trait::{Maybe, PureMaybe, PureStaticMaybe, StaticMaybe, ops::MaybeAnd};
 use thiserror::Error;
 
 use crate::{util, quantities::{ListOrSingle, OwnedList}, util::MaybeLenEq, System, systems::Tf};
@@ -38,8 +38,9 @@ where
     L: OwnedList<Tf<T, B>> + MaybeLenEq<B, true>,
     B: OwnedList<T>,
     <L::Length as StaticMaybe<usize>>::Opposite: MaybeAnd<usize, <B::Length as StaticMaybe<usize>>::Opposite, Output = NN>,
-    NN: MaybeAnd<usize, N, Output = N, Opposite: Sized>,
-    N: StaticMaybe<usize>,
+    NN: MaybeAnd<usize, N, Output = N>,
+    N: PureStaticMaybe<usize, Opposite: Sized>,
+    <B::Length as StaticMaybe<usize>>::Opposite: PureMaybe<usize>,
     [(); (L::LENGTH % 2) - 1]:,
     [(); (B::LENGTH % 2) - 1]:
 {
@@ -48,13 +49,13 @@ where
         TS: Maybe<T>,
         M: Maybe<usize>
     {
-        let n = numtaps.into_option()
+        let n = numtaps.option()
             .unwrap_or_else(|| {
                 NN::Opposite::maybe_from_fn(|| L::LENGTH.min(B::LENGTH))
-                    .into_option()
+                    .option()
                     .unwrap_or_else(|| order + 3 - order % 2)
             });
-        let m = derivative.into_option()
+        let m = derivative.option()
             .unwrap_or(0);
 
         if n % 2 != 1
@@ -70,7 +71,7 @@ where
             return Err(SGolayError::DerivativeOutOfRange)
         }
 
-        let scale = scale.into_option()
+        let scale = scale.option()
             .unwrap_or_else(T::one);
 
         let mut f = (0..n).map(|_| Tf::new(vec![T::zero(); n].try_into().ok().unwrap(), ()))
@@ -139,7 +140,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{plot, analysis::RealFreqZ, gen::filter::SGolay, systems::Tf};
+    use crate::{plot, analysis::RealFreqZ, generators::filter::SGolay, systems::Tf};
 
     #[test]
     fn test()

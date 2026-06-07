@@ -1,6 +1,5 @@
 use core::ops::{AddAssign, Mul, MulAssign};
 
-use array_math::{ArrayOps, SliceMath};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, NumCast, One, Zero};
 use option_trait::Maybe;
 
@@ -35,7 +34,7 @@ where
         let Tf { b, mut a }: Tf<Complex<T::Real>, Vec<Vec<Complex<T::Real>>>, Vec<Complex<T::Real>>> = self.into();
 
         let nf = <T::Real as NumCast>::from(N).unwrap();
-        let w = ArrayOps::fill(|i| <T::Real as NumCast>::from(i).unwrap()/nf*T::Real::TAU() - if shift {T::Real::PI()} else {T::Real::zero()});
+        let w = core::array::from_fn(|i| <T::Real as NumCast>::from(i).unwrap()/nf*T::Real::TAU() - if shift {T::Real::PI()} else {T::Real::zero()});
 
         let mut b = b.into_inner()
             .into_iter();
@@ -50,7 +49,7 @@ where
             b.fft();
             a.fft(); 
             
-            ArrayOps::fill(|mut i| {
+            core::array::from_fn(|mut i| {
                 if shift
                 {
                     i += N - N/2
@@ -136,7 +135,7 @@ where
             .unwrap_or_else(|| [One::one(); N]);
         
         let nf = <T::Real as NumCast>::from(N).unwrap();
-        let w = ArrayOps::fill(|i| <T::Real as NumCast>::from(i).unwrap()/nf*T::Real::TAU() - if shift {T::Real::PI()} else {T::Real::zero()});
+        let w = core::array::from_fn(|i| <T::Real as NumCast>::from(i).unwrap()/nf*T::Real::TAU() - if shift {T::Real::PI()} else {T::Real::zero()});
         (h, w)
     }
 }

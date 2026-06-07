@@ -6,7 +6,7 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 use thiserror::Error;
 
-use crate::{gen::filter::FilterClassType, systems::{Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, System, transforms::system::{ToSs, ToZpk}};
+use crate::{generators::filter::FilterClassType, systems::{Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, System, transforms::system::{ToSs, ToZpk}};
 
 moddef::moddef!(
     mod {
@@ -88,9 +88,9 @@ where
             response,
             weight,
             filter_type,
-            sampling_frequency.into_option(),
-            max_iter.into_option().unwrap_or(40),
-            grid_density.into_option().unwrap_or(16),
+            sampling_frequency.option(),
+            max_iter.option().unwrap_or(40),
+            grid_density.option().unwrap_or(16),
             T::infinity()
         ).map(|(h, _)| Tf::new(h.into_iter().map(Into::into).collect(), ()))
     }
@@ -121,9 +121,9 @@ where
             response,
             weight,
             filter_type,
-            sampling_frequency.into_option(),
-            max_iter.into_option().unwrap_or(40),
-            grid_density.into_option().unwrap_or(16),
+            sampling_frequency.option(),
+            max_iter.option().unwrap_or(40),
+            grid_density.option().unwrap_or(16),
             T::infinity()
         ).map(|(h, _)| Tf::new(
             h.into_iter()
@@ -212,8 +212,8 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use crate::{plot, gen::filter::{FilterClassType, FirGr}, Plane, analysis::RealFreqZ, systems::{Tf, Zpk}, transforms::system::ToZpk};
+    
+    use crate::{plot, generators::filter::{FilterClassType, FirGr}, Plane, analysis::RealFreqZ, systems::{Tf, Zpk}, transforms::system::ToZpk};
 
     #[test]
     fn test()

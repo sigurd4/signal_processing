@@ -1,6 +1,5 @@
 use core::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
-use array_math::{max_len, SliceMath};
 use ndarray_linalg::Lapack;
 use num::{complex::ComplexFloat, Complex, One, Zero};
 use option_trait::Maybe;
@@ -20,7 +19,7 @@ where
     B: MaybeLists<T>,
     A: MaybeList<T, Owned: MaybeOwnedList<T>>,
     Complex<<T as ComplexFloat>::Real>: ComplexFloat<Real = <T as ComplexFloat>::Real> + AddAssign + SubAssign + MulAssign + DivAssign + DivAssign<<T as ComplexFloat>::Real> + From<T> + TruncateIm,
-    [(); max_len(max_len(B::WIDTH, A::WIDTH), 1)]:
+    [(); usize::max(usize::max(B::WIDTH, A::WIDTH), 1)]:
 {
     type Output = Tf<T, B, A::Owned>;
 

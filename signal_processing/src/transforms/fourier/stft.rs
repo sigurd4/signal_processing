@@ -4,7 +4,6 @@ use num::{complex::ComplexFloat, traits::FloatConst, Complex, NumCast, One, Zero
 use option_trait::Maybe;
 use core::{iter::Sum, ops::{AddAssign, Div, MulAssign, Sub}};
 use std::ops::Mul;
-use array_math::{SliceMath, SliceOps};
 
 use crate::quantities::{List, Matrix, MaybeList};
 
@@ -114,10 +113,10 @@ where
         let one = <T as ComplexFloat>::Real::one();
         let two = one + one;
 
-        let boundary = boundary.into_option()
+        let boundary = boundary.option()
             .unwrap_or_default();
 
-        let fs = sampling_frequency.into_option()
+        let fs = sampling_frequency.option()
             .unwrap_or_else(One::one);
 
         let mut x: Vec<T> = self.into_vec();
@@ -214,7 +213,7 @@ where
             }
         }
 
-        let padded = padded.into_option()
+        let padded = padded.option()
             .unwrap_or(false);
 
         if padded && step != 0
@@ -224,7 +223,7 @@ where
             x.resize(nx, T::zero());
         }
 
-        let scaling = scaling.into_option()
+        let scaling = scaling.option()
             .unwrap_or_default();
 
         let scale = match scaling
@@ -244,7 +243,7 @@ where
             }
         }.sqrt();
 
-        let detrend = detrend.into_option()
+        let detrend = detrend.option()
             .unwrap_or_default();
 
         let z: Vec<_> = (0..x.len() - nw.saturating_sub(1)).step_by(step)

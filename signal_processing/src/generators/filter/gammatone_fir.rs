@@ -1,5 +1,5 @@
 use num::{complex::ComplexFloat, traits::FloatConst, Float, NumCast};
-use option_trait::{Maybe, StaticMaybe};
+use option_trait::{Maybe, PureStaticMaybe, StaticMaybe};
 use thiserror::Error;
 
 use crate::{quantities::OwnedList, systems::Tf, util, System};
@@ -36,6 +36,7 @@ where
     B: OwnedList<T>,
     <B::Length as StaticMaybe<usize>>::Opposite: StaticMaybe<usize, Maybe<N> = N> + Sized,
     N: StaticMaybe<N> + StaticMaybe<usize>,
+    (): PureStaticMaybe<N>,
     [(); B::LENGTH - 1]:
 {
     fn gammatone_fir<O, FS>(
@@ -52,7 +53,7 @@ where
         let one = T::one();
         let two = one + one;
 
-        let fs = if let Some(fs) = sampling_frequency.into_option()
+        let fs = if let Some(fs) = sampling_frequency.option()
         {
             if !(fs > zero)
             {
@@ -70,7 +71,7 @@ where
             return Err(GammatoneError::FrequencyOutOfRange)
         }
 
-        let order = if let Some(order) = order.into_option()
+        let order = if let Some(order) = order.option()
         {
             if !(0 < order && order <= 24)
             {
@@ -83,10 +84,10 @@ where
             4
         };
         
-        let numtaps = numtaps.into_option()
+        let numtaps = numtaps.option()
             .or_else(|| <B::Length as StaticMaybe<usize>>::Opposite::maybe_from_fn(|| {
                     <usize as NumCast>::from(fs * T::from(0.015).unwrap()).unwrap().max(15)
-                }).into_option()
+                }).option()
             ).unwrap_or(B::LENGTH);
 
         let hz_to_erb = |hz: T| {
@@ -111,9 +112,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{analysis::RealFreqZ, gen::filter::GammatoneFir, plot, systems::{Tf, Zpk}, transforms::system::ToZpk, Plane};
+    use crate::{analysis::RealFreqZ, generators::filter::GammatoneFir, plot, systems::{Tf, Zpk}, transforms::system::ToZpk, Plane};
 
     #[test]
     fn test()

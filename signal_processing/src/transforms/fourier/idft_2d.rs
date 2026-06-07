@@ -1,6 +1,5 @@
 use core::ops::{AddAssign, MulAssign};
 
-use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex};
 
 use crate::quantities::{Matrix, MaybeMatrix, OwnedLists, OwnedMatrix};

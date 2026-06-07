@@ -164,7 +164,7 @@ where
         T: Into<Complex<T::Real>>,
         Self: ToZpk<T, Vec<T>, Vec<T>, K, (), ()>
     {
-        let tol = if let Some(tol) = tolerance.into_option()
+        let tol = if let Some(tol) = tolerance.option()
         {
             if tol < Zero::zero() || tol > One::one()
             {

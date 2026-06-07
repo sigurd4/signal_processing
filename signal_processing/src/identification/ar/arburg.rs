@@ -67,7 +67,7 @@ where
         let two = one + one;
         let three = two + one;
 
-        let criterion = criterion.into_option();
+        let criterion = criterioMaybe::option(n);
 
         let avk = x.map_rows_into_owned(|x| {
             let mut x = x.into_vec();

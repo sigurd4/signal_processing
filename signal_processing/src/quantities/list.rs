@@ -1,8 +1,4 @@
-
-
-use array_math::ArrayOps;
 use ndarray::{Array1, ArrayView1};
-
 
 use crate::quantities::{IntoList, ListOrSingle, Matrix, MaybeList, OwnedList};
 

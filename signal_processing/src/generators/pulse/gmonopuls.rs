@@ -41,9 +41,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::pulse::GMonoPuls};
+    use crate::{plot, generators::pulse::GMonoPuls};
 
     #[test]
     fn test()

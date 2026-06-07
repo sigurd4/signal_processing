@@ -47,9 +47,9 @@ checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 
 [[package]]
 name = "bulks"
-version = "0.6.0"
+version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd3751426e5faf686d980d3b3977f40588580e4e4ef806c57f0fc8b82c737823"
+checksum = "192bbdf71d00d9142adeb763efbd3b353a75e3592143a1460f568e06a2d356fa"
 dependencies = [
  "array_trait",
  "currying",

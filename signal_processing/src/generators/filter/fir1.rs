@@ -2,9 +2,8 @@ use core::ops::{AddAssign, Mul, MulAssign};
 
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, One, Zero};
 use option_trait::Maybe;
-use array_math::SliceMath;
 
-use crate::{windows::Hamming, gen::{window::{WindowGen, WindowRange}, filter::{Fir2, FilterGenError}}, quantities::{ContainerOrSingle, List, ListOrSingle, MaybeList, Polynomial}, System, systems::Tf};
+use crate::{windows::Hamming, generators::{window::{WindowGen, WindowRange}, filter::{Fir2, FilterGenError}}, quantities::{ContainerOrSingle, List, ListOrSingle, MaybeList, Polynomial}, System, systems::Tf};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Fir1Type
@@ -206,9 +205,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::filter::{Fir1, Fir1Type}, Plane, analysis::RealFreqZ, systems::{Tf, Zpk}, transforms::system::ToZpk};
+    use crate::{plot, generators::filter::{Fir1, Fir1Type}, Plane, analysis::RealFreqZ, systems::{Tf, Zpk}, transforms::system::ToZpk};
 
     #[test]
     fn test()

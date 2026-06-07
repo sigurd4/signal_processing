@@ -40,9 +40,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::wavelet::Mexihat};
+    use crate::{plot, generators::wavelet::Mexihat};
 
     #[test]
     fn test()

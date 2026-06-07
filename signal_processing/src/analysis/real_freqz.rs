@@ -1,6 +1,5 @@
 use core::ops::{AddAssign, MulAssign};
 
-use array_math::{ArrayOps, SliceMath};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast, One, Zero};
 use option_trait::Maybe;
 
@@ -49,8 +48,8 @@ where
         a.real_fft(&mut af);
 
         let nf = <T as NumCast>::from(N).unwrap();
-        let w = ArrayOps::fill(|i| <T as NumCast>::from(i).unwrap()/nf*T::PI());
-        let h = ArrayOps::fill(|i| {
+        let w = core::array::from_fn(|i| <T as NumCast>::from(i).unwrap()/nf*T::PI());
+        let h = core::array::from_fn(|i| {
             let i = i as f64*l as f64/N as f64;
             let p = i.fract();
             let q = <T as NumCast>::from(1.0 - p).unwrap();
@@ -140,7 +139,7 @@ where
             .unwrap_or_else(|| [One::one(); N]);
         
         let nf = <T as NumCast>::from(N).unwrap();
-        let w = ArrayOps::fill(|i| <T as NumCast>::from(i).unwrap()/nf*T::PI());
+        let w = core::array::from_fn(|i| <T as NumCast>::from(i).unwrap()/nf*T::PI());
         (h, w)
     }
 }

@@ -1,4 +1,5 @@
 use num::complex::ComplexFloat;
+use option_trait::Maybe;
 
 use crate::{
     quantities::{ListOrSingle, MaybeList, MaybeLists, MaybeOwnedList},

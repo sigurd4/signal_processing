@@ -1,6 +1,5 @@
 use core::{marker::PhantomData, ops::DivAssign};
 
-use array_math::{ArrayOps, SliceMath, SliceOps};
 use num::{complex::ComplexFloat, traits::Euclid, Float, One, Zero};
 use option_trait::NotVoid;
 
@@ -166,7 +165,7 @@ where
 
         let mut c = p.c.into_iter();
         Polynomial::new(
-            ArrayOps::fill(|_| c.next().unwrap())
+            core::array::from_fn(|_| c.next().unwrap())
         )
     }
 

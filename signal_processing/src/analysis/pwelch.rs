@@ -3,9 +3,8 @@ use core::{iter::Sum, ops::{AddAssign, Div, MulAssign, SubAssign}};
 use ndarray_linalg::Lapack;
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast, Zero};
 use option_trait::{Maybe, NotVoid, StaticMaybe};
-use array_math::SliceMath;
 
-use crate::{util::{self, MaybeLenEq}, windows::Hamming, gen::window::{WindowGen, WindowRange}, quantities::{List, MaybeList}};
+use crate::{generators::window::{WindowGen, WindowRange}, quantities::{ContainerOrSingle, List, MaybeList}, util::{self, MaybeLenEq}, windows::Hamming};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PWelchDetrend
@@ -138,13 +137,13 @@ where
         CONFF: StaticMaybe<[Vec<R>; 2]>,
         F: StaticMaybe<Vec<R>>
     {
-        let window_length = window_length.into_option()
+        let window_length = window_length.option()
             .unwrap_or(256);
         let mut w = Hamming.window_gen(window_length, WindowRange::Symmetric);
-        let mut wlen = nfft.into_option()
+        let mut wlen = nfft.option()
             .map(|nfft| nfft.max(window_length))
             .unwrap_or(window_length);
-        if sloppy.into_option().unwrap_or(false)
+        if sloppy.option().unwrap_or(false)
         {
             wlen = wlen.next_power_of_two()   
         }
@@ -170,7 +169,9 @@ where
     WW::Mapped<Complex<R>>: StaticMaybe<WW::Mapped<Complex<R>>>,
     WW::Mapped<R>: StaticMaybe<WW::Mapped<R>>,
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<R>>>: Sized,
-    <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<R>>: Sized
+    <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<R>>: Sized,
+    <WW as ContainerOrSingle<W>>::Mapped<Complex<R>>: NotVoid,
+    <WW as ContainerOrSingle<W>>::Mapped<R>: NotVoid
 {
     fn pwelch<O, FS, CONF, DT, XPOW, CROSS, TRANS, COHER, YPOW, CONFF, F>(
         self,
@@ -206,7 +207,7 @@ where
             .map(|&fs| fs)
             .unwrap_or(one);
 
-        let conf = confidence.into_option()
+        let conf = confidence.option()
             .map(|conf| conf.min(one).max(zero))
             .unwrap_or_else(|| NumCast::from(0.95).unwrap());
 
@@ -220,7 +221,7 @@ where
 
         let max_overlap = self.length()
             .saturating_sub(1);
-        let overlap = overlap.into_option()
+        let overlap = overlap.option()
             .map(|o| o.min(seg_len - 1).min(max_overlap))
             .unwrap_or_else(|| seg_len/2);
 
@@ -245,7 +246,7 @@ where
             x.resize(len, T::zero())
         }
 
-        let detrend = detrend.into_option()
+        let detrend = detrend.option()
             .unwrap_or(PWelchDetrend::LongMean);
         match detrend
         {
@@ -595,7 +596,7 @@ where
             F::maybe_from_fn(|| {
                 let mut i = 0;
                 let nfftf = R::from(nfft).unwrap();
-                let tau = sampling_frequency.into_option()
+                let tau = sampling_frequency.option()
                     .unwrap_or(R::TAU());
                 window.map_into_owned(|_| {
                     let mut i_f = R::from(i).unwrap();
@@ -616,7 +617,7 @@ mod test
 {
     use core::f64::consts::PI;
 
-    use rand::distributions::uniform::SampleRange;
+    use rand::distr::uniform::SampleRange;
 
     use crate::{plot, analysis::RealPWelch};
 
@@ -627,7 +628,7 @@ mod test
 
         let n: [_; N] = core::array::from_fn(|i| i as f64);
 
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let x = n.map(|n| (PI/4.0*n).cos() + (-1.0..1.0).sample_single(&mut rng));
 
         let (pxx, (), (), (), (), (), f) = x.real_pwelch((), (), 71, (), 256, (), (), (), ());

@@ -2,7 +2,7 @@ use ndarray::prelude::Array2;
 use num::{traits::FloatConst, Complex, Float};
 use option_trait::Maybe;
 
-use crate::{gen::filter::{BesselAP, FilterGenError, FilterGenPlane, FilterGenType}, transforms::{domain::Bilinear, filter::SfTrans, system::{ToSos, ToSs, ToTf}}, quantities::MaybeList, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, System};
+use crate::{generators::filter::{BesselAP, FilterGenError, FilterGenPlane, FilterGenType}, transforms::{domain::Bilinear, filter::SfTrans, system::{ToSos, ToSs, ToTf}}, quantities::MaybeList, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, System};
 
 pub trait BesselF<O>: System + Sized
 where
@@ -222,9 +222,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::filter::{BesselF, FilterGenPlane, FilterGenType}, Plane, analysis::RealFreqZ, systems::Tf, transforms::system::ToZpk, systems::Zpk};
+    use crate::{plot, generators::filter::{BesselF, FilterGenPlane, FilterGenType}, Plane, analysis::RealFreqZ, systems::Tf, transforms::system::ToZpk, systems::Zpk};
 
     #[test]
     fn test()

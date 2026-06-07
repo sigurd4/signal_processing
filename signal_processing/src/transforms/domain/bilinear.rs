@@ -1,6 +1,5 @@
 use core::{any::Any, iter::Product, ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign}};
 
-use array_math::{SliceMath, SliceOps};
 use num::{complex::ComplexFloat, NumCast, One};
 use option_trait::{Maybe, StaticMaybe};
 use thiserror::Error;
@@ -207,9 +206,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{analysis::RealFreqZ, gen::filter::{Butter, FilterGenPlane, FilterGenType}, plot, systems::{Tf, Zpk}, transforms::domain::Bilinear};
+    use crate::{analysis::RealFreqZ, generators::filter::{Butter, FilterGenPlane, FilterGenType}, plot, systems::{Tf, Zpk}, transforms::domain::Bilinear};
 
     #[test]
     fn test()

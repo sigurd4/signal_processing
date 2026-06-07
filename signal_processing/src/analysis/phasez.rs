@@ -96,9 +96,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::filter::{Butter, FilterGenPlane}, analysis::{FreqZ, PhaseUnwrapReference, PhaseZ}, systems::Tf};
+    use crate::{plot, generators::filter::{Butter, FilterGenPlane}, analysis::{FreqZ, PhaseUnwrapReference, PhaseZ}, systems::Tf};
 
     #[test]
     fn test()

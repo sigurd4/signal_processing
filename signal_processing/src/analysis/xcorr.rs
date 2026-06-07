@@ -1,6 +1,5 @@
 use core::{iter::Sum, ops::{AddAssign, DivAssign, MulAssign, RangeInclusive}};
 
-use array_math::{SliceMath, SliceOps};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
@@ -73,9 +72,9 @@ where
         }
         let nm1 = n - 1;
 
-        let mut max_lag = max_lag.into_option()
+        let mut max_lag = max_lag.option()
             .unwrap_or(nm1);
-        let scale = scale.into_option()
+        let scale = scale.option()
             .unwrap_or_default();
 
         let pad_result = if max_lag > nm1

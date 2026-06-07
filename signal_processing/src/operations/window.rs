@@ -45,9 +45,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, windows, gen::{window::{WindowGen, WindowRange}, filter::{Butter, FilterGenPlane, FilterGenType}}, analysis::RealFreqZ, systems::Tf, operations::Window};
+    use crate::{plot, windows, generators::{window::{WindowGen, WindowRange}, filter::{Butter, FilterGenPlane, FilterGenType}}, analysis::RealFreqZ, systems::Tf, operations::Window};
 
     #[test]
     fn test()

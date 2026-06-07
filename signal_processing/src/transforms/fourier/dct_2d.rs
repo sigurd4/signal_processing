@@ -1,6 +1,5 @@
 use core::ops::{AddAssign, DivAssign, Mul, MulAssign};
 
-use array_math::SliceMath;
 use num::{complex::ComplexFloat, Complex};
 
 use crate::quantities::{Matrix, MaybeMatrix, OwnedLists, OwnedMatrix};
@@ -100,7 +99,7 @@ mod test
         const M: usize = 64;
         const N: usize = 64;
 
-        let mut img = image::io::Reader::open("images/lena.png")?.decode().unwrap();
+        let mut img = image::ImageReader::open("images/lena.png")?.decode().unwrap();
 
         let n = img.width() as usize;
         let m = img.height() as usize;

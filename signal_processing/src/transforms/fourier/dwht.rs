@@ -1,6 +1,5 @@
 use core::ops::MulAssign;
 
-use array_math::{SliceMath, SliceOps};
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 

@@ -2,7 +2,6 @@ use core::ops::{AddAssign, MulAssign, SubAssign};
 
 use num::{complex::ComplexFloat, traits::float::FloatConst, Complex, Float, NumCast, One, Zero};
 use option_trait::Maybe;
-use array_math::SliceMath;
 
 use crate::{systems::Ar, quantities::{ContainerOrSingle, List, ListOrSingle, Lists, MaybeList}, System};
 
@@ -53,12 +52,12 @@ where
         let one = T::Real::one();
         let two = one + one;
 
-        let freq_len = numtaps.into_option()
+        let freq_len = numtaps.option()
             .unwrap_or(256);
         let freq_lenf = <T::Real as NumCast>::from(freq_len).unwrap();
-        let fs = sampling_frequency.into_option()
+        let fs = sampling_frequency.option()
             .unwrap_or(T::Real::TAU());
-        let range = range.into_option()
+        let range = range.option()
             .unwrap_or(PsdRange::Whole);
 
         let w = fs/freq_lenf;
@@ -71,7 +70,7 @@ where
             w*i
         }).collect();
 
-        let method = method.into_option()
+        let method = method.option()
             .unwrap_or_else(|| if freq_len.is_power_of_two()
             {
                 PsdMethod::Fft
@@ -147,7 +146,7 @@ where
             return (self.av.map_to_owned(|_| [T::Real::zero(); N]), [T::Real::zero(); N])
         }
         
-        let range = range.into_option()
+        let range = range.option()
             .unwrap_or(PsdRange::Whole);
 
         let numtaps = if range == PsdRange::Half
@@ -181,7 +180,7 @@ where
     where
         FS: Maybe<<Self::Set as ComplexFloat>::Real>
     {
-        let fs = sampling_frequency.into_option()
+        let fs = sampling_frequency.option()
             .unwrap_or(T::Real::TAU());
         
         let w = T::Real::TAU()/fs;
@@ -208,7 +207,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
     use crate::{plot, systems::Ar, analysis::Psd};
 

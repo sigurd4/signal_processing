@@ -4,8 +4,6 @@ use core::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast};
 use option_trait::Maybe;
 
-use array_math::SliceMath;
-
 use crate::{util::Chain, quantities::{Polynomial, ProductSequence}, System, systems::Zpk};
 
 pub trait BesselAP<O>: System + Sized
@@ -81,11 +79,11 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
     use num::Complex;
 
-    use crate::{plot, gen::filter::BesselAP, transforms::domain::Bilinear, analysis::{FreqS, RealFreqZ}, systems::Zpk, Plane};
+    use crate::{plot, generators::filter::BesselAP, transforms::domain::Bilinear, analysis::{FreqS, RealFreqZ}, systems::Zpk, Plane};
 
     #[test]
     fn test()

@@ -27,7 +27,7 @@ where
     where
         TOL: Maybe<T::Real>
     {
-        let tol = tol.into_option();
+        let tol = tol.option();
 
         let a = self.a.as_view();
 
@@ -78,7 +78,7 @@ where
     where
         TOL: Maybe<T::Real>
     {
-        let tol = tol.into_option()
+        let tol = tol.option()
             .map(|tol| Float::abs(tol))
             .unwrap_or_else(T::Real::epsilon);
 

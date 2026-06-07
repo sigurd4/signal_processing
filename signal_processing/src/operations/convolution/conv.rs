@@ -1,6 +1,5 @@
 use core::{iter::Sum, ops::{AddAssign, Mul, MulAssign}};
 
-use array_math::{ArrayMath, SliceMath};
 use num::{complex::ComplexFloat, Complex};
 
 use crate::quantities::{ListOrSingle, MaybeContainer};

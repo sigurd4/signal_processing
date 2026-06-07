@@ -1,6 +1,5 @@
 use core::ops::{AddAssign, Deref, SubAssign};
 
-use array_math::{SliceOps, SliceMath};
 use ndarray::{Array1, Array2};
 use num::{complex::ComplexFloat, Zero};
 use option_trait::{Maybe, StaticMaybe};
@@ -80,7 +79,7 @@ where
                     {
                         y += w*b.into()
                     }
-                    w.shift_right(&mut w0);
+                    [w0] = w.shift_right([w0]);
 
                     y
                 });
@@ -159,7 +158,7 @@ where
                 {
                     y += w*b.into()
                 }
-                w.shift_right(&mut w0);
+                [w0] = w.shift_right([w0]);
 
                 y
             });
@@ -192,10 +191,10 @@ where
     fn filter_mut(&mut self, x: XX) -> Self::Output
     {
         let Ss {mut a, mut b, mut c, mut d, ..} = Ss::new(
-            self.sys.a.to_array2().map(|&a| a.into()),
-            self.sys.b.to_array2().map(|&b| b.into()),
-            self.sys.c.to_array2().map(|&c| c.into()),
-            self.sys.d.to_array2().map(|&d| d.into())
+            self.sys.a.to_array2().map(|a| a.into()),
+            self.sys.b.to_array2().map(|b| b.into()),
+            self.sys.c.to_array2().map(|c| c.into()),
+            self.sys.d.to_array2().map(|d| d.into())
         );
 
         let (mu, nu) = x.matrix_dim();

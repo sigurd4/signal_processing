@@ -71,7 +71,7 @@ where
         resize(&mut c, (q, n));
         resize(&mut d, (q, p));
         
-        let w0 = w.into_option()
+        let w0 = w.option()
             .map(|mut w| {
                 w.resize(n, T::zero());
                 w
@@ -232,7 +232,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use crate::{analysis::ImpulseZ, gen::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::Tf};
+    use crate::{analysis::ImpulseZ, generators::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::Tf};
 
     #[test]
     fn test()

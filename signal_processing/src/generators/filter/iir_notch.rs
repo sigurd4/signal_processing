@@ -42,7 +42,7 @@ where
         let one = T::one();
         let two = one + one;
 
-        let fs = if let Some(fs) = sampling_frequency.into_option()
+        let fs = if let Some(fs) = sampling_frequency.option()
         {
             if !(fs > zero)
             {
@@ -86,7 +86,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
     use crate::{analysis::RealFreqZ, plot, systems::{Tf, Zpk}, transforms::system::ToZpk, Plane};
 

@@ -1,7 +1,5 @@
 use core::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
-use array_math::SliceMath;
-
 use num::{complex::ComplexFloat, Complex, Float, NumCast, One, Zero, traits::FloatConst};
 use option_trait::Maybe;
 
@@ -50,7 +48,7 @@ where
 
         let Tf {b, a}: Tf<T, B::RowsMapped<Vec<T>>, Vec<T>> = self.into();
 
-        let fs = sampling_frequency.into_option()
+        let fs = sampling_frequency.option()
             .unwrap_or_else(One::one);
         let t: Vec<_> = (0..n).map(|n| <T::Real as NumCast>::from(n).unwrap()/fs)
             .collect();
@@ -225,10 +223,10 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
     use num::complex::ComplexFloat;
 
-    use crate::{plot, gen::filter::{Butter, FilterGenPlane, FilterGenType}, analysis::{FreqZ, ImpZ}, systems::Tf};
+    use crate::{plot, generators::filter::{Butter, FilterGenPlane, FilterGenType}, analysis::{FreqZ, ImpZ}, systems::Tf};
 
     #[test]
     fn test()

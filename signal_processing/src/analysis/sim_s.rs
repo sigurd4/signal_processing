@@ -5,7 +5,7 @@ use ndarray_linalg::Lapack;
 use num::{complex::ComplexFloat, NumCast, One, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{quantities::{List, ListOrSingle, Lists, Matrix, MaybeList, MaybeLists, MaybeOwnedList, OwnedList, OwnedListOrSingle, OwnedLists}, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, transforms::system::ToSs, util::{self, ComplexOp, MaybeLenEq, TwoSidedRange}, System};
+use crate::{System, quantities::{List, ListOrSingle, Lists, Matrix, MaybeList, MaybeLists, MaybeOwnedList, OwnedList, OwnedListOrSingle, OwnedLists}, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, transforms::system::ToSs, util::{self, ComplexOp, MaybeLenEq, TwoSidedRange}};
 
 pub trait SimS<X, XX>: System
 where
@@ -52,10 +52,10 @@ where
         W: Maybe<Vec<Y>>
     {
         let Ss {mut a, mut b, mut c, mut d, ..} = Ss::new(
-            self.a.to_array2().map(|&a| a.into()),
-            self.b.to_array2().map(|&b| b.into()),
-            self.c.to_array2().map(|&c| c.into()),
-            self.d.to_array2().map(|&d| d.into())
+            self.a.to_array2().map(|a| a.into()),
+            self.b.to_array2().map(|b| b.into()),
+            self.c.to_array2().map(|c| c.into()),
+            self.d.to_array2().map(|d| d.into())
         );
 
         let (mu, nu) = x.matrix_dim();
@@ -89,7 +89,7 @@ where
         resize(&mut c, (q, n));
         resize(&mut d, (q, p));
         
-        let w0 = w.into_option()
+        let w0 = w.option()
             .map(|mut w| {
                 w.resize(n, Y::zero());
                 w
@@ -99,7 +99,7 @@ where
         let t0 = *t.start();
         let mut xout = if !t0.is_zero()
         {
-            match util::expm(a.t().map(|&a| a*t0))
+            match util::expm(a.t().map(|a| a*t0))
             {
                 Ok(at_expm) => {
                     let w0 = Array1::from_vec(w0).dot(&at_expm);
@@ -116,7 +116,7 @@ where
         };
 
         let mut u = x.to_array2()
-            .map(|&u| u.into());
+            .map(|u| u.into());
         let no_input = u.iter()
             .all(|u: &Y| u.is_zero());
 
@@ -141,7 +141,7 @@ where
 
         if no_input
         {
-            let expat_dt = match util::expm(a.reversed_axes().map(|&a| a*dt))
+            let expat_dt = match util::expm(a.reversed_axes().map(|a| a*dt))
             {
                 Ok(e) => e,
                 Err(_) => Array2::from_elem((n, n), Y::zero())
@@ -382,10 +382,10 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
 
-    use crate::{analysis::SimS, gen::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::Tf};
+    use crate::{analysis::SimS, generators::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::Tf};
 
     #[test]
     fn test()

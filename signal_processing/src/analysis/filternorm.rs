@@ -81,7 +81,7 @@ where
 mod test
 {
     use crate::{
-        gen::filter::{Butter, FilterGenPlane, FilterGenType},
+        generators::filter::{Butter, FilterGenPlane, FilterGenType},
         analysis::FilterNorm,
         systems::Tf
     };

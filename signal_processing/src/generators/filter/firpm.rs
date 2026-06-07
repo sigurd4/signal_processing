@@ -3,7 +3,7 @@ use core::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 use ndarray::Array2;
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, NumCast};
 use option_trait::{Maybe, StaticMaybe};
-use rand::distributions::uniform::SampleUniform;
+use rand::distr::uniform::SampleUniform;
 use thiserror::Error;
 
 use crate::{systems::{Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, transforms::system::{ToSs, ToZpk}, System};
@@ -124,7 +124,7 @@ where
         let mut h = Err(FirPmError::NumericalError);
         let mut n = 1;
 
-        let sampling_frequency = sampling_frequency.into_option();
+        let sampling_frequency = sampling_frequency.option();
     
         for _ in 0..128
         {
@@ -151,7 +151,7 @@ where
                         *e.0 += e.1
                     }
                     *m += m_;
-                    if let Some(r) = r.as_option_mut() && let Some(r_) = r_.into_option()
+                    if let Some(r) = r.as_option_mut() && let Some(r_) = r_.option()
                     {
                         for e in r.des.iter_mut()
                             .zip(r_.des)
@@ -308,9 +308,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::filter::{FirPm, FirPmType}, Plane, analysis::RealFreqZ, transforms::system::ToZpk, systems::{Tf, Zpk}};
+    use crate::{plot, generators::filter::{FirPm, FirPmType}, Plane, analysis::RealFreqZ, transforms::system::ToZpk, systems::{Tf, Zpk}};
 
     #[test]
     fn test()

@@ -2,7 +2,6 @@ use core::ops::Mul;
 
 use num::{complex::ComplexFloat, traits::FloatConst, Float};
 use option_trait::Maybe;
-use array_math::SliceMath;
 
 use crate::{quantities::{MaybeList, MaybeOwnedList}, operations::Simplify, decompositions::Residue, systems::{Rpk, Tf}, System};
 

@@ -2,8 +2,6 @@ use core::ops::{AddAssign, Deref, Div, Rem, Sub};
 
 use num::{traits::Euclid, One, Zero};
 
-use array_math::SliceMath;
-
 use crate::quantities::{Lists, MaybeList, NotPolynomial, Polynomial};
 
 impl<T, C1, C2> Div<Polynomial<T, C2>> for Polynomial<T, C1>

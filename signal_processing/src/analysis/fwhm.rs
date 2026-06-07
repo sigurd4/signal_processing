@@ -159,10 +159,9 @@ mod test
 {
     use core::f64::consts::{PI, TAU};
 
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
     use crate::{
-        gen::window::{WindowGen, WindowRange},
+        generators::window::{WindowGen, WindowRange},
         windows::{Barthann, BlackmanHarris, Boxcar, Hamming, Hann, Kaiser, Triangular},
         analysis::{FWHM, FullWidthAt},
         transforms::fourier::Dft

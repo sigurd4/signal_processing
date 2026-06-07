@@ -43,7 +43,7 @@ where
 
         let mut bands = bands.into_vec();
 
-        if let Some(fs) = sampling_frequency.into_option()
+        if let Some(fs) = sampling_frequency.option()
         {
             let nyq = fs/two;
             for (f, bw) in bands.iter_mut()
@@ -116,9 +116,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::filter::PeiTsengNotch, Plane, analysis::RealFreqZ, transforms::system::ToZpk, systems::{Tf, Zpk}};
+    use crate::{plot, generators::filter::PeiTsengNotch, Plane, analysis::RealFreqZ, transforms::system::ToZpk, systems::{Tf, Zpk}};
 
     #[test]
     fn test()

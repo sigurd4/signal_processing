@@ -41,7 +41,7 @@ where
             (rho, omega)
         };
 
-        let lambda = lambda.into_option()
+        let lambda = lambda.option()
             .and_then(|lambda| if lambda.is_zero() {None} else {Some(lambda)});
         if let Some(lambda) = lambda
         {
@@ -167,9 +167,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
-    use rand::distributions::uniform::SampleRange;
+    
+    use linspace::Linspace;
+    use rand::distr::uniform::SampleRange;
 
     use crate::{plot, transforms::bspline::{CSpline1d, CSpline1dEval}};
 
@@ -177,7 +177,7 @@ mod test
     fn test()
     {
         const N: usize = 300;
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let x: [_; N] = [0.0; N/3].chain([1.0; N/3])
             .chain([0.0; N/3])
             .add_each(core::array::from_fn(|_| (-0.05..0.05).sample_single(&mut rng)));

@@ -1,4 +1,3 @@
-use array_math::SliceMath;
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 

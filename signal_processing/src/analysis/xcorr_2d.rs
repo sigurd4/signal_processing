@@ -51,7 +51,7 @@ where
         
         let mut y: YYY = YY::MaybeSome::maybe_or_from_fn(
             || y.into_maybe_some()
-                .into_option()
+                .option()
                 .unwrap()
                 .map_into_owned(|y| y.into()),
             || self.map_to_owned(|&x| x.into())
@@ -59,7 +59,7 @@ where
         
         let (mb, nb) = y.matrix_dim();
 
-        let scale = scale.into_option()
+        let scale = scale.option()
             .unwrap_or_default();
 
         let coeff_scale = if scale == XCorrScale::Coeff
@@ -167,7 +167,7 @@ mod test
     #[test]
     fn test() -> Result<(), Box<dyn std::error::Error>>
     {
-        let ximg = image::io::Reader::open("images/durer.png")?.decode()?;
+        let ximg = image::ImageReader::open("images/durer.png")?.decode()?;
 
         let xn = ximg.width() as usize;
         let xm = ximg.height() as usize;
@@ -184,7 +184,7 @@ mod test
             *x -= mean
         }
 
-        let yimg = image::io::Reader::open("images/durer_dog.png")?.decode()?;
+        let yimg = image::ImageReader::open("images/durer_dog.png")?.decode()?;
 
         let yn = yimg.width() as usize;
         let ym = yimg.height() as usize;

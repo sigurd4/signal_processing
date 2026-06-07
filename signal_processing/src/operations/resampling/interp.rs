@@ -1,10 +1,9 @@
 use core::ops::MulAssign;
 
-use array_math::max_len;
 use num::{complex::ComplexFloat, NumCast, One};
 use option_trait::Maybe;
 
-use crate::{util::ComplexOp, operations::filtering::FftFilt, gen::filter::{Fir1, Fir1Type}, quantities::{List, ListOrSingle, Lists, MaybeLists}, System, systems::Tf};
+use crate::{util::ComplexOp, operations::filtering::FftFilt, generators::filter::{Fir1, Fir1Type}, quantities::{List, ListOrSingle, Lists, MaybeLists}, System, systems::Tf};
 
 pub trait Interp<T, Q, Y>: Lists<T>
 where
@@ -30,9 +29,9 @@ where
         N: Maybe<usize>,
         W: Maybe<T::Real>
     {
-        let order = order.into_option()
+        let order = order.option()
             .unwrap_or(4);
-        let cutoff = cutoff.into_option()
+        let cutoff = cutoff.option()
             .unwrap_or_else(|| {
                 let one = T::Real::one();
                 let two = one + one;
@@ -88,7 +87,7 @@ where
     T: ComplexFloat,
     L: Lists<T, Width = usize> + Interp<T, usize, Vec<T>>,
     Self::RowsMapped<Vec<T>>: Lists<T, RowOwned = Vec<T>, RowsMapped<[T; M]> = L::RowsMapped<[T; M]>>,
-    [(); 0 - M % max_len(L::WIDTH, 1)]:
+    [(); 0 - M % usize::max(L::WIDTH, 1)]:
 {
     fn interp<N, W>(self, (): (), order: N, cutoff: W) -> Self::RowsMapped<[T; M]>
     where

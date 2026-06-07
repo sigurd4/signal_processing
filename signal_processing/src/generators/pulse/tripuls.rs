@@ -31,7 +31,7 @@ where
         let one = T::one();
         let two = one + one;
         let bw_half = bandwidth/two;
-        let skew = skew.into_option()
+        let skew = skew.option()
             .unwrap_or(zero);
         let peak = skew*bw_half;
 

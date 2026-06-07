@@ -1,7 +1,5 @@
 use core::ops::Neg;
 
-use array_math::ArrayOps;
-
 use crate::quantities::Polynomial;
 
 macro_rules! impl_neg {

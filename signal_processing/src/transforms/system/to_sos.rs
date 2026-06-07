@@ -1,8 +1,7 @@
 use core::ops::{AddAssign, MulAssign};
 
-use array_math::ArrayMath;
 use num::{complex::ComplexFloat, Complex};
-use option_trait::{Maybe, MaybeOr, NotVoid, StaticMaybe};
+use option_trait::{Maybe, NotVoid, PureStaticMaybe, StaticMaybe, ops::MaybeOr};
 
 use crate::{quantities::{MaybeList, MaybeLists, MaybeOwnedList, Polynomial, ProductSequence}, systems::{Sos, Tf, Zpk}, System, transforms::system::{ToTf, ToZpk}};
 
@@ -47,9 +46,9 @@ where
     K: ComplexFloat<Real = T1::Real> + Into<T2>,
     Z: MaybeList<T1, MaybeSome: StaticMaybe<Z::Some, Maybe<[T2; 3]>: MaybeOr<[T2; 3], B, Output = B>>>,
     P: MaybeList<T1, MaybeSome: StaticMaybe<P::Some, Maybe<[T2; 3]>: MaybeOr<[T2; 3], A, Output = A>>>,
-    B: StaticMaybe<[T2; 3]> + MaybeOwnedList<T2> + MaybeOr<[T2; 3], A, Output: StaticMaybe<[T2; 3], Maybe<Vec<Tf<T2, B, A>>>: MaybeOr<Vec<Tf<T2, B, A>>, S, Output = S>>>,
-    A: StaticMaybe<[T2; 3]> + MaybeOwnedList<T2>,
-    S: StaticMaybe<Vec<Tf<T2, B, A>>> + MaybeList<Tf<T2, B, A>>,
+    B: PureStaticMaybe<[T2; 3]> + MaybeOwnedList<T2> + MaybeOr<[T2; 3], A, Output: StaticMaybe<[T2; 3], Maybe<Vec<Tf<T2, B, A>>>: MaybeOr<Vec<Tf<T2, B, A>>, S, Output = S>>>,
+    A: PureStaticMaybe<[T2; 3]> + MaybeOwnedList<T2>,
+    S: PureStaticMaybe<Vec<Tf<T2, B, A>>> + MaybeList<Tf<T2, B, A>>,
     Complex<T1::Real>: Into<Complex<T2::Real>>,
     Complex<T2::Real>: AddAssign,
     T1::Real: Into<T2> + NotVoid,
@@ -119,8 +118,8 @@ where
     T2: ComplexFloat,
     B1: MaybeLists<T1, Some: NotVoid, MaybeSome: StaticMaybe<B1::Some, Maybe<[T2; 3]>: MaybeOr<[T2; 3], B2, Output = B2>> + StaticMaybe<B1::Some, Maybe<Vec<Complex<T1::Real>>> = Z>>,
     A1: MaybeList<T1, Some: NotVoid, MaybeSome: StaticMaybe<B1::Some, Maybe<[T2; 3]>: MaybeOr<[T2; 3], A2, Output = A2>> + StaticMaybe<A1::Some, Maybe<Vec<Complex<T1::Real>>> = P>>,
-    B2: StaticMaybe<[T2; 3]> + MaybeOwnedList<T2>,
-    A2: StaticMaybe<[T2; 3]> + MaybeOwnedList<T2>,
+    B2: PureStaticMaybe<[T2; 3]> + MaybeOwnedList<T2>,
+    A2: PureStaticMaybe<[T2; 3]> + MaybeOwnedList<T2>,
     O: Maybe<usize>,
     Z: MaybeList<Complex<T1::Real>>,
     P: MaybeList<Complex<T1::Real>>,

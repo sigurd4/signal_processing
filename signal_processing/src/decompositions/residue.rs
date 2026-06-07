@@ -3,7 +3,6 @@ use core::ops::{AddAssign, Div, DivAssign, Mul, MulAssign, SubAssign};
 use ndarray_linalg::Lapack;
 use num::{complex::ComplexFloat, traits::{float::TotalOrder, Euclid, FloatConst}, Complex, Float, One, Zero};
 
-use array_math::SliceMath;
 use option_trait::Maybe;
 
 use crate::{quantities::{MaybeContainer, MaybeList, Polynomial, SumSequence}, operations::Simplify, System, systems::{Rpk, Tf}, transforms::system::ToTf};
@@ -97,7 +96,7 @@ where
     T: Float + FloatConst + TotalOrder,
     TOL: Maybe<T>
 {
-    let tol = tol.into_option()
+    let tol = tol.option()
         .map(|tol| Float::abs(tol))
         .unwrap_or_else(|| T::from(1e-3).unwrap());
     let mut unique_poles_multiplicity: Vec<(Complex<_>, usize)> = vec![];

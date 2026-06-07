@@ -34,9 +34,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::wavelet::CMorWavF};
+    use crate::{plot, generators::wavelet::CMorWavF};
 
     #[test]
     fn test()

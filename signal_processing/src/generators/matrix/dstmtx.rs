@@ -184,9 +184,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::{ArrayOps, CollumnArrayOps, MatrixMath};
-
-    use crate::{transforms::fourier::Dst, gen::matrix::DstMatrix};
+    use crate::{transforms::fourier::Dst, generators::matrix::DstMatrix};
 
     #[test]
     fn test()

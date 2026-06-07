@@ -1,8 +1,7 @@
 use core::{iter::Product, ops::{AddAssign, DerefMut, DivAssign, MulAssign, SubAssign}};
 
 use num::{complex::ComplexFloat, Complex, One};
-use array_math::SliceMath;
-use option_trait::{Maybe, MaybeOr, StaticMaybe};
+use option_trait::{Maybe, PureStaticMaybe, StaticMaybe, ops::MaybeOr};
 
 use crate::{quantities::{MaybeList, MaybeOwnedList, MaybeLists, ProductSequence}, operations::Simplify, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, System, transforms::system::{ToSos, ToTf}};
 
@@ -50,8 +49,8 @@ where
     K: ComplexFloat + DivAssign,
     B: MaybeLists<T, MaybeSome: StaticMaybe<B::Some, Maybe<Vec<Complex<<K as ComplexFloat>::Real>>>: MaybeOr<Vec<Complex<<K as ComplexFloat>::Real>>, Z, Output = Z>>>,
     A: MaybeList<T, MaybeSome: StaticMaybe<A::Some, Maybe<Vec<Complex<<K as ComplexFloat>::Real>>>: MaybeOr<Vec<Complex<<K as ComplexFloat>::Real>>, P, Output = P>>>,
-    Z: MaybeList<Complex<<K as ComplexFloat>::Real>> + StaticMaybe<Vec<Complex<<K as ComplexFloat>::Real>>, Maybe<Vec<K>> = B2>,
-    P: MaybeList<Complex<<K as ComplexFloat>::Real>> + StaticMaybe<Vec<Complex<<K as ComplexFloat>::Real>>, Maybe<Vec<K>> = A2>,
+    Z: MaybeList<Complex<<K as ComplexFloat>::Real>> + PureStaticMaybe<Vec<Complex<<K as ComplexFloat>::Real>>, Maybe<Vec<K>> = B2>,
+    P: MaybeList<Complex<<K as ComplexFloat>::Real>> + PureStaticMaybe<Vec<Complex<<K as ComplexFloat>::Real>>, Maybe<Vec<K>> = A2>,
     Self: Simplify<Output: ToTf<K, B2, A2, (), O>>,
     B2: MaybeList<K> + Maybe<Vec<K>>,
     A2: MaybeList<K> + Maybe<Vec<K>>,

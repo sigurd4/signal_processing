@@ -3,7 +3,7 @@ use core::ops::MulAssign;
 use num::{complex::ComplexFloat, traits::FloatConst, Float};
 use option_trait::Maybe;
 
-use crate::{systems::Tf, System, gen::filter::SingleFreqFilterError};
+use crate::{systems::Tf, System, generators::filter::SingleFreqFilterError};
 
 pub trait IirPeak: System + Sized
 {
@@ -32,7 +32,7 @@ where
         let one = T::one();
         let two = one + one;
 
-        let fs = if let Some(fs) = sampling_frequency.into_option()
+        let fs = if let Some(fs) = sampling_frequency.option()
         {
             if !(fs > zero)
             {
@@ -76,7 +76,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
     use crate::{analysis::RealFreqZ, plot, systems::{Tf, Zpk}, transforms::system::ToZpk, Plane};
 

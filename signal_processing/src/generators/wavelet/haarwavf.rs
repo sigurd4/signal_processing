@@ -50,9 +50,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::wavelet::HaarWavF};
+    use crate::{plot, generators::wavelet::HaarWavF};
 
     #[test]
     fn test()

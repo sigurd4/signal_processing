@@ -90,10 +90,10 @@ where
 #[cfg(test)]
 mod test
 {
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
     use num::{Complex, Zero};
 
-    use crate::{plot, gen::waveform::{Chirp, ChirpCurve}, transforms::fourier::Sdft};
+    use crate::{plot, generators::waveform::{Chirp, ChirpCurve}, transforms::fourier::Sdft};
 
     #[test]
     fn test()

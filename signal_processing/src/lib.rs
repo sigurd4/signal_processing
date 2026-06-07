@@ -4,9 +4,9 @@
 #![feature(associated_type_defaults)]
 #![feature(auto_traits)]
 #![feature(negative_impls)]
-#![feature(associated_const_equality)]
 #![feature(split_array)]
 #![feature(iterator_try_collect)]
+#![feature(const_cmp)]
 #![feature(float_gamma)]
 #![feature(fn_traits)]
 #![feature(coerce_unsized)]
@@ -33,14 +33,14 @@ moddef::moddef!(
         validate_filter_bands
     },
     pub mod {
-        //analysis,
-        //decompositions,
+        analysis,
+        decompositions,
         generators,
-        //identification,
-        //operations,
-        //quantities,
-        //systems,
-        //transforms,
+        identification,
+        operations,
+        quantities,
+        systems,
+        transforms,
         util,
         windows,
     },

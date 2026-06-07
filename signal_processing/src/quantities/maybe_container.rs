@@ -1,7 +1,7 @@
 
 
 
-use ndarray::{ArrayBase, ArrayView, Dimension, NdIndex, OwnedRepr};
+use ndarray::{ArrayBase, ArrayView, Dimension, NdIndex, OwnedRepr, RawData};
 use option_trait::{NotVoid, StaticMaybe};
 
 use crate::quantities::{Container, ContainerOrSingle};
@@ -1991,7 +1991,7 @@ impl<T, const N: usize> MaybeContainer<T> for &[&[T; N]]
     }
 }
 
-impl<T, D> MaybeContainer<T> for ArrayBase<OwnedRepr<T>, D>
+impl<T, D> MaybeContainer<T> for ArrayBase<OwnedRepr<T>, D, T>
 where
     D: Dimension + NotVoid,
     <D as Dimension>::Pattern: NdIndex<D>
@@ -2000,7 +2000,7 @@ where
     where
         T: 'a,
         Self: 'a;
-    type Owned = ArrayBase<OwnedRepr<T>, D>;
+    type Owned = ArrayBase<OwnedRepr<T>, D, T>;
     type Some = Self;
     type MaybeSome = Self;
     type MaybeMapped<MM> = <Self as ContainerOrSingle<T>>::Mapped<MM>;

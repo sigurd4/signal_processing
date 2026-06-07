@@ -3,7 +3,6 @@
 use core::f64::consts::TAU;
 use std::collections::HashMap;
 
-use array_math::{ArrayOps, ArrayNdOps};
 use num::Complex;
 use plotters::{coord::ranged3d::{ProjectionMatrix, ProjectionMatrixBuilder}, element::PointCollection, prelude::*, style::{full_palette::GREY, text_anchor::{HPos, Pos, VPos}}};
 

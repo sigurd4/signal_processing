@@ -1,6 +1,5 @@
 use core::ops::{AddAssign, MulAssign};
 
-use array_math::SliceMath;
 use num::{One, Zero};
 
 use crate::quantities::{MaybeList, MaybeLists, Polynomial};

@@ -1,7 +1,6 @@
 use core::{ops::{Mul, MulAssign, AddAssign}, iter::Sum};
 
 use num::{complex::ComplexFloat, Complex};
-use array_math::{max_len, SliceMath, ArrayMath};
 
 use crate::quantities::{MaybeLists, ListOrSingle, MaybeContainer};
 
@@ -56,11 +55,11 @@ macro_rules! impl_cconv {
             T2: ComplexFloat,
             Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign,
-            [(); max_len($n, $m)]:,
+            [(); usize::max($n, $m)]:,
             $($($w)*)?
         {
             type OutputT = <T1 as Mul<T2>>::Output;
-            type Output = [<T1 as Mul<T2>>::Output; max_len($n, $m)];
+            type Output = [<T1 as Mul<T2>>::Output; usize::max($n, $m)];
         
             fn cconv(self, rhs: $rhs) -> Self::Output
             {
@@ -94,11 +93,11 @@ macro_rules! impl_cconv {
             T2: ComplexFloat,
             Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign,
-            [(); max_len($n, $m)]:,
+            [(); usize::max($n, $m)]:,
             $($($w)*)?
         {
             type OutputT = <T1 as Mul<T2>>::Output;
-            type Output = [[<T1 as Mul<T2>>::Output; max_len($n, $m)]; $k];
+            type Output = [[<T1 as Mul<T2>>::Output; usize::max($n, $m)]; $k];
         
             #[inline]
             fn cconv(self, rhs: $rhs) -> Self::Output
@@ -115,11 +114,11 @@ macro_rules! impl_cconv {
             T2: ComplexFloat,
             Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign,
-            [(); max_len($n, $m)]:,
+            [(); usize::max($n, $m)]:,
             $($($w)*)?
         {
             type OutputT = <T1 as Mul<T2>>::Output;
-            type Output = [[<T1 as Mul<T2>>::Output; max_len($n, $m)]; $k];
+            type Output = [[<T1 as Mul<T2>>::Output; usize::max($n, $m)]; $k];
         
             #[inline]
             fn cconv(self, rhs: $rhs) -> Self::Output
@@ -136,11 +135,11 @@ macro_rules! impl_cconv {
             T2: ComplexFloat,
             Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign,
-            [(); max_len($n, $m)]:,
+            [(); usize::max($n, $m)]:,
             $($($w)*)?
         {
             type OutputT = <T1 as Mul<T2>>::Output;
-            type Output = Vec<[<T1 as Mul<T2>>::Output; max_len($n, $m)]>;
+            type Output = Vec<[<T1 as Mul<T2>>::Output; usize::max($n, $m)]>;
         
             #[inline]
             fn cconv(self, rhs: $rhs) -> Self::Output
@@ -158,11 +157,11 @@ macro_rules! impl_cconv {
             T2: ComplexFloat,
             Complex<T1::Real>: From<T1> + AddAssign + MulAssign + Mul<Complex<T2::Real>, Output: ComplexFloat<Real = <<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + MulAssign + AddAssign + MulAssign<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real> + From<Complex<<<T1 as Mul<T2>>::Output as ComplexFloat>::Real>> + Sum + 'static>,
             Complex<T2::Real>: From<T2> + AddAssign + MulAssign,
-            [(); max_len($n, $m)]:,
+            [(); usize::max($n, $m)]:,
             $($($w)*)?
         {
             type OutputT = <T1 as Mul<T2>>::Output;
-            type Output = Vec<[<T1 as Mul<T2>>::Output; max_len($n, $m)]>;
+            type Output = Vec<[<T1 as Mul<T2>>::Output; usize::max($n, $m)]>;
         
             #[inline]
             fn cconv(self, rhs: $rhs) -> Self::Output

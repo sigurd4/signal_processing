@@ -1,7 +1,6 @@
 use core::ops::DivAssign;
 
 use num::{Float, complex::ComplexFloat};
-use array_math::{SliceMath, SliceOps};
 use option_trait::Maybe;
 
 use crate::{quantities::{ListOrSingle, MaybeOwnedList, MaybeList, MaybeLists}, systems::{Sos, Tf, Zpk}, System, transforms::system::ToTf};
@@ -27,7 +26,7 @@ where
     where
         TOL: Maybe<T::Real>
     {
-        let tol = tol.into_option()
+        let tol = tol.option()
             .map(|tol| Float::abs(tol))
             .unwrap_or_else(T::Real::epsilon);
 
@@ -109,7 +108,7 @@ where
     where
         TOL: Maybe<T::Real>
     {
-        let tol = tol.into_option()
+        let tol = tol.option()
             .map(|tol| Float::abs(tol))
             .unwrap_or_else(T::Real::epsilon);
 

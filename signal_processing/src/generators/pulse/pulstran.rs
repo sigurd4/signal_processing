@@ -46,7 +46,7 @@ where
         let t = self.into_list(n);
 
         let s = train.map_into_owned(|(d, g)| {
-            let g: G = g.into_option()
+            let g: G = g.option()
                 .unwrap_or_else(|| unsafe {core::mem::transmute_copy(&T::one())});
             t.map_to_owned(|&t| {
                 pulse(t - d)*g.clone()
@@ -74,9 +74,9 @@ mod test
 {
     use core::ops::Add;
 
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::pulse::{GausPuls, PulseTrain}};
+    use crate::{plot, generators::pulse::{GausPuls, PulseTrain}};
 
     #[test]
     fn test()

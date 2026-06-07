@@ -3,7 +3,6 @@ use core::ops::{AddAssign, Deref, DivAssign, MulAssign};
 use ndarray::{Array1, Array2};
 use ndarray_linalg::{Lapack, Solve};
 use num::{complex::ComplexFloat, One};
-use array_math::{SliceMath, ArrayMath, SliceOps};
 use option_trait::Maybe;
 
 use crate::{quantities::{MaybeList, MaybeOwnedList}, systems::{Sos, Tf}, System};
@@ -127,9 +126,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-
-    use crate::{analysis::FiltIcU, gen::filter::{Butter, FilterGenPlane, FilterGenType}, operations::filtering::Filter, plot, systems::Sos};
+    use crate::{analysis::FiltIcU, generators::filter::{Butter, FilterGenPlane, FilterGenType}, operations::filtering::Filter, plot, systems::Sos};
 
     #[test]
     fn test()

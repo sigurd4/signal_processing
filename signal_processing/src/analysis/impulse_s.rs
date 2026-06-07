@@ -51,11 +51,11 @@ where
         TT: TwoSidedRange<T::Real> + Clone,
         W: Maybe<Vec<T>>
     {
-        let w = w.into_option();
+        let w = w.option();
         
         let b: Array2<T> = self.b.to_array2();
 
-        let n = numtaps.into_option()
+        let n = numtaps.option()
             .unwrap_or(L::LENGTH);
         let nuf = <T::Real as NumCast>::from(n).unwrap();
         let numaybem1 = if t.is_end_inclusive()
@@ -225,9 +225,9 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::ArrayOps;
+    
 
-    use crate::{analysis::ImpulseS, gen::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::Tf};
+    use crate::{analysis::ImpulseS, generators::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::Tf};
 
     #[test]
     fn test()

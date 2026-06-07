@@ -80,9 +80,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::Array2dOps;
-
-    use crate::{plot, windows::Hann, gen::window::{WindowGen, WindowRange}, transforms::window::ToKw};
+    use crate::{plot, windows::Hann, generators::window::{WindowGen, WindowRange}, transforms::window::ToKw};
 
     #[test]
     fn test()

@@ -1,4 +1,3 @@
-use array_math::SliceOps;
 use num::{complex::ComplexFloat, Float};
 use option_trait::Maybe;
 
@@ -26,7 +25,7 @@ where
     where
         TOL: Maybe<T::Real>
     {
-        let tol = tol.into_option()
+        let tol = tol.option()
             .map(|tol| Float::abs(tol))
             .unwrap_or(T::Real::epsilon());
 
@@ -101,7 +100,7 @@ where
                 .is_linphase(tol, generalized);
         }
         
-        let tol = tol.into_option()
+        let tol = tol.option()
             .map(|tol| Float::abs(tol))
             .unwrap_or_else(T::Real::epsilon);
 
@@ -158,7 +157,7 @@ where
     where
         TOL: Maybe<T::Real>
     {
-        let tol = tol.into_option()
+        let tol = tol.option()
             .map(|tol| Float::abs(tol))
             .unwrap_or_else(T::Real::epsilon);
 

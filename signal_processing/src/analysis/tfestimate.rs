@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float};
-use option_trait::{Maybe, StaticMaybe};
+use option_trait::{Maybe, NotVoid, StaticMaybe};
 
-use crate::{quantities::List, util::MaybeLenEq, analysis::{PWelch, PWelchDetrend}};
+use crate::{analysis::{PWelch, PWelchDetrend}, quantities::{ContainerOrSingle, List}, util::MaybeLenEq};
 
 pub trait TfEstimate<X, Y, YY, W, WW, WWW, WL, N, S>: List<X> + MaybeLenEq<YY, true>
 where
@@ -56,7 +56,9 @@ where
     (): StaticMaybe<YY::Maybe<WW::Mapped<Complex<T>>>>,
     (): StaticMaybe<YY::Maybe<WW::Mapped<T>>>,
     WW::Mapped<Complex<T>>: StaticMaybe<YY::Maybe<WW::Mapped<Complex<T>>>>,
-    (): StaticMaybe<WW::Mapped<T>>
+    (): StaticMaybe<WW::Mapped<T>>,
+    <WW as ContainerOrSingle<W>>::Mapped<Complex<T>>: NotVoid,
+    <WW as ContainerOrSingle<W>>::Mapped<T>: NotVoid
 {
     fn tfestimate<O, FS, CONF, DT, F>(
         self,
@@ -98,10 +100,10 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use rand::distributions::uniform::SampleRange;
+    
+    use rand::distr::uniform::SampleRange;
 
-    use crate::{plot, windows::Boxcar, operations::filtering::Filter, gen::{window::{WindowGen, WindowRange}, filter::{Fir1, Fir1Type}}, analysis::{TfEstimate, FreqZ}, systems::Tf};
+    use crate::{plot, windows::Boxcar, operations::filtering::Filter, generators::{window::{WindowGen, WindowRange}, filter::{Fir1, Fir1Type}}, analysis::{TfEstimate, FreqZ}, systems::Tf};
 
     #[test]
     fn test()
@@ -111,7 +113,7 @@ mod test
             .unwrap();
 
         const N: usize = 1024;
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let x: [_; N] = core::array::from_fn(|_| (-1.0..1.0).sample_single(&mut rng));
         let y = h.filter(x, ());
         let (h_f, _) = h.freqz((), true);

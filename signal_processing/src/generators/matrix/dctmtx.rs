@@ -229,9 +229,7 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::{ArrayOps, CollumnArrayOps, MatrixMath};
-
-    use crate::{transforms::fourier::Dct, gen::matrix::DctMatrix};
+    use crate::{transforms::fourier::Dct, generators::matrix::DctMatrix};
 
     #[test]
     fn test()

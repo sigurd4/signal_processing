@@ -12,7 +12,7 @@ where
     {
         let one = T::one();
     
-        let scale = scale.into_option()
+        let scale = scale.option()
             .unwrap_or(one);
 
         h.reverse();

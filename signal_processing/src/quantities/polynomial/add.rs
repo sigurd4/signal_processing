@@ -1,6 +1,5 @@
 use core::ops::Add;
 
-use array_math::{max_len, ArrayOps};
 use num::Zero;
 
 use crate::quantities::Polynomial;
@@ -51,9 +50,9 @@ impl<T1, T2, const N: usize, const M: usize> Add<Polynomial<T2, [T2; M]>> for Po
 where
     T1: Add<T2> + Zero,
     T2: Zero,
-    [(); max_len(N, M)]:
+    [(); usize::max(N, M)]:
 {
-    type Output = Polynomial<<T1 as Add<T2>>::Output, [<T1 as Add<T2>>::Output; max_len(N, M)]>;
+    type Output = Polynomial<<T1 as Add<T2>>::Output, [<T1 as Add<T2>>::Output; usize::max(N, M)]>;
 
     fn add(self, rhs: Polynomial<T2, [T2; M]>) -> Self::Output
     {

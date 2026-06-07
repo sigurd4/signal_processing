@@ -1,10 +1,9 @@
 use core::ops::{AddAssign, Div, Mul, MulAssign, SubAssign};
 
-use array_math::{SliceOps, SliceMath};
 use num::{complex::ComplexFloat, traits::float::TotalOrder, Complex, Float, NumCast, One, Zero};
 use option_trait::Maybe;
 
-use crate::{windows::Hamming, gen::{filter::FilterGenError, window::{WindowGen, WindowRange}}, quantities::{List, MaybeList, Polynomial}, System, systems::Tf, util::TruncateIm};
+use crate::{windows::Hamming, generators::{filter::FilterGenError, window::{WindowGen, WindowRange}}, quantities::{List, MaybeList, Polynomial}, System, systems::Tf, util::TruncateIm};
 
 pub trait Fir2<O, F, M, W, WW = (), const WWW: bool = false>: System + Sized
 where
@@ -61,9 +60,9 @@ where
         let w: &[W] = window.as_view_slice();
         let n = w.len().saturating_sub(1);
 
-        let mut grid_n = npt.into_option()
+        let mut grid_n = npt.option()
             .unwrap_or(512.max(n + 1));
-        let ramp_n = lap.into_option()
+        let ramp_n = lap.option()
             .unwrap_or(grid_n/25);
 
         let f = frequencies.as_view_slice();
@@ -87,7 +86,7 @@ where
         let zero = T::Real::zero();
         let one = T::Real::one();
         let two = one + one;
-        if let Some(fs) = sampling_frequency.into_option()
+        if let Some(fs) = sampling_frequency.option()
         {
             for wc in f.iter_mut()
             {
@@ -311,9 +310,9 @@ mod test
 {
     use core::f64::consts::{PI, TAU};
 
-    use array_math::ArrayOps;
     
-    use crate::{plot, gen::filter::Fir2, analysis::FreqZ, Plane, systems::Tf, transforms::system::ToZpk, systems::Zpk};
+    
+    use crate::{plot, generators::filter::Fir2, analysis::FreqZ, Plane, systems::Tf, transforms::system::ToZpk, systems::Zpk};
 
     #[test]
     fn test()

@@ -1,7 +1,7 @@
 use num::{traits::FloatConst, Complex, Float, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{quantities::{List, Lists, MaybeList, ListOrSingle}, util::MaybeLenEq, analysis::{PWelch, PWelchDetrend}};
+use crate::{analysis::{PWelch, PWelchDetrend}, quantities::{List, ListOrSingle, Lists, MaybeList}, util::MaybeLenEq};
 
 pub trait RealPWelch<T, YY, WW, WWW, WL, N, S>: Lists<T> + MaybeLenEq<YY, true>
 where
@@ -107,39 +107,39 @@ where
 
         (
             StaticMaybe::maybe_from_fn(|| {
-                let pxx = pxx.into_option().unwrap();
+                let pxx = pxx.option().unwrap();
                 let l = pxx.length();
                 pxx.static_resize_list::<{WW::WIDTH/2 + 1}>(l/2 + 1, Zero::zero)
             }),
             StaticMaybe::maybe_from_fn(|| StaticMaybe::maybe_from_fn(|| {
-                let cross: WW::Mapped<Complex<T>> = cross.into_option().unwrap().into_option().unwrap();
+                let cross: WW::Mapped<Complex<T>> = cross.option().unwrap().option().unwrap();
                 let l = cross.length();
                 cross.static_resize_list::<{WW::WIDTH/2 + 1}>(l/2 + 1, Zero::zero)
             })),
             StaticMaybe::maybe_from_fn(|| StaticMaybe::maybe_from_fn(|| {
-                let trans: WW::Mapped<Complex<T>> = trans.into_option().unwrap().into_option().unwrap();
+                let trans: WW::Mapped<Complex<T>> = trans.option().unwrap().option().unwrap();
                 let l = trans.length();
                 trans.static_resize_list::<{WW::WIDTH/2 + 1}>(l.length()/2 + 1, Zero::zero)
             })),
             StaticMaybe::maybe_from_fn(|| StaticMaybe::maybe_from_fn(|| {
-                let coher: WW::Mapped<T> = coher.into_option().unwrap().into_option().unwrap();
+                let coher: WW::Mapped<T> = coher.option().unwrap().option().unwrap();
                 let l = coher.length();
                 coher.static_resize_list::<{WW::WIDTH/2 + 1}>(l/2 + 1, Zero::zero)
             })),
             StaticMaybe::maybe_from_fn(|| StaticMaybe::maybe_from_fn(|| {
-                let ypp: WW::Mapped<T> = ypp.into_option().unwrap().into_option().unwrap();
+                let ypp: WW::Mapped<T> = ypp.option().unwrap().option().unwrap();
                 let l = ypp.length();
                 ypp.static_resize_list::<{WW::WIDTH/2 + 1}>(l/2 + 1, Zero::zero)
             })),
             StaticMaybe::maybe_from_fn(|| {
-                let conf = conf.into_option().unwrap();
+                let conf = conf.option().unwrap();
                 conf.map(|conf| {
                     let l = conf.length();
                     conf.static_resize_list::<{WW::WIDTH/2 + 1}>(l/2 + 1, Zero::zero)
                 })
             }),
             StaticMaybe::maybe_from_fn(|| {
-                let f = f.into_option().unwrap();
+                let f = f.option().unwrap();
                 let l = f.length();
                 f.static_resize_list::<{WW::WIDTH/2 + 1}>(l/2 + 1, Zero::zero)
             })

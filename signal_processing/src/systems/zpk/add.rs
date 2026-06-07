@@ -1,7 +1,7 @@
 use core::ops::{Add, Mul};
 
 use num::{complex::ComplexFloat, Complex};
-use option_trait::{MaybeOr, StaticMaybe};
+use option_trait::{ops::MaybeOr, StaticMaybe};
 
 use crate::{quantities::MaybeList, decompositions::SplitNumerDenom, systems::{Tf, Zpk}, transforms::system::{ToTf, ToZpk}};
 

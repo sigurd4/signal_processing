@@ -5,7 +5,7 @@ use ndarray_linalg::Lapack;
 use num::{complex::ComplexFloat, traits::real::Real, NumCast, One, Zero};
 use option_trait::{Maybe, StaticMaybe};
 
-use crate::{quantities::{List, ListOrSingle, Lists, Matrix, MaybeList, MaybeLists, MaybeOwnedList, OwnedListOrSingle}, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, transforms::system::ToSs, util::{self, ComplexOp, MaybeLenEq, TwoSidedRange}, System};
+use crate::{quantities::{List, ListOrSingle, Lists, Matrix, MaybeList, MaybeLists, MaybeOwnedList, OwnedListOrSingle}, systems::{Sos, Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, transforms::system::ToSs, util::{self, ComplexOp, TwoSidedRange}, System};
 
 pub trait SimZ<X, XX>: System
 where
@@ -31,7 +31,7 @@ where
     B: SsBMatrix<T, A, C, D>,
     C: SsCMatrix<T, A, B, D>,
     D: SsDMatrix<T, A, B, C>,
-    XX: Matrix<X, Transpose: Matrix<X, RowOwned: MaybeLenEq<D::RowOwned, true> + MaybeLenEq<B::RowOwned, true>>> + Clone,
+    XX: Matrix<X, Transpose: Matrix<X, /*RowOwned: MaybeLenEq<D::RowOwned, true> + MaybeLenEq<B::RowOwned, true>*/>> + Clone,
     Array2<Y>: SsAMatrix<Y, Array2<Y>, Array2<Y>, Array2<Y>> + SsBMatrix<Y, Array2<Y>, Array2<Y>, Array2<Y>> + SsCMatrix<Y, Array2<Y>, Array2<Y>, Array2<Y>> + SsDMatrix<Y, Array2<Y>, Array2<Y>, Array2<Y>>,
     D::RowsMapped<Vec<Y>>: Lists<Y> + OwnedListOrSingle<Vec<Y>, Length: StaticMaybe<usize, Opposite: Sized>>
 {
@@ -44,10 +44,10 @@ where
         W: Maybe<Vec<Y>>
     {
         let Ss {mut a, mut b, mut c, mut d, ..} = Ss::new(
-            self.a.to_array2().map(|&a| a.into()),
-            self.b.to_array2().map(|&b| b.into()),
-            self.c.to_array2().map(|&c| c.into()),
-            self.d.to_array2().map(|&d| d.into())
+            self.a.to_array2().map(|a| a.into()),
+            self.b.to_array2().map(|b| b.into()),
+            self.c.to_array2().map(|c| c.into()),
+            self.d.to_array2().map(|d| d.into())
         );
 
         let (mu, nu) = x.matrix_dim();
@@ -81,7 +81,7 @@ where
         resize(&mut c, (q, n));
         resize(&mut d, (q, p));
         
-        let w0 = w.into_option()
+        let w0 = w.option()
             .map(|mut w| {
                 w.resize(n, Y::zero());
                 w
@@ -91,7 +91,7 @@ where
         let mut xout = vec![w0];
 
         let mut u = x.to_array2()
-            .map(|&u| u.into());
+            .map(|u| u.into());
 
         let zero = T::Real::zero();
         let one = T::Real::one();
@@ -311,10 +311,10 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
 
-    use crate::{analysis::SimZ, gen::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::Tf};
+    use crate::{analysis::SimZ, generators::filter::{BesselF, FilterGenPlane, FilterGenType}, plot, systems::Tf};
 
     #[test]
     fn test()

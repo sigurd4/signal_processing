@@ -28,8 +28,8 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
 
     use crate::{plot, transforms::fourier::Dht};
 
@@ -40,7 +40,7 @@ mod test
         const T: f64 = 1.0;
         const F: f64 = 220.0;
         
-        let x: [_; N] = ArrayOps::fill(|i| (TAU*F*i as f64/N as f64*T).sin());
+        let x: [_; N] = core::array::from_fn(|i| (TAU*F*i as f64/N as f64*T).sin());
 
         let xf = x.dht();
 

@@ -79,7 +79,7 @@ where
                 coher.static_resize_list::<{WW::WIDTH/2 + 1}>(l/2 + 1, Zero::zero)
             },
             StaticMaybe::maybe_from_fn(|| {
-                let f = f.into_option().unwrap();
+                let f = f.option().unwrap();
                 let l = f.length();
                 f.static_resize_list::<{WW::WIDTH/2 + 1}>(l/2 + 1, Zero::zero)
             })

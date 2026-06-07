@@ -3,7 +3,7 @@ use core::marker::PhantomData;
 use num::complex::ComplexFloat;
 use option_trait::Maybe;
 
-use crate::{util::LenEq, quantities::Matrix};
+use crate::{quantities::Matrix};
 
 pub trait SsAMatrix<T, B: Matrix<T>, C: Matrix<T>, D: Matrix<T>>: Matrix<T> {}
 impl<T, A, B, C, D, N> SsAMatrix<T, B, C, D> for A
@@ -12,8 +12,7 @@ where
     A: Matrix<T, Height = N, Width = N>,
     B: Matrix<T, Height = A::Height, Width = D::Width>,
     C: Matrix<T, Height = D::Height, Width = A::Width>,
-    D: Matrix<T>,
-    usize: LenEq<{A::HEIGHT}, {A::WIDTH}, true> + LenEq<{B::HEIGHT}, {A::HEIGHT}, true> + LenEq<{B::WIDTH}, {D::WIDTH}, true> + LenEq<{C::HEIGHT}, {D::HEIGHT}, true> + LenEq<{C::WIDTH}, {A::WIDTH}, true>
+    D: Matrix<T>
 {}
 pub trait SsBMatrix<T, A: Matrix<T>, C: Matrix<T>, D: Matrix<T>>: Matrix<T> {}
 impl<T, A, B, C, D, N> SsBMatrix<T, A, C, D> for B
@@ -22,8 +21,7 @@ where
     A: Matrix<T, Height = N, Width = N>,
     B: Matrix<T, Height = A::Height, Width = D::Width>,
     C: Matrix<T, Height = D::Height, Width = A::Width>,
-    D: Matrix<T>,
-    usize: LenEq<{A::HEIGHT}, {A::WIDTH}, true> + LenEq<{B::HEIGHT}, {A::HEIGHT}, true> + LenEq<{B::WIDTH}, {D::WIDTH}, true> + LenEq<{C::HEIGHT}, {D::HEIGHT}, true> + LenEq<{C::WIDTH}, {A::WIDTH}, true>
+    D: Matrix<T>
 {}
 pub trait SsCMatrix<T, A: Matrix<T>, B: Matrix<T>, D: Matrix<T>>: Matrix<T> {}
 impl<T, A, B, C, D, N> SsCMatrix<T, A, B, D> for C
@@ -32,8 +30,7 @@ where
     A: Matrix<T, Height = N, Width = N>,
     B: Matrix<T, Height = A::Height, Width = D::Width>,
     C: Matrix<T, Height = D::Height, Width = A::Width>,
-    D: Matrix<T>,
-    usize: LenEq<{A::HEIGHT}, {A::WIDTH}, true> + LenEq<{B::HEIGHT}, {A::HEIGHT}, true> + LenEq<{B::WIDTH}, {D::WIDTH}, true> + LenEq<{C::HEIGHT}, {D::HEIGHT}, true> + LenEq<{C::WIDTH}, {A::WIDTH}, true>
+    D: Matrix<T>
 {}
 pub trait SsDMatrix<T, A: Matrix<T>, B: Matrix<T>, C: Matrix<T>>: Matrix<T> {}
 impl<T, A, B, C, D, N> SsDMatrix<T, A, B, C> for D
@@ -42,8 +39,7 @@ where
     A: Matrix<T, Height = N, Width = N>,
     B: Matrix<T, Height = A::Height, Width = D::Width>,
     C: Matrix<T, Height = D::Height, Width = A::Width>,
-    D: Matrix<T>,
-    usize: LenEq<{A::HEIGHT}, {A::WIDTH}, true> + LenEq<{B::HEIGHT}, {A::HEIGHT}, true> + LenEq<{B::WIDTH}, {D::WIDTH}, true> + LenEq<{C::HEIGHT}, {D::HEIGHT}, true> + LenEq<{C::WIDTH}, {A::WIDTH}, true>
+    D: Matrix<T>
 {}
 
 

@@ -246,10 +246,10 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
 
-    use crate::{plot, transforms::{domain::Bilinear, filter::SfTrans}, gen::filter::{Butter, FilterGenPlane, FilterGenType}, analysis::RealFreqZ, systems::Zpk};
+    use crate::{plot, transforms::{domain::Bilinear, filter::SfTrans}, generators::filter::{Butter, FilterGenPlane, FilterGenType}, analysis::RealFreqZ, systems::Zpk};
 
     #[test]
     fn test()

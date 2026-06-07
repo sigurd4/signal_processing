@@ -1,7 +1,7 @@
 use core::ops::{AddAssign, DerefMut, DivAssign, MulAssign};
 
 use num::{complex::ComplexFloat, traits::Euclid, Zero, Float};
-use option_trait::{Maybe, MaybeOr, NotVoid, StaticMaybe};
+use option_trait::{Maybe, NotVoid, PureStaticMaybe, StaticMaybe, ops::MaybeOr};
 
 use crate::{quantities::{ListOrSingle, MaybeList, MaybeLists, OwnedLists, Polynomial, ProductSequence}, systems::{Ss, SsAMatrix, SsBMatrix, SsCMatrix, SsDMatrix, Tf, Zpk}, System};
 
@@ -27,7 +27,7 @@ where
     Polynomial<T, Vec<T>>: Euclid,
     BB: MaybeList<T> + Maybe<Vec<T>>,
     AA: MaybeList<T> + Maybe<Vec<T>> + Clone,
-    B::RowsMapped<BB>: MaybeLists<T> + StaticMaybe<B2>,
+    B::RowsMapped<BB>: MaybeLists<T> + PureStaticMaybe<B2>,
     BB2: MaybeLists<T> + Maybe<B2> + Clone,
     Polynomial<T, AA>: Into<Polynomial<T, Vec<T>>>,
     Polynomial<T, BB2::RowOwned>: Into<Polynomial<T, Vec<T>>>

@@ -3,10 +3,9 @@ use std::{f64::{consts::{FRAC_PI_2, PI}, EPSILON}, ops::Range};
 
 use num::{traits::FloatConst, Complex, Float, NumCast, Zero};
 use option_trait::StaticMaybe;
-use rand::{distributions::uniform::SampleUniform, rngs::ThreadRng, Rng};
-use array_math::{SliceMath, ArrayOps};
+use rand::{distr::uniform::SampleUniform, rngs::ThreadRng, Rng};
 
-use crate::{gen::filter::{FirPmError, FirPmReport, FirPmType}, quantities::Polynomial, systems::Tf};
+use crate::{generators::filter::{FirPmError, FirPmReport, FirPmType}, quantities::Polynomial, systems::Tf};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum FirType
@@ -634,7 +633,7 @@ where
     let mut stability;
     let mut minimality = zero;
     let mut space0: Vec<Point<T>> = vec![];
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     while result == MmFirResult::Success && density <= density2
     {
         // Map current density to a convergence minimality threshold:

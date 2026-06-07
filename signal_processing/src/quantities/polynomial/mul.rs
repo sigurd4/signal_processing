@@ -1,4 +1,3 @@
-use array_math::{ArrayMath, SliceMath};
 use num::Zero;
 use option_trait::NotVoid;
 

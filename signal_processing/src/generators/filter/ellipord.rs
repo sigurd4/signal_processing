@@ -1,9 +1,8 @@
 use core::ops::{DivAssign, MulAssign};
 
-use array_math::ArrayMath;
 use num::{traits::FloatConst, Float, NumCast};
 
-use crate::{validate_filter_bands, gen::filter::{FilterGenPlane, FilterGenType, FilterBandError}};
+use crate::{validate_filter_bands, generators::filter::{FilterGenPlane, FilterGenType, FilterBandError}};
 
 pub fn ellipord<T, const F: usize>(
     mut passband_frequencies: [T; F],

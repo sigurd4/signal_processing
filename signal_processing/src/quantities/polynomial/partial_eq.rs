@@ -1,4 +1,3 @@
-use array_math::SliceMath;
 use num::Zero;
 
 use crate::quantities::{MaybeLists, Polynomial};

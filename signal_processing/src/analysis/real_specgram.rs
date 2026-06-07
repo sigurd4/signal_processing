@@ -3,9 +3,8 @@ use core::ops::{AddAssign, MulAssign};
 use ndarray::Array2;
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, NumCast, Zero};
 use option_trait::Maybe;
-use array_math::{Array2dOps, ArrayOps, SliceMath};
 
-use crate::{windows::Hamming, gen::window::{WindowGen, WindowRange}, quantities::{List, Matrix, MaybeList}};
+use crate::{windows::Hamming, generators::window::{WindowGen, WindowRange}, quantities::{List, Matrix, MaybeList}};
 
 pub trait RealSpecGram<T, S, N, O, W, WW, const WWW: bool>: List<T>
 where
@@ -64,7 +63,7 @@ where
             }).collect();
         let s = Array2::from_shape_fn((ret_n, s.len()), |(r, c)| s[c][r]);
 
-        let fs = sampling_frequency.into_option()
+        let fs = sampling_frequency.option()
             .unwrap_or_else(FloatConst::TAU);
 
         let t = (0..x.len() - n).step_by(step)
@@ -114,14 +113,14 @@ where
             y.resize(|_| Zero::zero())
         }).transpose();
 
-        let fs = sampling_frequency.into_option()
+        let fs = sampling_frequency.option()
             .unwrap_or_else(FloatConst::TAU);
 
-        let t = ArrayOps::fill(|k| {
+        let t = core::array::from_fn(|k| {
             let i = k*step;
             <T::Real as NumCast>::from(i).unwrap()/fs
         });
-        let f = ArrayOps::fill(|i| <T::Real as NumCast>::from(i).unwrap()/NumCast::from(n).unwrap()*fs);
+        let f = core::array::from_fn(|i| <T::Real as NumCast>::from(i).unwrap()/NumCast::from(n).unwrap()*fs);
 
         (s, f, t)
     }
@@ -182,7 +181,7 @@ where
         assert_eq!(L, t.len());
         
         (
-            ArrayOps::fill(|i| ArrayOps::fill(|j| s[(i, j)])),
+            core::array::from_fn(|i| core::array::from_fn(|j| s[(i, j)])),
             f.try_into()
                 .ok()
                 .unwrap(),
@@ -196,9 +195,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::waveform::{Chirp, ChirpCurve}, analysis::RealSpecGram};
+    use crate::{plot, generators::waveform::{Chirp, ChirpCurve}, analysis::RealSpecGram};
 
     #[test]
     fn test()

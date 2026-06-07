@@ -1,7 +1,6 @@
 use core::ops::{AddAssign, Div, DivAssign};
 use std::ops::Mul;
 
-use array_math::{ArrayOps, SliceOps};
 use num::{complex::ComplexFloat, traits::FloatConst, Float, NumCast, One};
 use option_trait::Maybe;
 use thiserror::Error;
@@ -67,7 +66,7 @@ where
         let one = T::Real::one();
         let two = one + one;
 
-        let t = sampling_frequency.into_option()
+        let t = sampling_frequency.option()
             .unwrap_or(two);
         for wc in w.iter_mut()
         {
@@ -194,10 +193,10 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
 
-    use crate::{plot, gen::filter::{Ellip, FilterGenPlane, FilterGenType}, analysis::RealFreqZ, systems::Tf, transforms::filter::ZfTrans};
+    use crate::{plot, generators::filter::{Ellip, FilterGenPlane, FilterGenType}, analysis::RealFreqZ, systems::Tf, transforms::filter::ZfTrans};
 
     #[test]
     fn test()

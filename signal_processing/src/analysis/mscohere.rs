@@ -1,7 +1,7 @@
 use num::{complex::ComplexFloat, Complex};
 use option_trait::{Maybe, NotVoid, StaticMaybe};
 
-use crate::{quantities::List, util::MaybeLenEq, analysis::{PWelch, PWelchDetrend}};
+use crate::{analysis::{PWelch, PWelchDetrend}, quantities::{ContainerOrSingle, List}, util::MaybeLenEq};
 
 pub trait MsCohere<T, Y, YY, W, WW, WWW, WL, N, S>: List<T> + MaybeLenEq<YY, true>
 where
@@ -54,6 +54,8 @@ where
     WW::Mapped<Complex<T::Real>>: StaticMaybe<WW::Mapped<Complex<T::Real>>>,
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<Complex<T::Real>>>: NotVoid,
     <YY::MaybeSome as StaticMaybe<YY::Some>>::Maybe<WW::Mapped<T::Real>>: NotVoid,
+    <WW as ContainerOrSingle<W>>::Mapped<Complex<T::Real>>: NotVoid,
+    <WW as ContainerOrSingle<W>>::Mapped<T::Real>: NotVoid,
     (): StaticMaybe<WW::Mapped<T::Real>>
 {
     fn mscohere<O, FS, CONF, DT, F>(
@@ -84,16 +86,16 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
-    use rand::distributions::uniform::SampleRange;
+    
+    use rand::distr::uniform::SampleRange;
 
-    use crate::{plot, gen::filter::{Cheby1, Cheby2, FilterGenPlane}, operations::filtering::Filter, analysis::{RealMsCohere, RealFreqZ}, systems::Tf};
+    use crate::{plot, generators::filter::{Cheby1, Cheby2, FilterGenPlane}, operations::filtering::Filter, analysis::{RealMsCohere, RealFreqZ}, systems::Tf};
 
     #[test]
     fn test()
     {
         const N: usize = 16384;
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let r: Vec<_> = (0..N).map(|_| (-1.0..1.0).sample_single(&mut rng)).collect();
 
         let (n, wp, _ws, rs, t) = crate::generators::filter::cheb2ord([0.2, 0.4], [0.15, 0.45], 0.1, 60.0, FilterGenPlane::Z { sampling_frequency: None })

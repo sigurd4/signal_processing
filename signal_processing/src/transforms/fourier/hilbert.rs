@@ -1,7 +1,6 @@
 use core::ops::{AddAssign, MulAssign};
 
 use num::{complex::ComplexFloat, Complex, One, Zero};
-use array_math::SliceMath;
 
 use crate::{quantities::{Lists, OwnedLists}, util::TruncateIm};
 
@@ -66,8 +65,8 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    
+    use linspace::Linspace;
 
     use crate::{plot, transforms::fourier::Hilbert, quantities::MaybeContainer};
 
@@ -79,7 +78,7 @@ mod test
         const T: f64 = 4.0/F;
         
         let t = (0.0..T).linspace_array();
-        let x: [_; N] = ArrayOps::fill(|i| (TAU*F*i as f64/N as f64*T).sin());
+        let x: [_; N] = core::array::from_fn(|i| (TAU*F*i as f64/N as f64*T).sin());
 
         let y = x.as_view().hilbert();
 

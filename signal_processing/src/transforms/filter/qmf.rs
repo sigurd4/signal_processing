@@ -2,7 +2,6 @@ use core::ops::{AddAssign, DivAssign, MulAssign, SubAssign};
 
 use ndarray_linalg::Lapack;
 use num::{complex::ComplexFloat, traits::FloatConst, Complex, Float, One};
-use array_math::SliceMath;
 use option_trait::Maybe;
 
 use crate::{quantities::{MaybeList, MaybeLists, MaybeOwnedList, MaybeOwnedLists, Polynomial}, systems::{Sos, Tf, Zpk}, System, util::TruncateIm};
@@ -120,9 +119,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::filter::{Cheby1, FilterGenPlane, FilterGenType}, transforms::filter::Qmf, analysis::RealFreqZ, systems::Sos};
+    use crate::{plot, generators::filter::{Cheby1, FilterGenPlane, FilterGenType}, transforms::filter::Qmf, analysis::RealFreqZ, systems::Sos};
 
     #[test]
     fn test()

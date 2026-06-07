@@ -49,9 +49,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::waveform::Diric};
+    use crate::{plot, generators::waveform::Diric};
 
     #[test]
     fn test()

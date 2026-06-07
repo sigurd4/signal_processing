@@ -1,4 +1,4 @@
-use ndarray::Array1;
+use ndarray::{Array1, ArrayBase, Dim, Ix1, OwnedRepr};
 use option_trait::StaticMaybe;
 
 use crate::quantities::{MaybeList, OwnedListOrSingle};
@@ -57,10 +57,11 @@ impl<T, const N: usize> MaybeOwnedList<T> for [T; N]
     }
 }
 
-impl<T> MaybeOwnedList<T> for Array1<T>
+impl<T> MaybeOwnedList<T> for ArrayBase<OwnedRepr<T>, Dim<[usize; 1]>, T>
 {
     fn maybe_from_len_fn<F>(n: <<Self::Some as ListOrSingle<T>>::Length as StaticMaybe<usize>>::Opposite, f: F) -> Self
     where
+        Self: MaybeContainer<T, Some: ListOrSingle<T, Length: StaticMaybe<usize, Opposite: Sized>>>,
         F: FnMut(usize) -> T
     {
         Self::from_len_fn(n, f)

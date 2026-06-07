@@ -1,6 +1,5 @@
 use core::ops::{AddAssign, Mul, MulAssign};
 
-use array_math::{ArrayOps, SliceMath};
 use num::{complex::ComplexFloat, traits::FloatConst, Float, Complex, NumCast, One, Zero};
 use option_trait::Maybe;
 
@@ -39,11 +38,11 @@ where
     {
         let Tf { b, a }: Tf<Complex<T::Real>, Vec<Vec<Complex<T::Real>>>, Vec<Complex<T::Real>>> = self.into();
 
-        let fs = sampling_rate.into_option()
+        let fs = sampling_rate.option()
             .unwrap_or(T::Real::TAU());
 
         let nf = <T::Real as NumCast>::from(N).unwrap();
-        let w = ArrayOps::fill(|i| <T::Real as NumCast>::from(i).unwrap()/nf*fs);
+        let w = core::array::from_fn(|i| <T::Real as NumCast>::from(i).unwrap()/nf*fs);
 
         let oa = a.len().saturating_sub(1);
         
@@ -72,7 +71,7 @@ where
                 .unwrap_or_else(|num: Vec<_>| {
                     let l = num.len();
                     let lf = <T::Real as NumCast>::from(l).unwrap();
-                    ArrayOps::fill(|i| {
+                    core::array::from_fn(|i| {
                         let j = <T::Real as NumCast>::from(i).unwrap()*lf/nf;
                         let p = j.fract();
                         let q = one - p;
@@ -88,7 +87,7 @@ where
                 .unwrap_or_else(|den: Vec<_>| {
                     let l = den.len();
                     let lf = <T::Real as NumCast>::from(l).unwrap();
-                    ArrayOps::fill(|i| {
+                    core::array::from_fn(|i| {
                         let j = <T::Real as NumCast>::from(i).unwrap()*lf/nf;
                         let p = j.fract();
                         let q = one - p;
@@ -129,9 +128,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, gen::filter::{Butter, FilterGenPlane}, analysis::GrpDelay, systems::Tf};
+    use crate::{plot, generators::filter::{Butter, FilterGenPlane}, analysis::GrpDelay, systems::Tf};
 
     #[test]
     fn test()

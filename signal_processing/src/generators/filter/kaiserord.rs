@@ -3,7 +3,7 @@ use core::ops::DivAssign;
 use num::{traits::FloatConst, Float, NumCast};
 use option_trait::Maybe;
 
-use crate::{gen::filter::{FilterBandError, Fir1Type}, quantities::ListOrSingle};
+use crate::{generators::filter::{FilterBandError, Fir1Type}, quantities::ListOrSingle};
 
 pub fn kaiserord<T, FS, const F: usize, const D: usize>(
     frequencies: [T; F],
@@ -24,7 +24,7 @@ where
     let half = two.recip();
 
     let mut f: Vec<T> = frequencies.into_vec();
-    if let Some(fs) = sampling_frequency.into_option()
+    if let Some(fs) = sampling_frequency.option()
     {
         let nyq = fs*half;
         if !(fs > zero) || !fs.is_finite()
@@ -116,9 +116,9 @@ where
 #[cfg(test)]
 mod test
 {
-    use array_math::ArrayOps;
+    
 
-    use crate::{plot, windows::Kaiser, gen::{window::{WindowGen, WindowRange}, filter::Fir1}, Plane, analysis::RealFreqZ, systems::{Tf, Zpk}, transforms::system::ToZpk};
+    use crate::{plot, windows::Kaiser, generators::{window::{WindowGen, WindowRange}, filter::Fir1}, Plane, analysis::RealFreqZ, systems::{Tf, Zpk}, transforms::system::ToZpk};
 
     #[test]
     fn test()
