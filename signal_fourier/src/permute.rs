@@ -3,35 +3,51 @@ use bulks::{InplaceBulk, IntoBulk};
 
 use crate::util;
 
-pub const trait Permute: ~const IntoBulk<IntoBulk: ~const InplaceBulk>
+pub const trait Permute: ~const InplaceBulk
 {
-    type Output: ~const IntoBulk<IntoBulk = Self::IntoBulk>;
-
-    fn digit_rev_permute<R>(self, radix: R) -> Self::Output
+    fn digit_rev_permute_inplace<R>(&mut self, radix: R)
     where
+        Self: Sized,
         R: LengthValue;
 
-    fn bit_rev_permute(self) -> Self::Output
+    fn bit_rev_permute_inplace(&mut self)
+    where
+        Self: Sized
     {
-        self.digit_rev_permute([(); 2])
+        self.digit_rev_permute_inplace([(); 2])
+    }
+
+    fn digit_rev_permute<R>(mut self, radix: R) -> Self
+    where
+        Self: Sized,
+        R: LengthValue
+    {
+        self.digit_rev_permute_inplace(radix);
+        self
+    }
+
+    fn bit_rev_permute(mut self) -> Self
+    where
+        Self: Sized
+    {
+        self.bit_rev_permute_inplace();
+        self
     }
 }
 
 impl<T> const Permute for T
 where
-    T: ~const IntoBulk<IntoBulk: ~const InplaceBulk>
+    T: ~const InplaceBulk
 {
-    type Output = Self::IntoBulk;
-
-    fn digit_rev_permute<R>(self, radix: R) -> Self::IntoBulk
+    fn digit_rev_permute_inplace<R>(&mut self, radix: R)
     where
+        Self: Sized,
         R: LengthValue
     {
-        let bulk = self.into_bulk();
         let len = self.length();
         if length::value::le(len, radix)
         {
-            return bulk;
+            return;
         }
         assert!(util::is_power_of(len, radix), "Length must be a power of radix.");
         assert!(length::value::ne(radix, [(); 0]), "Radix must be nonzero!");
@@ -57,7 +73,6 @@ where
             j += k;
             i += 1;
         }
-        bulk
     }
 }
 
@@ -73,9 +88,9 @@ mod test
     {
         let a = [0, 1, 2, 3, 4, 5, 6, 7];
 
-        let mut bulk = a.into_bulk();
-        bulk.bit_rev_permute();
-        for x in bulk.collect_array()
+        for x in a.into_bulk()
+            .bit_rev_permute()
+            .collect_array()
         {
             print!("{x:03b} ")
         }

@@ -119,7 +119,7 @@ where
         {
             // In-place FFT
 
-            slice.bit_rev_permute();
+            slice.bit_rev_permute_inplace();
             
             for s in 0..length::value::len(len).ilog2()
             {
@@ -189,7 +189,7 @@ where
         {
             // In-place FFT
 
-            slice.digit_rev_permute([(); P]);
+            slice.digit_rev_permute_inplace([(); P]);
 
             let mut m = P;
             for s in 0..length::value::len(len).ilog(P)
@@ -271,7 +271,7 @@ where
         {
             // In-place FFT
 
-            slice.digit_rev_permute([(); P]);
+            slice.digit_rev_permute_inplace([(); P]);
 
             let mut m = P;
             for s in 0..length::value::len(len).ilog(P)
@@ -366,7 +366,7 @@ where
         {
             // In-place FFT
 
-            slice.digit_rev_permute([(); P]);
+            slice.digit_rev_permute_inplace([(); P]);
 
             let mut m = P;
             for s in 0..length::value::len(len).ilog(P)
@@ -480,7 +480,7 @@ where
         {
             // In-place FFT
 
-            bulk.digit_rev_permute(p);
+            bulk.digit_rev_permute_inplace(p);
 
             let mut x = bulks::repeat_n_with(|| core::ptr::null_mut::<Complex<T>>(), p)
                 .collect_nearest();
