@@ -1,4 +1,3 @@
-#![cfg_attr(not(any(test, feature = "std")), no_std)]
 #![feature(impl_trait_in_assoc_type)]
 #![feature(const_trait_impl)]
 #![feature(const_destruct)]
@@ -10,19 +9,16 @@
 #![feature(const_clone)]
 #![feature(derive_const)]
 #![feature(try_trait_v2)]
-#![feature(associated_type_defaults)]
-#![feature(ptr_metadata)]
-#![feature(const_convert)]
+#![feature(generic_const_exprs)]
 
 use core::{marker::{Destruct, PhantomData}, ops::{Mul, Try}};
 
-use array_trait::length::{self, Length};
+use array_trait::length::{self, Length, LengthValue};
 use bulks::{Bulk, DoubleEndedBulk, SplitBulk};
 
 moddef::moddef!(
     pub mod {
-        windows,
-        plot for cfg(test)
+        windows
     }
 );
 
@@ -39,8 +35,11 @@ pub enum Shape
 }
 impl Shape
 {
-    const fn window_len(self, len: usize) -> usize
+    const fn window_len<L>(self, len: L) -> usize
+    where
+        L: LengthValue
     {
+        let len = length::value::len(len);
         match self
         {
             Shape::Symmetric => len - 1,
@@ -57,7 +56,7 @@ where
 {
     type Functor: Fn(usize) -> L::Elem;
 
-    fn window_fn(self, len: usize) -> Self::Functor;
+    fn window_fn(self, len: L::Value, range: Shape) -> Self::Functor;
 }
 
 pub const trait Window<W>: Bulk
@@ -124,7 +123,7 @@ where
     {
         let Self { bulk, window, range, marker: PhantomData } = self;
         let functor = Functor {
-            window_function: window.window_fn(range.window_len(bulk.len())),
+            window_function: window.window_fn(bulk.length(), range),
             f
         };
         (bulk, functor)
@@ -281,10 +280,14 @@ where
 #[cfg(test)]
 mod tests
 {
+    use core::f64::consts::PI;
+
     use bulks::*;
     use linspace::Linspace;
+    use signal_processing_fourier::Dft;
+use to_snake_case::ToSnakeCase;
 
-    use crate::{Shape, Window, WindowFn, plot};
+    use crate::{Shape, Window, WindowFn};
 
     const N: usize = 1024;
 
@@ -292,17 +295,19 @@ mod tests
     where
         W: WindowFn<[f64]> + WindowFn<[f64; N/2]>
     {
-        let w = bulks::repeat_n(1.0, [(); N/2]).window(w, Shape::Symmetric);
+        let type_name = core::any::type_name::<W>().split("::").last().unwrap().split("<").next().unwrap().to_snake_case();
+
+        let w = bulks::repeat_n(1.0, [(); N/2]).window(w, Shape::Symmetric)
+            .collect_array();
 
         let data = (0.0..1.0).linspace(w.len()).zip(w);
 
-        plot::plot_curves("g(n/N)", "plots/windows/g_n_barthann.png", [data]).unwrap();
+        ezplot::plot_curves("g(n/N)", &format!("plots/windows/g_n_{type_name}.png"), [data]).unwrap();
 
-        /*let (mut w_f, mut omega): ([_; N], _) = Tf::new(w, ()).freqz((), false);
-        omega.map_assign(|omega| (omega + PI) % TAU - PI);
-        w_f.rotate_right(N/2);
-        omega.rotate_right(N/2);
+        let mut w_f = w.into_bulk().chain([0.0; N/2]).dft().collect_array();
+        w_f.rotate_right(N/4);
+        let data = (-PI..PI).linspace(w.len()).zip(w_f.into_bulk().map(|w| 20.0*w.norm().log10()));
         
-        plot::plot_curves("G(e^jw)", "plots/windows/g_f_barthann.png", [&omega.zip(w_f.map(|w| 20.0*w.norm().log10()))]).unwrap();*/
+        ezplot::plot_curves("G(e^jw)", &format!("plots/windows/g_f_{type_name}.png"), [data]).unwrap();
     }
 }

@@ -31,7 +31,7 @@ where
         let a2 = T::from(0.277263158).unwrap();
         let a3 = T::from(0.083578947).unwrap();
         let a4 = T::from(0.006947368).unwrap();
-        ArrayOps::fill(|i| {
+        core::array::from_fn(|i| {
             let z1 = (T::TAU()*T::from(i).unwrap()/T::from(m).unwrap()).cos();
             let z2 = (T::TAU()*T::from(i*2).unwrap()/T::from(m).unwrap()).cos();
             let z3 = (T::TAU()*T::from(i*3).unwrap()/T::from(m).unwrap()).cos();
@@ -80,7 +80,7 @@ mod test
     use core::f64::consts::{PI, TAU};
 
     use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
 
     use crate::{plot, gen::window::{WindowGen, WindowRange}, analysis::FreqZ, systems::Tf};
 

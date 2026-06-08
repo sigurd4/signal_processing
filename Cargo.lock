@@ -690,11 +690,13 @@ version = "0.1.0"
 dependencies = [
  "array_trait",
  "bulks",
+ "ezplot",
  "linspace",
  "moddef",
  "num-complex",
  "num-traits",
- "plotters",
+ "signal_processing-fourier",
+ "to_snake_case",
 ]
 
 [[package]]
@@ -753,6 +755,12 @@ dependencies = [
  "quote",
  "syn 2.0.110",
 ]
+
+[[package]]
+name = "to_snake_case"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2241d57b3444e621b35ea137be3978a5046898267dc19dbe888e89d2ba8f4ce3"
 
 [[package]]
 name = "ttf-parser"

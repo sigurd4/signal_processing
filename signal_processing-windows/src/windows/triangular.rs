@@ -29,7 +29,7 @@ where
 
         let one = T::one();
         let two = one + one;
-        ArrayOps::fill(|i| {
+        core::array::from_fn(|i| {
             one - ((T::from(i).unwrap()*two - T::from(N - 1).unwrap())/T::from(m).unwrap()).abs()
         })
     }
@@ -67,7 +67,7 @@ mod test
     use core::f64::consts::{PI, TAU};
 
     use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
 
     use crate::{plot, gen::window::{WindowGen, WindowRange}, analysis::FreqZ, systems::Tf};
 

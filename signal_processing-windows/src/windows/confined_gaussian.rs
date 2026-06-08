@@ -1,7 +1,7 @@
 use array_trait::length::Length;
 use num_traits::{Float, FloatConst};
 
-use crate::WindowFn;
+use crate::{Shape, WindowFn};
 
 #[derive(Clone, Copy)]
 pub struct ConfinedGaussian<T>
@@ -18,8 +18,9 @@ where
 {
     type Functor = impl Fn(usize) -> T;
 
-    fn window_fn(self, len: usize) -> Self::Functor
+    fn window_fn(self, len: L::Value, range: Shape) -> Self::Functor
     {
+        let len = range.window_len(len);
         let one = T::one();
         let two = one + one;
         let half = two.recip();

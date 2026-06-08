@@ -236,17 +236,21 @@ pub fn plot_pz(
 
 pub fn plot_curves<const M: usize>(
     plot_title: &str, plot_path: &str,
-    xy: [&[(T, T)]; M]
+    xy: [impl IntoIterator<Item = (T, T)>; M]
 ) -> Result<(), Box<dyn std::error::Error>>
 {
-    let x_min = xy.into_iter().flatten().map(|x| x.0).filter(|x| x.is_finite()).reduce(T::min).unwrap();
-    let x_max = xy.into_iter().flatten().map(|x| x.0).filter(|x| x.is_finite()).reduce(T::max).unwrap();
+    let xy = xy.into_bulk()
+        .map(|xy| xy.into_iter().collect::<Vec<_>>())
+        .collect::<[_; _], _>();
+
+    let x_min = xy.iter().flatten().map(|x| x.0).filter(|x| x.is_finite()).reduce(T::min).unwrap();
+    let x_max = xy.iter().flatten().map(|x| x.0).filter(|x| x.is_finite()).reduce(T::max).unwrap();
     
-    let y_min = xy.into_iter().flatten().map(|&x| x.1).filter(|x| x.is_finite()).reduce(T::min).unwrap();
-    let y_max = xy.into_iter().flatten().map(|&x| x.1).filter(|x| x.is_finite()).reduce(T::max).unwrap();
+    let y_min = xy.iter().flatten().map(|&x| x.1).filter(|x| x.is_finite()).reduce(T::min).unwrap();
+    let y_max = xy.iter().flatten().map(|&x| x.1).filter(|x| x.is_finite()).reduce(T::max).unwrap();
     
-    let x = xy.map(|x| x.iter().map(|&x| x.0.clamp(x_min, x_max)));
-    let y = xy.map(|y| y.iter().map(|&y| y.1.clamp(y_min, y_max)));
+    let x = xy.each_ref().map(|x| x.iter().map(|&x| x.0.clamp(x_min, x_max)));
+    let y = xy.each_ref().map(|y| y.iter().map(|&y| y.1.clamp(y_min, y_max)));
     
     let area = BitMapBackend::new(plot_path, PLOT_RES).into_drawing_area();
     

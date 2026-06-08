@@ -35,7 +35,7 @@ where
         let one = T::one();
         let two = one + one;
         let half = two.recip();
-        ArrayOps::fill(|i| {
+        core::array::from_fn(|i| {
             let i = T::from(if i > m/2 {m - i} else {i}).unwrap();
             if i < self.alpha*l*half
             {
@@ -91,7 +91,7 @@ mod test
     use core::f64::consts::{PI, TAU};
 
     use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
 
     use crate::{plot, gen::window::{WindowGen, WindowRange}, analysis::FreqZ, systems::Tf};
 

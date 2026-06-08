@@ -40,7 +40,7 @@ where
         let one = T::one();
         let two = one + one;
         let d = i0(self.beta);
-        ArrayOps::fill(|i| {
+        core::array::from_fn(|i| {
             let z = two*T::from(i).unwrap()/l - one;
             i0(self.beta*(one - z*z).sqrt())/d
         })
@@ -85,7 +85,7 @@ mod test
     use core::f64::consts::{PI, TAU};
 
     use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
 
     use crate::{plot, gen::window::{WindowGen, WindowRange}, analysis::FreqZ, systems::Tf};
 

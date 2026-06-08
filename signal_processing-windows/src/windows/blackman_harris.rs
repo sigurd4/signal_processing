@@ -1,7 +1,7 @@
 use array_trait::length::Length;
 use num_traits::{Float, FloatConst};
 
-use crate::WindowFn;
+use crate::{Shape, WindowFn};
 
 #[derive(Clone, Copy)]
 pub struct BlackmanHarris;
@@ -13,8 +13,9 @@ where
 {
     type Functor = impl Fn(usize) -> T;
 
-    fn window_fn(self, len: usize) -> Self::Functor
+    fn window_fn(self, len: L::Value, range: Shape) -> Self::Functor
     {
+        let len = range.window_len(len);
         let a0 = T::from(0.35875).unwrap();
         let a1 = T::from(0.48829).unwrap();
         let a2 = T::from(0.14128).unwrap();

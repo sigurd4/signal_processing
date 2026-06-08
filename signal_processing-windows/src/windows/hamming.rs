@@ -25,7 +25,7 @@ where
         };
 
         let a0 = T::from(25.0/46.0).unwrap();
-        ArrayOps::fill(|i| {
+        core::array::from_fn(|i| {
             let z = (T::TAU()*T::from(i).unwrap()/T::from(m).unwrap()).cos();
             a0 - (T::one() - a0)*z
         })
@@ -64,7 +64,7 @@ mod test
     use core::f64::consts::{PI, TAU};
 
     use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
 
     use crate::{plot, gen::window::{WindowGen, WindowRange}, analysis::FreqZ, systems::Tf};
 

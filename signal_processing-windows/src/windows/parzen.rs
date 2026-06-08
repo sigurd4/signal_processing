@@ -28,7 +28,7 @@ where
 
         let ld2 = T::from(m).unwrap()/T::from(2.0).unwrap();
         let ld4 = ld2/T::from(2.0).unwrap();
-        ArrayOps::fill(|i| {
+        core::array::from_fn(|i| {
             let m = T::from(i).unwrap() - T::from(N - 1).unwrap()/T::from(2.0).unwrap();
             let z1 = T::one() - m.abs()/ld2;
             if m.abs() <= ld4
@@ -86,7 +86,7 @@ mod test
     use core::f64::consts::{PI, TAU};
 
     use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
 
     use crate::{plot, gen::window::{WindowGen, WindowRange}, analysis::FreqZ, systems::Tf};
 

@@ -22,3 +22,4 @@ num-traits = { version = "0.2.19", default-features = false, features = ["std"] 
 
 linspace = "0.2.7"
 plotters = "0.3.7"
+to_snake_case = "0.1.3"

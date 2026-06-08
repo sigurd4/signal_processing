@@ -52,7 +52,7 @@ use linspace::Linspace;
             .idft()
             .collect_nearest();
 
-        ezplot::plot_curves("x(t)", "plots/x_t_idft.png", [&t.into_bulk().zip(y.map(|y| y.re)).collect_array(), &t.into_bulk().zip(x).collect_array()])
+        ezplot::plot_curves("x(t)", "plots/x_t_idft.png", [t.into_bulk().zip(y.map(|y| y.re)), t.into_bulk().zip(x)])
             .unwrap()
     }
 }

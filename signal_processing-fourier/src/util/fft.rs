@@ -192,7 +192,7 @@ where
             slice.digit_rev_permute_inplace([(); P]);
 
             let mut m = P;
-            for s in 0..length::value::len(len).ilog(P)
+            for _s in 0..length::value::len(len).ilog(P)
             {
                 let wm = Complex::cis(<T as NumCast>::from(if I {TAU} else {-TAU}/m as f64).unwrap());
                 for k in (0..length::value::len(len)).step_by(m)
@@ -274,7 +274,7 @@ where
             slice.digit_rev_permute_inplace([(); P]);
 
             let mut m = P;
-            for s in 0..length::value::len(len).ilog(P)
+            for _s in 0..length::value::len(len).ilog(P)
             {
                 let wm = Complex::cis(<T as NumCast>::from(if I {TAU} else {-TAU}/m as f64).unwrap());
                 for k in (0..length::value::len(len)).step_by(m)
@@ -369,7 +369,7 @@ where
             slice.digit_rev_permute_inplace([(); P]);
 
             let mut m = P;
-            for s in 0..length::value::len(len).ilog(P)
+            for _s in 0..length::value::len(len).ilog(P)
             {
                 let wm = Complex::cis(<T as NumCast>::from(if I {TAU} else {-TAU}/m as f64).unwrap());
                 for k in (0..length::value::len(len)).step_by(m)
@@ -486,7 +486,7 @@ where
                 .collect_nearest();
             
             let mut m = length::value::len(p);
-            for s in 0..length::value::len(len).ilog(length::value::len(p))
+            for _s in 0..length::value::len(len).ilog(length::value::len(p))
             {
                 let wm = Complex::cis(<T as NumCast>::from(
                     if I

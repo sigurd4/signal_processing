@@ -1,6 +1,12 @@
-use num_traits::{Float, FloatConst};
+use core::borrow::{BorrowMut};
 
-use crate::WindowFn;
+use array_trait::length::{self, Length};
+use bulks::{AsBulk, Bulk, CollectNearest};
+use num_complex::Complex;
+use num_traits::{Float, FloatConst};
+use signal_processing_fourier::DftInplace;
+
+use crate::{Shape, WindowFn};
 
 #[derive(Clone, Copy)]
 pub struct DolphChebyshev<T>
@@ -10,18 +16,16 @@ where
     pub alpha: T
 }
 
-impl<T> WindowFn<T> for DolphChebyshev<T>
+impl<L, T> WindowFn<L> for DolphChebyshev<T>
 where
+    L: Length<Elem = T> + ?Sized,
     T: Float + FloatConst
 {
-    type Functor<S> = impl Fn(usize) -> T
-    where
-        S: FnOnce<(), Output: DerefMut<Target = [T]>>;
+    type Functor = impl Fn(usize) -> T;
 
-    fn window_fn<S>(self, len: usize, _scrach_space: S) -> Self::Functor<S>
-    where
-        S: FnOnce<(), Output: DerefMut<Target = [T]>>
+    fn window_fn(self, len: L::Value, range: Shape) -> Self::Functor
     {
+        let m = range.window_len(len);
         let one = T::one();
         let two = one + one;
         let ten = T::from(10u8).unwrap();
@@ -45,21 +49,24 @@ where
         let gamma = ten.powf(-self.alpha);
         let beta = (gamma.recip().acosh()/l).cosh();
 
-        let mut w: [Complex<T>; N] = ArrayOps::fill(|i| {
-            let i = T::from(i).unwrap();
-            let x = beta*(T::PI()*i/(l + one)).cos();
-            (t(x)).into()
-        });
+        let mut w = bulks::repeat_n((), len)
+            .enumerate()
+            .map(|(i, ())| {
+                let i = T::from(i).unwrap();
+                let x = beta*(T::PI()*i/(l + one)).cos();
+                Complex::from(t(x))
+            }).collect_nearest();
         let wr = if m % 2 == 0
         {
-            w.fft();
-            let mut wr = [T::zero(); _];
+            w.borrow_mut().bulk_mut().dft_inplace();
+            let mut wr = bulks::repeat_n(T::zero(), len)
+                .collect_nearest();
             let mm = (m + 2)/2;
             for k in 0..mm
             {
                 let ww = (w[k]/w[0]).re;
                 wr[mm - k - 1] = ww;
-                if k + m + 1 - mm < N
+                if k + m + 1 - mm < length::value::len(len)
                 {
                     wr[k + m + 1 - mm] = ww;
                 }
@@ -68,26 +75,27 @@ where
         }
         else
         {
-            for (k, w) in w.iter_mut()
+            for (k, w) in w.borrow_mut().iter_mut()
                 .enumerate()
             {
-                *w *= Complex::cis(T::PI()*T::from(k).unwrap()/(l + one))
+                *w = *w * Complex::cis(T::PI()*T::from(k).unwrap()/(l + one))
             }
-            w.fft();
-            let mut wr = [T::zero(); _];
+            w.borrow_mut().bulk_mut().dft_inplace();
+            let mut wr = bulks::repeat_n(T::zero(), len)
+                .collect_nearest();
             let mm = (m + 1)/2 + 1;
             for k in 1..mm
             {
                 let ww = (w[k]/w[1]).re;
                 wr[mm - k - 1] = ww;
-                if k + m + 1 - mm < N
+                if k + m + 1 - mm < length::value::len(len)
                 {
                     wr[k + m + 1 - mm] = ww;
                 }
             }
             wr
         };
-        |i| wr[i]
+        move |i| wr[i]
     }
 }
 
@@ -104,35 +112,5 @@ mod test
         tests::plot_window(DolphChebyshev {
             alpha: 5.0
         })
-    }
-}
-
-#[cfg(test)]
-mod test
-{
-    use core::f64::consts::{PI, TAU};
-
-    use array_math::ArrayOps;
-    use linspace::LinspaceArray;
-
-    use crate::{plot, gen::window::{WindowGen, WindowRange}, analysis::FreqZ, systems::Tf};
-
-    use super::DolphChebyshev;
-
-    #[test]
-    fn test()
-    {
-        const N: usize = 1024;
-        let w: [_; N/2] = DolphChebyshev {alpha: 5.0}.window_gen((), WindowRange::Periodic);
-        let n = (0.0..1.0).linspace_array();
-
-        plot::plot_curves("g(n/N)", "plots/windows/g_n_dolph_chebyshev.png", [&n.zip(w)]).unwrap();
-
-        let (mut w_f, mut omega): ([_; N], _) = Tf::new(w, ()).freqz((), false);
-        omega.map_assign(|omega| (omega + PI) % TAU - PI);
-        w_f.rotate_right(N/2);
-        omega.rotate_right(N/2);
-        
-        plot::plot_curves("G(e^jw)", "plots/windows/g_f_dolph_chebyshev.png", [&omega.zip(w_f.map(|w| 20.0*w.norm().log10()))]).unwrap();
     }
 }

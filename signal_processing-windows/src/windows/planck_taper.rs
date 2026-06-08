@@ -34,7 +34,7 @@ where
         let l = T::from(m).unwrap();
         let zero = T::zero();
         let one = T::one();
-        ArrayOps::fill(|i| {
+        core::array::from_fn(|i| {
             let i = T::from(if i > m/2 {m - i} else {i}).unwrap();
             if i.is_zero()
             {
@@ -97,7 +97,7 @@ mod test
     use core::f64::consts::{PI, TAU};
 
     use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
 
     use crate::{plot, gen::window::{WindowGen, WindowRange}, analysis::FreqZ, systems::Tf};
 

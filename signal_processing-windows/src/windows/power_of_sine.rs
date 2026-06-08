@@ -31,7 +31,7 @@ where
             WindowRange::Periodic => N,
         };
 
-        ArrayOps::fill(|i| {
+        core::array::from_fn(|i| {
             (T::PI()*T::from(i).unwrap()/T::from(m).unwrap()).sin()
                 .powf(self.power)
         })
@@ -69,7 +69,7 @@ mod test
     use core::f64::consts::{PI, TAU};
 
     use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
 
     use crate::{plot, gen::window::{WindowGen, WindowRange}, analysis::FreqZ, systems::Tf};
 

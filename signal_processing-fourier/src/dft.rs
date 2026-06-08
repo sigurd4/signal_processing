@@ -51,7 +51,7 @@ use linspace::Linspace;
             .dft()
             .collect_nearest();
 
-        ezplot::plot_curves("X(e^jw)", "plots/x_z_dft.png", [&w.into_bulk().zip(xf.map(|xf| xf.norm())).collect_array()])
+        ezplot::plot_curves("X(e^jw)", "plots/x_z_dft.png", [w.into_bulk().zip(xf.map(|xf| xf.norm()))])
             .unwrap()
     }
 }

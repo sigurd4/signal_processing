@@ -8,7 +8,7 @@ moddef::moddef!(
         boxcar,
         confined_gaussian,
         confined_normal,
-        //dolph_chebyshev,
+        dolph_chebyshev,
         /*flattop,
         gaussian,
         hamming,

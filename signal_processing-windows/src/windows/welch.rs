@@ -25,7 +25,7 @@ where
         };
 
         let ld2 = T::from(m).unwrap()/T::from(2.0).unwrap();
-        ArrayOps::fill(|i| {
+        core::array::from_fn(|i| {
             let z = (T::from(i).unwrap() - T::from(N - 1).unwrap()/T::from(2.0).unwrap())/ld2;
             T::one() - z*z
         })
@@ -64,7 +64,7 @@ mod test
     use core::f64::consts::{PI, TAU};
 
     use array_math::ArrayOps;
-    use linspace::LinspaceArray;
+    use linspace::Linspace;
 
     use crate::{plot, gen::window::{WindowGen, WindowRange}, analysis::FreqZ, systems::Tf};
 

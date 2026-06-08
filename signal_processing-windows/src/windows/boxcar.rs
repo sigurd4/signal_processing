@@ -1,7 +1,7 @@
 use array_trait::length::Length;
 use num_traits::One;
 
-use crate::WindowFn;
+use crate::{Shape, WindowFn};
 
 #[derive(Clone, Copy)]
 pub struct Boxcar;
@@ -13,7 +13,7 @@ where
 {
     type Functor = impl Fn(usize) -> T;
 
-    fn window_fn(self, _len: usize) -> Self::Functor
+    fn window_fn(self, _len: L::Value, _range: Shape) -> Self::Functor
     {
         move |_| T::one()
     }
