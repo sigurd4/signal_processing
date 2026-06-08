@@ -19,6 +19,9 @@ use bulks::{Bulk, DoubleEndedBulk, SplitBulk};
 moddef::moddef!(
     pub mod {
         windows
+    },
+    pub(crate) mod {
+        util
     }
 );
 
