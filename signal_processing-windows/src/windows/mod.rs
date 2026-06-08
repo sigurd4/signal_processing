@@ -21,8 +21,8 @@ moddef::moddef!(
         power_of_sine,
         sine,
         triangular,
-        /*tukey,
-        ultraspherical,
+        tukey,
+        /*ultraspherical,
         welch*/
     }
 );
