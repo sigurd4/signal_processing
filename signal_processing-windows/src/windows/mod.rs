@@ -20,8 +20,8 @@ moddef::moddef!(
         planck_taper,
         power_of_sine,
         sine,
-        /*triangular,
-        tukey,
+        triangular,
+        /*tukey,
         ultraspherical,
         welch*/
     }
