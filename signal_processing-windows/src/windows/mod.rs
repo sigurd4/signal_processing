@@ -23,6 +23,6 @@ moddef::moddef!(
         triangular,
         tukey,
         ultraspherical,
-        /*welch*/
+        welch
     }
 );
