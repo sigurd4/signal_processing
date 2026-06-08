@@ -22,7 +22,7 @@ moddef::moddef!(
         sine,
         triangular,
         tukey,
-        /*ultraspherical,
-        welch*/
+        ultraspherical,
+        /*welch*/
     }
 );
