@@ -1,5 +1,5 @@
 use array_trait::length::Length;
-use num_traits::{FloatConst, Float};
+use num_traits::{Float, FloatConst, Zero};
 
 use crate::{Shape, WindowFn};
 
@@ -22,8 +22,13 @@ where
         let a2 = T::from(0.277263158).unwrap();
         let a3 = T::from(0.083578947).unwrap();
         let a4 = T::from(0.006947368).unwrap();
-        
+
         move |i| {
+            if m.is_zero()
+            {
+                return T::one()
+            }
+
             let z1 = (T::TAU()*T::from(i).unwrap()/T::from(m).unwrap()).cos();
             let z2 = (T::TAU()*T::from(i*2).unwrap()/T::from(m).unwrap()).cos();
             let z3 = (T::TAU()*T::from(i*3).unwrap()/T::from(m).unwrap()).cos();
