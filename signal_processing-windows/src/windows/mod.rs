@@ -17,10 +17,10 @@ moddef::moddef!(
         normal,
         nuttall,
         parzen,
-        /*planck_taper,
+        planck_taper,
         power_of_sine,
         sine,
-        triangular,
+        /*triangular,
         tukey,
         ultraspherical,
         welch*/
