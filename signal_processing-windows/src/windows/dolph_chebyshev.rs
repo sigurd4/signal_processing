@@ -3,7 +3,7 @@ use core::borrow::{BorrowMut};
 use array_trait::length::{self, Length};
 use bulks::{AsBulk, Bulk, CollectNearest};
 use num_complex::Complex;
-use num_traits::{Float, FloatConst};
+use num_traits::{Float, FloatConst, Zero};
 use signal_processing_fourier::DftInplace;
 
 use crate::{Shape, WindowFn};
@@ -95,7 +95,14 @@ where
             }
             wr
         };
-        move |i| wr[i]
+        move |i| {
+            if m.is_zero()
+            {
+                return T::one()
+            }
+            
+            wr[i]
+        }
     }
 }
 

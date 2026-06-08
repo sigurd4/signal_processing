@@ -1,5 +1,5 @@
 use array_trait::length::Length;
-use num_traits::{Float, FloatConst};
+use num_traits::{Float, FloatConst, Zero};
 
 use crate::{Shape, WindowFn};
 
@@ -20,17 +20,27 @@ where
 
     fn window_fn(self, len: L::Value, range: Shape) -> Self::Functor
     {
-        let len = range.window_len(len);
+        let m = range.window_len(len);
         let one = T::one();
         let two = one + one;
         let half = two.recip();
-        let l = T::from(len).unwrap();
+        let l = T::from(m).unwrap();
         let g = move |x| {
-            let z: T = (x - half*T::from(len - 1).unwrap())/(self.sigma*two*l);
+            if m.is_zero()
+            {
+                return T::one()
+            }
+
+            let z: T = (x - half*T::from(m - 1).unwrap())/(self.sigma*two*l);
             (-z*z).exp()
         };
         let gmul = g(-half)/(g(-half + l) + g(-half - l));
         move |i| {
+            if m.is_zero()
+            {
+                return T::one()
+            }
+
             let i = T::from(i).unwrap();
             g(i) - (g(i + l) + g(i - l))*gmul
         }

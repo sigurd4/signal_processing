@@ -1,5 +1,5 @@
 use array_trait::length::Length;
-use num_traits::{Float, FloatConst};
+use num_traits::{Float, FloatConst, Zero};
 
 use crate::{Shape, WindowFn};
 
@@ -15,11 +15,16 @@ where
 
     fn window_fn(self, len: L::Value, range: Shape) -> Self::Functor
     {
-        let len = range.window_len(len);
+        let m = range.window_len(len);
         let one = T::one();
         let two = one + one;
-        let mf = T::from(len).unwrap();
+        let mf = T::from(m).unwrap();
         move |i| {
+            if m.is_zero()
+            {
+                return T::one()
+            }
+
             let p = (T::from(i).unwrap() - mf/two).abs()/mf;
             (one - two*p)*(T::TAU()*p).cos() + T::PI().recip()*(T::TAU()*p).sin()
         }
