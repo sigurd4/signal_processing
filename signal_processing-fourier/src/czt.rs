@@ -7,10 +7,17 @@ use num_complex::{Complex, ComplexFloat};
 
 use crate::DftInplace;
 
+/// Computes a chirp-response within the z-transform.
 pub trait Czt: Bulk<Item: ComplexFloat>
 {
     type Output: Bulk<Item = Complex<<Self::Item as ComplexFloat>::Real>, Length = Self::Length>;
 
+    /// Computes a chirp-response within the z-transform.
+    /// 
+    /// `point` is a point on the chirp's curve in the z-domain.
+    /// `ratio` is the rate at which the curve grows for each bucket.
+    /// 
+    /// A spectrum of z-domain response following a complex chirp-curve will be obtained from the time-series signal.
     fn czt(self, ratio: Complex<<Self::Item as ComplexFloat>::Real>, point: Complex<<Self::Item as ComplexFloat>::Real>) -> Self::Output;
 }
 impl<B, T> Czt for B
