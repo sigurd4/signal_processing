@@ -18,6 +18,16 @@ pub trait Czt: Bulk<Item: ComplexFloat>
     /// `ratio` is the rate at which the curve grows for each bucket.
     /// 
     /// A spectrum of z-domain response following a complex chirp-curve will be obtained from the time-series signal.
+    /// 
+    /// # Comparison with the DFT (discrete fourier transform)
+    /// 
+    /// If we set `ratio` to `e^(j2π/n)`, where `n` is the length of the sequence, and `point` to `1`, we obtain the DFT.
+    /// The DFT is therefore a subset of the chirp-z-transform. Using [dft()](crate::Dft::dft) should be preferred in that case.
+    /// 
+    /// The signal's z-transform is a function across a plane. Just like the DFT, this computes a one-dimensional spectrum of the z-transform along a curve.
+    /// The difference is, here: the curve can be configured.
+    /// The DFT follows the unit-circle in the z-domain, while the chirp-z-transform follows a configurable chirp-curve.
+    /// 
     fn czt(self, ratio: Complex<<Self::Item as ComplexFloat>::Real>, point: Complex<<Self::Item as ComplexFloat>::Real>) -> Self::Output;
 }
 impl<B, T> Czt for B
