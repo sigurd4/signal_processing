@@ -1,5 +1,5 @@
 [package]
-name = "bulks-polynomial"
+name = "signal_processing-polynomial"
 version = "0.1.0"
 edition = "2024"
 
@@ -9,4 +9,3 @@ edition = "2024"
 moddef = { workspace = true }
 bulks = { workspace = true }
 array_trait = { workspace = true }
-bulks-math = { workspace = true }

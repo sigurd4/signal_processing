@@ -1,8 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
-    "bulks-polynomial",
-    "bulks-math",
+    "signal_processing-polynomial",
     #"signal_processing-systems",
     "signal_processing-fourier",
     "signal_processing-transforms",
@@ -11,8 +10,7 @@ members = [
 ]
 
 [workspace.dependencies]
-bulks-math = { path = "bulks-math" }
-bulks-polynomial = { path = "bulks-polynomial" }
+signal_processing-polynomial = { path = "signal_processing-polynomial" }
 #signal_processing-systems = { path = "signal_processing-systems" }
 signal_processing-transforms = { path = "signal_processing-transforms" }
 signal_processing-fourier = { path = "signal_processing-fourier" }
@@ -21,7 +19,7 @@ ezplot = { path = "ezplot" }
 
 moddef = "0.3.0"
 currying = {version = "0.4.0", features = ["rcurry"]}
-bulks = { version = "0.6.6", default-features = false, features = ["alloc"] }
+bulks = { version = "0.6.7", default-features = false, features = ["alloc"] }
 array_trait = { version = "1.1.20", default-features = false, features = ["alloc", "length"] }
 num-complex = { version = "0.4.6", default-features = false, features = ["std"] }
 num-traits = { version = "0.2.19", default-features = false, features = ["std"] }

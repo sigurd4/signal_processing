@@ -47,36 +47,14 @@ checksum = "812e12b5285cc515a9c72a5c1d3b6d46a19dac5acfef5265968c166106e31dd3"
 
 [[package]]
 name = "bulks"
-version = "0.6.6"
+version = "0.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10c560a0ca4785286e19c3e5b190144e1a2d11bcdee80144aee6c714a4a7fa57"
+checksum = "204ef6f07886e5992e7a346ab1c7b85b2ef6006dc8524868e0b732d6ae8d1df4"
 dependencies = [
  "array_trait",
  "currying",
  "moddef",
  "thiserror",
-]
-
-[[package]]
-name = "bulks-math"
-version = "0.1.0"
-dependencies = [
- "array_trait",
- "bulks",
- "currying",
- "moddef",
- "num-complex",
- "num-traits",
-]
-
-[[package]]
-name = "bulks-polynomial"
-version = "0.1.0"
-dependencies = [
- "array_trait",
- "bulks",
- "bulks-math",
- "moddef",
 ]
 
 [[package]]
@@ -689,6 +667,15 @@ dependencies = [
  "moddef",
  "num-complex",
  "num-traits",
+]
+
+[[package]]
+name = "signal_processing-polynomial"
+version = "0.1.0"
+dependencies = [
+ "array_trait",
+ "bulks",
+ "moddef",
 ]
 
 [[package]]

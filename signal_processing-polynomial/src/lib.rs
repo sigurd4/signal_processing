@@ -7,7 +7,7 @@
 use core::{marker::Destruct, ops::{Add, Deref, Try}};
 
 use array_trait::{AsSlice, length};
-use bulks::{Bulk, CollectNearest, InplaceBulk, IntoBulk, RandomAccessBulk};
+use bulks::{Bulk, CollectNearest, InplaceBulk, IntoBulk, Merge, RandomAccessBulk};
 
 pub struct Polynomial<I>(I)
 where
@@ -52,11 +52,13 @@ where
     }
 }
 
-/*impl<I1, I2, T> Add<Polynomial<I2>> for Polynomial<I1>
+impl<I1, I2, T> Add<Polynomial<I2>> for Polynomial<I1>
 where
-    I1: IntoBulk,
-    I2: IntoBulk
+    I1: IntoBulk<Item: Add<I2::Item, Output = T> + Into<T>>,
+    I2: IntoBulk<Item: Into<T>>
 {
+    type Output = Polynomial<Merge<I1::IntoBulk, I2::IntoBulk, fn(I1::Item, I2::Item) -> T>>;
+
     fn add(self, rhs: Polynomial<I2>) -> Self::Output
     {
         let Self(lhs) = self;
@@ -64,10 +66,6 @@ where
         let lhs = lhs.into_bulk();
         let rhs = rhs.into_bulk();
 
-        let len = length::value::max(lhs.length(), rhs.length());
-
-        Polynomial(
-            lhs.add_each(rhs)
-        )
+        Polynomial(lhs.merge(rhs, Add::add))
     }
-}*/
+}

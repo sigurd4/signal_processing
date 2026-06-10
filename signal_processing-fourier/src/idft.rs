@@ -4,7 +4,7 @@ use crate::DftInplace;
 
 pub trait Idft: Bulk<Item: ComplexFloat + Into<Complex<<Self::Item as ComplexFloat>::Real>>>
 {
-    type Output: DftInplace<Item = Complex<<Self::Item as ComplexFloat>::Real>>;
+    type Output: DftInplace<Item = Complex<<Self::Item as ComplexFloat>::Real>> + Bulk;
 
     fn idft(self) -> Self::Output;
 }

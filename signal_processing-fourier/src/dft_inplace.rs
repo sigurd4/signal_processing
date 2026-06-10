@@ -1,20 +1,20 @@
-use bulks::{Bulk, IntoBulk, RandomAccessBulk};
+use bulks::Bulk;
 use num_complex::Complex;
-use num_traits::Float;
+use num_traits::{Float, FloatConst};
 
 use crate::{permute::Permute, util::{fft, DivAssignSpec}};
 
-pub const trait DftInplace: Permute + RandomAccessBulk<ItemPointee = Complex<Self::ItemReal>>
+pub const trait DftInplace: ~const Permute<ItemPointee = Complex<Self::ItemReal>>
 {
-    type ItemReal: Float;
+    type ItemReal: Float + FloatConst;
 
     fn dft_inplace(&mut self);
     fn idft_inplace(&mut self);
 }
 impl<T, F> DftInplace for T
 where
-    T: Permute + RandomAccessBulk<ItemPointee = Complex<F>>,
-    F: Float
+    T: Permute<ItemPointee = Complex<F>>,
+    F: Float + FloatConst
 {
     type ItemReal = F;
 
