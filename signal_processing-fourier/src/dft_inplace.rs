@@ -8,7 +8,9 @@ pub const trait DftInplace: ~const Permute<ItemPointee = Complex<Self::ItemReal>
 {
     type ItemReal: Float + FloatConst;
 
+    #[doc(alias = "fft_inplace")]
     fn dft_inplace(&mut self);
+    #[doc(alias = "ifft_inplace")]
     fn idft_inplace(&mut self);
 }
 impl<T, F> DftInplace for T
@@ -41,7 +43,7 @@ mod test
     use crate::{DftInplace, tests};
 
     #[test]
-    fn test_dft()
+    fn it_works()
     {
         let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             .into_bulk()
@@ -56,5 +58,22 @@ mod test
         let b = bulk.collect_array();
 
         assert!(tests::approx_eq(&a, &b, 1e-5))
+    }
+
+    #[test]
+    fn test_dft()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| Complex::from(x as f32))
+            .collect_array();
+
+        let mut bulk = a.into_bulk();
+
+        bulk.dft_inplace();
+
+        let b = bulk.collect_array();
+
+        println!("{b:?}")
     }
 }

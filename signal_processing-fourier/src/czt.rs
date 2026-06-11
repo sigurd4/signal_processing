@@ -44,9 +44,8 @@ where
         let nfft_pow2 = length::value::len(nfft).next_power_of_two();
 
         let ratio_sqrt = ratio.sqrt();
-        let w2: Vec<_> = bulks::repeat_n((), nfft)
-            .enumerate()
-            .map(|(i, ())| {
+        let w2: Vec<_> = bulks::range([(); 0], nfft)
+            .map(|i| {
                 let p = i as i32 + 1 - length::value::len(n) as i32;
                 if let Some(pp) = p.checked_mul(p)
                 {
@@ -68,7 +67,7 @@ where
             .collect();
         let a_recip = point.recip();
         let mut apmk = Complex::one();
-        for (i, g)  in fg.iter_mut()
+        for (i, g)  in fg.bulk_mut()
             .enumerate()
         {
             *g = *g*apmk*w2[i + length::value::len(n) - 1];
@@ -109,7 +108,7 @@ use num_complex::Complex;
     use crate::Czt;
 
     #[test]
-    fn test()
+    fn it_works()
     {
         const N: usize = 1024;
         const T: f64 = 1.0;

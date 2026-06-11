@@ -6,6 +6,7 @@ pub trait Idft: Bulk<Item: ComplexFloat + Into<Complex<<Self::Item as ComplexFlo
 {
     type Output: DftInplace<Item = Complex<<Self::Item as ComplexFloat>::Real>> + Bulk;
 
+    #[doc(alias = "ifft")]
     fn idft(self) -> Self::Output;
 }
 impl<B, T, N> Idft for B
@@ -38,7 +39,7 @@ use linspace::Linspace;
     use crate::{Dft, Idft};
 
     #[test]
-    fn test()
+    fn it_works()
     {
         const N: usize = 1024;
         const T: f64 = 0.1;

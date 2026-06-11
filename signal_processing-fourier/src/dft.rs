@@ -6,6 +6,7 @@ pub trait Dft: Bulk<Item: ComplexFloat>
 {
     type Output: DftInplace<Item = Complex<<Self::Item as ComplexFloat>::Real>>;
 
+    #[doc(alias = "fft")]
     fn dft(self) -> Self::Output;
 }
 impl<B, T, N> Dft for B
@@ -38,7 +39,7 @@ use linspace::Linspace;
     use crate::Dft;
 
     #[test]
-    fn test()
+    fn it_works()
     {
         const N: usize = 1024;
         const T: f64 = 1.0;

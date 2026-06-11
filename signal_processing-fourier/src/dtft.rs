@@ -37,7 +37,7 @@ use bulks::IntoBulk;
 use crate::Dtft;
 
     #[test]
-    fn test()
+    fn it_works()
     {
         let omega = 0.01;
 
