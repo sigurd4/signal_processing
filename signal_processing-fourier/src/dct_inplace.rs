@@ -38,13 +38,18 @@ where
         let frac_1_sqrt_2 = <T::ItemPointee as ComplexFloat>::Real::FRAC_1_SQRT_2();
         let frac_pi_2 = <T::ItemPointee as ComplexFloat>::Real::FRAC_PI_2();
 
-        let w = bulks::once(From::from(half/sqrt_len))
+        let w1 = bulks::once(From::from(Float::recip(sqrt_len)))
             .chain(bulks::range([(); 1], len)
                 .map(|i| {
                     let i = <<T::ItemPointee as ComplexFloat>::Real as NumCast>::from(i).unwrap();
                     Complex::from_polar(frac_1_sqrt_2/sqrt_len, -frac_pi_2/lenf*i)
                 })
             );
+        let w2 = bulks::range([(); 1], len)
+            .map(|i| {
+                let i = <<T::ItemPointee as ComplexFloat>::Real as NumCast>::from(i).unwrap();
+                Complex::from_polar(frac_1_sqrt_2/sqrt_len, frac_pi_2/lenf*i)
+            });
 
         let mut y = bulks::range([(); 0], len)
             .chain(bulks::range([(); 0], len).rev())
@@ -53,12 +58,23 @@ where
             .collect::<Vec<_>, _>()
             .into_bulk();
         y.dft_inplace();
-        
-        for (i, (y, w)) in y.zip(w)
+
+        let (y1, y2) = y.split_at(len);
+
+        for (i, (y1, y2)) in y1.zip(w1)
+            .map(|(y, w)| y*w)
+            .zip(bulks::once(Zero::zero())
+                .chain(
+                    y2.rev()
+                        .zip(w2)
+                        .map(|(y, w)| y*w)
+                )
+            )
             .enumerate()
         {
+            let y = (y1 + y2)/two;
             let x = self.get_mut(i).unwrap();
-            *x = <T::ItemPointee as TruncateIm>::truncate_im(y*w)
+            *x = <T::ItemPointee as TruncateIm>::truncate_im(y)
         }
     }
     fn dct_ii_inplace(&mut self)

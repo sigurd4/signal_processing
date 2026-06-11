@@ -34,7 +34,7 @@ mod test
     use core::f64::consts::TAU;
 
     use bulks::{Bulk, CollectNearest, IntoBulk};
-use linspace::Linspace;
+    use linspace::Linspace;
 
     use crate::Dft;
 

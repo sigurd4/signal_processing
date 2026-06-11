@@ -24,6 +24,7 @@ moddef::moddef!(
     flat(pub) mod {
         czt,
         dct_inplace,
+        dct,
         dft_inplace,
         dft,
         dtft,
