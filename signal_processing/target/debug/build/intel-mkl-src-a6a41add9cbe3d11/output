@@ -1,6 +1,0 @@
-cargo:rustc-link-search=/home/sigurd/.local/share/ocipkg/ghcr.io/rust-math/rust-mkl/linux/mkl-static-lp64-seq/__2020.1-3038006115
-cargo:rustc-link-lib=static=mkl_sequential
-cargo:rustc-link-lib=static=mkl_intel_lp64
-cargo:rustc-link-lib=static=mkl_core
-cargo:rerun-if-changed=/home/sigurd/.local/share/ocipkg/ghcr.io/rust-math/rust-mkl/linux/mkl-static-lp64-seq/__2020.1-3038006115
-cargo:rerun-if-env-changed=XDG_DATA_HOME
