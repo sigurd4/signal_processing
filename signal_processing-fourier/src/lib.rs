@@ -1,20 +1,12 @@
 #![feature(unboxed_closures)]
-#![feature(fn_traits)]
 #![feature(const_trait_impl)]
 #![feature(const_convert)]
-#![feature(try_trait_v2)]
 #![feature(const_option_ops)]
-#![feature(const_try)]
-#![feature(trusted_random_access)]
-#![feature(maybe_uninit_uninit_array_transpose)]
 #![feature(const_destruct)]
 #![feature(const_result_trait_fn)]
 #![feature(macro_metavar_expr_concat)]
 #![feature(const_ops)]
-#![feature(str_as_str)]
-#![feature(impl_trait_in_assoc_type)]
 #![feature(generic_const_exprs)]
-#![feature(core_intrinsics)]
 #![feature(specialization)]
 
 moddef::moddef!(
@@ -28,6 +20,7 @@ moddef::moddef!(
         dft_inplace,
         dft,
         dst_inplace,
+        dst,
         dtft,
         idft
     },
