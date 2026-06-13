@@ -27,6 +27,7 @@ moddef::moddef!(
         dct,
         dft_inplace,
         dft,
+        dst_inplace,
         dtft,
         idft
     },

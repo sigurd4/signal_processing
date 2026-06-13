@@ -1,0 +1,13 @@
+/home/sigurd/Code/rust/sss/signal_processing/target/debug/deps/qoi-04a60e3da4db71d4.d: /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/lib.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/decode.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/encode.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/error.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/header.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/pixel.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/types.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/utils.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/consts.rs
+
+/home/sigurd/Code/rust/sss/signal_processing/target/debug/deps/libqoi-04a60e3da4db71d4.rmeta: /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/lib.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/decode.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/encode.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/error.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/header.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/pixel.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/types.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/utils.rs /home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/consts.rs
+
+/home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/lib.rs:
+/home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/decode.rs:
+/home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/encode.rs:
+/home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/error.rs:
+/home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/header.rs:
+/home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/pixel.rs:
+/home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/types.rs:
+/home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/utils.rs:
+/home/sigurd/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/qoi-0.4.1/src/consts.rs:
