@@ -61,7 +61,7 @@ mod test
     use bulks::{Bulk, CollectNearest, IntoBulk};
     use linspace::Linspace;
 
-    use crate::Dst;
+    use crate::{Dct, Dst, tests};
 
     #[test]
     fn it_works()
@@ -90,5 +90,55 @@ mod test
 
         ezplot::plot_curves("X(e^jw)", "plots/x_z_dst.png", xf.map(|xf| w.into_bulk().zip(xf)))
             .unwrap()
+    }
+
+    #[test]
+    fn from_dct_iii()
+    {
+        let a = [1, 2, 3, 4, 5]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let s = a.into_bulk()
+            .dst_iii()
+            .collect_array();
+        let mut c = a.into_bulk()
+            .rev()
+            .dct_iii();
+        c.each_mut()
+            .skip(1)
+            .step_by(2)
+            .for_each(|x| *x = -*x);
+        let c = c.collect_array();
+
+        println!("{s:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&s, &c, 1e-5));
+    }
+
+    #[test]
+    fn from_dct_iv()
+    {
+        let a = [1, 2, 3, 4, 5]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let s = a.into_bulk()
+            .dst_iv()
+            .collect_array();
+        let mut c = a.into_bulk()
+            .rev()
+            .dct_iv();
+        c.each_mut()
+            .skip(1)
+            .step_by(2)
+            .for_each(|x| *x = -*x);
+        let c = c.collect_array();
+
+        println!("{s:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&s, &c, 1e-5));
     }
 }
