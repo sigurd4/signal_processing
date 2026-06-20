@@ -28,7 +28,7 @@ where
     
     fn idft(&mut self)
     {
-        fft::fft_unscaled::<_, _, false>(self, None);
+        fft::fft_unscaled::<_, _, true>(self, None);
         let bulk = self.bulk_mut();
         let norm = T::from(bulk.len()).unwrap();
         bulk.for_each(|x| x._div_assign(norm))

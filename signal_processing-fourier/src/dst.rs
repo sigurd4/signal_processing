@@ -152,6 +152,7 @@ where
             .chain(
                 (*self).bulk()
                     .rev()
+                    .skip([(); 1])
                     .map(|x| Complex { re: x.re(), im: x.im() })
                     .zip(m2)
                     .map(|(x, m2)| m2*x)
@@ -259,6 +260,89 @@ mod test
 
         ezplot::plot_curves("X(e^jw)", "plots/x_z_dst.png", xf.map(|xf| w.into_bulk().zip(xf)))
             .unwrap()
+    }
+
+    #[test]
+    fn identities()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let mut b = a;
+        b.dst_i();
+        b.dst_i();
+
+        assert!(tests::approx_eq(&a, &b, 1e-5));
+
+        let mut b = a;
+        b.dst_ii();
+        b.dst_iii();
+
+        assert!(tests::approx_eq(&a, &b, 1e-5));
+
+        let mut b = a;
+        b.dst_iv();
+        b.dst_iv();
+
+        assert!(tests::approx_eq(&a, &b, 1e-5));
+    }
+
+    #[test]
+    fn test_dst_i()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let mut b = a;
+        b.dst_i();
+
+        println!("{b:?}")
+    }
+
+    #[test]
+    fn test_dst_ii()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let mut b = a;
+        b.dst_ii();
+
+        println!("{b:?}")
+    }
+
+    #[test]
+    fn test_dst_iii()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let mut b = a;
+        b.dst_iii();
+
+        println!("{b:?}")
+    }
+
+    #[test]
+    fn test_dst_iv()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let mut b = a;
+        b.dst_iv();
+
+        println!("{b:?}")
     }
 
     #[test]

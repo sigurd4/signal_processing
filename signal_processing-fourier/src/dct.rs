@@ -263,6 +263,83 @@ mod test
     }
 
     #[test]
+    fn identities()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let mut b = a;
+        b.dct_i();
+        b.dct_iv();
+
+        assert!(tests::approx_eq(&a, &b, 1e-5));
+
+        let mut b = a;
+        b.dct_ii();
+        b.dct_iii();
+
+        assert!(tests::approx_eq(&a, &b, 1e-5))
+    }
+
+    #[test]
+    fn test_dct_i()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let mut b = a;
+        b.dct_i();
+
+        println!("{b:?}")
+    }
+
+    #[test]
+    fn test_dct_ii()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let mut b = a;
+        b.dct_ii();
+
+        println!("{b:?}")
+    }
+
+    #[test]
+    fn test_dct_iii()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let mut b = a;
+        b.dct_iii();
+
+        println!("{b:?}")
+    }
+
+    #[test]
+    fn test_dct_iv()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let mut b = a;
+        b.dct_iv();
+
+        println!("{b:?}")
+    }
+
+    #[test]
     fn from_dst_ii()
     {
         let a = [1, 2, 3, 4, 5]
@@ -279,6 +356,7 @@ mod test
             .step_by(2)
             .for_each(|x| *x = -*x);
         s.dst_ii();
+        s.reverse();
 
         println!("{s:?}");
         println!("{c:?}");
