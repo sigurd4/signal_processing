@@ -14,10 +14,10 @@ moddef::moddef!(
     flat(pub) mod {
         //czt,
         //dct_2d,
-        //dct,
+        dct,
         dft,
         //dst_2d,
-        //dst,
+        dst,
         dtft
     },
     mod {

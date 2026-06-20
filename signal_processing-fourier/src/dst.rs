@@ -35,7 +35,7 @@ where
         let one = <T as ComplexFloat>::Real::one();
         let two = one + one;
 
-        let mut y = bulks::once(Zero::zero())
+        let mut y: Vec<_> = bulks::once(Zero::zero())
             .chain(
                 (*self).bulk()
                     .map(|x| Complex { re: x.re(), im: x.im() })
@@ -46,7 +46,7 @@ where
                     .rev()
                     .map(|x| -Complex { re: x.re(), im: x.im() })
             )
-            .collect::<Vec<_>, _>();
+            .collect();
         y.dft();
 
         let (y1, y2) = y.into_bulk().split_at([(); 1]).1.split_at(len);
@@ -73,13 +73,13 @@ where
         let frac_1_sqrt_2 = <T as ComplexFloat>::Real::FRAC_1_SQRT_2();
         let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
 
-        let mut y = (*self).bulk()
+        let mut y: Vec<_> = (*self).bulk()
             .map(|x| Complex { re: x.re(), im: x.im() })
             .chain(
                 (*self).bulk()
                     .rev()
                     .map(|x| -Complex { re: x.re(), im: x.im() })
-            ).collect::<Vec<_>, _>();
+            ).collect();
         y.dft();
     
         let zero = <T as ComplexFloat>::Real::zero();
@@ -96,7 +96,7 @@ where
             .map(|i| {
                 let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
                 Complex::from_polar(frac_1_sqrt_2, -i*frac_pi_2/lenf)
-            }).chain(core::iter::once(Complex::new(zero, -one)));
+            }).chain(bulks::once(Complex::new(zero, -one)));
     
         let m2 = bulks::range([(); 1], len)
             .map(|i| {
@@ -107,7 +107,8 @@ where
         for (y, x) in y1.into_iter()
             .zip(m1)
             .map(|(y, m1)| y*m1)
-            .zip(y2.rev()
+            .zip(y2.into_iter()
+                .rev()
                 .zip(m2)
                 .map(|(y, m2)| y*m2)
                 .chain(core::iter::once(Zero::zero()))

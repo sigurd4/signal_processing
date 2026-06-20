@@ -217,10 +217,10 @@ where
             .map(|(x, w)| x*w)
             .collect();
         
-        let mut y = y1.into_bulk()
+        let mut y: Vec<_> = y1.into_bulk()
             .chain(bulks::once(Zero::zero()))
             .chain(y2.into_bulk())
-            .collect::<Vec<_>, _>();
+            .collect();
         y.idft();
         
         for (y, x) in y.into_bulk()
