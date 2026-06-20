@@ -42,7 +42,7 @@ const trait LengthValueExt: LengthValue
 
     fn is_prime(n: Self) -> bool;
 }
-impl<I> const LengthValueExt for I
+const impl<I> LengthValueExt for I
 where
     I: LengthValue
 {
@@ -53,7 +53,7 @@ where
         _is_prime(n)
     }
 }
-impl<const N: usize> const LengthValueExt for [(); N]
+const impl<const N: usize> LengthValueExt for [(); N]
 {
     default type AlwaysPrime = [(); 0];
 
@@ -62,7 +62,7 @@ impl<const N: usize> const LengthValueExt for [(); N]
         const { _is_prime(N) }
     }
 }
-impl<const N: usize> const LengthValueExt for [(); N]
+const impl<const N: usize> LengthValueExt for [(); N]
 where
     [(); _is_prime(N) as usize]:
 {

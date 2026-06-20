@@ -23,7 +23,7 @@ where
         vec![fill; length::value::len(len)].same().ok().unwrap()
     }
 }
-impl<T, const N: usize> const ScratchLength<T> for [(); N]
+const impl<T, const N: usize> ScratchLength<T> for [(); N]
 where
     T: Copy
 {

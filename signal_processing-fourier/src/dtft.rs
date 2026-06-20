@@ -1,8 +1,7 @@
-use bulks::Bulk;
 use num_traits::{One, Zero};
 use num_complex::{Complex, ComplexFloat};
 
-pub trait Dtft: Bulk<Item: ComplexFloat>
+pub trait Dtft: IntoIterator<Item: ComplexFloat>
 {
     /// Discrete time fourier transform
     fn dtft(self, omega: <Self::Item as ComplexFloat>::Real) -> Complex<<Self::Item as ComplexFloat>::Real>;
@@ -10,7 +9,7 @@ pub trait Dtft: Bulk<Item: ComplexFloat>
 
 impl<I, T> Dtft for I
 where
-    I: Bulk<Item = T>,
+    I: IntoIterator<Item = T>,
     T: ComplexFloat
 {   
     fn dtft(self, omega: T::Real) -> Complex<T::Real>
@@ -32,9 +31,7 @@ mod test
 {
     use core::f64::consts::FRAC_1_SQRT_2;
 
-use bulks::IntoBulk;
-
-use crate::Dtft;
+    use crate::Dtft;
 
     #[test]
     fn it_works()
@@ -45,8 +42,8 @@ use crate::Dtft;
         let b = [omega, omega];
         let a = [2.0 + omega, -2.0 + omega];
 
-        let bf = b.into_bulk().dtft(omega);
-        let af = a.into_bulk().dtft(omega);
+        let bf = b.dtft(omega);
+        let af = a.dtft(omega);
 
         let gf = (bf/af).norm();
 

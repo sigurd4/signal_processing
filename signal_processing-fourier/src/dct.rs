@@ -1,55 +1,233 @@
-use bulks::{Bulk, CollectNearest, IntoBulk, Map};
+use array_trait::length;
+use bulks::{AsBulk, Bulk, DoubleEndedBulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
-use crate::{DctInplace, DftInplace, util::IntoComplex};
+use num_traits::{Float, FloatConst, NumCast, One, Zero};
+use crate::{Dft, Permute, util::TruncateIm};
 
-pub trait Dct: Bulk<Item: ComplexFloat>
+pub trait Dct: Permute
 {
-    type Output: DctInplace<Item = Self::Item>;
-
     #[doc(alias = "idct_iv")]
-    fn dct_i(self) -> Self::Output;
+    fn dct_i(&mut self);
     #[doc(alias = "idct_iii")]
-    fn dct_ii(self) -> Self::Output;
+    fn dct_ii(&mut self);
     #[doc(alias = "idct_ii")]
-    fn dct_iii(self) -> Self::Output;
+    fn dct_iii(&mut self);
     #[doc(alias = "idct_i")]
-    fn dct_iv(self) -> Self::Output;
+    fn dct_iv(&mut self);
 }
-impl<B, T, N> Dct for B
+impl<B, T> Dct for B
 where
-    B: Bulk<Item = T> + CollectNearest<Nearest = N>,
-    T: ComplexFloat + 'static,
-    N: IntoBulk<IntoBulk: DctInplace<Item = Self::Item>>
+    for<'a> &'a mut B: IntoBulk<Item = &'a mut T>,
+    for<'a> &'a B: IntoBulk<Item = &'a T, IntoBulk: DoubleEndedBulk>,
+    B: ?Sized,
+    T: ComplexFloat + 'static
 {
-    type Output = N::IntoBulk;
+    fn dct_i(&mut self)
+    {
+        let len = (*self).bulk().length();
+        if length::value::le(len, [(); 1])
+        {
+            return
+        }
+        let lenf = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len)).unwrap();
+        let sqrt_len = Float::sqrt(lenf);
 
-    fn dct_i(self) -> Self::Output
-    {
-        let mut bulk = self.collect_nearest()
-            .into_bulk();
-        bulk.dct_i_inplace();
-        bulk
+        let one = <T as ComplexFloat>::Real::one();
+        let two = one + one;
+        let frac_1_sqrt_2 = <T as ComplexFloat>::Real::FRAC_1_SQRT_2();
+        let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
+
+        let w1 = bulks::once(From::from(Float::recip(sqrt_len)))
+            .chain(bulks::range([(); 1], len)
+                .map(|i| {
+                    let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
+                    Complex::from_polar(frac_1_sqrt_2/sqrt_len, -frac_pi_2/lenf*i)
+                })
+            );
+        let w2 = bulks::range([(); 1], len)
+            .map(|i| {
+                let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
+                Complex::from_polar(frac_1_sqrt_2/sqrt_len, frac_pi_2/lenf*i)
+            });
+
+        let mut y = (*self).bulk()
+            .chain((*self).bulk().rev())
+            .map(|x| Complex { re: x.re(), im: x.im() })
+            .collect::<Vec<_>, _>();
+        y.dft();
+
+        let (y1, y2) = y.into_bulk().split_at(len);
+
+        for ((y1, y2), x) in y1.into_iter()
+            .zip(w1)
+            .map(|(y, w)| y*w)
+            .zip(bulks::once(Zero::zero())
+                .chain(
+                    y2.rev()
+                        .zip(w2)
+                        .map(|(y, w)| y*w)
+                )
+            )
+            .zip(self.bulk_mut())
+        {
+            let y = (y1 + y2)/two;
+            *x = <T as TruncateIm>::truncate_im(y)
+        }
     }
-    fn dct_ii(self) -> Self::Output
+    fn dct_ii(&mut self)
     {
-        let mut bulk = self.collect_nearest()
-            .into_bulk();
-        bulk.dct_ii_inplace();
-        bulk
+        let len = (*self).bulk().length();
+        if length::value::le(len, [(); 1])
+        {
+            return
+        }
+        let lenf = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len)).unwrap();
+
+        let frac_1_sqrt_2 = <T as ComplexFloat>::Real::FRAC_1_SQRT_2();
+        let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
+
+        let m1 = bulks::once(One::one())
+            .chain(bulks::range([(); 1], len)
+                .map(|i| {
+                    let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
+                    Complex::from_polar(frac_1_sqrt_2, -i*frac_pi_2/lenf)
+                })
+            );
+        let m2 = bulks::range([(); 1], len)
+            .map(|i| {
+                let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
+                Complex::from_polar(frac_1_sqrt_2, i*frac_pi_2/lenf)
+            });
+
+        let mut y = (*self).bulk()
+            .chain((*self).bulk().rev())
+            .map(|x| Complex { re: x.re(), im: x.im() })
+            .collect::<Vec<_>, _>();
+        y.dft();
+        let (y1, y2) = y.into_bulk().split_at(len);
+
+        let one = <T as ComplexFloat>::Real::one();
+        let two = one + one;
+        let ydiv = Float::sqrt(lenf)*two;
+
+        for ((y1, y2), x) in y1.into_iter()
+            .zip(m1)
+            .map(|(y, m1)| y*m1)
+            .zip(bulks::once(Zero::zero())
+                .chain(y2.rev()
+                    .zip(m2)
+                    .map(|(y, m2)| y*m2)
+                )
+            ).zip(self.bulk_mut())
+        {
+            let y = (y1 + y2)/ydiv;
+            *x = <T as TruncateIm>::truncate_im(y)
+        }
     }
-    fn dct_iii(self) -> Self::Output
+    fn dct_iii(&mut self)
     {
-        let mut bulk = self.collect_nearest()
-            .into_bulk();
-        bulk.dct_iii_inplace();
-        bulk
+        let len = (*self).bulk().length();
+        if length::value::le(len, [(); 1])
+        {
+            return
+        }
+        let lenf = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len)).unwrap();
+
+        let frac_1_sqrt_2 = <T as ComplexFloat>::Real::FRAC_1_SQRT_2();
+        let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
+
+        let m1 = bulks::once(One::one())
+            .chain(bulks::range([(); 1], len)
+                .map(|i| {
+                    let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
+                    Complex::from_polar(frac_1_sqrt_2, -i*frac_pi_2/lenf)
+                })
+            );
+        let m2 = bulks::range([(); 1], len)
+            .map(|i| {
+                let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
+                Complex::from_polar(frac_1_sqrt_2, i*frac_pi_2/lenf)
+            })
+            .rev();
+        
+        let mut y = (*self).bulk()
+            .map(|x| Complex { re: x.re(), im: x.im() })
+            .zip(m1)
+            .map(|(x, m1)| m1*x)
+            .chain(bulks::once(Zero::zero()))
+            .chain(
+                (*self).bulk()
+                    .skip([(); 1])
+                    .rev()
+                    .map(|x| Complex { re: x.re(), im: x.im() })
+                    .zip(m2)
+                    .map(|(x, m2)| m2*x)
+            ).collect::<Vec<_>, _>();
+        y.dft();
+        
+        let ydiv = Float::sqrt(lenf);
+        for (mut y, x) in y.into_bulk()
+            .zip(self.bulk_mut())
+        {
+            y = y/ydiv;
+            *x = <_ as TruncateIm>::truncate_im(y)
+        }
+
     }
-    fn dct_iv(self) -> Self::Output
+    fn dct_iv(&mut self)
     {
-        let mut bulk = self.collect_nearest()
-            .into_bulk();
-        bulk.dct_iv_inplace();
-        bulk
+        let len = (*self).bulk().length();
+        if length::value::le(len, [(); 1])
+        {
+            return
+        }
+        let lenf = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len)).unwrap();
+        let sqrt_len = Float::sqrt(lenf);
+
+        let one = <T as ComplexFloat>::Real::one();
+        let two = one + one;
+        let sqrt_2 = <T as ComplexFloat>::Real::SQRT_2();
+        let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
+        let pi = <T as ComplexFloat>::Real::PI();
+
+        let w1 = bulks::once(From::from(two*sqrt_len))
+            .chain(bulks::range([(); 1], len)
+                .map(|i| {
+                    let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
+                    Complex::from_polar(sqrt_2*sqrt_len, frac_pi_2/lenf*i)
+                })
+            );
+
+        let y1: Vec<_> = (*self).bulk()
+            .map(|x| Complex { re: x.re(), im: x.im() })
+            .zip(w1)
+            .map(|(x, w)| x*w)
+            .collect();
+
+        let w2 = bulks::range([(); 1], len)
+            .map(|i| {
+                let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
+                Complex::cis(-pi/lenf*i)
+            }).rev();
+
+        let y2: Vec<_> = y1.bulk()
+            .copied()
+            .rev()
+            .zip(w2)
+            .map(|(x, w)| x*w)
+            .collect();
+        
+        let mut y = y1.into_bulk()
+            .chain(bulks::once(Zero::zero()))
+            .chain(y2.into_bulk())
+            .collect::<Vec<_>, _>();
+        y.idft();
+        
+        for (y, x) in y.into_bulk()
+            .zip(self.bulk_mut())
+        {
+            *x = <_ as TruncateIm>::truncate_im(y)
+        }
     }
 }
 
@@ -58,7 +236,7 @@ mod test
 {
     use core::f64::consts::TAU;
 
-    use bulks::{Bulk, CollectNearest, IntoBulk};
+    use bulks::{AsBulk, Bulk, IntoBulk};
     use linspace::Linspace;
 
     use crate::{Dct, Dst, tests};
@@ -74,18 +252,10 @@ mod test
 
         let w = (0.0..TAU).linspace_array::<N>();
         let xf = [
-            x.into_bulk()
-                .dct_i()
-                .collect_nearest(),
-            x.into_bulk()
-                .dct_ii()
-                .collect_nearest(),
-            x.into_bulk()
-                .dct_iii()
-                .collect_nearest(),
-            x.into_bulk()
-                .dct_iv()
-                .collect_nearest()
+            { let mut y = x; y.dct_i(); y },
+            { let mut y = x; y.dct_ii(); y },
+            { let mut y = x; y.dct_iii(); y },
+            { let mut y = x; y.dct_iv(); y }
         ];
 
         ezplot::plot_curves("X(e^jw)", "plots/x_z_dct.png", xf.map(|xf| w.into_bulk().zip(xf)))
@@ -100,17 +270,15 @@ mod test
             .map(|x| x as f32)
             .collect_array();
 
-        let c = a.into_bulk()
-            .dct_ii()
-            .collect_array();
-        let mut s = a.into_bulk();
-        s.each_mut()
+        let mut c = a;
+        c.dct_ii();
+
+        let mut s = a;
+        s.bulk_mut()
             .skip(1)
             .step_by(2)
             .for_each(|x| *x = -*x);
-        let s = s.dst_ii()
-            .rev()
-            .collect_array();
+        s.dst_ii();
 
         println!("{s:?}");
         println!("{c:?}");

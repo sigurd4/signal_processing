@@ -80,7 +80,7 @@ pub const trait Window<W>: Bulk
         Self: Sized;
 }
 
-impl<B, W> const Window<W> for B
+const impl<B, W> Window<W> for B
 where
     B: Bulk + ?Sized
 {
@@ -148,7 +148,7 @@ where
             .map(functor)
     }
 }
-impl<I, W, T, U> const Bulk for Windowed<I, W, T>
+const impl<I, W, T, U> Bulk for Windowed<I, W, T>
 where
     I: ~const Bulk<Item: ~const Mul<T, Output = U> + ~const Destruct>,
     W: ~const WindowFn<<I::Length as Length>::Mapped<T>, Functor: ~const FnMut(usize) -> T + ~const Destruct>
@@ -185,7 +185,7 @@ where
             .try_for_each(functor)
     }
 }
-impl<I, W, T, U> const DoubleEndedBulk for Windowed<I, W, T>
+const impl<I, W, T, U> DoubleEndedBulk for Windowed<I, W, T>
 where
     I: ~const Bulk<Item: ~const Mul<T, Output = U> + ~const Destruct> + ~const DoubleEndedBulk,
     W: ~const WindowFn<<I::Length as Length>::Mapped<T>, Functor: ~const FnMut(usize) -> T + ~const Destruct>
@@ -211,7 +211,7 @@ where
             .try_rev_for_each(functor)
     }
 }
-impl<I, W, T, U, L> const SplitBulk<L> for Windowed<I, W, T>
+const impl<I, W, T, U, L> SplitBulk<L> for Windowed<I, W, T>
 where
     I: ~const Bulk<Item: ~const Mul<T, Output = U> + ~const Destruct>,
     bulks::Enumerate<I>: ~const SplitBulk<L, Item = (usize, I::Item), Left: ~const Bulk, Right: ~const Bulk>,
@@ -241,7 +241,7 @@ struct Functor<W, F>
     window_function: W,
     f: F
 }
-impl<W, F, T, X, U, Y> const FnOnce<((usize, X),)> for Functor<W, F>
+const impl<W, F, T, X, U, Y> FnOnce<((usize, X),)> for Functor<W, F>
 where
     W: ~const FnOnce(usize) -> T,
     X: ~const Mul<T, Output = U>,
@@ -255,7 +255,7 @@ where
         f(x*window_function(i))
     }
 }
-impl<W, F, T, X, U, Y> const FnMut<((usize, X),)> for Functor<W, F>
+const impl<W, F, T, X, U, Y> FnMut<((usize, X),)> for Functor<W, F>
 where
     W: ~const FnMut(usize) -> T,
     X: ~const Mul<T, Output = U>,
@@ -267,7 +267,7 @@ where
         f(x*window_function(i))
     }
 }
-impl<W, F, T, X, U, Y> const Fn<((usize, X),)> for Functor<W, F>
+const impl<W, F, T, X, U, Y> Fn<((usize, X),)> for Functor<W, F>
 where
     W: ~const Fn(usize) -> T,
     X: ~const Mul<T, Output = U>,
@@ -287,8 +287,10 @@ mod tests
 
     use bulks::*;
     use linspace::Linspace;
+    use num_complex::Complex;
+    use num_traits::Zero;
     use signal_processing_fourier::Dft;
-use to_snake_case::ToSnakeCase;
+    use to_snake_case::ToSnakeCase;
 
     use crate::{Shape, Window, WindowFn};
 
@@ -307,7 +309,11 @@ use to_snake_case::ToSnakeCase;
 
         ezplot::plot_curves("g(n/N)", &format!("plots/windows/g_n_{type_name}.png"), [data]).unwrap();
 
-        let mut w_f = w.into_bulk().chain([0.0; N/2]).dft().collect_array();
+        let mut w_f = w.into_bulk()
+            .map(Complex::from)
+            .chain([Complex::zero(); N/2])
+            .collect_array();
+        w_f.dft();
         w_f.rotate_right(N/4);
         let data = (-PI..PI).linspace(w.len()).zip(w_f.into_bulk().map(|w| 20.0*w.norm().log10()));
         

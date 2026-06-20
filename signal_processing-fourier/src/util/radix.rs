@@ -32,7 +32,7 @@ pub(crate) const trait LengthValueExt: LengthValue
 
     fn radix(n: Self) -> Option<Self::Radix>;
 }
-impl<I> const LengthValueExt for I
+const impl<I> LengthValueExt for I
 where
     I: LengthValue
 {
@@ -43,7 +43,7 @@ where
         _radix(n)
     }
 }
-impl<const N: usize> const LengthValueExt for [(); N]
+const impl<const N: usize> LengthValueExt for [(); N]
 where
     [(); _radix(N).unwrap_or(0)]:
 {
@@ -54,7 +54,7 @@ where
         const { _radix(N) }
     }
 }
-impl<const N: usize> const LengthValueExt for [(); N]
+const impl<const N: usize> LengthValueExt for [(); N]
 where
     Self: LengthAlwaysPrime,
     [(); _radix(N).unwrap_or(0)]:

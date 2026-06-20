@@ -1,50 +1,32 @@
-use array_trait::length::{self, LengthValue};
-use bulks::{InplaceBulk, IntoBulk};
+use array_trait::{length::{self, LengthValue}};
+use bulks::{AsBulk, Bulk, IntoBulk};
 
 use crate::util;
 
-pub const trait Permute: ~const InplaceBulk
+pub const trait Permute
 {
-    fn digit_rev_permute_inplace<R>(&mut self, radix: R)
+    fn digit_rev_permute<R>(&mut self, radix: R)
     where
-        Self: Sized,
         R: LengthValue;
 
-    fn bit_rev_permute_inplace(&mut self)
-    where
-        Self: Sized
+    fn bit_rev_permute(&mut self)
     {
-        self.digit_rev_permute_inplace([(); 2])
-    }
-
-    fn digit_rev_permute<R>(mut self, radix: R) -> Self
-    where
-        Self: Sized,
-        R: LengthValue
-    {
-        self.digit_rev_permute_inplace(radix);
-        self
-    }
-
-    fn bit_rev_permute(mut self) -> Self
-    where
-        Self: Sized
-    {
-        self.bit_rev_permute_inplace();
-        self
+        self.digit_rev_permute([(); 2])
     }
 }
 
-impl<T> const Permute for T
+const impl<B, T> Permute for B
 where
-    T: ~const InplaceBulk
+    for<'a> &'a mut B: ~const IntoBulk<Item = &'a mut T>,
+    B: ?Sized
 {
-    fn digit_rev_permute_inplace<R>(&mut self, radix: R)
+    fn digit_rev_permute<R>(&mut self, radix: R)
     where
-        Self: Sized,
         R: LengthValue
     {
-        let len = self.length();
+        let bulk = self.bulk_mut();
+        let len = bulk.length();
+        bulk.for_each(core::mem::drop);
         if length::value::le(len, radix)
         {
             return;
@@ -60,7 +42,7 @@ where
         {
             if i < j
             {
-                self.swap_inplace(i, j);
+                self.bulk_mut().swap::<T, _, _>(i, j);
             }
             let mut k = length::value::len(j0);
             let mut kk = length::value::len(length::value::mul(j0, rm1));
@@ -79,18 +61,15 @@ where
 #[cfg(test)]
 mod test
 {
-    use bulks::{Bulk, IntoBulk};
-
-    use super::*;
+    use super::Permute;
 
     #[test]
     fn it_works()
     {
-        let a = [0, 1, 2, 3, 4, 5, 6, 7];
+        let mut a = [0u8, 1, 2, 3, 4, 5, 6, 7];
 
-        for x in a.into_bulk()
-            .bit_rev_permute()
-            .collect_array()
+        a.bit_rev_permute();
+        for x in a
         {
             print!("{x:03b} ")
         }

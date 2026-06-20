@@ -1,10 +1,10 @@
 use core::borrow::{BorrowMut};
 
 use array_trait::length::{self, Length};
-use bulks::{AsBulk, Bulk, CollectNearest};
+use bulks::{Bulk, CollectNearest};
 use num_complex::Complex;
 use num_traits::{Float, FloatConst, Zero};
-use signal_processing_fourier::DftInplace;
+use signal_processing_fourier::Dft;
 
 use crate::{Shape, WindowFn};
 
@@ -19,7 +19,7 @@ where
 impl<L, T> WindowFn<L> for DolphChebyshev<T>
 where
     L: Length<Elem = T> + ?Sized,
-    T: Float + FloatConst
+    T: Float + FloatConst + 'static
 {
     type Functor = impl Fn(usize) -> T;
 
@@ -58,7 +58,8 @@ where
             }).collect_nearest();
         let wr = if m % 2 == 0
         {
-            w.borrow_mut().bulk_mut().dft_inplace();
+            let w: &mut [_] = w.borrow_mut();
+            w.dft();
             let mut wr = bulks::repeat_n(T::zero(), len)
                 .collect_nearest();
             let mm = (m + 2)/2;
@@ -75,12 +76,13 @@ where
         }
         else
         {
-            for (k, w) in w.borrow_mut().iter_mut()
+            let w: &mut [_] = w.borrow_mut();
+            for (k, w) in w.iter_mut()
                 .enumerate()
             {
                 *w = *w * Complex::cis(T::PI()*T::from(k).unwrap()/(l + one))
             }
-            w.borrow_mut().bulk_mut().dft_inplace();
+            w.dft();
             let mut wr = bulks::repeat_n(T::zero(), len)
                 .collect_nearest();
             let mm = (m + 1)/2 + 1;

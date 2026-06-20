@@ -1,6 +1,6 @@
 use array_trait::length::{self, LengthValue};
+use bulks::IntoBulk;
 use moddef::moddef;
-use num_complex::{Complex, ComplexFloat};
 
 use crate::util;
 
@@ -12,8 +12,8 @@ moddef!(
         assign,
         radix,
         is_prime,
-        length_as_bulk,
-        to_complex
+        to_complex,
+        indirect_reffable
     }
 );
 

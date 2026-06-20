@@ -1,13 +1,10 @@
 #![feature(const_trait_impl)]
 #![feature(const_precise_live_drops)]
-#![feature(const_destruct)]
-#![feature(const_try)]
-#![feature(try_trait_v2)]
 
-use core::{marker::Destruct, ops::{Add, Deref, Try}};
+use core::ops::Add;
 
-use array_trait::{AsSlice, length};
-use bulks::{Bulk, CollectNearest, InplaceBulk, IntoBulk, Merge, RandomAccessBulk};
+use array_trait::{AsSlice};
+use bulks::{Bulk, CollectNearest, IntoBulk, Merge};
 
 pub struct Polynomial<I>(I)
 where

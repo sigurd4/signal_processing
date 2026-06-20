@@ -2,27 +2,23 @@
 #![feature(const_trait_impl)]
 #![feature(const_convert)]
 #![feature(const_option_ops)]
-#![feature(const_destruct)]
-#![feature(const_result_trait_fn)]
 #![feature(macro_metavar_expr_concat)]
 #![feature(const_ops)]
 #![feature(generic_const_exprs)]
 #![feature(specialization)]
 
 moddef::moddef!(
-    pub mod {
+    flat(pub) mod {
         permute
     },
     flat(pub) mod {
         czt,
-        dct_inplace,
+        dct_2d,
         dct,
-        dft_inplace,
         dft,
-        dst_inplace,
+        dst_2d,
         dst,
-        dtft,
-        idft
+        dtft
     },
     mod {
         util
@@ -32,12 +28,32 @@ moddef::moddef!(
     }
 );
 
-pub mod conf
-{
-    pub struct TwoSided;
-    pub struct OneSided;
-    pub struct TwoSidedCentered;
+macro_rules! transform_2d_inplace {
+    ($bulks:ident.$transform:ident()) => {
+        {
+            use bulks::*;
+            use array_trait::length;
+
+            let bulks = $bulks;
+            let mut len = length::value::or_len(0);
+            for bulk in bulks.bulk_mut()
+            {
+                bulk.$transform();
+                len = length::value::max(bulk.bulk_mut().length(), len);
+            }
+            for i in 0..length::value::len(len)
+            {
+                let mut v = bulks.bulk_mut()
+                    .map(|bulk| bulk.bulk_mut().get_mut(i).ok_or(T::zero()))
+                    .collect::<Vec<_>>();
+
+                crate::util::IndirectReffable(&mut v).$transform()
+            }
+        }
+    };
 }
+
+use transform_2d_inplace as transform_2d_inplace;
 
 macro_rules! temp {
     ($temp:ident for $len:expr) => {

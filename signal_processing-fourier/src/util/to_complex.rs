@@ -1,5 +1,5 @@
 use num_complex::{Complex, ComplexFloat};
-use num_traits::{Float, FloatConst};
+use num_traits::{Float, FloatConst, NumCast};
 
 pub trait IntoComplex: ComplexFloat
 {
@@ -27,23 +27,45 @@ where
     }
 }
 
-pub trait TruncateIm: ComplexFloat<Real: Into<Self>>
+pub trait TruncateIm: ComplexFloat
 {
+    fn from_real(r: Self::Real) -> Self;
     fn truncate_im(c: Complex<Self::Real>) -> Self;
+}
+impl<T> TruncateIm for T
+where
+    T: ComplexFloat
+{
+    default fn from_real(r: Self::Real) -> Self
+    {
+        NumCast::from(r).expect("ComplexFloat cannot contain real.")
+    }
+    default fn truncate_im(c: Complex<Self::Real>) -> Self
+    {
+        Self::from_real(c.re)
+    }
 }
 impl<T> TruncateIm for T
 where
     T: ComplexFloat<Real: Into<Self>>
 {
+    default fn from_real(r: Self::Real) -> Self
+    {
+        r.into()
+    }
     default fn truncate_im(c: Complex<Self::Real>) -> Self
     {
-        c.re.into()
+        Self::from_real(c.re)
     }
 }
 impl<T> TruncateIm for Complex<T>
 where
     T: Float + FloatConst
 {
+    fn from_real(r: Self::Real) -> Self
+    {
+        r.into()
+    }
     fn truncate_im(c: Complex<Self::Real>) -> Self
     {
         c

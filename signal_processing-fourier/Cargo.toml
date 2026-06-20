@@ -15,3 +15,5 @@ num-traits = { workspace = true }
 [dev-dependencies]
 linspace = { workspace = true }
 ezplot = { workspace = true }
+image = { workspace = true }
+ndarray = { workspace = true }
