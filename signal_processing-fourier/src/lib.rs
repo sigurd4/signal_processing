@@ -12,7 +12,7 @@ moddef::moddef!(
         permute
     },
     flat(pub) mod {
-        //czt,
+        czt,
         //dct_2d,
         dct,
         dft,
