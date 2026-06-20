@@ -57,7 +57,7 @@ mod test
 
         let w = (0.0..TAU).linspace_array::<N>();
         let mut xf = x.map(Complex::from);
-        xf.dft();
+        xf.as_mut_slice().dft();
 
         ezplot::plot_curves("X(e^jw)", "plots/x_z_dft.png", [w.into_bulk().zip(xf.map(|xf| xf.norm()))])
             .unwrap()

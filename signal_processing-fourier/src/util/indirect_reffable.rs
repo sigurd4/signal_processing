@@ -22,7 +22,7 @@ where
     fn into_iter(self) -> Self::IntoIter
     {
         let IndirectReffable(c) = self;
-        c.iter_mut()
+        (**c).iter_mut()
             .map(flatten_mut as fn(_) -> _)
     }
 }
@@ -35,7 +35,7 @@ where
     fn into_bulk(self) -> Self::IntoBulk
     {
         let IndirectReffable(c) = self;
-        c.bulk_mut()
+        (**c).bulk_mut()
             .map(flatten_mut as fn(_) -> _)
     }
 }
@@ -49,7 +49,7 @@ where
     fn into_iter(self) -> Self::IntoIter
     {
         let IndirectReffable(c) = self;
-        c.iter()
+        (**c).iter()
             .map(flatten_ref as fn(_) -> _)
     }
 }
@@ -62,7 +62,7 @@ where
     fn into_bulk(self) -> Self::IntoBulk
     {
         let IndirectReffable(c) = self;
-        c.bulk()
+        (**c).bulk()
             .map(flatten_ref as fn(_) -> _)
     }
 }
