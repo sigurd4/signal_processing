@@ -4,6 +4,7 @@
 #![feature(const_option_ops)]
 #![feature(macro_metavar_expr_concat)]
 #![feature(const_ops)]
+#![feature(const_destruct)]
 #![feature(generic_const_exprs)]
 #![feature(specialization)]
 
@@ -13,7 +14,7 @@ moddef::moddef!(
     },
     flat(pub) mod {
         czt,
-        //dct_2d,
+        dct_2d,
         dct,
         dft,
         //dst_2d,

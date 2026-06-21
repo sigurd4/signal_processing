@@ -1,4 +1,4 @@
-use core::ops::Mul;
+use core::{borrow::{Borrow, BorrowMut}, ops::Mul};
 
 use array_trait::length;
 use bulks::{AsBulk, Bulk, IntoBulk};
@@ -8,7 +8,7 @@ use num_complex::{Complex, ComplexFloat};
 use crate::Dft;
 
 /// Computes a chirp-response within the z-transform.
-pub trait Czt<T>: Dft
+pub trait Czt<T>: Dft<T>
 where
     T: Float + FloatConst
 {
@@ -32,7 +32,7 @@ where
 }
 impl<B, T> Czt<T> for B
 where
-    for<'a> &'a mut B: IntoBulk<Item = &'a mut Complex<T>>,
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<Complex<T>>>,
     B: ?Sized,
     T: Float + FloatConst + 'static
 {
@@ -62,7 +62,7 @@ where
         fw.dft();
 
         let mut fg: Vec<_> = self.bulk_mut()
-            .map(|x| Complex { re: x.re(), im: x.im() })
+            .map(|x| *x.borrow())
             .collect();
         let a_recip = point.recip();
         let mut apmk = Complex::one();
@@ -88,14 +88,14 @@ where
             .collect::<Vec<_>, _>();
         gg.idft();
 
-        for (y, x) in gg.into_bulk()
+        for (y, mut x) in gg.into_bulk()
             .zip(w2)
             .skip(length::value::saturating_sub(n, [(); 1]))
             .map(mul_tuple as fn(_) -> _)
             .into_iter()
             .zip(self.bulk_mut())
         {
-            *x = y
+            *x.borrow_mut() = y
         }
     }
 }

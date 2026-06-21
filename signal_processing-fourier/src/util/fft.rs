@@ -10,7 +10,7 @@ use crate::{permute::Permute, temp, util::{self, MulAssignSpec, AddAssignSpec}};
 
 pub fn fft_unscaled<B, T, const I: bool>(sequence: &mut B, mut temp: Option<&mut [Complex<T>]>)
 where
-    for<'a> &'a mut B: IntoBulk<Item = &'a mut Complex<T>>,
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<Complex<T>>>,
     B: ?Sized,
     T: Float + 'static
 {
@@ -54,7 +54,7 @@ where
 
 pub fn partial_fft_unscaled<B, T, const I: bool, M>(sequence: &mut B, temp: &mut [Complex<T>], m: M) -> bool
 where
-    for<'a> &'a mut B: IntoBulk<Item = &'a mut Complex<T>>,
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<Complex<T>>>,
     B: ?Sized,
     T: Float + 'static,
     M: LengthValue
@@ -72,8 +72,35 @@ where
             .skip(k)
             .step_by(m)
         {
-            temp[i] = *x;
+            temp[i] = *x.borrow();
             i += 1;
+        }
+    }
+
+    trait Recurse<T>
+    where
+        T: Float + 'static
+    {
+        fn buffer(&mut self) -> Option<&mut [Complex<T>]>;
+    }
+    impl<B, T> Recurse<T> for B
+    where
+        B: ?Sized,
+        T: Float + 'static,
+    {
+        default fn buffer(&mut self) -> Option<&mut [Complex<T>]>
+        {
+            None
+        }
+    }
+    impl<B, T> Recurse<T> for B
+    where
+        B: BorrowMut<[Complex<T>]> + ?Sized,
+        T: Float + 'static,
+    {
+        fn buffer(&mut self) -> Option<&mut [Complex<T>]>
+        {
+            Some(self.borrow_mut())
         }
     }
 
@@ -81,8 +108,11 @@ where
     let n = length::value::div(len, length::value::max(m, [(); 1]));
     let r = length::value::rem(len, length::value::max(m, [(); 1]));
 
+    let mut buffer = Recurse::<T>::buffer(sequence);
+    temp!(buffer for len);
+
     let mut iter = temp.bulk_mut()
-        .zip(sequence.bulk_mut())
+        .zip(buffer)
         .step_by(n)
         .into_iter();
     
@@ -101,7 +131,7 @@ where
         unsafe {
             fft_unscaled::<[_], T, I>(
                 core::slice::from_raw_parts_mut(temp, length::value::len(r)),
-                Some(core::slice::from_raw_parts_mut(bulk, length::value::len(n)))
+                Some(core::slice::from_raw_parts_mut(bulk, length::value::len(r)))
             )
         }
     }
@@ -111,7 +141,7 @@ where
 
 pub fn fft_radix2_unscaled<T, B, const I: bool>(sequence: &mut B, temp: &mut Option<&mut [Complex<T>]>) -> bool
 where
-    for<'a> &'a mut B: IntoBulk<Item = &'a mut Complex<T>>,
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<Complex<T>>>,
     B: ?Sized,
     T: Float + 'static
 {
@@ -133,7 +163,7 @@ where
                     let mut w = Complex::<T>::one();
                     for j in 0..m/2
                     {
-                        let [x1, x2]: [&mut Complex<T>; _] = sequence.bulk_mut()
+                        let [mut x1, mut x2] = sequence.bulk_mut()
                             .skip(k + j)
                             .step_by(m/2)
                             .map(Some)
@@ -141,11 +171,11 @@ where
                             .try_collect_array()
                             .unwrap();
 
-                        let p = *x1;
-                        let q = w**x2;
+                        let p = *x1.borrow();
+                        let q = w**x2.borrow();
 
-                        *x1 = p + q;
-                        *x2 = p - q;
+                        *x1.borrow_mut() = p + q;
+                        *x2.borrow_mut() = p - q;
                         w._mul_assign(wm);
                     }
                 }
@@ -169,7 +199,7 @@ where
             let p = x[0][k];
             let q = wn_pk*x[1][k];
 
-            let [x1, x2]: [&mut Complex<T>; _] = sequence.bulk_mut()
+            let [mut x1, mut x2] = sequence.bulk_mut()
                 .skip(k)
                 .step_by(ldiv)
                 .map(Some)
@@ -177,8 +207,8 @@ where
                 .try_collect_array()
                 .unwrap();
             
-            *x1 = p + q;
-            *x2 = p - q;
+            *x1.borrow_mut() = p + q;
+            *x2.borrow_mut() = p - q;
 
             wn_pk._mul_assign(wn);
         }
@@ -189,7 +219,7 @@ where
 
 pub fn fft_radix3_unscaled<T, B, const I: bool>(sequence: &mut B, temp: &mut Option<&mut [Complex<T>]>) -> bool
 where
-    for<'a> &'a mut B: IntoBulk<Item = &'a mut Complex<T>>,
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<Complex<T>>>,
     B: ?Sized,
     T: Float + 'static
 {
@@ -217,7 +247,7 @@ where
                     let mut w = Complex::one();
                     for j in 0..m/P
                     {
-                        let [x1, x2, x3]: [&mut Complex<T>; _] = sequence.bulk_mut()
+                        let [mut x1, mut x2, mut x3] = sequence.bulk_mut()
                             .skip(k + j)
                             .step_by(m/P)
                             .map(Some)
@@ -225,13 +255,13 @@ where
                             .try_collect_array()
                             .unwrap();
                             
-                        let p = *x1 + (*x2 + *x3*w)*w;
-                        let q = *x1 + (*x2*w3 + *x3*w3_p2*w)*w;
-                        let r = *x1 + (*x2*w3_p2 + *x3*w3*w)*w;
+                        let p = *x1.borrow() + (*x2.borrow() + *x3.borrow()*w)*w;
+                        let q = *x1.borrow() + (*x2.borrow()*w3 + *x3.borrow()*w3_p2*w)*w;
+                        let r = *x1.borrow() + (*x2.borrow()*w3_p2 + *x3.borrow()*w3*w)*w;
 
-                        *x1 = p;
-                        *x2 = q;
-                        *x3 = r;
+                        *x1.borrow_mut() = p;
+                        *x2.borrow_mut() = q;
+                        *x3.borrow_mut() = r;
                         
                         w._mul_assign(wm);
                     }
@@ -262,16 +292,16 @@ where
             let q = *x1 + (*x2*w3 + *x3*w3_p2*w)*w;
             let r = *x1 + (*x2*w3_p2 + *x3*w3*w)*w;
 
-            let [x1, x2, x3]: [&mut Complex<T>; _] = sequence.bulk_mut()
+            let [mut x1, mut x2, mut x3] = sequence.bulk_mut()
                 .skip(k)
                 .step_by(ldiv)
                 .map(Some)
                 .resize_with([(); _], || None)
                 .try_collect_array()
                 .unwrap();
-            *x1 = p;
-            *x2 = q;
-            *x3 = r;
+            *x1.borrow_mut() = p;
+            *x2.borrow_mut() = q;
+            *x3.borrow_mut() = r;
 
             w._mul_assign(wn);
         }
@@ -282,7 +312,7 @@ where
 
 pub fn fft_radix5_unscaled<T, B, const I: bool>(sequence: &mut B, temp: &mut Option<&mut [Complex<T>]>) -> bool
 where
-    for<'a> &'a mut B: IntoBulk<Item = &'a mut Complex<T>>,
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<Complex<T>>>,
     B: ?Sized,
     T: Float + 'static
 {
@@ -312,7 +342,7 @@ where
                     let mut w = Complex::one();
                     for j in 0..m/P
                     {
-                        let [x1, x2, x3, x4, x5]: [&mut Complex<T>; _] = sequence.bulk_mut()
+                        let [mut x1, mut x2, mut x3, mut x4, mut x5] = sequence.bulk_mut()
                             .skip(k + j)
                             .step_by(m/P)
                             .map(Some)
@@ -320,17 +350,17 @@ where
                             .try_collect_array()
                             .unwrap();
 
-                        let p = *x1 + (*x2 + (*x3 + (*x4 + *x5*w)*w)*w)*w;
-                        let q = *x1 + (*x2*w5 + (*x3*w5_p2 + (*x4*w5_p3 + *x5*w5_p4*w)*w)*w)*w;
-                        let r = *x1 + (*x2*w5_p2 + (*x3*w5_p4 + (*x4*w5 + *x5*w5_p3*w)*w)*w)*w;
-                        let s = *x1 + (*x2*w5_p3 + (*x3*w5 + (*x4*w5_p4 + *x5*w5_p2*w)*w)*w)*w;
-                        let t = *x1 + (*x2*w5_p4 + (*x3*w5_p3 + (*x4*w5_p2 + *x5*w5*w)*w)*w)*w;
+                        let p = *x1.borrow() + (*x2.borrow() + (*x3.borrow() + (*x4.borrow() + *x5.borrow()*w)*w)*w)*w;
+                        let q = *x1.borrow() + (*x2.borrow()*w5 + (*x3.borrow()*w5_p2 + (*x4.borrow()*w5_p3 + *x5.borrow()*w5_p4*w)*w)*w)*w;
+                        let r = *x1.borrow() + (*x2.borrow()*w5_p2 + (*x3.borrow()*w5_p4 + (*x4.borrow()*w5 + *x5.borrow()*w5_p3*w)*w)*w)*w;
+                        let s = *x1.borrow() + (*x2.borrow()*w5_p3 + (*x3.borrow()*w5 + (*x4.borrow()*w5_p4 + *x5.borrow()*w5_p2*w)*w)*w)*w;
+                        let t = *x1.borrow() + (*x2.borrow()*w5_p4 + (*x3.borrow()*w5_p3 + (*x4.borrow()*w5_p2 + *x5.borrow()*w5*w)*w)*w)*w;
 
-                        *x1 = p;
-                        *x2 = q;
-                        *x3 = r;
-                        *x4 = s;
-                        *x5 = t;
+                        *x1.borrow_mut() = p;
+                        *x2.borrow_mut() = q;
+                        *x3.borrow_mut() = r;
+                        *x4.borrow_mut() = s;
+                        *x5.borrow_mut() = t;
                         
                         w._mul_assign(wm);
                     }
@@ -365,7 +395,7 @@ where
             let s = *x1 + (*x2*w5_p3 + (*x3*w5 + (*x4*w5_p4 + *x5*w5_p2*w)*w)*w)*w;
             let t = *x1 + (*x2*w5_p4 + (*x3*w5_p3 + (*x4*w5_p2 + *x5*w5*w)*w)*w)*w;
 
-            let [x1, x2, x3, x4, x5]: [&mut Complex<T>; _] = sequence.bulk_mut()
+            let [mut x1, mut x2, mut x3, mut x4, mut x5] = sequence.bulk_mut()
                 .skip(k)
                 .step_by(ldiv)
                 .map(Some)
@@ -373,11 +403,11 @@ where
                 .try_collect_array()
                 .unwrap();
             
-            *x1 = p;
-            *x2 = q;
-            *x3 = r;
-            *x4 = s;
-            *x5 = t;
+            *x1.borrow_mut() = p;
+            *x2.borrow_mut() = q;
+            *x3.borrow_mut() = r;
+            *x4.borrow_mut() = s;
+            *x5.borrow_mut() = t;
 
             w._mul_assign(wn);
         }
@@ -388,7 +418,7 @@ where
 
 pub fn fft_radix7_unscaled<T, B, const I: bool>(sequence: &mut B, temp: &mut Option<&mut [Complex<T>]>) -> bool
 where
-    for<'a> &'a mut B: IntoBulk<Item = &'a mut Complex<T>>,
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<Complex<T>>>,
     B: ?Sized,
     T: Float + 'static
 {
@@ -420,7 +450,7 @@ where
                     let mut w = Complex::one();
                     for j in 0..m/P
                     {
-                        let [x1, x2, x3, x4, x5, x6, x7]: [&mut Complex<T>; _] = sequence.bulk_mut()
+                        let [mut x1, mut x2, mut x3, mut x4, mut x5, mut x6, mut x7] = sequence.bulk_mut()
                             .skip(k + j)
                             .step_by(m/P)
                             .map(Some)
@@ -428,21 +458,21 @@ where
                             .try_collect_array()
                             .unwrap();
 
-                        let p = *x1 + (*x2 + (*x3 + (*x4 + (*x5 + (*x6 + *x7*w)*w)*w)*w)*w)*w;
-                        let q = *x1 + (*x2*w7 + (*x3*w7_p2 + (*x4*w7_p3 + (*x5*w7_p4 + (*x6*w7_p5 + *x7*w7_p6*w)*w)*w)*w)*w)*w;
-                        let r = *x1 + (*x2*w7_p2 + (*x3*w7_p4 + (*x4*w7_p6 + (*x5*w7 + (*x6*w7_p3 + *x7*w7_p5*w)*w)*w)*w)*w)*w;
-                        let s = *x1 + (*x2*w7_p3 + (*x3*w7_p6 + (*x4*w7_p2 + (*x5*w7_p5 + (*x6*w7 + *x7*w7_p4*w)*w)*w)*w)*w)*w;
-                        let t = *x1 + (*x2*w7_p4 + (*x3*w7 + (*x4*w7_p5 + (*x5*w7_p2 + (*x6*w7_p6 + *x7*w7_p3*w)*w)*w)*w)*w)*w;
-                        let u = *x1 + (*x2*w7_p5 + (*x3*w7_p3 + (*x4*w7 + (*x5*w7_p6 + (*x6*w7_p4 + *x7*w7_p2*w)*w)*w)*w)*w)*w;
-                        let v = *x1 + (*x2*w7_p6 + (*x3*w7_p5 + (*x4*w7_p4 + (*x5*w7_p3 + (*x6*w7_p2 + *x7*w7*w)*w)*w)*w)*w)*w;
+                        let p = *x1.borrow() + (*x2.borrow() + (*x3.borrow() + (*x4.borrow() + (*x5.borrow() + (*x6.borrow() + *x7.borrow()*w)*w)*w)*w)*w)*w;
+                        let q = *x1.borrow() + (*x2.borrow()*w7 + (*x3.borrow()*w7_p2 + (*x4.borrow()*w7_p3 + (*x5.borrow()*w7_p4 + (*x6.borrow()*w7_p5 + *x7.borrow()*w7_p6*w)*w)*w)*w)*w)*w;
+                        let r = *x1.borrow() + (*x2.borrow()*w7_p2 + (*x3.borrow()*w7_p4 + (*x4.borrow()*w7_p6 + (*x5.borrow()*w7 + (*x6.borrow()*w7_p3 + *x7.borrow()*w7_p5*w)*w)*w)*w)*w)*w;
+                        let s = *x1.borrow() + (*x2.borrow()*w7_p3 + (*x3.borrow()*w7_p6 + (*x4.borrow()*w7_p2 + (*x5.borrow()*w7_p5 + (*x6.borrow()*w7 + *x7.borrow()*w7_p4*w)*w)*w)*w)*w)*w;
+                        let t = *x1.borrow() + (*x2.borrow()*w7_p4 + (*x3.borrow()*w7 + (*x4.borrow()*w7_p5 + (*x5.borrow()*w7_p2 + (*x6.borrow()*w7_p6 + *x7.borrow()*w7_p3*w)*w)*w)*w)*w)*w;
+                        let u = *x1.borrow() + (*x2.borrow()*w7_p5 + (*x3.borrow()*w7_p3 + (*x4.borrow()*w7 + (*x5.borrow()*w7_p6 + (*x6.borrow()*w7_p4 + *x7.borrow()*w7_p2*w)*w)*w)*w)*w)*w;
+                        let v = *x1.borrow() + (*x2.borrow()*w7_p6 + (*x3.borrow()*w7_p5 + (*x4.borrow()*w7_p4 + (*x5.borrow()*w7_p3 + (*x6.borrow()*w7_p2 + *x7.borrow()*w7*w)*w)*w)*w)*w)*w;
 
-                        *x1 = p;
-                        *x2 = q;
-                        *x3 = r;
-                        *x4 = s;
-                        *x5 = t;
-                        *x6 = u;
-                        *x7 = v;
+                        *x1.borrow_mut() = p;
+                        *x2.borrow_mut() = q;
+                        *x3.borrow_mut() = r;
+                        *x4.borrow_mut() = s;
+                        *x5.borrow_mut() = t;
+                        *x6.borrow_mut() = u;
+                        *x7.borrow_mut() = v;
                         
                         w._mul_assign(wm);
                     }
@@ -481,7 +511,7 @@ where
             let u = *x1 + (*x2*w7_p5 + (*x3*w7_p3 + (*x4*w7 + (*x5*w7_p6 + (*x6*w7_p4 + *x7*w7_p2*w)*w)*w)*w)*w)*w;
             let v = *x1 + (*x2*w7_p6 + (*x3*w7_p5 + (*x4*w7_p4 + (*x5*w7_p3 + (*x6*w7_p2 + *x7*w7*w)*w)*w)*w)*w)*w;
 
-            let [x1, x2, x3, x4, x5, x6, x7]: [&mut Complex<T>; _] = sequence.bulk_mut()
+            let [mut x1, mut x2, mut x3, mut x4, mut x5, mut x6, mut x7]: [_; _] = sequence.bulk_mut()
                 .skip(k)
                 .step_by(ldiv)
                 .map(Some)
@@ -489,13 +519,13 @@ where
                 .try_collect_array()
                 .unwrap();
 
-            *x1 = p;
-            *x2 = q;
-            *x3 = r;
-            *x4 = s;
-            *x5 = t;
-            *x6 = u;
-            *x7 = v;
+            *x1.borrow_mut() = p;
+            *x2.borrow_mut() = q;
+            *x3.borrow_mut() = r;
+            *x4.borrow_mut() = s;
+            *x5.borrow_mut() = t;
+            *x6.borrow_mut() = u;
+            *x7.borrow_mut() = v;
 
             w._mul_assign(wn);
         }
@@ -506,7 +536,7 @@ where
 
 pub fn fft_radix_p_unscaled<T, B, P, const I: bool>(sequence: &mut B, temp: &mut Option<&mut [Complex<T>]>, p: P) -> bool
 where
-    for<'a> &'a mut B: IntoBulk<Item = &'a mut Complex<T>>,
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<Complex<T>>>,
     B: ?Sized,
     P: LengthValue,
     T: Float + 'static
@@ -564,19 +594,19 @@ where
                     for (j, ()) in bulks::repeat_n((), mp)
                         .enumerate()
                     {
-                        for (r, x) in sequence.bulk_mut()
+                        for (mut r, x) in sequence.bulk_mut()
                             .skip(k + j)
                             .step_by(mp)
                             .zip(x.borrow_mut() as &mut [*mut Complex<T>])
                         {
-                            *x = r as *mut _
+                            *x = r.borrow_mut() as *mut _
                         }
 
                         for (i, y) in y.borrow_mut()
                             .bulk_mut()
                             .enumerate()
                         {
-                            *y = x.borrow()
+                            *y.borrow_mut() = x.borrow()
                                 .bulk()
                                 .enumerate()
                                 .map(|(j, x)| unsafe {**x}*wp[(j*i) % length::value::len(p)])
@@ -627,7 +657,7 @@ where
                 .bulk_mut()
                 .enumerate()
             {
-                *y = x.iter()
+                *y.borrow_mut() = x.iter()
                     .enumerate()
                     .map(|(j, x)| x[k]*wp[(j*i) % length::value::len(p)])
                     .fold(Complex::zero(), |y, z| {
@@ -635,12 +665,12 @@ where
                     });
             }
 
-            for (x, y) in sequence.bulk_mut()
+            for (mut x, y) in sequence.bulk_mut()
                 .skip(k)
                 .step_by(m)
                 .zip(y.borrow())
             {
-                *x = *y
+                *x.borrow_mut() = *y
             }
             
             w._mul_assign(wn);
@@ -652,7 +682,7 @@ where
 
 pub fn fft_radix_n_sqrt_unscaled<B, T, const I: bool>(sequence: &mut B, temp: &mut Option<&mut [Complex<T>]>) -> bool
 where
-    for<'a> &'a mut B: IntoBulk<Item = &'a mut Complex<T>>,
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<Complex<T>>>,
     B: ?Sized,
     T: Float + 'static
 {
@@ -669,7 +699,7 @@ where
 
 pub fn dft_unscaled<B, T, const I: bool>(sequence: &mut B, temp: &mut Option<&mut [Complex<T>]>)
 where
-    for<'a> &'a mut B: IntoBulk<Item = &'a mut Complex<T>>,
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<Complex<T>>>,
     B: ?Sized,
     T: Float + 'static
 {
@@ -692,14 +722,14 @@ where
     
     sequence.bulk_mut()
         .zip(temp.borrow_mut())
-        .for_each(|(src, dst)| { *dst = core::mem::replace(src, Zero::zero()); });
+        .for_each(|(mut src, dst)| { *dst = core::mem::replace(src.borrow_mut(), Zero::zero()); });
         
     sequence.bulk_mut()
-        .for_each(|y| {
+        .for_each(|mut y| {
             let mut wnki = Complex::one();
             (*temp).bulk()
                 .for_each(|x| {
-                    y._add_assign(*x*wnki);
+                    y.borrow_mut()._add_assign(*x*wnki);
                     wnki._mul_assign(wnk);
                 });
             wnk._mul_assign(wn);

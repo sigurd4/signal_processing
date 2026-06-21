@@ -1,26 +1,26 @@
+use core::borrow::BorrowMut;
+
 use bulks::{AsBulk, Bulk, IntoBulk};
 use num_complex::Complex;
 use num_traits::{Float, FloatConst};
 use crate::{Permute, util::{DivAssignSpec, fft}};
 
-pub trait Dft: Permute
+pub trait Dft<T>: Permute<Complex<T>>
+where
+    T: Float + FloatConst
 {
-    type ItemReal: Float + FloatConst;
-
     #[doc(alias = "fft")]
     fn dft(&mut self);
 
     #[doc(alias = "ifft")]
     fn idft(&mut self);
 }
-impl<B, T> Dft for B
+impl<B, T> Dft<T> for B
 where
-    for<'a> &'a mut B: IntoBulk<Item = &'a mut Complex<T>>,
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<Complex<T>>>,
     B: ?Sized,
     T: Float + FloatConst + 'static
 {
-    type ItemReal = T;
-
     fn dft(&mut self)
     {
         fft::fft_unscaled::<_, _, false>(self, None);
@@ -31,7 +31,7 @@ where
         fft::fft_unscaled::<_, _, true>(self, None);
         let bulk = self.bulk_mut();
         let norm = T::from(bulk.len()).unwrap();
-        bulk.for_each(|x| x._div_assign(norm))
+        bulk.for_each(|mut x| x.borrow_mut()._div_assign(norm))
     }
 }
 

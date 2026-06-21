@@ -1,10 +1,12 @@
+use core::borrow::{Borrow, BorrowMut};
+
 use array_trait::length;
 use bulks::{AsBulk, Bulk, DoubleEndedBulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
 use num_traits::{Float, One, FloatConst, NumCast, Zero};
 use crate::{Dft, Permute, util::TruncateIm};
 
-pub trait Dst: Permute
+pub trait Dst<T>: Permute<T>
 {
     #[doc(alias = "idst_i")]
     fn dst_i(&mut self);
@@ -15,10 +17,10 @@ pub trait Dst: Permute
     #[doc(alias = "idst_iv")]
     fn dst_iv(&mut self);
 }
-impl<B, T> Dst for B
+impl<B, T> Dst<T> for B
 where
-    for<'a> &'a mut B: IntoBulk<Item = &'a mut T>,
-    for<'a> &'a B: IntoBulk<Item = &'a T, IntoBulk: DoubleEndedBulk>,
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<T>>,
+    for<'a> &'a B: IntoBulk<Item: Borrow<T>, IntoBulk: DoubleEndedBulk>,
     B: ?Sized,
     T: ComplexFloat + 'static
 {
@@ -38,13 +40,13 @@ where
         let mut y: Vec<_> = bulks::once(Zero::zero())
             .chain(
                 (*self).bulk()
-                    .map(|x| Complex { re: x.re(), im: x.im() })
+                    .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
             )
             .chain(bulks::once(Zero::zero()))
             .chain(
                 (*self).bulk()
                     .rev()
-                    .map(|x| -Complex { re: x.re(), im: x.im() })
+                    .map(|x| -Complex { re: x.borrow().re(), im: x.borrow().im() })
             )
             .collect();
         y.dft();
@@ -52,13 +54,13 @@ where
         let (y1, y2) = y.into_bulk().split_at([(); 1]).1.split_at(len);
 
         let y_div = Complex::new(Zero::zero(), -Float::sqrt(two*lenf_p1));
-        for (y, x) in y1.into_iter()
+        for (y, mut x) in y1.into_iter()
             .zip(y2.rev())
             .map(|(y1, y2)| (y1 - y2)/two)
             .map(|y| y/y_div)
             .zip(self.bulk_mut())
         {
-            *x = <T as TruncateIm>::truncate_im(y)
+            *x.borrow_mut() = <T as TruncateIm>::truncate_im(y)
         }
     }
     fn dst_ii(&mut self)
@@ -74,11 +76,11 @@ where
         let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
 
         let mut y: Vec<_> = (*self).bulk()
-            .map(|x| Complex { re: x.re(), im: x.im() })
+            .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
             .chain(
                 (*self).bulk()
                     .rev()
-                    .map(|x| -Complex { re: x.re(), im: x.im() })
+                    .map(|x| -Complex { re: x.borrow().re(), im: x.borrow().im() })
             ).collect();
         y.dft();
     
@@ -104,7 +106,7 @@ where
                 Complex::from_polar(-frac_1_sqrt_2, i*frac_pi_2/lenf)
             });
     
-        for (y, x) in y1.into_iter()
+        for (y, mut x) in y1.into_iter()
             .zip(m1)
             .map(|(y, m1)| y*m1)
             .zip(y2.into_iter()
@@ -115,7 +117,7 @@ where
             ).map(|(y1, y2)| y1 + y2)
             .zip(self.bulk_mut())
         {
-            *x = TruncateIm::truncate_im(y);
+            *x.borrow_mut() = TruncateIm::truncate_im(y);
         }
     }
     fn dst_iii(&mut self)
@@ -145,7 +147,7 @@ where
         let mut y = bulks::once(Zero::zero())
             .chain(
                 (*self).bulk()
-                    .map(|x| Complex { re: x.re(), im: x.im() })
+                    .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
                     .zip(m1)
                     .map(|(x, m1)| m1*x)
             )
@@ -153,7 +155,7 @@ where
                 (*self).bulk()
                     .rev()
                     .skip([(); 1])
-                    .map(|x| Complex { re: x.re(), im: x.im() })
+                    .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
                     .zip(m2)
                     .map(|(x, m2)| m2*x)
             ).collect::<Vec<_>, _>();
@@ -162,11 +164,11 @@ where
         let one = <T as ComplexFloat>::Real::one();
         let two = one + one;
         let ymul = Complex::new(Zero::zero(), -Float::sqrt(lenf)*two);
-        for (mut y, x) in y.into_bulk()
+        for (mut y, mut x) in y.into_bulk()
             .zip(self.bulk_mut())
         {
             y = y*ymul;
-            *x = <_ as TruncateIm>::truncate_im(y)
+            *x.borrow_mut() = <_ as TruncateIm>::truncate_im(y)
         }
 
     }
@@ -197,13 +199,13 @@ where
             }).collect();
 
         let mut y = (*self).bulk()
-            .map(|x| Complex { re: x.re(), im: x.im() })
+            .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
             .zip(m1.bulk())
             .map(|(x, &m1)| m1*x)
             .chain(
                 (*self).bulk()
                     .rev()
-                    .map(|x| Complex { re: x.re(), im: x.im() })
+                    .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
                     .zip(m2.bulk()
                         .rev()
                     ).map(|(x, &m2)| m2*x)
@@ -217,7 +219,7 @@ where
             .map(|y| y*ymul)
             .split_at(len);
         
-        for (y, x) in y1.into_iter()
+        for (y, mut x) in y1.into_iter()
             .zip(m1)
             .map(|(y, m1)| y*m1)
             .zip(y2.rev()
@@ -226,7 +228,7 @@ where
             ).map(|(y1, y2)| y1 + y2)
             .zip(self.bulk_mut())
         {
-            *x = TruncateIm::truncate_im(y);
+            *x.borrow_mut() = TruncateIm::truncate_im(y);
         }
     }
 }

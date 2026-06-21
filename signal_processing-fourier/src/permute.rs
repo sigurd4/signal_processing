@@ -1,9 +1,11 @@
+use core::{borrow::BorrowMut, marker::Destruct};
+
 use array_trait::{length::{self, LengthValue}};
 use bulks::{AsBulk, Bulk, IntoBulk};
 
 use crate::util;
 
-pub const trait Permute
+pub const trait Permute<T>
 {
     fn digit_rev_permute<R>(&mut self, radix: R)
     where
@@ -15,9 +17,9 @@ pub const trait Permute
     }
 }
 
-const impl<B, T> Permute for B
+const impl<B, T> Permute<T> for B
 where
-    for<'a> &'a mut B: ~const IntoBulk<Item = &'a mut T>,
+    for<'a> &'a mut B: ~const IntoBulk<Item: ~const BorrowMut<T> + ~const Destruct, IntoBulk: ~const Destruct>,
     B: ?Sized
 {
     fn digit_rev_permute<R>(&mut self, radix: R)
@@ -26,7 +28,8 @@ where
     {
         let bulk = self.bulk_mut();
         let len = bulk.length();
-        bulk.for_each(core::mem::drop);
+        core::mem::drop(bulk);
+
         if length::value::le(len, radix)
         {
             return;
