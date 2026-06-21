@@ -3,8 +3,8 @@ use core::borrow::{Borrow, BorrowMut};
 use array_trait::length;
 use bulks::{AsBulk, Bulk, DoubleEndedBulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
-use num_traits::{Float, FloatConst, NumCast, One, Zero};
-use crate::{Dft, Permute, util::TruncateIm};
+use num_traits::{FloatConst, NumCast, One, Zero};
+use crate::{Dft, Permute, SpectrumScaling, util::TruncateIm};
 
 pub trait Dct<T>: Permute<T>
 where
@@ -34,31 +34,30 @@ where
             return
         }
         let lenf = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len)).unwrap();
-        let sqrt_len = Float::sqrt(lenf);
 
         let one = <T as ComplexFloat>::Real::one();
         let two = one + one;
-        let frac_1_sqrt_2 = <T as ComplexFloat>::Real::FRAC_1_SQRT_2();
+        let sqrt_2 = <T as ComplexFloat>::Real::SQRT_2();
         let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
 
-        let w1 = bulks::once(From::from(Float::recip(sqrt_len)))
+        let w1 = bulks::once(From::from(sqrt_2))
             .chain(bulks::range([(); 1], len)
                 .map(|i| {
                     let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                    Complex::from_polar(frac_1_sqrt_2/sqrt_len, -frac_pi_2/lenf*i)
+                    Complex::cis(-frac_pi_2/lenf*i)
                 })
             );
         let w2 = bulks::range([(); 1], len)
             .map(|i| {
                 let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                Complex::from_polar(frac_1_sqrt_2/sqrt_len, frac_pi_2/lenf*i)
+                Complex::cis(frac_pi_2/lenf*i)
             });
 
         let mut y = (*self).bulk()
             .chain((*self).bulk().rev())
             .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
             .collect::<Vec<_>, _>();
-        y.dft();
+        y.dft_scaled(SpectrumScaling::Balanced);
 
         let (y1, y2) = y.into_bulk().split_at(len);
 
@@ -107,12 +106,11 @@ where
             .chain((*self).bulk().rev())
             .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
             .collect::<Vec<_>, _>();
-        y.dft();
+        y.dft_scaled(SpectrumScaling::Balanced);
+        
         let (y1, y2) = y.into_bulk().split_at(len);
 
-        let one = <T as ComplexFloat>::Real::one();
-        let two = one + one;
-        let ydiv = Float::sqrt(lenf)*two;
+        let ydiv = T::Real::SQRT_2();
 
         for ((y1, y2), mut x) in y1.into_iter()
             .zip(m1)
@@ -159,17 +157,16 @@ where
             .zip(m1)
             .map(|(x, m1)| m1*x)
             .chain(bulks::once(Zero::zero()))
-            .chain(
-                (*self).bulk()
-                    .skip([(); 1])
-                    .rev()
-                    .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
-                    .zip(m2)
-                    .map(|(x, m2)| m2*x)
+            .chain((*self).bulk()
+                .skip([(); 1])
+                .rev()
+                .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
+                .zip(m2)
+                .map(|(x, m2)| m2*x)
             ).collect::<Vec<_>, _>();
-        y.dft();
+        y.dft_scaled(SpectrumScaling::Balanced);
         
-        let ydiv = Float::sqrt(lenf);
+        let ydiv = T::Real::FRAC_1_SQRT_2();
         for (mut y, mut x) in y.into_bulk()
             .zip(self.bulk_mut())
         {
@@ -186,40 +183,38 @@ where
             return
         }
         let lenf = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len)).unwrap();
-        let sqrt_len = Float::sqrt(lenf);
 
-        let one = <T as ComplexFloat>::Real::one();
-        let two = one + one;
         let sqrt_2 = <T as ComplexFloat>::Real::SQRT_2();
         let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
 
-        let w1 = bulks::once(From::from(two*sqrt_len))
+        let w1 = bulks::once(From::from(sqrt_2))
             .chain(bulks::range([(); 1], len)
                 .map(|i| {
                     let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                    Complex::from_polar(sqrt_2*sqrt_len, frac_pi_2/lenf*i)
+                    Complex::cis(frac_pi_2/lenf*i)
                 })
             );
-
         let w2 = bulks::range([(); 1], len)
             .map(|i| {
                 let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                Complex::from_polar(sqrt_2*sqrt_len, -frac_pi_2/lenf*i)
+                Complex::cis(-frac_pi_2/lenf*i)
             }).rev();
 
-        let mut y: Vec<_> = (*self).bulk()
+        let y1 = (*self).bulk()
             .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
             .zip(w1)
-            .map(|(x, w)| x*w)
+            .map(|(x, w)| x*w);
+        let y2 = (*self).bulk()
+            .rev()
+            .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
+            .zip(w2)
+            .map(|(x, w)| x*w);
+        
+        let mut y: Vec<_> = y1.into_bulk()
             .chain(bulks::once(Zero::zero()))
-            .chain((*self).bulk()
-                .rev()
-                .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
-                .zip(w2)
-                .map(|(x, w)| x*w)
-            )
+            .chain(y2)
             .collect();
-        y.idft();
+        y.idft_scaled(SpectrumScaling::Balanced);
         
         for (y, mut x) in y.into_bulk()
             .zip(self.bulk_mut())
@@ -240,7 +235,7 @@ mod test
     use crate::{Dct, Dst, tests};
 
     #[test]
-    fn plot_dct()
+    fn it_works()
     {
         const N: usize = 1024;
         const T: f64 = 1.0;
@@ -292,7 +287,8 @@ mod test
         let mut b = a;
         b.dct_i();
 
-        println!("{b:?}")
+        println!("{b:?}");
+        assert_eq!(b, [19.899748, -10.419458, -5.108138e-7, -1.1238024, 8.570133e-8, -0.37572402, 1.1269405e-7, -0.16287114, -3.4678138e-8, -0.06524393, -1.7231845e-7])
     }
 
     #[test]
@@ -306,7 +302,8 @@ mod test
         let mut b = a;
         b.dct_ii();
 
-        println!("{b:?}")
+        println!("{b:?}");
+        assert_eq!(b, [19.89975, -10.419459, -5.108137e-7, -1.1238025, 8.570132e-8, -0.375724, 1.1269405e-7, -0.16287115, -3.4678138e-8, -0.06524394, -1.7231848e-7])
     }
 
     #[test]
@@ -320,7 +317,8 @@ mod test
         let mut b = a;
         b.dct_iii();
 
-        println!("{b:?}")
+        println!("{b:?}");
+        assert_eq!(b, [14.913473, -14.0317545, 6.0747924, -5.061192, 3.2091174, -2.6832993, 1.8371736, -1.4470706, 0.92111814, -0.5798823, 0.1641483])
     }
 
     #[test]
@@ -334,15 +332,15 @@ mod test
         let mut b = a;
         b.dct_iv();
 
-        println!("{b:?}")
+        println!("{b:?}");
+        assert_eq!(b, [14.913474, -14.031754, 6.074792, -5.0611916, 3.209117, -2.6832988, 1.8371726, -1.4470705, 0.9211181, -0.57988304, 0.16414675])
     }
 
     #[test]
     fn from_dst_ii()
     {
-        const N: usize = 1024;
-
-        let a = bulks::range([(); 0], [(); N])
+        let a = [1, 2, 3, 4, 5]
+            .into_bulk()
             .map(|x| x as f32)
             .collect_array();
 

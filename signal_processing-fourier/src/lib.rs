@@ -18,6 +18,7 @@ moddef::moddef!(
         dct,
         dft_2d for cfg(feature = "ndarray"),
         dft,
+        dht,
         dst_2d for cfg(feature = "ndarray"),
         dst,
         dtft
@@ -49,8 +50,6 @@ use temp as temp;
 mod tests
 {
     use num_complex::ComplexFloat;
-
-    use super::*;
 
     pub(crate) fn approx_eq<T>(lhs: &[T], rhs: &[T], diff: T::Real) -> bool
     where

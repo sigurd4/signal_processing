@@ -5,15 +5,33 @@ use num_complex::Complex;
 use num_traits::{Float, FloatConst};
 use crate::{Permute, util::{DivAssignSpec, fft}};
 
+pub enum SpectrumScaling
+{
+    Summed,
+    Balanced,
+    Averaged
+}
+
 pub trait Dft<T>: Permute<Complex<T>>
 where
     T: Float + FloatConst
 {
     #[doc(alias = "fft")]
-    fn dft(&mut self);
-
+    fn dft(&mut self)
+    {
+        self.dft_scaled(SpectrumScaling::Balanced);
+    }
     #[doc(alias = "ifft")]
-    fn idft(&mut self);
+    fn idft(&mut self)
+    {
+        self.idft_scaled(SpectrumScaling::Balanced);
+    }
+
+    #[doc(alias = "fft_scaled")]
+    fn dft_scaled(&mut self, scaling: SpectrumScaling);
+
+    #[doc(alias = "ifft_scaled")]
+    fn idft_scaled(&mut self, scaling: SpectrumScaling);
 }
 impl<B, T> Dft<T> for B
 where
@@ -21,17 +39,36 @@ where
     B: ?Sized,
     T: Float + FloatConst + 'static
 {
-    fn dft(&mut self)
+    fn dft_scaled(&mut self, scaling: SpectrumScaling)
     {
         fft::fft_unscaled::<_, _, false>(self, None);
+
+        let bulk = self.bulk_mut();
+        if let Some(norm) = match scaling
+        {
+            SpectrumScaling::Summed => None,
+            SpectrumScaling::Balanced => Some(Float::sqrt(T::from(bulk.len()).unwrap())),
+            SpectrumScaling::Averaged => Some(T::from(bulk.len()).unwrap())
+        }
+        {
+            bulk.for_each(|mut x| x.borrow_mut()._div_assign(norm))
+        }
     }
     
-    fn idft(&mut self)
+    fn idft_scaled(&mut self, scaling: SpectrumScaling)
     {
         fft::fft_unscaled::<_, _, true>(self, None);
+
         let bulk = self.bulk_mut();
-        let norm = T::from(bulk.len()).unwrap();
-        bulk.for_each(|mut x| x.borrow_mut()._div_assign(norm))
+        if let Some(norm) = match scaling
+        {
+            SpectrumScaling::Summed => Some(T::from(bulk.len()).unwrap()),
+            SpectrumScaling::Balanced => Some(Float::sqrt(T::from(bulk.len()).unwrap())),
+            SpectrumScaling::Averaged => None
+        }
+        {
+            bulk.for_each(|mut x| x.borrow_mut()._div_assign(norm))
+        }
     }
 }
 

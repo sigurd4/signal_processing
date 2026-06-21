@@ -3,7 +3,7 @@ use core::borrow::{Borrow, BorrowMut};
 use array_trait::length;
 use bulks::{AsBulk, Bulk, DoubleEndedBulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
-use num_traits::{Float, One, FloatConst, NumCast, Zero};
+use num_traits::{One, FloatConst, NumCast, Zero};
 use crate::{Dft, Permute, util::TruncateIm};
 
 pub trait Dst<T>: Permute<T>
@@ -31,9 +31,6 @@ where
         {
             return
         }
-        let len_p1 = length::value::add(len, [(); 1]);
-        let lenf_p1 = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len_p1)).unwrap();
-
         let one = <T as ComplexFloat>::Real::one();
         let two = one + one;
 
@@ -53,7 +50,7 @@ where
 
         let (y1, y2) = y.into_bulk().split_at([(); 1]).1.split_at(len);
 
-        let y_div = Complex::new(Zero::zero(), -Float::sqrt(two*lenf_p1));
+        let y_div = Complex::new(Zero::zero(), -one);
         for (y, mut x) in y1.into_iter()
             .zip(y2.rev())
             .map(|(y1, y2)| (y1 - y2)/two)
@@ -86,9 +83,8 @@ where
     
         let zero = <T as ComplexFloat>::Real::zero();
         let one = <T as ComplexFloat>::Real::one();
-        let two = one + one;
     
-        let mul = Complex::new(zero, Float::recip(Float::sqrt(lenf))/two);
+        let mul = Complex::new(zero, frac_1_sqrt_2);
         let (y1, y2) = y.into_bulk()
             .split_at([(); 1]).1
             .map(|y| y*mul)
@@ -161,9 +157,7 @@ where
             ).collect::<Vec<_>, _>();
         y.idft();
         
-        let one = <T as ComplexFloat>::Real::one();
-        let two = one + one;
-        let ymul = Complex::new(Zero::zero(), -Float::sqrt(lenf)*two);
+        let ymul = -Complex::i()*T::Real::SQRT_2();
         for (mut y, mut x) in y.into_bulk()
             .zip(self.bulk_mut())
         {
@@ -212,9 +206,7 @@ where
             ).collect::<Vec<_>, _>();
         y.dft();
 
-        let zero = <T as ComplexFloat>::Real::zero();
-
-        let ymul = Complex::new(zero, frac_1_sqrt_2/Float::sqrt(lenf))*Complex::cis(-frac_pi_4/lenf);
+        let ymul = Complex::<T::Real>::i()*Complex::cis(-frac_pi_4/lenf);
         let (y1, y2) = y.into_bulk()
             .map(|y| y*ymul)
             .split_at(len);
