@@ -192,7 +192,6 @@ where
         let two = one + one;
         let sqrt_2 = <T as ComplexFloat>::Real::SQRT_2();
         let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
-        let pi = <T as ComplexFloat>::Real::PI();
 
         let w1 = bulks::once(From::from(two*sqrt_len))
             .chain(bulks::range([(); 1], len)
@@ -202,28 +201,23 @@ where
                 })
             );
 
-        let y1: Vec<_> = (*self).bulk()
-            .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
-            .zip(w1)
-            .map(|(x, w)| x*w)
-            .collect();
-
         let w2 = bulks::range([(); 1], len)
             .map(|i| {
                 let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                Complex::cis(-pi/lenf*i)
+                Complex::from_polar(sqrt_2*sqrt_len, -frac_pi_2/lenf*i)
             }).rev();
 
-        let y2: Vec<_> = y1.bulk()
-            .copied()
-            .rev()
-            .zip(w2)
+        let mut y: Vec<_> = (*self).bulk()
+            .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
+            .zip(w1)
             .map(|(x, w)| x*w)
-            .collect();
-        
-        let mut y: Vec<_> = y1.into_bulk()
             .chain(bulks::once(Zero::zero()))
-            .chain(y2.into_bulk())
+            .chain((*self).bulk()
+                .rev()
+                .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
+                .zip(w2)
+                .map(|(x, w)| x*w)
+            )
             .collect();
         y.idft();
         
@@ -246,7 +240,7 @@ mod test
     use crate::{Dct, Dst, tests};
 
     #[test]
-    fn it_works()
+    fn plot_dct()
     {
         const N: usize = 1024;
         const T: f64 = 1.0;
@@ -346,8 +340,9 @@ mod test
     #[test]
     fn from_dst_ii()
     {
-        let a = [1, 2, 3, 4, 5]
-            .into_bulk()
+        const N: usize = 1024;
+
+        let a = bulks::range([(); 0], [(); N])
             .map(|x| x as f32)
             .collect_array();
 

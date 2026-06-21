@@ -14,10 +14,11 @@ moddef::moddef!(
     },
     flat(pub) mod {
         czt,
-        dct_2d,
+        dct_2d for cfg(feature = "ndarray"),
         dct,
+        dft_2d for cfg(feature = "ndarray"),
         dft,
-        //dst_2d,
+        dst_2d for cfg(feature = "ndarray"),
         dst,
         dtft
     },
@@ -28,33 +29,6 @@ moddef::moddef!(
         scratch_space
     }
 );
-
-macro_rules! transform_2d_inplace {
-    ($bulks:ident.$transform:ident()) => {
-        {
-            use bulks::*;
-            use array_trait::length;
-
-            let bulks = $bulks;
-            let mut len = length::value::or_len(0);
-            for bulk in bulks.bulk_mut()
-            {
-                bulk.$transform();
-                len = length::value::max(bulk.bulk_mut().length(), len);
-            }
-            for i in 0..length::value::len(len)
-            {
-                let mut v = bulks.bulk_mut()
-                    .map(|bulk| bulk.bulk_mut().get_mut(i).ok_or(T::zero()))
-                    .collect::<Vec<_>>();
-
-                crate::util::IndirectReffable(&mut v).$transform()
-            }
-        }
-    };
-}
-
-use transform_2d_inplace as transform_2d_inplace;
 
 macro_rules! temp {
     ($temp:ident for $len:expr) => {

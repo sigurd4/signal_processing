@@ -47,9 +47,9 @@ mod test
     use crate::Dft;
 
     #[test]
-    fn it_works_dft()
+    fn plot_dft()
     {
-        const N: usize = 1024;
+        const N: usize = 2048;
         const T: f64 = 1.0;
         const F: f64 = 220.0;
         
@@ -57,14 +57,14 @@ mod test
 
         let w = (0.0..TAU).linspace_array::<N>();
         let mut xf = x.map(Complex::from);
-        xf.as_mut_slice().dft();
+        xf.dft();
 
         ezplot::plot_curves("X(e^jw)", "plots/x_z_dft.png", [w.into_bulk().zip(xf.map(|xf| xf.norm()))])
             .unwrap()
     }
 
     #[test]
-    fn it_works_idft()
+    fn plot_idft()
     {
         const N: usize = 1024;
         const T: f64 = 0.1;

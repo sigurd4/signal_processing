@@ -1,5 +1,4 @@
 use array_trait::length::{self, LengthValue};
-use bulks::IntoBulk;
 use moddef::moddef;
 
 use crate::util;

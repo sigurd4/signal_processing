@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
+default = ["ndarray"]
+ndarray = ["dep:ndarray", "bulks/ndarray"]
 
 [dependencies]
 moddef = { workspace = true }
@@ -11,9 +13,9 @@ bulks = { workspace = true }
 array_trait = { workspace = true }
 num-complex = { workspace = true }
 num-traits = { workspace = true }
+ndarray = { workspace = true, optional = true }
 
 [dev-dependencies]
 linspace = { workspace = true }
 ezplot = { workspace = true }
 image = { workspace = true }
-ndarray = { workspace = true }

@@ -45,7 +45,7 @@ where
         {
             if i < j
             {
-                self.bulk_mut().swap::<T, _, _>(i, j);
+                self.bulk_mut().swap::<T>(i, j);
             }
             let mut k = length::value::len(j0);
             let mut kk = length::value::len(length::value::mul(j0, rm1));
