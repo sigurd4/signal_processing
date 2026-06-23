@@ -3,6 +3,9 @@ use num_complex::ComplexFloat;
 
 use crate::Dct;
 
+/// # 2D discrete cosine-transform
+/// 
+/// The discrete cosine-transform is the real-valued fourier transform of the even extension of a sequence.
 pub trait Dct2D
 {
     #[doc(alias = "idct_iv_2d")]

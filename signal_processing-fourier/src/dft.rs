@@ -5,6 +5,7 @@ use num_complex::Complex;
 use num_traits::{Float, FloatConst};
 use crate::{Permute, util::{DivAssignSpec, fft}};
 
+#[derive(Clone, Copy, Debug)]
 pub enum SpectrumScaling
 {
     Summed,

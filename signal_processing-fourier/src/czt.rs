@@ -7,6 +7,8 @@ use num_complex::{Complex, ComplexFloat};
 
 use crate::Dft;
 
+/// # Chirp z-transform
+/// 
 /// Computes a chirp-response within the z-transform.
 pub trait Czt<T>: Dft<T>
 where
@@ -112,7 +114,7 @@ use num_complex::Complex;
     use crate::Czt;
 
     #[test]
-    fn it_works()
+    fn plot_czt()
     {
         const N: usize = 1024;
         const T: f64 = 1.0;

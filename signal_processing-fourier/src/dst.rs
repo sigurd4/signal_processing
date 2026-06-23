@@ -236,7 +236,7 @@ mod test
     use crate::{Dct, Dst, tests};
 
     #[test]
-    fn it_works()
+    fn plot_dst()
     {
         const N: usize = 1024;
         const T: f64 = 1.0;
