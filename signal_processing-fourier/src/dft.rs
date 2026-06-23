@@ -2,7 +2,7 @@ use core::borrow::BorrowMut;
 
 use bulks::{AsBulk, Bulk, IntoBulk};
 use num_complex::Complex;
-use num_traits::{Float, FloatConst};
+use num_traits::{Float, FloatConst, Inv};
 use crate::{Permute, util::{DivAssignSpec, fft}};
 
 #[derive(Clone, Copy, Debug)]
@@ -11,6 +11,21 @@ pub enum SpectrumScaling
     Summed,
     Balanced,
     Averaged
+}
+
+impl Inv for SpectrumScaling
+{
+    type Output = Self;
+
+    fn inv(self) -> Self::Output
+    {
+        match self
+        {
+            Self::Summed => Self::Averaged,
+            Self::Balanced => Self::Balanced,
+            Self::Averaged => Self::Summed
+        }
+    }
 }
 
 pub trait Dft<T>: Permute<Complex<T>>
