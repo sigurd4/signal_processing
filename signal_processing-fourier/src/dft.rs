@@ -97,7 +97,7 @@ mod test
     use linspace::Linspace;
     use num_complex::Complex;
 
-    use crate::Dft;
+    use crate::{Dft, SpectrumScaling, tests, util};
 
     #[test]
     fn plot_dft()
@@ -132,5 +132,47 @@ mod test
 
         ezplot::plot_curves("x(t)", "plots/x_t_idft.png", [t.into_bulk().zip(y.map(|y| y.re)), t.into_bulk().zip(x)])
             .unwrap()
+    }
+
+    #[test]
+    fn test_dct_i()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f64)
+            .map(Complex::from)
+            .collect_array();
+
+        fn dft_direct_unscaled(x: &mut [Complex<f64>])
+        {
+            util::fft::dft_unscaled::<[_], f64, false>(x, &mut None);
+        }
+        fn dft_direct(x: &mut [Complex<f64>])
+        {
+            let l = x.len();
+            dft_direct_unscaled(x);
+            for x in x
+            {
+                *x /= (l as f64).sqrt()
+            }
+        }
+
+        let mut b = a;
+        let mut c = a;
+        b.dft();
+        dft_direct(&mut c);
+
+        println!("{b:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&b, &c, 1e-5));
+
+        let mut b = a;
+        let mut c = a;
+        b.dft_scaled(SpectrumScaling::Summed);
+        dft_direct_unscaled(&mut c);
+
+        println!("{b:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&b, &c, 1e-5))
     }
 }
