@@ -405,15 +405,15 @@ mod test
         assert!(tests::approx_eq(&a, &b, 1e-5));
 
         let mut b = a;
-        b.dct_iii();
         b.dct_ii();
+        b.dct_iii();
 
         println!("{b:?}");
         assert!(tests::approx_eq(&a, &b, 1e-5));
 
         let mut b = a;
-        b.dct_ii();
         b.dct_iii();
+        b.dct_ii();
 
         println!("{b:?}");
         assert!(tests::approx_eq(&a, &b, 1e-5));
@@ -442,15 +442,15 @@ mod test
         assert!(tests::approx_eq(&a, &b, 1e-5));
 
         let mut b = a;
-        b.dct_iii_scaled(SpectrumScaling::Summed);
-        b.dct_ii_scaled(SpectrumScaling::Averaged);
+        b.dct_ii_scaled(SpectrumScaling::Summed);
+        b.dct_iii_scaled(SpectrumScaling::Averaged);
 
         println!("{b:?}");
         assert!(tests::approx_eq(&a, &b, 1e-5));
 
         let mut b = a;
-        b.dct_ii_scaled(SpectrumScaling::Summed);
-        b.dct_iii_scaled(SpectrumScaling::Averaged);
+        b.dct_iii_scaled(SpectrumScaling::Summed);
+        b.dct_ii_scaled(SpectrumScaling::Averaged);
 
         println!("{b:?}");
         assert!(tests::approx_eq(&a, &b, 1e-5));
@@ -479,15 +479,15 @@ mod test
         assert!(tests::approx_eq(&a, &b, 1e-5));
 
         let mut b = a;
-        b.dct_iii_scaled(SpectrumScaling::Averaged);
-        b.dct_ii_scaled(SpectrumScaling::Summed);
+        b.dct_ii_scaled(SpectrumScaling::Averaged);
+        b.dct_iii_scaled(SpectrumScaling::Summed);
 
         println!("{b:?}");
         assert!(tests::approx_eq(&a, &b, 1e-5));
 
         let mut b = a;
-        b.dct_ii_scaled(SpectrumScaling::Averaged);
-        b.dct_iii_scaled(SpectrumScaling::Summed);
+        b.dct_iii_scaled(SpectrumScaling::Averaged);
+        b.dct_ii_scaled(SpectrumScaling::Summed);
 
         println!("{b:?}");
         assert!(tests::approx_eq(&a, &b, 1e-5));

@@ -3,19 +3,36 @@ use core::borrow::{Borrow, BorrowMut};
 use array_trait::length;
 use bulks::{AsBulk, Bulk, DoubleEndedBulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
-use num_traits::{One, FloatConst, NumCast, Zero};
-use crate::{Dft, Permute, util::TruncateIm};
+use num_traits::{Float, FloatConst, Inv, NumCast, One, Zero};
+use crate::{Dft, Permute, SpectrumScaling, util::TruncateIm};
 
 pub trait Dst<T>: Permute<T>
 {
     #[doc(alias = "idst_i")]
-    fn dst_i(&mut self);
+    fn dst_i(&mut self)
+    {
+        self.dst_i_scaled(SpectrumScaling::Balanced)
+    }
     #[doc(alias = "idst_iii")]
-    fn dst_ii(&mut self);
+    fn dst_ii(&mut self)
+    {
+        self.dst_ii_scaled(SpectrumScaling::Balanced)
+    }
     #[doc(alias = "idst_ii")]
-    fn dst_iii(&mut self);
+    fn dst_iii(&mut self)
+    {
+        self.dst_iii_scaled(SpectrumScaling::Balanced)
+    }
     #[doc(alias = "idst_iv")]
-    fn dst_iv(&mut self);
+    fn dst_iv(&mut self)
+    {
+        self.dst_iv_scaled(SpectrumScaling::Balanced)
+    }
+
+    fn dst_i_scaled(&mut self, scaling: SpectrumScaling);
+    fn dst_ii_scaled(&mut self, scaling: SpectrumScaling);
+    fn dst_iii_scaled(&mut self, scaling: SpectrumScaling);
+    fn dst_iv_scaled(&mut self, scaling: SpectrumScaling);
 }
 impl<B, T> Dst<T> for B
 where
@@ -24,7 +41,7 @@ where
     B: ?Sized,
     T: ComplexFloat + 'static
 {
-    fn dst_i(&mut self)
+    fn dst_i_scaled(&mut self, scaling: SpectrumScaling)
     {
         let len = (*self).bulk().length();
         if length::value::le(len, [(); 1])
@@ -46,11 +63,17 @@ where
                     .map(|x| -Complex { re: x.borrow().re(), im: x.borrow().im() })
             )
             .collect();
-        y.dft();
+        y.dft_scaled(scaling);
 
         let (y1, y2) = y.into_bulk().split_at([(); 1]).1.split_at(len);
 
-        let y_div = Complex::new(Zero::zero(), -one);
+        let y_div = match scaling
+        {
+            SpectrumScaling::Summed => two,
+            SpectrumScaling::Balanced => one,
+            SpectrumScaling::Averaged => Float::recip(two)
+        };
+        let y_div = Complex::new(Zero::zero(), -y_div);
         for (y, mut x) in y1.into_iter()
             .zip(y2.rev())
             .map(|(y1, y2)| (y1 - y2)/two)
@@ -60,7 +83,7 @@ where
             *x.borrow_mut() = <T as TruncateIm>::truncate_im(y)
         }
     }
-    fn dst_ii(&mut self)
+    fn dst_ii_scaled(&mut self, scaling: SpectrumScaling)
     {
         let len = (*self).bulk().length();
         if length::value::le(len, [(); 1])
@@ -71,6 +94,10 @@ where
 
         let frac_1_sqrt_2 = <T as ComplexFloat>::Real::FRAC_1_SQRT_2();
         let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
+        let one = T::Real::one();
+        let two = one + one;
+        let half = Float::recip(two);
+        let zero = <T as ComplexFloat>::Real::zero();
 
         let mut y: Vec<_> = (*self).bulk()
             .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
@@ -79,12 +106,14 @@ where
                     .rev()
                     .map(|x| -Complex { re: x.borrow().re(), im: x.borrow().im() })
             ).collect();
-        y.dft();
+        y.dft_scaled(scaling);
     
-        let zero = <T as ComplexFloat>::Real::zero();
-        let one = <T as ComplexFloat>::Real::one();
-    
-        let mul = Complex::new(zero, frac_1_sqrt_2);
+        let mul = Complex::new(zero, match scaling
+        {
+            SpectrumScaling::Summed => half,
+            SpectrumScaling::Balanced => one,
+            SpectrumScaling::Averaged => two
+        });
         let (y1, y2) = y.into_bulk()
             .split_at([(); 1]).1
             .map(|y| y*mul)
@@ -93,13 +122,13 @@ where
         let m1 = bulks::range([(); 1], len)
             .map(|i| {
                 let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                Complex::from_polar(frac_1_sqrt_2, -i*frac_pi_2/lenf)
-            }).chain(bulks::once(Complex::new(zero, -one)));
+                Complex::from_polar(half, -i*frac_pi_2/lenf)
+            }).chain(bulks::once(Complex::new(zero, -if matches!(scaling, SpectrumScaling::Balanced) { frac_1_sqrt_2 } else { one })));
     
         let m2 = bulks::range([(); 1], len)
             .map(|i| {
                 let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                Complex::from_polar(-frac_1_sqrt_2, i*frac_pi_2/lenf)
+                Complex::from_polar(-half, i*frac_pi_2/lenf)
             });
     
         for (y, mut x) in y1.into_iter()
@@ -116,7 +145,7 @@ where
             *x.borrow_mut() = TruncateIm::truncate_im(y);
         }
     }
-    fn dst_iii(&mut self)
+    fn dst_iii_scaled(&mut self, scaling: SpectrumScaling)
     {
         let len = (*self).bulk().length();
         if length::value::le(len, [(); 1])
@@ -125,18 +154,19 @@ where
         }
         let lenf = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len)).unwrap();
 
-        let frac_1_sqrt_2 = <T as ComplexFloat>::Real::FRAC_1_SQRT_2();
         let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
+        let one = T::Real::one();
+        let two = one + one;
 
         let m1 = bulks::range([(); 1], len)
             .map(|i| {
                 let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                Complex::from_polar(frac_1_sqrt_2, i*frac_pi_2/lenf)
-            }).chain(bulks::once(Complex::i()));
+                Complex::cis(i*frac_pi_2/lenf)
+            }).chain(bulks::once(if matches!(scaling, SpectrumScaling::Balanced) { Complex::i()*T::Real::SQRT_2() } else { Complex::i() }));
         let m2 = bulks::range([(); 1], len)
             .map(|i| {
                 let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                Complex::from_polar(-frac_1_sqrt_2, -i*frac_pi_2/lenf)
+                -Complex::cis(-i*frac_pi_2/lenf)
             })
             .rev();
         
@@ -155,9 +185,21 @@ where
                     .zip(m2)
                     .map(|(x, m2)| m2*x)
             ).collect::<Vec<_>, _>();
-        y.idft();
+        y.idft_scaled(scaling.inv());
         
-        let ymul = -Complex::i()*T::Real::SQRT_2();
+        let ymul = -Complex::i()*match scaling
+        {
+            SpectrumScaling::Summed => Float::recip(two),
+            SpectrumScaling::Balanced => one,
+            SpectrumScaling::Averaged => two
+        };
+        let (y1, y2) = y.bulk_mut()
+            .split_at(len);
+        for (y1, y2) in y1.zip(y2.rev())
+        {
+            *y1 = (*y1 - *y2)/two
+        }
+        
         for (mut y, mut x) in y.into_bulk()
             .zip(self.bulk_mut())
         {
@@ -166,7 +208,7 @@ where
         }
 
     }
-    fn dst_iv(&mut self)
+    fn dst_iv_scaled(&mut self, scaling: SpectrumScaling)
     {
         let len = (*self).bulk().length();
         if length::value::le(len, [(); 1])
@@ -179,6 +221,9 @@ where
         let frac_1_sqrt_2 = <T as ComplexFloat>::Real::FRAC_1_SQRT_2();
         let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
         let frac_pi_4 = <T as ComplexFloat>::Real::FRAC_PI_4();
+        let one = T::Real::one();
+        let two = one + one;
+        let half = Float::recip(two);
 
         let m1: Vec<_> = bulks::range([(); 0], len)
             .map(|i| {
@@ -204,9 +249,15 @@ where
                         .rev()
                     ).map(|(x, &m2)| m2*x)
             ).collect::<Vec<_>, _>();
-        y.dft();
+        y.dft_scaled(scaling);
 
-        let ymul = Complex::<T::Real>::i()*Complex::cis(-frac_pi_4/lenf);
+        let scale = match scaling
+        {
+            SpectrumScaling::Summed => half,
+            SpectrumScaling::Balanced => one,
+            SpectrumScaling::Averaged => two
+        };
+        let ymul = Complex::<T::Real>::i()*Complex::from_polar(scale, -frac_pi_4/lenf);
         let (y1, y2) = y.into_bulk()
             .map(|y| y*ymul)
             .split_at(len);
@@ -228,12 +279,12 @@ where
 #[cfg(test)]
 mod test
 {
-    use core::f64::consts::TAU;
+    use core::f64::consts::{PI, SQRT_2, TAU};
 
     use bulks::{AsBulk, Bulk, IntoBulk};
     use linspace::Linspace;
 
-    use crate::{Dct, Dst, tests};
+    use crate::{Dct, Dst, SpectrumScaling, tests};
 
     #[test]
     fn plot_dst()
@@ -268,18 +319,102 @@ mod test
         b.dst_i();
         b.dst_i();
 
+        println!("{b:?}");
         assert!(tests::approx_eq(&a, &b, 1e-5));
 
         let mut b = a;
         b.dst_ii();
         b.dst_iii();
 
+        println!("{b:?}");
+        assert!(tests::approx_eq(&a, &b, 1e-5));
+
+        let mut b = a;
+        b.dst_iii();
+        b.dst_ii();
+
+        println!("{b:?}");
         assert!(tests::approx_eq(&a, &b, 1e-5));
 
         let mut b = a;
         b.dst_iv();
         b.dst_iv();
 
+        println!("{b:?}");
+        assert!(tests::approx_eq(&a, &b, 1e-5));
+    }
+
+    #[test]
+    fn identities_summed()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let mut b = a;
+        b.dst_i_scaled(SpectrumScaling::Summed);
+        b.dst_i_scaled(SpectrumScaling::Averaged);
+
+        println!("{b:?}");
+        assert!(tests::approx_eq(&a, &b, 1e-5));
+
+        let mut b = a;
+        b.dst_ii_scaled(SpectrumScaling::Summed);
+        b.dst_iii_scaled(SpectrumScaling::Averaged);
+
+        println!("{b:?}");
+        assert!(tests::approx_eq(&a, &b, 1e-5));
+
+        let mut b = a;
+        b.dst_iii_scaled(SpectrumScaling::Summed);
+        b.dst_ii_scaled(SpectrumScaling::Averaged);
+
+        println!("{b:?}");
+        assert!(tests::approx_eq(&a, &b, 1e-5));
+
+        let mut b = a;
+        b.dst_iv_scaled(SpectrumScaling::Summed);
+        b.dst_iv_scaled(SpectrumScaling::Averaged);
+
+        println!("{b:?}");
+        assert!(tests::approx_eq(&a, &b, 1e-5));
+    }
+
+    #[test]
+    fn identities_averaged()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let mut b = a;
+        b.dst_i_scaled(SpectrumScaling::Averaged);
+        b.dst_i_scaled(SpectrumScaling::Summed);
+
+        println!("{b:?}");
+        assert!(tests::approx_eq(&a, &b, 1e-5));
+
+        let mut b = a;
+        b.dst_ii_scaled(SpectrumScaling::Averaged);
+        b.dst_iii_scaled(SpectrumScaling::Summed);
+
+        println!("{b:?}");
+        assert!(tests::approx_eq(&a, &b, 1e-5));
+
+        let mut b = a;
+        b.dst_iii_scaled(SpectrumScaling::Averaged);
+        b.dst_ii_scaled(SpectrumScaling::Summed);
+
+        println!("{b:?}");
+        assert!(tests::approx_eq(&a, &b, 1e-5));
+
+        let mut b = a;
+        b.dst_iv_scaled(SpectrumScaling::Averaged);
+        b.dst_iv_scaled(SpectrumScaling::Summed);
+
+        println!("{b:?}");
         assert!(tests::approx_eq(&a, &b, 1e-5));
     }
 
@@ -288,13 +423,52 @@ mod test
     {
         let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             .into_bulk()
-            .map(|x| x as f32)
+            .map(|x| x as f64)
             .collect_array();
 
-        let mut b = a;
-        b.dst_i();
+        fn dst_i_direct_unscaled(x: &mut [f64])
+        {
+            let l = x.len();
+            let y: Vec<_> = (0..l)
+                .map(|k| x.iter()
+                        .enumerate()
+                        .map(|(n, xn)| xn*(PI*(n + 1) as f64*(k + 1) as f64/(l + 1) as f64).sin())
+                        .sum::<f64>()
+                ).collect();
+            
+            for (x, y) in x.iter_mut()
+                .zip(y)
+            {
+                *x = y
+            }
+        }
+        fn dst_i_direct(x: &mut [f64])
+        {
+            let l = x.len();
+            dst_i_direct_unscaled(x);
+            for x in x
+            {
+                *x *= (2.0/(l + 1) as f64).sqrt()
+            }
+        }
 
-        println!("{b:?}")
+        let mut b = a;
+        let mut c = a;
+        b.dst_i();
+        dst_i_direct(&mut c);
+
+        println!("{b:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&b, &c, 1e-5));
+
+        let mut b = a;
+        let mut c = a;
+        b.dst_i_scaled(SpectrumScaling::Summed);
+        dst_i_direct_unscaled(&mut c);
+
+        println!("{b:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&b, &c, 1e-5));
     }
 
     #[test]
@@ -302,13 +476,53 @@ mod test
     {
         let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             .into_bulk()
-            .map(|x| x as f32)
+            .map(|x| x as f64)
             .collect_array();
 
-        let mut b = a;
-        b.dst_ii();
+        fn dst_ii_direct_unscaled(x: &mut [f64])
+        {
+            let l = x.len();
+            let y: Vec<_> = (0..l)
+                .map(|k| x.iter()
+                        .enumerate()
+                        .map(|(n, xn)| xn*(PI*(n as f64 + 0.5)*(k + 1) as f64/l as f64).sin())
+                        .sum::<f64>()
+                ).collect();
+            
+            for (x, y) in x.iter_mut()
+                .zip(y)
+            {
+                *x = y
+            }
+        }
+        fn dst_ii_direct(x: &mut [f64])
+        {
+            let l = x.len();
+            dst_ii_direct_unscaled(x);
+            x[l - 1] /= SQRT_2;
+            for x in x
+            {
+                *x *= (2.0/l as f64).sqrt()
+            }
+        }
 
-        println!("{b:?}")
+        let mut b = a;
+        let mut c = a;
+        b.dst_ii();
+        dst_ii_direct(&mut c);
+
+        println!("{b:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&b, &c, 1e-5));
+
+        let mut b = a;
+        let mut c = a;
+        b.dst_ii_scaled(SpectrumScaling::Summed);
+        dst_ii_direct_unscaled(&mut c);
+
+        println!("{b:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&b, &c, 1e-5));
     }
 
     #[test]
@@ -316,13 +530,59 @@ mod test
     {
         let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             .into_bulk()
-            .map(|x| x as f32)
+            .map(|x| x as f64)
             .collect_array();
 
-        let mut b = a;
-        b.dst_iii();
+        fn dst_iii_direct_unscaled(x: &mut [f64])
+        {
+            let l = x.len();
+            let first_term = [
+                0.5*x[l - 1],
+                -0.5*x[l - 1]
+            ];
+            let y: Vec<_> = (0..l)
+                .map(|k| first_term[k % 2]
+                    + x.iter()
+                        .take(l - 1)
+                        .enumerate()
+                        .map(|(n, xn)| xn*(PI*(n + 1) as f64*(k as f64 + 0.5)/l as f64).sin())
+                        .sum::<f64>()
+                ).collect();
+            
+            for (x, y) in x.iter_mut()
+                .zip(y)
+            {
+                *x = y
+            }
+        }
+        fn dst_iii_direct(x: &mut [f64])
+        {
+            let l = x.len();
+            x[l - 1] *= SQRT_2;
+            dst_iii_direct_unscaled(x);
+            for x in x
+            {
+                *x *= (2.0/l as f64).sqrt()
+            }
+        }
 
-        println!("{b:?}")
+        let mut b = a;
+        let mut c = a;
+        b.dst_iii();
+        dst_iii_direct(&mut c);
+
+        println!("{b:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&b, &c, 1e-5));
+
+        let mut b = a;
+        let mut c = a;
+        b.dst_iii_scaled(SpectrumScaling::Summed);
+        dst_iii_direct_unscaled(&mut c);
+
+        println!("{b:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&b, &c, 1e-5));
     }
 
     #[test]
@@ -330,13 +590,52 @@ mod test
     {
         let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             .into_bulk()
-            .map(|x| x as f32)
+            .map(|x| x as f64)
             .collect_array();
 
-        let mut b = a;
-        b.dst_iv();
+        fn dst_iv_direct_unscaled(x: &mut [f64])
+        {
+            let l = x.len();
+            let y: Vec<_> = (0..l)
+                .map(|k| x.iter()
+                        .enumerate()
+                        .map(|(n, xn)| xn*(PI*(n as f64 + 0.5)*(k as f64 + 0.5)/l as f64).sin())
+                        .sum::<f64>()
+                ).collect();
+            
+            for (x, y) in x.iter_mut()
+                .zip(y)
+            {
+                *x = y
+            }
+        }
+        fn dst_iv_direct(x: &mut [f64])
+        {
+            let l = x.len();
+            dst_iv_direct_unscaled(x);
+            for x in x
+            {
+                *x *= (2.0/l as f64).sqrt()
+            }
+        }
 
-        println!("{b:?}")
+        let mut b = a;
+        let mut c = a;
+        b.dst_iv();
+        dst_iv_direct(&mut c);
+
+        println!("{b:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&b, &c, 1e-5));
+
+        let mut b = a;
+        let mut c = a;
+        b.dst_iv_scaled(SpectrumScaling::Summed);
+        dst_iv_direct_unscaled(&mut c);
+
+        println!("{b:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&b, &c, 1e-5));
     }
 
     #[test]
