@@ -1,7 +1,7 @@
-use core::{borrow::{Borrow, BorrowMut}, ops::{Div, Mul}};
+use core::borrow::{Borrow, BorrowMut};
 
 use array_trait::length;
-use bulks::{AsBulk, Bulk, CollectNearest, DoubleEndedBulk, IntoBulk};
+use bulks::{AsBulk, Bulk, DoubleEndedBulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
 use num_traits::{Float, FloatConst, NumCast, One, Zero};
 use crate::{Dft, Permute, SpectrumScaling, util::TruncateIm};
@@ -95,12 +95,10 @@ where
             return
         }
         let len_m1 = length::value::saturating_sub(len, [(); 1]);
-        let lenf = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len)).unwrap();
 
         let one = <T as ComplexFloat>::Real::one();
         let two = one + one;
         let sqrt_2 = <T as ComplexFloat>::Real::SQRT_2();
-        let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
 
         let mut y: Vec<_> = (*self).bulk()
             .chain((*self).bulk().skip([(); 1]).rev().skip([(); 1]))
@@ -142,7 +140,6 @@ where
         }
         let lenf = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len)).unwrap();
 
-        let frac_1_sqrt_2 = <T as ComplexFloat>::Real::FRAC_1_SQRT_2();
         let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
         let one = T::Real::one();
         let two = one + one;
@@ -245,7 +242,6 @@ where
         }
         let lenf = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len)).unwrap();
 
-        let sqrt_2 = <T as ComplexFloat>::Real::SQRT_2();
         let frac_1_sqrt_2 = <T as ComplexFloat>::Real::FRAC_1_SQRT_2();
         let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
 
@@ -300,13 +296,10 @@ where
 #[cfg(test)]
 mod test
 {
-    use core::{borrow::{Borrow, BorrowMut}, f64::consts::{PI, SQRT_2, TAU}, ops::{Div, Mul}};
+    use core::f64::consts::{PI, SQRT_2, TAU};
 
-    use array_trait::length;
-use bulks::{AsBulk, Bulk, IntoBulk};
+    use bulks::{AsBulk, Bulk, IntoBulk};
     use linspace::Linspace;
-use num_complex::ComplexFloat;
-use num_traits::{Float, FloatConst, NumCast, One};
 
     use crate::{Dct, Dst, tests};
 
