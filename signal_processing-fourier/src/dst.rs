@@ -363,4 +363,29 @@ mod test
         println!("{c:?}");
         assert!(tests::approx_eq(&s, &c, 1e-5));
     }
+
+    #[test]
+    fn from_dct_iv()
+    {
+        let a = [1, 2, 3, 4, 5]
+            .into_bulk()
+            .map(|x| x as f32)
+            .collect_array();
+
+        let mut s = a;
+        s.dst_iv();
+
+        let mut c = a.into_bulk()
+            .rev()
+            .collect_array();
+        c.dct_iv();
+        c.bulk_mut()
+            .skip(1)
+            .step_by(2)
+            .for_each(|x| *x = -*x);
+
+        println!("{s:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&s, &c, 1e-5));
+    }
 }
