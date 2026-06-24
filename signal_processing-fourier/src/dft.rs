@@ -135,7 +135,7 @@ mod test
     }
 
     #[test]
-    fn test_dct_i()
+    fn test_dft()
     {
         let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
             .into_bulk()
@@ -170,6 +170,48 @@ mod test
         let mut c = a;
         b.dft_scaled(SpectrumScaling::Summed);
         dft_direct_unscaled(&mut c);
+
+        println!("{b:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&b, &c, 1e-5))
+    }
+
+    #[test]
+    fn test_idft()
+    {
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+            .into_bulk()
+            .map(|x| x as f64)
+            .map(Complex::from)
+            .collect_array();
+
+        fn idft_direct_unscaled(x: &mut [Complex<f64>])
+        {
+            util::fft::dft_unscaled::<[_], f64, true>(x, &mut None);
+        }
+        fn idft_direct(x: &mut [Complex<f64>])
+        {
+            let l = x.len();
+            idft_direct_unscaled(x);
+            for x in x
+            {
+                *x /= (l as f64).sqrt()
+            }
+        }
+
+        let mut b = a;
+        let mut c = a;
+        b.idft();
+        idft_direct(&mut c);
+
+        println!("{b:?}");
+        println!("{c:?}");
+        assert!(tests::approx_eq(&b, &c, 1e-5));
+
+        let mut b = a;
+        let mut c = a;
+        b.idft_scaled(SpectrumScaling::Averaged);
+        idft_direct_unscaled(&mut c);
 
         println!("{b:?}");
         println!("{c:?}");

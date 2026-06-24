@@ -719,7 +719,6 @@ where
     ).unwrap()).into();
     let mut wnk = Complex::one();
 
-    
     sequence.bulk_mut()
         .zip(temp.borrow_mut())
         .for_each(|(mut src, dst)| { *dst = core::mem::replace(src.borrow_mut(), Zero::zero()); });
