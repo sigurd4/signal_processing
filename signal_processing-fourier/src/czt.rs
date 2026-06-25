@@ -2,7 +2,7 @@ use core::{borrow::{Borrow, BorrowMut}, ops::Mul};
 
 use array_trait::length;
 use bulks::{AsBulk, Bulk, IntoBulk};
-use num_traits::{Float, FloatConst, One, Zero};
+use num_traits::{Float, FloatConst, Inv, One, Zero};
 use num_complex::{Complex, ComplexFloat};
 
 use crate::{Dft, SpectrumScaling};
@@ -65,7 +65,7 @@ where
             .map(Complex::inv)
             .resize::<[_]>(nfft_pow2, Complex::zero())
             .collect::<Vec<_>, _>();
-        fw.dft_scaled(scaling);
+        fw.dft_scaled(SpectrumScaling::Summed);
 
         let mut fg: Vec<_> = self.bulk_mut()
             .map(|x| *x.borrow())
@@ -92,7 +92,7 @@ where
             .zip(fw)
             .map(mul_tuple)
             .collect::<Vec<_>, _>();
-        gg.idft_scaled(SpectrumScaling::Summed);
+        gg.idft_scaled(scaling.inv());
 
         for (y, mut x) in gg.into_bulk()
             .zip(w2)
