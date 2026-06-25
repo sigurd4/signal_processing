@@ -5,7 +5,7 @@ use bulks::{AsBulk, Bulk, IntoBulk};
 use num_traits::{Float, FloatConst, Inv, One, Zero};
 use num_complex::{Complex, ComplexFloat};
 
-use crate::{Dft, SpectrumScaling};
+use crate::{Dft, SpectrumScaling, util::DivAssignSpec};
 
 /// # Chirp z-transform
 /// 
@@ -67,18 +67,18 @@ where
             .collect::<Vec<_>, _>();
         fw.dft_scaled(SpectrumScaling::Summed);
 
-        let mut fg: Vec<_> = self.bulk_mut()
-            .map(|x| *x.borrow())
-            .collect();
         let a_recip = point.recip();
         let mut apmk = Complex::one();
-        for (i, g)  in fg.bulk_mut()
-            .enumerate()
-        {
-            *g = *g*apmk*w2[i + length::value::len(n) - 1];
-            apmk = apmk*a_recip;
-        }
-        fg.resize(nfft_pow2, Complex::zero());
+        let mut fg: Vec<_> = self.bulk_mut()
+            .map(|x| *x.borrow())
+            .zip(&w2[length::value::len(n) - 1..])
+            .map(|(mut g, &w)| {
+                g = g*apmk*w;
+                apmk = apmk*a_recip;
+                g
+            })
+            .resize::<[_]>(nfft_pow2, Complex::zero())
+            .collect();
 
         fn mul_tuple<T>((a, b): (T, T)) -> <T as Mul>::Output
         where
@@ -92,7 +92,7 @@ where
             .zip(fw)
             .map(mul_tuple)
             .collect::<Vec<_>, _>();
-        gg.idft_scaled(scaling.inv());
+        gg.idft_scaled(SpectrumScaling::Summed);
 
         for (y, mut x) in gg.into_bulk()
             .zip(w2)
@@ -102,6 +102,17 @@ where
             .zip(self.bulk_mut())
         {
             *x.borrow_mut() = y
+        }
+
+        let bulk = self.bulk_mut();        
+        if let Some(norm) = match scaling
+        {
+            SpectrumScaling::Summed => None,
+            SpectrumScaling::Balanced => Some(Float::sqrt(T::from(bulk.len()).unwrap())),
+            SpectrumScaling::Averaged => Some(T::from(bulk.len()).unwrap())
+        }
+        {
+            bulk.for_each(|mut x| x.borrow_mut()._div_assign(norm))
         }
     }
 }
@@ -114,8 +125,9 @@ mod test
     use bulks::{Bulk, IntoBulk};
     use linspace::Linspace;
     use num_complex::Complex;
+    use num_traits::One;
 
-    use crate::Czt;
+    use crate::{Czt, Dft, tests};
 
     #[test]
     fn plot_czt()
@@ -135,5 +147,23 @@ mod test
         });
 
         ezplot::plot_curves("X(n*e^jw)", "plots/x_z_czt.png", xf.map(|xf| w.into_bulk().zip(xf.map(|xf| xf.norm())))).unwrap()
+    }
+
+    #[test]
+    fn equals_dft()
+    {
+        let x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(|x| Complex::from(x as f64));
+
+        let rate = Complex::cis(-TAU/x.len() as f64);
+        let point = Complex::one();
+
+        let mut y1 = x;
+        let mut y2 = x;
+        y1.dft();
+        y2.czt(rate, point);
+
+        println!("{y1:?}");
+        println!("{y2:?}");
+        assert!(tests::approx_eq(&y1, &y2, 1e-5))
     }
 }
