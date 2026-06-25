@@ -6,23 +6,56 @@ use num_complex::{Complex, ComplexFloat};
 use num_traits::{Float, FloatConst, Inv, NumCast, One, Zero};
 use crate::{Dft, Permute, SpectrumScaling, util::TruncateIm};
 
+/// # Discrete sine-transform
+/// 
+/// The discrete sine-transform is the real-valued fourier transform of the odd extension of a sequence.
+/// 
+/// There are four types of DSTs:
+/// 
+/// ## DST I
+/// 
+/// The DST I is its own inverse (assuming balanced scaling).
+/// 
+/// ## DST II
+/// 
+/// The DST III is its inverse (assuming balanced scaling).
+/// 
+/// ## DST III
+/// 
+/// The DST II is its inverse (assuming balanced scaling).
+/// 
+/// ## DST IV
+/// 
+/// The DST IV is its own inverse (assuming balanced scaling).
 pub trait Dst<T>: Permute<T>
 {
+    /// The type I discrete sine-transform.
+    /// 
+    /// The DST I is its own inverse (assuming balanced scaling).
     #[doc(alias = "idst_i")]
     fn dst_i(&mut self)
     {
         self.dst_i_scaled(SpectrumScaling::Balanced)
     }
+    /// The type II discrete sine-transform.
+    /// 
+    /// The DST III is its inverse (assuming balanced scaling).
     #[doc(alias = "idst_iii")]
     fn dst_ii(&mut self)
     {
         self.dst_ii_scaled(SpectrumScaling::Balanced)
     }
+    /// The type III discrete sine-transform.
+    /// 
+    /// The DST II is its inverse (assuming balanced scaling).
     #[doc(alias = "idst_ii")]
     fn dst_iii(&mut self)
     {
         self.dst_iii_scaled(SpectrumScaling::Balanced)
     }
+    /// The type IV discrete sine-transform.
+    /// 
+    /// The DST IV is its own inverse (assuming balanced scaling).
     #[doc(alias = "idst_iv")]
     fn dst_iv(&mut self)
     {

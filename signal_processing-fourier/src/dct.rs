@@ -14,78 +14,50 @@ use crate::{Dft, Permute, SpectrumScaling, util::TruncateIm};
 /// 
 /// ## DCT I
 /// 
-/// ```txt
-///                                        N - 2
-///                                         ___
-///                                         \
-/// X[k] = 0.5*(x[0] + (-1)^k * x[N - 1]) +  \  x[n]*cos(π*n*k/(N - 1))
-///                                          /
-///                                         /__
-///                                        n = 1
-/// ```
-/// 
-/// The DCT IV is its inverse (assuming balanced scaling).
+/// The DCT I is its own inverse (assuming balanced scaling).
 /// 
 /// ## DCT II
-/// 
-/// ```txt
-///       N - 1
-///        ___
-///        \
-/// X[k] =  \  x[n]*cos(π*(n + 0.5)*k/(N - 1))
-///         /
-///        /__
-///       n = 0
-/// ```
 /// 
 /// The DCT III is its inverse (assuming balanced scaling).
 /// 
 /// ## DCT III
 /// 
-/// ```txt
-///                  N - 1
-///                   ___
-///                   \
-/// X[k] = 0.5*x[0] +  \  x[n]*cos(π*k*(k + 0.5)/N)
-///                    /
-///                   /__
-///                  n = 1
-/// ```
-/// 
 /// The DCT II is its inverse (assuming balanced scaling).
 /// 
 /// ## DCT IV
 /// 
-/// ```txt
-///       N - 1
-///        ___
-///        \
-/// X[k] =  \  x[n]*cos(π*(n + 0.5)*(k + 0.5)/N)
-///         /
-///        /__
-///       n = 0
-/// ```
-/// 
-/// The DCT I is its inverse (assuming balanced scaling).
+/// The DCT IV is its own inverse (assuming balanced scaling).
 pub trait Dct<T>: Permute<T>
 where
     T: ComplexFloat
 {
+    /// The type I discrete cosine-transform.
+    /// 
+    /// The DCT I is its own inverse (assuming balanced scaling).
     #[doc(alias = "idct_i")]
     fn dct_i(&mut self)
     {
         self.dct_i_scaled(SpectrumScaling::Balanced);
     }
+    /// The type II discrete cosine-transform.
+    /// 
+    /// The DCT III is its inverse (assuming balanced scaling).
     #[doc(alias = "idct_iii")]
     fn dct_ii(&mut self)
     {
         self.dct_ii_scaled(SpectrumScaling::Balanced);
     }
+    /// The type III discrete cosine-transform.
+    /// 
+    /// The DCT II is its inverse (assuming balanced scaling).
     #[doc(alias = "idct_ii")]
     fn dct_iii(&mut self)
     {
         self.dct_iii_scaled(SpectrumScaling::Balanced);
     }
+    /// The type IV discrete cosine-transform.
+    /// 
+    /// The DCT IV is its own inverse (assuming balanced scaling).
     #[doc(alias = "idct_iv")]
     fn dct_iv(&mut self)
     {
