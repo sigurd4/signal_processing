@@ -10,11 +10,13 @@ use crate::{Dft, Permute, SpectrumScaling, util::TruncateIm};
 /// 
 /// The discrete sine-transform is the real-valued fourier transform of the odd extension of a sequence.
 /// 
-/// There are four types of DSTs:
+/// While there is only one continuous sine-transform, due to the nature of how quantized signals can be mirrored there are four types of DSTs in total.
 /// 
 /// ## DST I
 /// 
-/// The DST I is its own inverse (assuming balanced scaling).
+/// For input `[a, b, c]`, it's equivalent to the DFT of `[0, a, b, c, 0, -c, -b, -a]`.
+/// 
+/// The DST I is orthogonal, i.e. it's its own inverse (assuming balanced scaling).
 /// 
 /// ## DST II
 /// 
@@ -26,7 +28,7 @@ use crate::{Dft, Permute, SpectrumScaling, util::TruncateIm};
 /// 
 /// ## DST IV
 /// 
-/// The DST IV is its own inverse (assuming balanced scaling).
+/// The DST IV is orthogonal, i.e. it's its own inverse (assuming balanced scaling).
 pub trait Dst<T>: Permute<T>
 {
     /// The type I discrete sine-transform.

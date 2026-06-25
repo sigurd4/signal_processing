@@ -5,7 +5,7 @@ use bulks::{AsBulk, Bulk, IntoBulk};
 use num_traits::{Float, FloatConst, One, Zero};
 use num_complex::{Complex, ComplexFloat};
 
-use crate::Dft;
+use crate::{Dft, SpectrumScaling};
 
 /// # Chirp z-transform
 /// 
@@ -29,8 +29,12 @@ where
     /// The signal's z-transform is a function across a plane. Just like the DFT, this computes a one-dimensional spectrum of the z-transform along a curve.
     /// The difference is, here: the curve can be configured.
     /// The DFT follows the unit-circle in the z-domain, while the chirp-z-transform follows a configurable chirp-curve.
-    /// 
-    fn czt(&mut self, ratio: Complex<T>, point: Complex<T>);
+    fn czt(&mut self, ratio: Complex<T>, point: Complex<T>)
+    {
+        self.czt_scaled(ratio, point, SpectrumScaling::Balanced);
+    }
+
+    fn czt_scaled(&mut self, ratio: Complex<T>, point: Complex<T>, scaling: SpectrumScaling);
 }
 impl<B, T> Czt<T> for B
 where
@@ -38,7 +42,7 @@ where
     B: ?Sized,
     T: Float + FloatConst + 'static
 {
-    fn czt(&mut self, ratio: Complex<T>, point: Complex<T>)
+    fn czt_scaled(&mut self, ratio: Complex<T>, point: Complex<T>, scaling: SpectrumScaling)
     {
         let n = self.bulk_mut().length();
         let nfft = length::value::saturating_sub(length::value::mul(n, [(); 2]), [(); 1]);
@@ -61,7 +65,7 @@ where
             .map(Complex::inv)
             .resize::<[_]>(nfft_pow2, Complex::zero())
             .collect::<Vec<_>, _>();
-        fw.dft();
+        fw.dft_scaled(scaling);
 
         let mut fg: Vec<_> = self.bulk_mut()
             .map(|x| *x.borrow())
@@ -83,12 +87,12 @@ where
             a*b
         }
 
-        fg.dft();
+        fg.dft_scaled(SpectrumScaling::Summed);
         let mut gg = fg.into_bulk()
             .zip(fw)
             .map(mul_tuple)
             .collect::<Vec<_>, _>();
-        gg.idft();
+        gg.idft_scaled(SpectrumScaling::Summed);
 
         for (y, mut x) in gg.into_bulk()
             .zip(w2)
@@ -108,8 +112,8 @@ mod test
     use core::f64::consts::TAU;
 
     use bulks::{Bulk, IntoBulk};
-use linspace::Linspace;
-use num_complex::Complex;
+    use linspace::Linspace;
+    use num_complex::Complex;
 
     use crate::Czt;
 

@@ -10,11 +10,13 @@ use crate::{Dft, Permute, SpectrumScaling, util::TruncateIm};
 /// 
 /// The discrete cosine-transform is the real-valued fourier transform of the even extension of a sequence.
 /// 
-/// There are four types of DCTs:
+/// While there is only one continuous cosine-transform, due to the nature of how quantized signals can be mirrored there are four types of DCTs in total.
 /// 
 /// ## DCT I
 /// 
-/// The DCT I is its own inverse (assuming balanced scaling).
+/// For input `[a, b, c]`, it's equivalent to the DFT of `[a, b, c, b]`.
+/// 
+/// The DCT I is orthogonal, i.e. it's its own inverse (assuming balanced scaling).
 /// 
 /// ## DCT II
 /// 
@@ -26,7 +28,7 @@ use crate::{Dft, Permute, SpectrumScaling, util::TruncateIm};
 /// 
 /// ## DCT IV
 /// 
-/// The DCT IV is its own inverse (assuming balanced scaling).
+/// The DCT IV is orthogonal, i.e. it's its own inverse (assuming balanced scaling).
 pub trait Dct<T>: Permute<T>
 where
     T: ComplexFloat
