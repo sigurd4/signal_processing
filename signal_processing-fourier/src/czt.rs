@@ -2,7 +2,7 @@ use core::{borrow::{Borrow, BorrowMut}, ops::Mul};
 
 use array_trait::length;
 use bulks::{AsBulk, Bulk, IntoBulk};
-use num_traits::{Float, FloatConst, Inv, One, Zero};
+use num_traits::{Float, FloatConst, One, Zero};
 use num_complex::{Complex, ComplexFloat};
 
 use crate::{Dft, SpectrumScaling, util::DivAssignSpec};
