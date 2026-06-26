@@ -313,7 +313,7 @@ mod test
     use bulks::{AsBulk, Bulk, IntoBulk};
     use linspace::Linspace;
 
-    use crate::{Dct, Dst, SpectrumScaling, tests, util::fct_i};
+    use crate::{Dct, Dst, SpectrumScaling, tests, util::fct_ii};
 
     #[test]
     fn plot_dct()

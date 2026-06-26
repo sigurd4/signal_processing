@@ -6,6 +6,7 @@ use crate::util;
 moddef!(
     pub(crate) mod {
         fct_i,
+        fct_ii,
         fft
     },
     flat(pub(crate)) mod {
