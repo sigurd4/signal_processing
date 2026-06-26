@@ -1,5 +1,55 @@
 use core::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign};
 
+use num_complex::ComplexFloat;
+
+use crate::util::TruncateIm;
+
+pub trait RealMul: ComplexFloat
+{
+    fn _real_mul(self, real: Self::Real) -> Self;
+}
+impl<C> RealMul for C
+where
+    C: ComplexFloat
+{
+    default fn _real_mul(self, real: Self::Real) -> Self
+    {
+        self*TruncateIm::from_real(real)
+    }
+}
+impl<C> RealMul for C
+where
+    C: ComplexFloat + Mul<C::Real, Output = Self>
+{
+    fn _real_mul(self, real: Self::Real) -> Self
+    {
+        self*real
+    }
+}
+
+pub trait RealDiv: ComplexFloat
+{
+    fn _real_div(self, real: Self::Real) -> Self;
+}
+impl<C> RealDiv for C
+where
+    C: ComplexFloat
+{
+    default fn _real_div(self, real: Self::Real) -> Self
+    {
+        self/TruncateIm::from_real(real)
+    }
+}
+impl<C> RealDiv for C
+where
+    C: ComplexFloat + Div<C::Real, Output = Self>
+{
+    fn _real_div(self, real: Self::Real) -> Self
+    {
+        self/real
+    }
+}
+
 pub const trait AddAssignSpec: ~const Add<Output = Self> + Copy
 {
     fn _add_assign(&mut self, rhs: Self);

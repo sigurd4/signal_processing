@@ -4,7 +4,7 @@ use array_trait::length;
 use bulks::{AsBulk, Bulk, DoubleEndedBulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
 use num_traits::{Float, FloatConst, Inv, NumCast, One, Zero};
-use crate::{Dft, Permute, SpectrumScaling, util::TruncateIm};
+use crate::{Dft, Permute, SpectrumScaling, util::{RealDiv, RealMul, TruncateIm, fct_i}};
 
 /// # Discrete cosine-transform
 /// 
@@ -81,66 +81,39 @@ where
     fn dct_i_scaled(&mut self, scaling: SpectrumScaling)
     {
         let len = (*self).bulk().length();
-        if length::value::le(len, [(); 1])
-        {
-            return
-        }
         let len_m1 = length::value::saturating_sub(len, [(); 1]);
 
-        let one = <T as ComplexFloat>::Real::one();
+        let sqrt_2 = T::Real::SQRT_2();
+        let one = T::Real::one();
         let two = one + one;
-        let four = two + two;
-        let sqrt_2 = <T as ComplexFloat>::Real::SQRT_2();
 
-        let mut y: Vec<_> = (*self).bulk()
-            .chain((*self).bulk().skip([(); 1]).rev().skip([(); 1]))
-            .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
-            .collect();
         if matches!(scaling, SpectrumScaling::Balanced)
         {
-            for y in y.bulk_mut().step_by(len_m1)
-            {
-                *y = *y*sqrt_2
-            }
+            self.bulk_mut()
+                .step_by(len_m1)
+                .map(|mut x| (*x.borrow_mut(), x))
+                .for_each(|(x, mut y)| *y.borrow_mut() = x._real_mul(sqrt_2));
         }
-        for y in y.bulk_mut()
+
+        fct_i::fct_i_unscaled(self, None);
+
+        if matches!(scaling, SpectrumScaling::Balanced)
         {
-            *y = *y/two
+            self.bulk_mut()
+                .step_by(len_m1)
+                .map(|mut x| (*x.borrow_mut(), x))
+                .for_each(|(x, mut y)| *y.borrow_mut() = x._real_div(sqrt_2));
         }
-        y.dft_scaled(scaling);
         if let Some(scale) = match scaling
         {
             SpectrumScaling::Summed => None,
-            SpectrumScaling::Balanced => Some(sqrt_2),
-            SpectrumScaling::Averaged => Some(four)
+            SpectrumScaling::Balanced => Some(Float::sqrt(two/<T::Real as NumCast>::from(length::value::len(len_m1)).unwrap())),
+            SpectrumScaling::Averaged => Some(two/<T::Real as NumCast>::from(length::value::len(len_m1)).unwrap())
         }
         {
-            for y in y.bulk_mut().step_by(len_m1)
-            {
-                *y = *y*scale
-            }
-        }
-        let (y1, y2) = y.bulk_mut()
-            .split_at(len);
-        for (y1, y2) in y1.skip([(); 1])
-            .zip(y2.rev())
-        {
-            *y1 = *y1 + *y2;
-            if let Some(scale) = match scaling
-            {
-                SpectrumScaling::Summed => Some(two),
-                SpectrumScaling::Balanced => None,
-                SpectrumScaling::Averaged => Some(Float::recip(two))
-            }
-            {
-                *y1 = *y1/scale
-            }
-        }
-
-        for (y, mut x) in y.into_bulk()
-            .zip(self.bulk_mut())
-        {
-            *x.borrow_mut() = <T as TruncateIm>::truncate_im(y)
+            self.bulk_mut()
+                .map(|mut x| (*x.borrow_mut(), x))
+                .for_each(|(x, mut y)| *y.borrow_mut() = x._real_mul(scale));
         }
     }
     fn dct_ii_scaled(&mut self, scaling: SpectrumScaling)
@@ -340,7 +313,7 @@ mod test
     use bulks::{AsBulk, Bulk, IntoBulk};
     use linspace::Linspace;
 
-    use crate::{Dct, Dst, SpectrumScaling, tests};
+    use crate::{Dct, Dst, SpectrumScaling, tests, util::fct_i};
 
     #[test]
     fn plot_dct()
@@ -524,8 +497,8 @@ mod test
 
         let mut b = a;
         let mut c = a;
-        b.dct_i();
-        dct_i_direct(&mut c);
+        b.dct_i_scaled(SpectrumScaling::Summed);
+        dct_i_direct_unscaled(&mut c);
 
         println!("{b:?}");
         println!("{c:?}");
@@ -533,12 +506,12 @@ mod test
 
         let mut b = a;
         let mut c = a;
-        b.dct_i_scaled(SpectrumScaling::Summed);
-        dct_i_direct_unscaled(&mut c);
+        b.dct_i();
+        dct_i_direct(&mut c);
 
         println!("{b:?}");
         println!("{c:?}");
-        assert!(tests::approx_eq(&b, &c, 1e-5))
+        assert!(tests::approx_eq(&b, &c, 1e-5));
     }
 
     #[test]
