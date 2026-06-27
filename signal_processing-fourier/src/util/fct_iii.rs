@@ -5,7 +5,7 @@ use crate::{Dft, Permute, SpectrumScaling, scratch_space::ScratchLength, temp, u
 use array_trait::length::{self, LengthValue};
 use bulks::{AsBulk, Bulk, CollectNearest, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
-use num_traits::{Float, FloatConst, NumCast, One, Zero};
+use num_traits::{Float, FloatConst, NumCast, One, ToPrimitive, Zero};
 
 pub fn fct_iii_unscaled<B, C, T>(sequence: &mut B, mut temp: Option<&mut [C]>)
 where
@@ -14,11 +14,11 @@ where
     C: ComplexFloat<Real = T> + 'static,
     T: Float + FloatConst + 'static
 {
-    /*if  fct_iii_radix2_unscaled(sequence, &mut temp) ||
+    if  //fct_iii_radix2_unscaled(sequence, &mut temp) ||
         dct_iii_fft_unscaled(sequence, &mut temp)
     {
         return
-    }*/
+    }
     dct_iii_direct_unscaled(sequence, &mut temp);
 }
 
@@ -101,20 +101,27 @@ where
         .map(|mut x| *x.borrow_mut())
         .zip(temp.bulk_mut().take(len))
         .for_each(|(x, y)| *y = x.into_complex());
+    temp[length::value::len(len)] = Complex::zero();
     sequence.bulk_mut()
+        .skip([(); 1])
         .map(|mut x| *x.borrow_mut())
-        .zip(temp.bulk_mut().skip(len).rev())
+        .zip(temp.bulk_mut().skip(length::value::add(len, [(); 1])).rev())
         .for_each(|(x, y)| *y = x.into_complex());
+    let (y0, y1) = (*temp).bulk_mut()
+        .split_at(len);
+    y0.skip([(); 1])
+        .zip(y1.skip([(); 1]).rev())
+        .zip(m)
+        .for_each(|((y0, y1), m)| {
+            y0._mul_assign(m.conj());
+            y1._mul_assign(m);
+        });
     temp.dft_scaled(SpectrumScaling::Summed);
     let (y1, y2) = (*temp).bulk()
         .split_at(len);
-    let (y0, y1) = y1.split_at([(); 1]);
-    y0.map(|y| C::truncate_im(*y))
-        .chain(
-            bulks::zip(y1, y2.rev())
-                .zip(m)
-                .map(|((y1, y2), m)| C::truncate_im(y1*m.conj() + y2*m)._real_div(two))
-        )
+    /*bulks::zip(y1, y2.rev())
+        .map(|(y1, y2)| C::truncate_im(y1 + y2)._real_div(two))*/
+        y1.map(|y| C::truncate_im(*y))
         .zip(sequence)
         .for_each(|(y, mut x)| *x.borrow_mut() = y);
 

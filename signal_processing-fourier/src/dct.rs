@@ -4,7 +4,7 @@ use array_trait::length;
 use bulks::{AsBulk, Bulk, DoubleEndedBulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
 use num_traits::{Float, FloatConst, Inv, NumCast, One, Zero};
-use crate::{Dft, Permute, SpectrumScaling, util::{RealDiv, RealMul, TruncateIm, fct_i, fct_ii}};
+use crate::{Dft, Permute, SpectrumScaling, util::{RealDiv, RealMul, TruncateIm, fct_i, fct_ii, fct_iii}};
 
 /// # Discrete cosine-transform
 /// 
@@ -149,59 +149,33 @@ where
     fn dct_iii_scaled(&mut self, scaling: SpectrumScaling)
     {
         let len = (*self).bulk().length();
-        if length::value::le(len, [(); 1])
-        {
-            return
-        }
-        let lenf = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len)).unwrap();
 
-        let frac_1_sqrt_2 = <T as ComplexFloat>::Real::FRAC_1_SQRT_2();
-        let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
-
+        let sqrt_2 = T::Real::SQRT_2();
         let one = T::Real::one();
         let two = one + one;
 
-        let m1 = bulks::once(if matches!(scaling, SpectrumScaling::Balanced) { One::one() } else { (frac_1_sqrt_2).into() })
-            .chain(bulks::range([(); 1], len)
-                .map(|i| {
-                    let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                    Complex::from_polar(frac_1_sqrt_2, -i*frac_pi_2/lenf)
-                })
-            );
-        let m2 = bulks::range([(); 1], len)
-            .map(|i| {
-                let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                Complex::from_polar(frac_1_sqrt_2, i*frac_pi_2/lenf)
-            })
-            .rev();
-        
-        let mut y = (*self).bulk()
-            .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
-            .zip(m1)
-            .map(|(x, m1)| m1*x)
-            .chain(bulks::once(Zero::zero()))
-            .chain((*self).bulk()
-                .skip([(); 1])
-                .rev()
-                .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
-                .zip(m2)
-                .map(|(x, m2)| m2*x)
-            ).collect::<Vec<_>, _>();
-        y.dft_scaled(scaling);
-        
-        let ydiv = match scaling
+        if matches!(scaling, SpectrumScaling::Balanced)
         {
-            SpectrumScaling::Summed => T::Real::FRAC_1_SQRT_2()*two,
-            SpectrumScaling::Balanced => T::Real::FRAC_1_SQRT_2(),
-            SpectrumScaling::Averaged => T::Real::FRAC_1_SQRT_2()/two
-        };
-        for (mut y, mut x) in y.into_bulk()
-            .zip(self.bulk_mut())
-        {
-            y = y/ydiv;
-            *x.borrow_mut() = <_ as TruncateIm>::truncate_im(y)
+            self.bulk_mut()
+                .first()
+                .map(|mut x| (*x.borrow_mut(), x))
+                .into_bulk()
+                .for_each(|(x, mut y)| *y.borrow_mut() = x._real_mul(sqrt_2));
         }
 
+        fct_iii::fct_iii_unscaled(self, None);
+        
+        if let Some(scale) = match scaling
+        {
+            SpectrumScaling::Summed => None,
+            SpectrumScaling::Balanced => Some(Float::sqrt(two/<T::Real as NumCast>::from(length::value::len(len)).unwrap())),
+            SpectrumScaling::Averaged => Some(two/<T::Real as NumCast>::from(length::value::len(len)).unwrap())
+        }
+        {
+            self.bulk_mut()
+                .map(|mut x| (*x.borrow_mut(), x))
+                .for_each(|(x, mut y)| *y.borrow_mut() = x._real_mul(scale));
+        }
     }
     fn dct_iv_scaled(&mut self, scaling: SpectrumScaling)
     {
@@ -280,7 +254,7 @@ mod test
     use bulks::{AsBulk, Bulk, IntoBulk};
     use linspace::Linspace;
 
-    use crate::{Dct, Dst, SpectrumScaling, tests, util::{fct_ii, fct_iii}};
+    use crate::{Dct, Dst, SpectrumScaling, tests, util::fct_iii};
 
     #[test]
     fn plot_dct()
@@ -575,7 +549,7 @@ mod test
         let mut b = a;
         let mut c = a;
         b.dct_iii_scaled(SpectrumScaling::Summed);
-        fct_iii::dct_iii_direct_unscaled::<[f64], f64, f64>(&mut c, &mut None);
+        dct_iii_direct_unscaled(&mut c);
 
         println!("{b:?}");
         println!("{c:?}");
