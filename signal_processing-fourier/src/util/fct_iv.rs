@@ -1,28 +1,28 @@
-use core::{borrow::{Borrow, BorrowMut}, f64::consts::{FRAC_PI_2, PI}};
+use core::{borrow::{Borrow, BorrowMut}, f64::consts::{FRAC_PI_2, FRAC_PI_4, PI}};
 
 use crate::{Dft, Permute, SpectrumScaling, scratch_space::ScratchLength, temp, util::{self, AddAssignSpec, IntoComplex, MulAssignSpec, RealDiv, RealMul, TruncateIm, fft}};
 
 use array_trait::length::{self, LengthValue};
 use bulks::{AsBulk, Bulk, CollectNearest, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
-use num_traits::{Float, FloatConst, NumCast, One, Zero};
+use num_traits::{Float, FloatConst, NumCast, One, ToPrimitive, Zero};
 
-pub fn fct_ii_unscaled<B, C, T>(sequence: &mut B, mut temp: Option<&mut [C]>)
+pub fn fct_iv_unscaled<B, C, T>(sequence: &mut B, mut temp: Option<&mut [C]>)
 where
     for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,
     B: ?Sized,
     C: ComplexFloat<Real = T> + 'static,
     T: Float + FloatConst + 'static
 {
-    if  fct_ii_radix2_unscaled(sequence, &mut temp) ||
-        dct_ii_fft_unscaled(sequence, &mut temp)
+    if  //fct_iv_radix2_unscaled(sequence, &mut temp) ||
+        dct_iv_fft_unscaled(sequence, &mut temp)
     {
         return
     }
-    dct_ii_direct_unscaled(sequence, &mut temp);
+    dct_iv_direct_unscaled(sequence, &mut temp);
 }
 
-pub fn partial_fct_ii_unscaled<B, C, T, M>(sequence: &mut B, temp: &mut [C], m: M)
+pub fn partial_fct_iv_unscaled<B, C, T, M>(sequence: &mut B, temp: &mut [C], m: M)
 where
     for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,
     B: ?Sized,
@@ -46,7 +46,7 @@ where
         .take(length::value::len(m))
     {
         unsafe {
-            fct_ii_unscaled::<[_], C, T>(
+            fct_iv_unscaled::<[_], C, T>(
                 core::slice::from_raw_parts_mut(temp, length::value::len(n)),
                 Some(core::slice::from_raw_parts_mut(bulk, length::value::len(n)))
             )
@@ -55,7 +55,7 @@ where
     if length::value::gt(r, [(); 0]) && let Some((temp, bulk)) = iter.next()
     {
         unsafe {
-            fct_ii_unscaled::<[_], C, T>(
+            fct_iv_unscaled::<[_], C, T>(
                 core::slice::from_raw_parts_mut(temp, length::value::len(r)),
                 Some(core::slice::from_raw_parts_mut(bulk, length::value::len(r)))
             )
@@ -63,91 +63,7 @@ where
     }
 }
 
-/// Algorithm by Byeong Gi Lee, 1984. For details, see:
-/// See: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.118.3056&rep=rep1&type=pdf#page=34
-pub fn fct_ii_radix2_unscaled<B, C, T>(sequence: &mut B, temp: &mut Option<&mut [C]>) -> bool
-where
-    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,
-    B: ?Sized,
-    C: ComplexFloat<Real = T> + 'static,
-    T: Float + FloatConst + 'static
-{
-    let len = sequence.bulk_mut().length();
-    if length::value::eq(length::value::rem(len, [(); 2]), [(); 0])
-    {
-        // Recursive FFT
-
-        temp!(temp for len);
-
-        let ldiv = length::value::len(len)/2;
-        let wn_half = Complex::cis(<T as NumCast>::from(FRAC_PI_2/length::value::len(len) as f64).unwrap());
-        let wn = wn_half*wn_half;
-        let mut wn_pk = wn_half;
-
-        {
-            let mut x = temp.chunks_mut(ldiv);
-            let x = bulks::repeat_n_with(|| x.next().unwrap(), [(); 2])
-                .collect_nearest();
-            for k in 0..ldiv
-            {
-                let [x1, x2] = sequence.bulk_mut()
-                    .map(|mut x| *x.borrow_mut())
-                    .skip(k)
-                    .step_by(length::value::len(len) - k*2 - 1)
-                    .map(Some)
-                    .resize_with([(); _], || None)
-                    .try_collect_array()
-                    .unwrap();
-                
-                let p = x1 + x2;
-                let q = x1 - x2;
-
-                x[0][k] = p;
-                x[1][k] = q._real_div(wn_pk.re + wn_pk.re);
-
-                wn_pk._mul_assign(wn);
-            }
-        }
-        partial_fct_ii_unscaled(sequence, temp, [(); 2]);
-        let mut x = temp.chunks(ldiv);
-        let x = bulks::repeat_n_with(|| x.next().unwrap(), [(); 2])
-            .collect_nearest();
-        for k in 0..ldiv.saturating_sub(1)
-        {
-            let p = x[0][k];
-            let q = x[1][k];
-            let r = x[1][k + 1];
-
-            let [mut x1, mut x2] = sequence.bulk_mut()
-                .skip(k*2)
-                .map(Some)
-                .resize_with([(); _], || None)
-                .try_collect_array()
-                .unwrap();
-            
-            *x1.borrow_mut() = p;
-            *x2.borrow_mut() = q + r;
-        }
-        if let Some(k) = ldiv.checked_sub(1)
-        {
-            let p = x[0][k];
-            let q = x[1][k];
-
-            let [mut x1, mut x2] = sequence.bulk_mut()
-                .skip(k*2)
-                .map(Some)
-                .resize_with([(); _], || None)
-                .try_collect_array()
-                .unwrap();
-            
-            *x1.borrow_mut() = p;
-            *x2.borrow_mut() = q;
-        }
-        return true;
-    }
-    false
-}
-pub fn dct_ii_fft_unscaled<B, C, T>(sequence: &mut B, temp: &mut Option<&mut [C]>) -> bool
+pub fn dct_iv_fft_unscaled<B, C, T>(sequence: &mut B, temp: &mut Option<&mut [C]>) -> bool
 where
     for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,
     B: ?Sized,
@@ -172,7 +88,7 @@ where
     let one = T::one();
     let two = one + one;
 
-    let m = bulks::range([(); 1], len)
+    let m = bulks::range_inclusive([(); 1], len)
         .map(|i| {
             let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
             Complex::cis(i*frac_pi_2/lenf)
@@ -189,23 +105,42 @@ where
         .map(|mut x| *x.borrow_mut())
         .zip(temp.bulk_mut().skip(len).rev())
         .for_each(|(x, y)| *y = x.into_complex());
-    temp.dft_scaled(SpectrumScaling::Summed);
+    let (y0, y1) = temp.bulk_mut()
+        .split_at(len);
+    y0.skip([(); 1])
+        .zip(m.clone())
+        .for_each(|(y, m)| {
+            y._mul_assign(m);
+        });
+    y1.rev()
+        .zip(m.clone())
+        .for_each(|(y, m)| {
+            y._mul_assign(m.conj());
+        });
+    temp.idft_scaled(SpectrumScaling::Averaged);
+    let shift = Complex::cis(T::FRAC_PI_4()/lenf);
+    temp.bulk_mut()
+        .for_each(|y| y._mul_assign(shift));
     let (y1, y2) = (*temp).bulk()
         .split_at(len);
     let (y0, y1) = y1.split_at([(); 1]);
-    y0.map(|y| C::truncate_im(*y))
-        .chain(
-            bulks::zip(y1, y2.rev())
-                .zip(m)
-                .map(|((y1, y2), m)| C::truncate_im(y1*m.conj() + y2*m)._real_div(two))
-        )
+    bulks::zip(
+        y0.map(|y| *y)
+            .chain(
+                y1.zip(m.clone())
+                    .map(|(y, m)| y*m)
+            ),
+        y2.rev()
+            .zip(m)
+            .map(|(y, m)| y*m.conj())
+    ).map(|(y1, y2)| C::truncate_im((y1 + y2)/two))
         .zip(sequence)
         .for_each(|(y, mut x)| *x.borrow_mut() = y);
 
     true
 }
 
-pub fn dct_ii_direct_unscaled<B, C, T>(sequence: &mut B, temp: &mut Option<&mut [C]>)
+pub fn dct_iv_direct_unscaled<B, C, T>(sequence: &mut B, temp: &mut Option<&mut [C]>)
 where
     for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,
     B: ?Sized,
@@ -216,10 +151,11 @@ where
 
     temp!(temp for len);
 
-    let wn_half = Complex::cis(<T as NumCast>::from(
-        FRAC_PI_2/length::value::len(len) as f64
+    let wn_quarter = Complex::cis(<T as NumCast>::from(
+        FRAC_PI_4/length::value::len(len) as f64
     ).unwrap());
-    let mut wnk_half = Complex::one();
+    let wn_half = wn_quarter*wn_quarter;
+    let mut wnk_half = wn_quarter;
 
     sequence.bulk_mut()
         .zip(temp.borrow_mut())

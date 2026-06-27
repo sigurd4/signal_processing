@@ -63,6 +63,84 @@ where
     }
 }
 
+/// Algorithm by Byeong Gi Lee, 1984. For details, see:
+/// https://www.nayuki.io/res/fast-discrete-cosine-transform-algorithms/lee-new-algo-discrete-cosine-transform.pdf
+pub fn fct_iii_radix2_unscaled<B, C, T>(sequence: &mut B, temp: &mut Option<&mut [C]>) -> bool
+where
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,
+    B: ?Sized,
+    C: ComplexFloat<Real = T> + 'static,
+    T: Float + FloatConst + 'static
+{
+    let len = sequence.bulk_mut().length();
+    if length::value::eq(length::value::rem(len, [(); 2]), [(); 0])
+    {
+        // Recursive FFT
+
+        temp!(temp for len);
+
+        let ldiv = length::value::len(len)/2;
+        {
+            let mut x = temp.chunks_mut(ldiv);
+            let x = bulks::repeat_n_with(|| x.next().unwrap(), [(); 2])
+                .collect_nearest();
+            {
+                let [p, q] = sequence.bulk_mut()
+                    .map(|mut x| *x.borrow_mut())
+                    .map(Some)
+                    .resize_with([(); _], || None)
+                    .try_collect_array()
+                    .unwrap();
+
+                x[0][0] = p;
+                x[1][0] = q;
+            }
+            for k in 1..ldiv
+            {
+                let [p, q, r] = sequence.bulk_mut()
+                    .map(|mut x| *x.borrow_mut())
+                    .skip(2*k - 1)
+                    .map(Some)
+                    .resize_with([(); _], || None)
+                    .try_collect_array()
+                    .unwrap();
+
+                x[0][k] = q;
+                x[1][k] = p + r;
+            }
+        }
+        partial_fct_iii_unscaled(sequence, temp, [(); 2]);
+
+        let wn_half = Complex::cis(<T as NumCast>::from(FRAC_PI_2/length::value::len(len) as f64).unwrap());
+        let wn = wn_half*wn_half;
+        let mut wn_pk = wn_half;
+
+        let mut x = temp.chunks(ldiv);
+        let x = bulks::repeat_n_with(|| x.next().unwrap(), [(); 2])
+            .collect_nearest();
+        for k in 0..ldiv.saturating_sub(1)
+        {
+            let p = x[0][k];
+            let q = x[1][k]._real_div(wn_pk.re + wn_pk.re);
+
+            let [mut x1, mut x2] = sequence.bulk_mut()
+                .skip(k)
+                .step_by(length::value::len(len) - k*2 - 1)
+                .map(Some)
+                .resize_with([(); _], || None)
+                .try_collect_array()
+                .unwrap();
+            
+            *x1.borrow_mut() = p + q;
+            *x2.borrow_mut() = p - q;
+
+            wn_pk._mul_assign(wn);
+        }
+        return true;
+    }
+    false
+}
+
 pub fn dct_iii_fft_unscaled<B, C, T>(sequence: &mut B, temp: &mut Option<&mut [C]>) -> bool
 where
     for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,
@@ -119,9 +197,8 @@ where
     temp.dft_scaled(SpectrumScaling::Summed);
     let (y1, y2) = (*temp).bulk()
         .split_at(len);
-    /*bulks::zip(y1, y2.rev())
-        .map(|(y1, y2)| C::truncate_im(y1 + y2)._real_div(two))*/
-        y1.map(|y| C::truncate_im(*y))
+    bulks::zip(y1, y2.rev())
+        .map(|(y1, y2)| C::truncate_im(y1 + y2)._real_div(two))
         .zip(sequence)
         .for_each(|(y, mut x)| *x.borrow_mut() = y);
 

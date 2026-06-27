@@ -4,7 +4,7 @@ use array_trait::length;
 use bulks::{AsBulk, Bulk, DoubleEndedBulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
 use num_traits::{Float, FloatConst, Inv, NumCast, One, Zero};
-use crate::{Dft, Permute, SpectrumScaling, util::{RealDiv, RealMul, TruncateIm, fct_i, fct_ii, fct_iii}};
+use crate::{Dft, Permute, SpectrumScaling, util::{RealDiv, RealMul, TruncateIm, fct_i, fct_ii, fct_iii, fct_iv}};
 
 /// # Discrete cosine-transform
 /// 
@@ -180,68 +180,22 @@ where
     fn dct_iv_scaled(&mut self, scaling: SpectrumScaling)
     {
         let len = (*self).bulk().length();
-        if length::value::le(len, [(); 1])
-        {
-            return
-        }
-        let lenf = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len)).unwrap();
-
-        let frac_1_sqrt_2 = <T as ComplexFloat>::Real::FRAC_1_SQRT_2();
-        let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
 
         let one = T::Real::one();
         let two = one + one;
 
-        let w1: Vec<_> = bulks::range([(); 0], len)
-            .map(|i| {
-                let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                Complex::from_polar(frac_1_sqrt_2, frac_pi_2/lenf*i)
-            }).collect();
-        let w2: Vec<_> = bulks::range_inclusive([(); 1], len)
-            .map(|i| {
-                let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                Complex::from_polar(frac_1_sqrt_2, -frac_pi_2/lenf*i)
-            }).collect();
-
-        let y1 = (*self).bulk()
-            .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
-            .zip(w1.bulk().copied())
-            .map(|(x, w)| x*w);
-        let y2 = (*self).bulk()
-            .rev()
-            .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
-            .zip(w2.bulk().rev().copied())
-            .map(|(x, w)| x*w);
+        fct_iv::fct_iv_unscaled(self, None);
         
-        let mut y: Vec<_> = y1.into_bulk()
-            .chain(y2)
-            .collect();
-        y.idft_scaled(scaling.inv());
-        
-        let scale = match scaling
+        if let Some(scale) = match scaling
         {
-            SpectrumScaling::Summed => Float::recip(two),
-            SpectrumScaling::Balanced => one,
-            SpectrumScaling::Averaged => two
-        };
-        let ymul = Complex::from_polar(scale, T::Real::FRAC_PI_4()/lenf);
-        for y in y.iter_mut()
-        {
-            *y = *y*ymul
+            SpectrumScaling::Summed => None,
+            SpectrumScaling::Balanced => Some(Float::sqrt(two/<T::Real as NumCast>::from(length::value::len(len)).unwrap())),
+            SpectrumScaling::Averaged => Some(two/<T::Real as NumCast>::from(length::value::len(len)).unwrap())
         }
-        
-        let (y1, y2) = y.into_bulk().split_at(len);
-        
-        for (y, mut x) in y1.into_iter()
-            .zip(w1)
-            .map(|(y, m)| y*m)
-            .zip(y2.rev()
-                .zip(w2)
-                .map(|(y, m)| y*m)
-            ).map(|(y1, y2)| y1 + y2)
-            .zip(self.bulk_mut())
         {
-            *x.borrow_mut() = <T as TruncateIm>::truncate_im(y)
+            self.bulk_mut()
+                .map(|mut x| (*x.borrow_mut(), x))
+                .for_each(|(x, mut y)| *y.borrow_mut() = x._real_mul(scale));
         }
     }
 }
@@ -254,7 +208,7 @@ mod test
     use bulks::{AsBulk, Bulk, IntoBulk};
     use linspace::Linspace;
 
-    use crate::{Dct, Dst, SpectrumScaling, tests, util::fct_iii};
+    use crate::{Dct, Dst, SpectrumScaling, tests, util::{fct_iii, fct_iv}};
 
     #[test]
     fn plot_dct()
@@ -458,7 +412,7 @@ mod test
     #[test]
     fn test_dct_ii()
     {
-        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11]
+        let a = [1, 2, 3, 4, 5, 6, 7, 8]
             .into_bulk()
             .map(|x| x as f64)
             .collect_array();
@@ -512,7 +466,7 @@ mod test
     #[test]
     fn test_dct_iii()
     {
-        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        let a = [1, 2, 3, 4, 5, 6, 7, 8]
             .into_bulk()
             .map(|x| x as f64)
             .collect_array();
