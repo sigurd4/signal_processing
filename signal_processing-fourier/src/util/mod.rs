@@ -1,4 +1,7 @@
+use core::borrow::BorrowMut;
+
 use array_trait::length::{self, LengthValue};
+use bulks::IntoBulk;
 use moddef::moddef;
 
 use crate::util;
@@ -17,6 +20,37 @@ moddef!(
         indirect_reffable
     }
 );
+
+pub fn recurse_buffer<B, T>(buffer: &mut B) -> Option<&mut [T]>
+where
+    B: ?Sized,
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<T>>,
+{
+    trait Recurse<T>
+    {
+        fn buffer(&mut self) -> Option<&mut [T]>;
+    }
+    impl<B, T> Recurse<T> for B
+    where
+        B: ?Sized
+    {
+        default fn buffer(&mut self) -> Option<&mut [T]>
+        {
+            None
+        }
+    }
+    impl<B, T> Recurse<T> for B
+    where
+        B: BorrowMut<[T]> + ?Sized
+    {
+        fn buffer(&mut self) -> Option<&mut [T]>
+        {
+            Some(self.borrow_mut())
+        }
+    }
+
+    Recurse::buffer(buffer)
+}
 
 pub const fn closest_prime(x: usize) -> Option<usize>
 {

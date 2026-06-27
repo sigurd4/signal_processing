@@ -37,7 +37,8 @@ macro_rules! temp {
     };
     ($temp:ident for $len:expr => $x:ident) => {
         let mut ${concat($temp, _owned)} = None;
-        let $x = match $temp.take()
+        let $x = match $temp.as_mut()
+            .and_then(|$temp| $temp.get_mut(..length::value::len($len)))
         {
             Some($temp) => $temp,
             None => ${concat($temp, _owned)}.insert(crate::ScratchLength::scratch_space($len, num_traits::Zero::zero())).borrow_mut()

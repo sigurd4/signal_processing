@@ -52,17 +52,13 @@ where
     }
 }
 
-pub fn partial_fft_unscaled<B, T, const I: bool, M>(sequence: &mut B, temp: &mut [Complex<T>], m: M) -> bool
+pub fn partial_fft_unscaled<B, T, const I: bool, M>(sequence: &mut B, temp: &mut [Complex<T>], m: M)
 where
     for<'a> &'a mut B: IntoBulk<Item: BorrowMut<Complex<T>>>,
     B: ?Sized,
     T: Float + 'static,
     M: LengthValue
 {
-    if length::value::eq(m, [(); 0])
-    {
-        return false
-    }
     let mut i = 0;
 
     for (k, ()) in bulks::repeat_n((), m)
@@ -77,38 +73,11 @@ where
         }
     }
 
-    trait Recurse<T>
-    where
-        T: Float + 'static
-    {
-        fn buffer(&mut self) -> Option<&mut [Complex<T>]>;
-    }
-    impl<B, T> Recurse<T> for B
-    where
-        B: ?Sized,
-        T: Float + 'static,
-    {
-        default fn buffer(&mut self) -> Option<&mut [Complex<T>]>
-        {
-            None
-        }
-    }
-    impl<B, T> Recurse<T> for B
-    where
-        B: BorrowMut<[Complex<T>]> + ?Sized,
-        T: Float + 'static,
-    {
-        fn buffer(&mut self) -> Option<&mut [Complex<T>]>
-        {
-            Some(self.borrow_mut())
-        }
-    }
-
     let len = sequence.bulk_mut().length();
     let n = length::value::div(len, length::value::max(m, [(); 1]));
     let r = length::value::rem(len, length::value::max(m, [(); 1]));
 
-    let mut buffer = Recurse::<T>::buffer(sequence);
+    let mut buffer = util::recurse_buffer(sequence);
     temp!(buffer for len);
 
     let mut iter = temp.bulk_mut()
@@ -135,7 +104,6 @@ where
             )
         }
     }
-    true
 }
 
 
