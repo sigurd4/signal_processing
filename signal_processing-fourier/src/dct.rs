@@ -280,7 +280,7 @@ mod test
     use bulks::{AsBulk, Bulk, IntoBulk};
     use linspace::Linspace;
 
-    use crate::{Dct, Dst, SpectrumScaling, tests, util::fct_ii};
+    use crate::{Dct, Dst, SpectrumScaling, tests, util::{fct_ii, fct_iii}};
 
     #[test]
     fn plot_dct()
@@ -484,7 +484,7 @@ mod test
     #[test]
     fn test_dct_ii()
     {
-        let a = [1, 2, 3, 4, 5, 6, 7, 8]
+        let a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 11]
             .into_bulk()
             .map(|x| x as f64)
             .collect_array();
@@ -574,8 +574,8 @@ mod test
         
         let mut b = a;
         let mut c = a;
-        b.dct_iii();
-        dct_iii_direct(&mut c);
+        b.dct_iii_scaled(SpectrumScaling::Summed);
+        fct_iii::dct_iii_direct_unscaled::<[f64], f64, f64>(&mut c, &mut None);
 
         println!("{b:?}");
         println!("{c:?}");
@@ -583,12 +583,12 @@ mod test
         
         let mut b = a;
         let mut c = a;
-        b.dct_iii_scaled(SpectrumScaling::Summed);
-        dct_iii_direct_unscaled(&mut c);
+        b.dct_iii();
+        dct_iii_direct(&mut c);
 
         println!("{b:?}");
         println!("{c:?}");
-        assert!(tests::approx_eq(&b, &c, 1e-5))
+        assert!(tests::approx_eq(&b, &c, 1e-5));
     }
 
     #[test]
@@ -627,8 +627,8 @@ mod test
 
         let mut b = a;
         let mut c = a;
-        b.dct_iv();
-        dct_iv_direct(&mut c);
+        b.dct_iv_scaled(SpectrumScaling::Summed);
+        dct_iv_direct_unscaled(&mut c);
 
         println!("{b:?}");
         println!("{c:?}");
@@ -636,12 +636,12 @@ mod test
 
         let mut b = a;
         let mut c = a;
-        b.dct_iv_scaled(SpectrumScaling::Summed);
-        dct_iv_direct_unscaled(&mut c);
+        b.dct_iv();
+        dct_iv_direct(&mut c);
 
         println!("{b:?}");
         println!("{c:?}");
-        assert!(tests::approx_eq(&b, &c, 1e-5))
+        assert!(tests::approx_eq(&b, &c, 1e-5));
     }
 
     #[test]

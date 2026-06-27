@@ -14,7 +14,7 @@ where
     C: ComplexFloat<Real = T> + 'static,
     T: Float + FloatConst + 'static
 {
-    if  //fct_ii_radix2_unscaled(sequence, &mut temp) ||
+    if  fct_ii_radix2_unscaled(sequence, &mut temp) ||
         dct_ii_fft_unscaled(sequence, &mut temp)
     {
         return
@@ -78,8 +78,6 @@ where
         /*if util::is_power_of(len, [(); 2])
         {
             // In-place DCT II
-            temp!(temp for len);
-
             sequence.bit_rev_permute();
             
             for s in 0..length::value::len(len).ilog2()
@@ -115,7 +113,6 @@ where
 
         temp!(temp for len);
 
-        let m = 2;
         let ldiv = length::value::len(len)/2;
         let wn_half = Complex::cis(<T as NumCast>::from(FRAC_PI_2/length::value::len(len) as f64).unwrap());
         let wn = wn_half*wn_half;
@@ -130,7 +127,7 @@ where
                 let [x1, x2] = sequence.bulk_mut()
                     .map(|mut x| *x.borrow_mut())
                     .skip(k)
-                    .step_by(length::value::len(len) - k - 1)
+                    .step_by(length::value::len(len) - k*2 - 1)
                     .map(Some)
                     .resize_with([(); _], || None)
                     .try_collect_array()
@@ -197,13 +194,11 @@ where
         return false
     }
     let len_buf = length::value::mul(len, [(); 2]);
-    /*let mut temp = temp.as_mut()
+    let mut temp = temp.as_mut()
         .map(|temp| unsafe {
             core::slice::from_raw_parts_mut(temp.as_mut_ptr().cast::<Complex<T>>(), temp.len()/(std::mem::size_of::<Complex<T>>()/std::mem::size_of::<C>()).max(1))
         });
-    temp!(temp for len_buf);*/
-    let mut temp = ScratchLength::scratch_space(len_buf, Complex::zero());
-    let temp: &mut [_] = temp.borrow_mut();
+    temp!(temp for len_buf);
 
     let lenf = <T as NumCast>::from(length::value::len(len)).unwrap();
 

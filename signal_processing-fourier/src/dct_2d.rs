@@ -114,9 +114,13 @@ mod test
             })
         });
         
+        println!("DCT-II begin.");
         r.dct_ii_2d();
+        println!("DCT-II done.");
         g.dct_ii_2d();
+        println!("DCT-II done.");
         b.dct_ii_2d();
+        println!("DCT-II done.");
 
         for i in 0..n
         {
@@ -151,9 +155,13 @@ mod test
             }
         }
 
+        println!("DCT-III begin.");
         r.dct_iii_2d();
+        println!("DCT-III done.");
         g.dct_iii_2d();
+        println!("DCT-III done.");
         b.dct_iii_2d();
+        println!("DCT-III done.");
 
         for i in 0..n
         {
