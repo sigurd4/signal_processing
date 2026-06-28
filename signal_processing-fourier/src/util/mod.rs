@@ -12,6 +12,7 @@ moddef!(
         fct_ii,
         fct_iii,
         fct_iv,
+        fst_i,
         fft
     },
     flat(pub(crate)) mod {
