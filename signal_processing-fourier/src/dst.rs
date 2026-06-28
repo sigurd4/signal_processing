@@ -267,7 +267,7 @@ mod test
     use bulks::{AsBulk, Bulk, IntoBulk};
     use linspace::Linspace;
 
-    use crate::{Dct, Dst, SpectrumScaling, tests, util::{fst_i, fst_ii}};
+    use crate::{Dct, Dst, SpectrumScaling, tests, util::{fst_i, fst_ii, fst_iii}};
 
     #[test]
     fn plot_dst()
@@ -551,8 +551,8 @@ mod test
 
         let mut b = a;
         let mut c = a;
-        b.dst_iii();
-        dst_iii_direct(&mut c);
+        b.dst_iii_scaled(SpectrumScaling::Summed);
+        fst_iii::fst_iii_unscaled::<[_], _, _>(&mut c, None);
 
         println!("{b:?}");
         println!("{c:?}");
@@ -560,8 +560,8 @@ mod test
 
         let mut b = a;
         let mut c = a;
-        b.dst_iii_scaled(SpectrumScaling::Summed);
-        dst_iii_direct_unscaled(&mut c);
+        b.dst_iii();
+        dst_iii_direct(&mut c);
 
         println!("{b:?}");
         println!("{c:?}");
