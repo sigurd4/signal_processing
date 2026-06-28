@@ -1,11 +1,11 @@
-use core::{borrow::BorrowMut, f64::consts::{FRAC_PI_2, PI}};
+use core::{borrow::BorrowMut, f64::consts::FRAC_PI_2};
 
 use crate::{Dft, SpectrumScaling, temp, util::{AddAssignSpec, IntoComplex, MulAssignSpec, RealDiv, RealMul, TruncateIm}};
 
 use array_trait::length;
 use bulks::{AsBulk, Bulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
-use num_traits::{Float, FloatConst, NumCast, One, Zero};
+use num_traits::{Float, FloatConst, NumCast, Zero};
 
 pub fn fst_ii_unscaled<B, C, T>(sequence: &mut B, mut temp: Option<&mut [C]>)
 where

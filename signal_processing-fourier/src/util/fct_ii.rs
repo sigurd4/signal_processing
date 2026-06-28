@@ -1,6 +1,6 @@
 use core::{borrow::BorrowMut, f64::consts::{FRAC_PI_2, SQRT_2}};
 
-use crate::{Dft, SpectrumScaling, temp, util::{self, AddAssignSpec, IntoComplex, MulAssignSpec, RealDiv, RealMul, TruncateIm, fft}};
+use crate::{Dft, SpectrumScaling, temp, util::{self, AddAssignSpec, IntoComplex, MulAssignSpec, RealDiv, RealMul, TruncateIm}};
 
 use array_trait::length::{self, LengthValue};
 use bulks::{AsBulk, Bulk, CollectNearest, IntoBulk};
@@ -66,6 +66,7 @@ where
 
 // Algorithm by Arai, Agui, Nakajima, 1988. For details, see:
 // https://web.stanford.edu/class/ee398a/handouts/lectures/07-TransformCoding.pdf#page=30
+#[allow(unused)]
 pub fn fct_ii_8_unscaled<B, C, T>(sequence: &mut B) -> bool
 where
     for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,

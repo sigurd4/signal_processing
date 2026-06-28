@@ -1,11 +1,11 @@
-use core::{borrow::{Borrow, BorrowMut}, f64::consts::{FRAC_PI_2, FRAC_PI_4, PI}};
+use core::{borrow::BorrowMut, f64::consts::FRAC_PI_4};
 
-use crate::{Dft, Permute, SpectrumScaling, scratch_space::ScratchLength, temp, util::{self, AddAssignSpec, IntoComplex, MulAssignSpec, RealDiv, RealMul, TruncateIm, fft}};
+use crate::{Dft, SpectrumScaling, temp, util::{AddAssignSpec, IntoComplex, MulAssignSpec, RealDiv, RealMul, TruncateIm}};
 
-use array_trait::length::{self, LengthValue};
-use bulks::{AsBulk, Bulk, CollectNearest, IntoBulk};
+use array_trait::length;
+use bulks::{AsBulk, Bulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
-use num_traits::{Float, FloatConst, NumCast, One, ToPrimitive, Zero};
+use num_traits::{Float, FloatConst, NumCast, Zero};
 
 pub fn fct_iv_unscaled<B, C, T>(sequence: &mut B, mut temp: Option<&mut [C]>)
 where
@@ -14,53 +14,12 @@ where
     C: ComplexFloat<Real = T> + 'static,
     T: Float + FloatConst + 'static
 {
-    if  //fct_iv_radix2_unscaled(sequence, &mut temp) ||
+    if //fct_iv_radix2_unscaled(sequence, &mut temp) ||
         dct_iv_fft_unscaled(sequence, &mut temp)
     {
         return
     }
     dct_iv_direct_unscaled(sequence, &mut temp);
-}
-
-pub fn partial_fct_iv_unscaled<B, C, T, M>(sequence: &mut B, temp: &mut [C], m: M)
-where
-    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,
-    B: ?Sized,
-    C: ComplexFloat<Real = T> + 'static,
-    T: Float + FloatConst + 'static,
-    M: LengthValue
-{
-    let len = sequence.bulk_mut().length();
-    let n = length::value::div(len, length::value::max(m, [(); 1]));
-    let r = length::value::rem(len, length::value::max(m, [(); 1]));
-    
-    let mut buffer = util::recurse_buffer(sequence);
-    temp!(buffer for len);
-
-    let mut iter = temp.bulk_mut()
-        .zip(buffer)
-        .step_by(n)
-        .into_iter();
-    
-    for (temp, bulk) in iter.by_ref()
-        .take(length::value::len(m))
-    {
-        unsafe {
-            fct_iv_unscaled::<[_], C, T>(
-                core::slice::from_raw_parts_mut(temp, length::value::len(n)),
-                Some(core::slice::from_raw_parts_mut(bulk, length::value::len(n)))
-            )
-        }
-    }
-    if length::value::gt(r, [(); 0]) && let Some((temp, bulk)) = iter.next()
-    {
-        unsafe {
-            fct_iv_unscaled::<[_], C, T>(
-                core::slice::from_raw_parts_mut(temp, length::value::len(r)),
-                Some(core::slice::from_raw_parts_mut(bulk, length::value::len(r)))
-            )
-        }
-    }
 }
 
 pub fn dct_iv_fft_unscaled<B, C, T>(sequence: &mut B, temp: &mut Option<&mut [C]>) -> bool

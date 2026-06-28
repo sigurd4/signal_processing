@@ -1,11 +1,11 @@
-use core::{borrow::{Borrow, BorrowMut}, f64::consts::{FRAC_PI_2, PI}};
+use core::{borrow::BorrowMut, f64::consts::{FRAC_PI_2, SQRT_2}};
 
-use crate::{Dft, Permute, SpectrumScaling, scratch_space::ScratchLength, temp, util::{self, AddAssignSpec, IntoComplex, MulAssignSpec, RealDiv, RealMul, TruncateIm, fft}};
+use crate::{Dft, SpectrumScaling, temp, util::{self, AddAssignSpec, IntoComplex, MulAssignSpec, RealDiv, RealMul, TruncateIm}};
 
 use array_trait::length::{self, LengthValue};
 use bulks::{AsBulk, Bulk, CollectNearest, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
-use num_traits::{Float, FloatConst, NumCast, One, ToPrimitive, Zero};
+use num_traits::{Float, FloatConst, NumCast, Zero};
 
 pub fn fct_iii_unscaled<B, C, T>(sequence: &mut B, mut temp: Option<&mut [C]>)
 where
@@ -14,12 +14,105 @@ where
     C: ComplexFloat<Real = T> + 'static,
     T: Float + FloatConst + 'static
 {
-    if fct_iii_radix2_unscaled(sequence, &mut temp) ||
+    if //fct_iii_8_unscaled(sequence) ||
+        fct_iii_radix2_unscaled(sequence, &mut temp) ||
         dct_iii_fft_unscaled(sequence, &mut temp)
     {
         return
     }
     dct_iii_direct_unscaled(sequence, &mut temp);
+}
+
+// Algorithm by Arai, Agui, Nakajima, 1988. For details, see:
+// https://web.stanford.edu/class/ee398a/handouts/lectures/07-TransformCoding.pdf#page=30
+#[allow(unused)]
+pub fn fct_iii_8_unscaled<B, C, T>(sequence: &mut B) -> bool
+where
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,
+    B: ?Sized,
+    C: ComplexFloat<Real = T> + 'static,
+    T: Float + FloatConst + 'static
+{
+    const S: [f64; 8] = [
+        0.353553390593273762200422/SQRT_2.next_down(),
+        0.254897789552079584470970,
+        0.270598050073098492199862,
+        0.300672443467522640271861,
+        0.353553390593273762200422,
+        0.449988111568207852319255,
+        0.653281482438188263928322,
+        1.281457723870753089398043,
+    ];
+
+    const A: [f64; 5] = [
+        0.707106781186547524400844,
+        0.541196100146196984399723,
+        0.707106781186547524400844,
+        1.306562964876376527856643,
+        0.382683432365089771728460,
+    ];
+
+    let len = sequence.bulk_mut().length();
+
+    if length::value::eq(len, [(); 8])
+        && let Some(mut sequence) = sequence.bulk_mut()
+        .map(Some)
+        .resize_with([(); 8], || None)
+        .try_collect::<[_; 8], _>()
+    {
+        let [v15, v26, v21, v28, v16, v25, v22, v27] = sequence.bulk_mut()
+            .map(|x| *(*x).borrow_mut())
+            .zip(S)
+            .map(|(v, s)| v._real_div(T::from(s).unwrap()))
+            .collect();
+
+        let one = T::one();
+        let two = one + one;
+
+        let v19 = (v25 - v28)._real_div(two);
+        let v20 = (v26 - v27)._real_div(two);
+        let v23 = (v26 + v27)._real_div(two);
+        let v24 = (v25 + v28)._real_div(two);
+        
+        let v7  = (v23 + v24)._real_div(two);
+        let v11 = (v21 + v22)._real_div(two);
+        let v13 = (v23 - v24)._real_div(two);
+        let v17 = (v21 - v22)._real_div(two);
+        
+        let v8 = (v15 + v16)._real_div(two);
+        let v9 = (v15 - v16)._real_div(two);
+        
+        let v18 = (v19 - v20)._real_mul(T::from(A[4]).unwrap());  // Different from original
+        let v12 = (v19._real_mul(T::from(A[3]).unwrap()) - v18)._real_div(T::from(A[1] * A[4] - A[1] * A[3] - A[3] * A[4]).unwrap());
+        let v14 = (v18 - v20._real_mul(T::from(A[1]).unwrap()))._real_div(T::from(A[1] * A[4] - A[1] * A[3] - A[3] * A[4]).unwrap());
+        
+        let v6 = v14 - v7;
+        let v5 = v13._real_div(T::from(A[2]).unwrap()) - v6;
+        let v4 = -v5 - v12;
+        let v10 = v17._real_div(T::from(A[0]).unwrap()) - v11;
+        
+        let v0 = (v8 + v11)._real_div(two);
+        let v1 = (v9 + v10)._real_div(two);
+        let v2 = (v9 - v10)._real_div(two);
+        let v3 = (v8 - v11)._real_div(two);
+
+        let y1 = [v0, v1, v2, v3];
+        let y2 = [v4, v5, v6, v7];
+
+        bulks::chain(
+            y1.into_bulk()
+                .zip(y2.into_bulk().rev())
+                .map(|(y1, y2)| (y1 + y2)._real_div(two)),
+            y1.into_bulk()
+                .rev()
+                .zip(y2)
+                .map(|(y1, y2)| (y1 - y2)._real_div(two))
+        )
+            .zip(sequence)
+            .for_each(|(x, mut y)| *y.borrow_mut() = x);
+        return true
+    }
+    false
 }
 
 pub fn partial_fct_iii_unscaled<B, C, T, M>(sequence: &mut B, temp: &mut [C], m: M)

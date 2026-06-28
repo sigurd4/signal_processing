@@ -1,11 +1,11 @@
-use core::{borrow::BorrowMut, f64::consts::{FRAC_PI_2, PI}};
+use core::{borrow::BorrowMut, f64::consts::FRAC_PI_2};
 
 use crate::{Dft, SpectrumScaling, temp, util::{AddAssignSpec, IntoComplex, MulAssignSpec, RealDiv, RealMul, TruncateIm}};
 
 use array_trait::length;
 use bulks::{AsBulk, Bulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
-use num_traits::{Float, FloatConst, NumCast, One, Zero};
+use num_traits::{Float, FloatConst, NumCast, Zero};
 
 pub fn fst_iii_unscaled<B, C, T>(sequence: &mut B, mut temp: Option<&mut [C]>)
 where
@@ -46,7 +46,6 @@ where
     let frac_pi_2 = T::FRAC_PI_2();
     let one = T::one();
     let two = one + one;
-    let four = two + two;
 
     let m = bulks::range([(); 1], len)
         .map(|i| {

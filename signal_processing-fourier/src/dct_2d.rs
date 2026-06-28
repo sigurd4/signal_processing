@@ -1,10 +1,7 @@
-use core::ops::DerefMut;
+use ndarray::{ArrayBase, DataMut, Ix2};
+use num_complex::ComplexFloat;
 
-use ndarray::{ArrayBase, ArrayRef1, DataMut, Ix2};
-use num_complex::{Complex, ComplexFloat};
-use num_traits::Zero;
-
-use crate::{Dct, util::fct_ii};
+use crate::Dct;
 
 /// # 2D discrete cosine-transform
 /// 

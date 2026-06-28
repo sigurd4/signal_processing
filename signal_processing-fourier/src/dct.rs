@@ -1,10 +1,10 @@
-use core::borrow::{Borrow, BorrowMut};
+use core::borrow::BorrowMut;
 
 use array_trait::length;
-use bulks::{AsBulk, Bulk, DoubleEndedBulk, IntoBulk};
-use num_complex::{Complex, ComplexFloat};
-use num_traits::{Float, FloatConst, Inv, NumCast, One, Zero};
-use crate::{Dft, Permute, SpectrumScaling, util::{RealDiv, RealMul, TruncateIm, fct_i, fct_ii, fct_iii, fct_iv}};
+use bulks::{AsBulk, Bulk, IntoBulk};
+use num_complex::ComplexFloat;
+use num_traits::{Float, FloatConst, NumCast, One};
+use crate::{Permute, SpectrumScaling, util::{RealDiv, RealMul, fct_i, fct_ii, fct_iii, fct_iv}};
 
 /// # Discrete cosine-transform
 /// 
@@ -153,13 +153,13 @@ where
         let one = T::Real::one();
         let two = one + one;
 
-        if let Some(scale) = match scaling
         {
-            SpectrumScaling::Summed => Some(two),
-            SpectrumScaling::Balanced => Some(sqrt_2),
-            SpectrumScaling::Averaged => Some(two),
-        }
-        {
+            let scale = match scaling
+            {
+                SpectrumScaling::Summed => two,
+                SpectrumScaling::Balanced => sqrt_2,
+                SpectrumScaling::Averaged => two,
+            };
             self.bulk_mut()
                 .first()
                 .map(|mut x| (*x.borrow_mut(), x))
