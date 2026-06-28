@@ -1,26 +1,27 @@
 use core::borrow::{Borrow, BorrowMut};
 
-use bulks::{AsBulk, Bulk, DoubleEndedBulk, IntoBulk};
+use bulks::{AsBulk, Bulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
 use num_traits::{Float, FloatConst};
 use crate::{Dft, Permute, util::TruncateIm};
 
+/// Discrete Hartley transform
 pub trait Dht<T>: Permute<T>
 where
     T: ComplexFloat
 {
+    /// Discrete Hartley transform
     fn dht(&mut self);
 }
 impl<B, T> Dht<T> for B
 where
     for<'a> &'a mut B: IntoBulk<Item: BorrowMut<T>>,
-    for<'a> &'a B: IntoBulk<Item: Borrow<T>, IntoBulk: DoubleEndedBulk>,
     B: ?Sized,
     T: Float + FloatConst + 'static
 {
     fn dht(&mut self)
     {
-        let mut y = (*self).bulk()
+        let mut y = (*self).bulk_mut()
             .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
             .collect::<Vec<_>, _>();
         y.dft();

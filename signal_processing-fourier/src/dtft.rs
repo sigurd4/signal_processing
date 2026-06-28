@@ -3,9 +3,10 @@ use num_complex::{Complex, ComplexFloat};
 
 use crate::SpectrumScaling;
 
+/// Discrete-time Fourier transform
 pub trait Dtft: IntoIterator<Item: ComplexFloat>
 {
-    /// Discrete time fourier transform
+    /// Discrete-time Fourier transform
     fn dtft(self, omega: <Self::Item as ComplexFloat>::Real) -> Complex<<Self::Item as ComplexFloat>::Real>;
 
     fn dtft_scaled(self, omega: <Self::Item as ComplexFloat>::Real, scaling: SpectrumScaling) -> Complex<<Self::Item as ComplexFloat>::Real>;
