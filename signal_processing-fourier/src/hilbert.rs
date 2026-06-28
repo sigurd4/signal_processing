@@ -3,7 +3,6 @@ use core::borrow::{Borrow, BorrowMut};
 use array_trait::length;
 use bulks::{AsBulk, Bulk, CollectNearest, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
-use num_traits::Zero;
 use crate::{Dft, Permute, SpectrumScaling, util::{IntoComplex, MulAssignSpec, TruncateIm}};
 
 /// Discrete Hilbert transform
