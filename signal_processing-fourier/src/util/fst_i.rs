@@ -7,7 +7,7 @@ use bulks::{AsBulk, Bulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
 use num_traits::{Float, FloatConst, NumCast, One, Zero};
 
-pub fn fst_i_unscaled<B, C, T>(sequence: &mut B, mut temp: Option<&mut [Complex<T>]>)
+pub fn fst_i_unscaled<B, C, T>(sequence: &mut B, mut temp: Option<&mut [C]>)
 where
     for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,
     B: ?Sized,
@@ -21,7 +21,7 @@ where
     dst_i_direct_unscaled(sequence, &mut temp);
 }
 
-pub fn dst_i_fft_unscaled<B, C, T>(sequence: &mut B, temp: &mut Option<&mut [Complex<T>]>) -> bool
+pub fn dst_i_fft_unscaled<B, C, T>(sequence: &mut B, temp: &mut Option<&mut [C]>) -> bool
 where
     for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,
     B: ?Sized,
@@ -38,6 +38,10 @@ where
     let len_p2 = length::value::add(len, [(); 2]);
     let len_buf = length::value::mul(len_p1, [(); 2]);
 
+    let mut temp = temp.as_mut()
+        .map(|temp| unsafe {
+            core::slice::from_raw_parts_mut(temp.as_mut_ptr().cast::<Complex<T>>(), temp.len()/(std::mem::size_of::<Complex<T>>()/std::mem::size_of::<C>()).max(1))
+        });
     temp!(temp for len_buf);
 
     let one = T::one();
@@ -68,7 +72,7 @@ where
     true
 }
 
-pub fn dst_i_direct_unscaled<B, C, T>(sequence: &mut B, temp: &mut Option<&mut [Complex<T>]>)
+pub fn dst_i_direct_unscaled<B, C, T>(sequence: &mut B, temp: &mut Option<&mut [C]>)
 where
     for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,
     B: ?Sized,
@@ -87,14 +91,14 @@ where
 
     sequence.bulk_mut()
         .zip(temp.borrow_mut())
-        .for_each(|(mut src, dst)| { *dst = core::mem::replace(src.borrow_mut(), Zero::zero()).into_complex(); });
+        .for_each(|(mut src, dst)| { *dst = core::mem::replace(src.borrow_mut(), Zero::zero()); });
         
     sequence.bulk_mut()
         .for_each(|mut y| {
             let mut wnki = wnk;
             (*temp).bulk()
                 .for_each(|x| {
-                    y.borrow_mut()._add_assign(C::truncate_im(*x)._real_mul(wnki.im));
+                    y.borrow_mut()._add_assign(x._real_mul(wnki.im));
                     wnki._mul_assign(wnk);
                 });
             wnk._mul_assign(wn);
