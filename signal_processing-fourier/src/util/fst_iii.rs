@@ -64,14 +64,14 @@ where
         .zip(temp.bulk_mut().skip([(); 1]).take(len))
         .for_each(|(x, y)| *y = x.into_complex());
     sequence.bulk_mut()
-        .skip([(); 1])
+        .take(len_m1)
         .map(|mut x| *x.borrow_mut())
-        .zip(temp.bulk_mut().skip(length::value::add(len, [(); 1])).rev())
+        .zip(temp.bulk_mut().rev().take(len_m1))
         .for_each(|(x, y)| *y = x.into_complex());
     let (y1, y2) = (*temp).bulk_mut()
         .skip([(); 1])
-        .split_at(len);
-    let (y1, y3) = y1.split_at(len_m1);
+        .split_at(len_m1);
+    let (y3, y2) = y2.split_at([(); 1]);
     y3.for_each(|y| y._mul_assign(Complex::i()));
     y1.zip(y2.rev())
         .zip(m)
@@ -83,7 +83,7 @@ where
     let (y1, y2) = (*temp).bulk()
         .split_at(len);
     bulks::zip(y1, y2.rev())
-        .map(|(y1, y2)| C::truncate_im(-(y1 - y2)*Complex::i())._real_div(four))
+        .map(|(y1, y2)| C::truncate_im(-(y1 - y2)*Complex::i())._real_div(two))
         .zip(sequence)
         .for_each(|(y, mut x)| *x.borrow_mut() = y);
 
