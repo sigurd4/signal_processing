@@ -108,9 +108,13 @@ use ndarray::Array2;
             })
         });
         
+        println!("DST-II begin.");
         r.dst_ii_2d();
+        println!("DST-II done.");
         g.dst_ii_2d();
+        println!("DST-II done.");
         b.dst_ii_2d();
+        println!("DST-II done.");
 
         for i in 0..n
         {
@@ -145,8 +149,11 @@ use ndarray::Array2;
             }
         }
 
+        println!("DST-III begin.");
         r.dst_iii_2d();
+        println!("DST-III done.");
         g.dst_iii_2d();
+        println!("DST-III done.");
         b.dst_iii_2d();
 
         for i in 0..n

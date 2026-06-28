@@ -154,22 +154,27 @@ where
         let one = T::Real::one();
         let two = one + one;
 
-        if matches!(scaling, SpectrumScaling::Balanced)
+        if let Some(scale) = match scaling
+        {
+            SpectrumScaling::Summed => Some(two),
+            SpectrumScaling::Balanced => Some(sqrt_2),
+            SpectrumScaling::Averaged => None,
+        }
         {
             self.bulk_mut()
                 .first()
                 .map(|mut x| (*x.borrow_mut(), x))
                 .into_bulk()
-                .for_each(|(x, mut y)| *y.borrow_mut() = x._real_mul(sqrt_2));
+                .for_each(|(x, mut y)| *y.borrow_mut() = x._real_div(scale));
         }
 
         fct_iii::fct_iii_unscaled(self, None);
         
         if let Some(scale) = match scaling
         {
-            SpectrumScaling::Summed => None,
-            SpectrumScaling::Balanced => Some(Float::sqrt(two/<T::Real as NumCast>::from(length::value::len(len)).unwrap())),
-            SpectrumScaling::Averaged => Some(two/<T::Real as NumCast>::from(length::value::len(len)).unwrap())
+            SpectrumScaling::Summed => Some(two),
+            SpectrumScaling::Balanced => Some(two*Float::sqrt(two/<T::Real as NumCast>::from(length::value::len(len)).unwrap())),
+            SpectrumScaling::Averaged => Some(two*two/<T::Real as NumCast>::from(length::value::len(len)).unwrap())
         }
         {
             self.bulk_mut()

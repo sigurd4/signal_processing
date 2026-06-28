@@ -14,7 +14,7 @@ where
     C: ComplexFloat<Real = T> + 'static,
     T: Float + FloatConst + 'static
 {
-    if  //fct_iii_radix2_unscaled(sequence, &mut temp) ||
+    if fct_iii_radix2_unscaled(sequence, &mut temp) ||
         dct_iii_fft_unscaled(sequence, &mut temp)
     {
         return
@@ -98,8 +98,8 @@ where
             for k in 1..ldiv
             {
                 let [p, q, r] = sequence.bulk_mut()
-                    .map(|mut x| *x.borrow_mut())
                     .skip(2*k - 1)
+                    .map(|mut x| *x.borrow_mut())
                     .map(Some)
                     .resize_with([(); _], || None)
                     .try_collect_array()
@@ -118,7 +118,7 @@ where
         let mut x = temp.chunks(ldiv);
         let x = bulks::repeat_n_with(|| x.next().unwrap(), [(); 2])
             .collect_nearest();
-        for k in 0..ldiv.saturating_sub(1)
+        for k in 0..ldiv
         {
             let p = x[0][k];
             let q = x[1][k]._real_div(wn_pk.re + wn_pk.re);
@@ -165,6 +165,7 @@ where
     let frac_pi_2 = T::FRAC_PI_2();
     let one = T::one();
     let two = one + one;
+    let four = two + two;
 
     let m = bulks::range([(); 1], len)
         .map(|i| {
@@ -173,7 +174,9 @@ where
         });
 
     sequence.bulk_mut()
+        .skip([(); 1])
         .map(|mut x| (*x.borrow_mut(), x))
+        .into_bulk()
         .for_each(|(x, mut y)| *y.borrow_mut() = x._real_div(two));
     sequence.bulk_mut()
         .map(|mut x| *x.borrow_mut())
@@ -198,7 +201,7 @@ where
     let (y1, y2) = (*temp).bulk()
         .split_at(len);
     bulks::zip(y1, y2.rev())
-        .map(|(y1, y2)| C::truncate_im(y1 + y2)._real_div(two))
+        .map(|(y1, y2)| C::truncate_im(y1 + y2)._real_div(four))
         .zip(sequence)
         .for_each(|(y, mut x)| *x.borrow_mut() = y);
 
@@ -233,7 +236,7 @@ where
 
     sequence.bulk_mut()
         .zip(temp.borrow_mut())
-        .for_each(|(mut src, dst)| { *dst = core::mem::replace(src.borrow_mut(), first_term); });
+        .for_each(|(mut src, dst)| { *dst = core::mem::replace(src.borrow_mut(), first_term)._real_div(two); });
         
     sequence.bulk_mut()
         .for_each(|mut y| {

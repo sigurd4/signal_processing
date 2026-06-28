@@ -1,6 +1,6 @@
-use core::{borrow::{Borrow, BorrowMut}, f64::consts::{FRAC_PI_2, PI}};
+use core::{borrow::BorrowMut, f64::consts::{FRAC_PI_2, SQRT_2}};
 
-use crate::{Dft, Permute, SpectrumScaling, scratch_space::ScratchLength, temp, util::{self, AddAssignSpec, IntoComplex, MulAssignSpec, RealDiv, RealMul, TruncateIm, fft}};
+use crate::{Dft, SpectrumScaling, temp, util::{self, AddAssignSpec, IntoComplex, MulAssignSpec, RealDiv, RealMul, TruncateIm, fft}};
 
 use array_trait::length::{self, LengthValue};
 use bulks::{AsBulk, Bulk, CollectNearest, IntoBulk};
@@ -14,7 +14,8 @@ where
     C: ComplexFloat<Real = T> + 'static,
     T: Float + FloatConst + 'static
 {
-    if  fct_ii_radix2_unscaled(sequence, &mut temp) ||
+    if //fct_ii_8_unscaled(sequence) ||
+        fct_ii_radix2_unscaled(sequence, &mut temp) ||
         dct_ii_fft_unscaled(sequence, &mut temp)
     {
         return
@@ -63,6 +64,86 @@ where
     }
 }
 
+// Algorithm by Arai, Agui, Nakajima, 1988. For details, see:
+// https://web.stanford.edu/class/ee398a/handouts/lectures/07-TransformCoding.pdf#page=30
+pub fn fct_ii_8_unscaled<B, C, T>(sequence: &mut B) -> bool
+where
+    for<'a> &'a mut B: IntoBulk<Item: BorrowMut<C>>,
+    B: ?Sized,
+    C: ComplexFloat<Real = T> + 'static,
+    T: Float + FloatConst + 'static
+{
+    const S: [f64; 8] = [
+        0.353553390593273762200422*2.0*SQRT_2.next_down(),
+        0.254897789552079584470970*2.0,
+        0.270598050073098492199862*2.0,
+        0.300672443467522640271861*2.0,
+        0.353553390593273762200422*2.0,
+        0.449988111568207852319255*2.0,
+        0.653281482438188263928322*2.0,
+        1.281457723870753089398043*2.0,
+    ];
+
+    const A: [f64; 5] = [
+        0.707106781186547524400844,
+        0.541196100146196984399723,
+        0.707106781186547524400844,
+        1.306562964876376527856643,
+        0.382683432365089771728460,
+    ];
+
+    let len = sequence.bulk_mut().length();
+
+    if length::value::eq(len, [(); 8])
+        && let Some(mut sequence) = sequence.bulk_mut()
+        .map(Some)
+        .resize_with([(); 8], || None)
+        .try_collect::<[_; 8], _>()
+    {
+        let (x1, x2) = sequence.bulk_mut()
+            .map(|x| *x.borrow_mut())
+            .split_at([(); 4]);
+        let [[v0, v7], [v1, v6], [v2, v5], [v3, v4]] = x1.zip(x2.rev())
+            .map(|(x1, x2)| [x1 + x2, x1 - x2])
+            .collect();
+
+        let v8 = v0 + v3;
+        let v9 = v1 + v2;
+        let v10 = v1 - v2;
+        let v11 = v0 - v3;
+        let v12 = -v4 - v5;
+        let v13 = (v5 + v6)._real_mul(T::from(A[2]).unwrap());
+        let v14 = v6 + v7;
+        
+        let v15 = v8 + v9;
+        let v16 = v8 - v9;
+        let v17 = (v10 + v11)._real_mul(T::from(A[0]).unwrap());
+        let v18 = (v12 + v14)._real_mul(T::from(A[4]).unwrap());
+        
+        let v19 = -v12._real_mul(T::from(A[1]).unwrap()) - v18;
+        let v20 = v14._real_mul(T::from(A[3]).unwrap()) - v18;
+        
+        let v21 = v17 + v11;
+        let v22 = v11 - v17;
+        let v23 = v13 + v7;
+        let v24 = v7 - v13;
+        
+        let v25 = v19 + v24;
+        let v26 = v23 + v20;
+        let v27 = v23 - v20;
+        let v28 = v24 - v19;
+
+        let v = [v15, v26, v21, v28, v16, v25, v22, v27];
+        v.into_bulk()
+            .zip(S)
+            .map(|(v, s)| v._real_mul(T::from(s).unwrap()))
+            .zip(sequence)
+            .for_each(|(x, mut y)| *y.borrow_mut() = x);
+        return true
+    }
+    false
+}
+
 /// Algorithm by Byeong Gi Lee, 1984. For details, see:
 /// See: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.118.3056&rep=rep1&type=pdf#page=34
 pub fn fct_ii_radix2_unscaled<B, C, T>(sequence: &mut B, temp: &mut Option<&mut [C]>) -> bool
@@ -91,9 +172,9 @@ where
             for k in 0..ldiv
             {
                 let [x1, x2] = sequence.bulk_mut()
-                    .map(|mut x| *x.borrow_mut())
                     .skip(k)
                     .step_by(length::value::len(len) - k*2 - 1)
+                    .map(|mut x| *x.borrow_mut())
                     .map(Some)
                     .resize_with([(); _], || None)
                     .try_collect_array()
