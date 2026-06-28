@@ -21,6 +21,7 @@ moddef::moddef!(
         dht,
         dst_2d for cfg(feature = "ndarray"),
         dst,
+        hilbert_2d for cfg(feature = "ndarray"),
         hilbert,
         dtft
     },
