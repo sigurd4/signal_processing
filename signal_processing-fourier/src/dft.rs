@@ -159,8 +159,8 @@ mod test
 
         let mut b = a;
         let mut c = a;
-        b.dft();
-        dft_direct(&mut c);
+        b.dft_scaled(SpectrumScaling::Summed);
+        dft_direct_unscaled(&mut c);
 
         println!("{b:?}");
         println!("{c:?}");
@@ -168,12 +168,12 @@ mod test
 
         let mut b = a;
         let mut c = a;
-        b.dft_scaled(SpectrumScaling::Summed);
-        dft_direct_unscaled(&mut c);
+        b.dft();
+        dft_direct(&mut c);
 
         println!("{b:?}");
         println!("{c:?}");
-        assert!(tests::approx_eq(&b, &c, 1e-5))
+        assert!(tests::approx_eq(&b, &c, 1e-5));
     }
 
     #[test]

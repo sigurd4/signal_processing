@@ -515,18 +515,13 @@ where
     if length::value::eq(length::value::rem(len, length::value::max(p, [(); 1])), [(); 0])
     {
         let pf = length::value::len(p) as f64;
-        let wp = bulks::repeat_n((), p)
-            .enumerate()
-            .map(|(i, ())| {
-                if i == 0
-                {
-                    Complex::one()
-                }
-                else
-                {
-                    Complex::cis(<T as NumCast>::from(if I {TAU} else {-TAU}*i as f64/pf).unwrap()).into()
-                }
-            }).collect_nearest();
+        let wp = bulks::once(Complex::one())
+            .chain(
+                bulks::range([(); 1], p)
+                    .map(|i| {
+                        Complex::cis(<T as NumCast>::from(if I {TAU} else {-TAU}*i as f64/pf).unwrap()).into()
+                    })
+            ).collect_nearest();
         let mut y = bulks::repeat_n(Complex::zero(), p)
             .collect_nearest();
 
@@ -551,7 +546,7 @@ where
                     {
                         -TAU
                     }/m as f64
-                ).unwrap()).into();
+                ).unwrap());
 
                 let mp = length::value::div(m, p);
                 for (k, ()) in bulks::repeat_n((), len)
@@ -578,9 +573,10 @@ where
                                 .bulk()
                                 .enumerate()
                                 .map(|(j, x)| unsafe {**x}*wp[(j*i) % length::value::len(p)])
-                                .fold(Complex::zero(), |y, z| {
+                                .rev()
+                                .reduce(|y, z| {
                                     y*w + z
-                                });
+                                }).unwrap_or(Zero::zero());
                         }
                         
                         for (x, y) in BorrowMut::<[*mut Complex<T>]>::borrow_mut(&mut x)
@@ -616,7 +612,7 @@ where
             {
                 -TAU
             }/length::value::len(len) as f64
-        ).unwrap()).into();
+        ).unwrap());
 
         let mut w = Complex::one();
         for k in 0..length::value::len(m)
@@ -628,6 +624,7 @@ where
                 *y.borrow_mut() = x.iter()
                     .enumerate()
                     .map(|(j, x)| x[k]*wp[(j*i) % length::value::len(p)])
+                    .rev()
                     .fold(Complex::zero(), |y, z| {
                         z + y*w
                     });

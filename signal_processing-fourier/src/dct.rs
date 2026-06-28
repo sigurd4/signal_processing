@@ -74,13 +74,12 @@ where
 impl<B, T> Dct<T> for B
 where
     for<'a> &'a mut B: IntoBulk<Item: BorrowMut<T>>,
-    for<'a> &'a B: IntoBulk<Item: Borrow<T>, IntoBulk: DoubleEndedBulk>,
     B: ?Sized,
     T: ComplexFloat + 'static
 {
     fn dct_i_scaled(&mut self, scaling: SpectrumScaling)
     {
-        let len = (*self).bulk().length();
+        let len = self.bulk_mut().length();
         let len_m1 = length::value::saturating_sub(len, [(); 1]);
 
         let sqrt_2 = T::Real::SQRT_2();
@@ -118,7 +117,7 @@ where
     }
     fn dct_ii_scaled(&mut self, scaling: SpectrumScaling)
     {
-        let len = (*self).bulk().length();
+        let len = self.bulk_mut().length();
 
         let sqrt_2 = T::Real::SQRT_2();
         let one = T::Real::one();
@@ -148,7 +147,7 @@ where
     }
     fn dct_iii_scaled(&mut self, scaling: SpectrumScaling)
     {
-        let len = (*self).bulk().length();
+        let len = self.bulk_mut().length();
 
         let sqrt_2 = T::Real::SQRT_2();
         let one = T::Real::one();
@@ -158,7 +157,7 @@ where
         {
             SpectrumScaling::Summed => Some(two),
             SpectrumScaling::Balanced => Some(sqrt_2),
-            SpectrumScaling::Averaged => None,
+            SpectrumScaling::Averaged => Some(two),
         }
         {
             self.bulk_mut()
@@ -184,7 +183,7 @@ where
     }
     fn dct_iv_scaled(&mut self, scaling: SpectrumScaling)
     {
-        let len = (*self).bulk().length();
+        let len = self.bulk_mut().length();
 
         let one = T::Real::one();
         let two = one + one;
@@ -213,7 +212,7 @@ mod test
     use bulks::{AsBulk, Bulk, IntoBulk};
     use linspace::Linspace;
 
-    use crate::{Dct, Dst, SpectrumScaling, tests, util::{fct_iii, fct_iv}};
+    use crate::{Dct, Dst, SpectrumScaling, tests};
 
     #[test]
     fn plot_dct()

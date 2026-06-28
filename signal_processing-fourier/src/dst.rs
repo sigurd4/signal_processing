@@ -4,7 +4,7 @@ use array_trait::length;
 use bulks::{AsBulk, Bulk, DoubleEndedBulk, IntoBulk};
 use num_complex::{Complex, ComplexFloat};
 use num_traits::{Float, FloatConst, Inv, NumCast, One, Zero};
-use crate::{Dft, Permute, SpectrumScaling, util::{RealMul, TruncateIm, fst_i}};
+use crate::{Dft, Permute, SpectrumScaling, util::{RealDiv, RealMul, TruncateIm, fst_i, fst_ii}};
 
 /// # Discrete sine-transform
 /// 
@@ -78,7 +78,7 @@ where
 {
     fn dst_i_scaled(&mut self, scaling: SpectrumScaling)
     {
-        let len = (*self).bulk().length();
+        let len = self.bulk_mut().length();
         let len_p1 = length::value::add(len, [(); 1]);
 
         let one = T::Real::one();
@@ -100,69 +100,37 @@ where
     }
     fn dst_ii_scaled(&mut self, scaling: SpectrumScaling)
     {
-        let len = (*self).bulk().length();
-        if length::value::le(len, [(); 1])
-        {
-            return
-        }
-        let lenf = <<T as ComplexFloat>::Real as NumCast>::from(length::value::len(len)).unwrap();
+        let len = self.bulk_mut().length();
 
-        let frac_1_sqrt_2 = <T as ComplexFloat>::Real::FRAC_1_SQRT_2();
-        let frac_pi_2 = <T as ComplexFloat>::Real::FRAC_PI_2();
         let one = T::Real::one();
         let two = one + one;
-        let half = Float::recip(two);
-        let zero = <T as ComplexFloat>::Real::zero();
+        let sqrt_2 = T::Real::SQRT_2();
 
-        let mut y: Vec<_> = (*self).bulk()
-            .map(|x| Complex { re: x.borrow().re(), im: x.borrow().im() })
-            .chain(
-                (*self).bulk()
-                    .rev()
-                    .map(|x| -Complex { re: x.borrow().re(), im: x.borrow().im() })
-            ).collect();
-        y.dft_scaled(scaling);
-    
-        let mul = Complex::new(zero, match scaling
+        fst_ii::fst_ii_unscaled(self, None);
+        if matches!(scaling, SpectrumScaling::Balanced)
         {
-            SpectrumScaling::Summed => half,
-            SpectrumScaling::Balanced => one,
-            SpectrumScaling::Averaged => two
-        });
-        let (y1, y2) = y.into_bulk()
-            .split_at([(); 1]).1
-            .map(|y| y*mul)
-            .split_at(len);
-    
-        let m1 = bulks::range([(); 1], len)
-            .map(|i| {
-                let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                Complex::from_polar(half, -i*frac_pi_2/lenf)
-            }).chain(bulks::once(Complex::new(zero, -if matches!(scaling, SpectrumScaling::Balanced) { frac_1_sqrt_2 } else { one })));
-    
-        let m2 = bulks::range([(); 1], len)
-            .map(|i| {
-                let i = <<T as ComplexFloat>::Real as NumCast>::from(i).unwrap();
-                Complex::from_polar(-half, i*frac_pi_2/lenf)
-            });
-    
-        for (y, mut x) in y1.into_iter()
-            .zip(m1)
-            .map(|(y, m1)| y*m1)
-            .zip(y2.into_iter()
-                .rev()
-                .zip(m2)
-                .map(|(y, m2)| y*m2)
-                .chain(core::iter::once(Zero::zero()))
-            ).map(|(y1, y2)| y1 + y2)
-            .zip(self.bulk_mut())
+            self.bulk_mut()
+                .last()
+                .map(|mut x| (*x.borrow_mut(), x))
+                .into_bulk()
+                .for_each(|(x, mut y)| *y.borrow_mut() = x._real_div(sqrt_2));
+        }
+        
+        if let Some(scale) = match scaling
         {
-            *x.borrow_mut() = TruncateIm::truncate_im(y);
+            SpectrumScaling::Summed => None,
+            SpectrumScaling::Balanced => Some(Float::sqrt(two/<T::Real as NumCast>::from(length::value::len(len)).unwrap())),
+            SpectrumScaling::Averaged => Some(two/<T::Real as NumCast>::from(length::value::len(len)).unwrap())
+        }
+        {
+            self.bulk_mut()
+                .map(|mut x| (*x.borrow_mut(), x))
+                .for_each(|(x, mut y)| *y.borrow_mut() = x._real_mul(scale));
         }
     }
     fn dst_iii_scaled(&mut self, scaling: SpectrumScaling)
     {
-        let len = (*self).bulk().length();
+        let len = self.bulk_mut().length();
         if length::value::le(len, [(); 1])
         {
             return
@@ -225,7 +193,7 @@ where
     }
     fn dst_iv_scaled(&mut self, scaling: SpectrumScaling)
     {
-        let len = (*self).bulk().length();
+        let len = self.bulk_mut().length();
         if length::value::le(len, [(); 1])
         {
             return
@@ -299,7 +267,7 @@ mod test
     use bulks::{AsBulk, Bulk, IntoBulk};
     use linspace::Linspace;
 
-    use crate::{Dct, Dst, SpectrumScaling, tests, util::fst_i};
+    use crate::{Dct, Dst, SpectrumScaling, tests, util::{fst_i, fst_ii}};
 
     #[test]
     fn plot_dst()
@@ -523,8 +491,8 @@ mod test
 
         let mut b = a;
         let mut c = a;
-        b.dst_ii();
-        dst_ii_direct(&mut c);
+        b.dst_ii_scaled(SpectrumScaling::Summed);
+        dst_ii_direct_unscaled(&mut c);
 
         println!("{b:?}");
         println!("{c:?}");
@@ -532,8 +500,8 @@ mod test
 
         let mut b = a;
         let mut c = a;
-        b.dst_ii_scaled(SpectrumScaling::Summed);
-        dst_ii_direct_unscaled(&mut c);
+        b.dst_ii();
+        dst_ii_direct(&mut c);
 
         println!("{b:?}");
         println!("{c:?}");
